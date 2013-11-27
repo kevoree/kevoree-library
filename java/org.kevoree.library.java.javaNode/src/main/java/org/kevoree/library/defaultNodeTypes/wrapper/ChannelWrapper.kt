@@ -8,8 +8,9 @@ import org.kevoree.log.Log
 import java.lang.reflect.InvocationTargetException
 import org.kevoree.api.BootstrapService
 import org.kevoree.api.Port
+import org.kevoree.api.ChannelDispatch
 
-public class ChannelWrapper(override val targetObj: Any, val _nodeName: String, val _name: String, override var tg: ThreadGroup, override val bs: BootstrapService) : Port,KInstanceWrapper {
+public class ChannelWrapper(override val targetObj: Any, val _nodeName: String, val _name: String, override var tg: ThreadGroup, override val bs: BootstrapService) : Port, KInstanceWrapper {
 
     val portsBinded: MutableMap<String, Port> = HashMap<String, Port>()
     override var isStarted: Boolean = false
@@ -17,10 +18,7 @@ public class ChannelWrapper(override val targetObj: Any, val _nodeName: String, 
     private val fieldResolver = FieldAnnotationResolver(targetObj.javaClass);
 
     override fun call(payload: Any?, callback: org.kevoree.api.Callback?) {
-        //TODO
-
-        println("should dispatch .... :-)")
-
+        (targetObj as ChannelDispatch).dispatch(payload, callback)
     }
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {

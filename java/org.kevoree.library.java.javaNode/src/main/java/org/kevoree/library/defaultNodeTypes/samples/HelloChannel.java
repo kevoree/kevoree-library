@@ -3,6 +3,8 @@ package org.kevoree.library.defaultNodeTypes.samples;
 import org.kevoree.annotation.ChannelType;
 import org.kevoree.annotation.Start;
 import org.kevoree.annotation.Stop;
+import org.kevoree.api.Callback;
+import org.kevoree.api.ChannelDispatch;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,7 +13,7 @@ import org.kevoree.annotation.Stop;
  * Time: 23:28
  */
 @ChannelType
-public class HelloChannel {
+public class HelloChannel implements ChannelDispatch {
 
     @Start
     public void start() {
@@ -23,11 +25,9 @@ public class HelloChannel {
         System.out.println("Bye from channel");
     }
 
-    /*
     @Override
-    public Object dispatch(Message message) {
-        System.out.println("Dispatch :-) "+message.get_content());
-        return null;
-    }*/
+    public void dispatch(Object payload, Callback callback) {
+        System.out.println("dispatch="+payload);
+    }
 
 }
