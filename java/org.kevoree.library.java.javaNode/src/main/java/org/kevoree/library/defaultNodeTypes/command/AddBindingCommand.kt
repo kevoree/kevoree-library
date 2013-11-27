@@ -4,8 +4,8 @@ import org.kevoree.MBinding
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.ComponentInstance
 import org.kevoree.log.Log
-import org.kevoree.library.defaultNodeTypes.wrapper.KevoreeComponent
-import org.kevoree.library.defaultNodeTypes.wrapper.ChannelTypeFragmentThread
+import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
+import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
 
 class AddBindingCommand(val c: MBinding, val nodeName: String, val registry: MutableMap<String, Any>) : PrimitiveCommand {
 
@@ -15,7 +15,7 @@ class AddBindingCommand(val c: MBinding, val nodeName: String, val registry: Mut
     override fun execute(): Boolean {
         val kevoreeChannelFound = registry.get(c.hub!!.path()!!)
         val kevoreeComponentFound = registry.get((c.port!!.eContainer() as ComponentInstance).path()!!)
-        if(kevoreeChannelFound != null && kevoreeComponentFound != null && kevoreeComponentFound is KevoreeComponent && kevoreeChannelFound is KevoreeChannelFragment){
+        if(kevoreeChannelFound != null && kevoreeComponentFound != null && kevoreeComponentFound is ComponentWrapper && kevoreeChannelFound is ChannelWrapper){
             val portName = c.port!!.portTypeRef!!.name!!
             val foundNeedPort = kevoreeComponentFound.requiredPorts.get(portName)
             val foundHostedPort = kevoreeComponentFound.providedPorts.get(portName)
@@ -24,7 +24,7 @@ class AddBindingCommand(val c: MBinding, val nodeName: String, val registry: Mut
                 return false
             }
             if (foundNeedPort != null) {
-                foundNeedPort.delegate = kevoreeChannelFound as ChannelTypeFragmentThread?
+                foundNeedPort.delegate = kevoreeChannelFound as ChannelWrapper?
                 return true
             }
             if(foundHostedPort != null){

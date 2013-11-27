@@ -3,9 +3,9 @@ package org.kevoree.library.defaultNodeTypes.command
 import org.kevoree.ContainerRoot
 import org.kevoree.Instance
 import org.kevoree.log.Log
-import org.kevoree.library.defaultNodeTypes.wrapper.KevoreeComponent
-import org.kevoree.library.defaultNodeTypes.wrapper.ChannelTypeFragmentThread
-import org.kevoree.library.defaultNodeTypes.wrapper.KevoreeGroup
+import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
+import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
+import org.kevoree.library.defaultNodeTypes.wrapper.GroupWrapper
 import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
 import org.kevoree.api.BootstrapService
 

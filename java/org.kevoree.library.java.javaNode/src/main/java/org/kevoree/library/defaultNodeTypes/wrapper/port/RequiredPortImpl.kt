@@ -2,7 +2,7 @@ package org.kevoree.library.defaultNodeTypes.wrapper.port
 
 import org.kevoree.api.Port
 import org.kevoree.api.Callback
-import org.kevoree.library.defaultNodeTypes.wrapper.ChannelTypeFragmentThread
+import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
 import org.kevoree.log.Log
 
 /**
@@ -14,11 +14,11 @@ import org.kevoree.log.Log
 
 class RequiredPortImpl : Port {
 
-    var delegate: ChannelTypeFragmentThread? = null
+    var delegate: ChannelWrapper? = null
 
     override fun call(payload: Any?, callback: Callback?) {
         if(delegate != null){
-            delegate!!.send(payload)
+            delegate!!.call(payload,callback)
             //todo send and put the callback inside
         } else {
             callback?.run(null)

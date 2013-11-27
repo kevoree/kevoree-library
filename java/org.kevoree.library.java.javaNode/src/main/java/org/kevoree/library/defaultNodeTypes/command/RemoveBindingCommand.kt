@@ -3,12 +3,9 @@ package org.kevoree.library.defaultNodeTypes.command
 import org.kevoree.MBinding
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.ComponentInstance
-import org.kevoree.framework.KevoreeChannelFragment
-import org.kevoree.framework.KevoreePort
-import org.kevoree.framework.message.PortUnbindMessage
-import org.kevoree.framework.message.FragmentUnbindMessage
 import org.kevoree.log.Log
-import org.kevoree.library.defaultNodeTypes.wrapper.KevoreeComponent
+import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
+import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -37,7 +34,7 @@ class RemoveBindingCommand(val c: MBinding, val nodeName: String, val registry: 
         }else{
             val kevoreeChannelFound = registry.get(c.hub!!.path()!!)
             val kevoreeComponentFound = registry.get((c.port!!.eContainer() as ComponentInstance).path()!!)
-            if(kevoreeChannelFound != null && kevoreeComponentFound != null && kevoreeComponentFound is KevoreeComponent && kevoreeChannelFound is KevoreeChannelFragment){
+            if(kevoreeChannelFound != null && kevoreeComponentFound != null && kevoreeComponentFound is ComponentWrapper && kevoreeChannelFound is ChannelWrapper){
                 val foundNeedPort = kevoreeComponentFound.requiredPorts.get(c.port!!.portTypeRef!!.name)
                 val foundHostedPort = kevoreeComponentFound.providedPorts.get(c.port!!.portTypeRef!!.name)
                 if(foundNeedPort == null && foundHostedPort == null){

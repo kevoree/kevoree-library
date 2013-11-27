@@ -2,7 +2,6 @@ package org.kevoree.library.defaultNodeTypes.command
 
 import org.kevoree.*
 import org.kevoree.api.PrimitiveCommand
-import org.kevoree.framework.kaspects.TypeDefinitionAspect
 import org.kevoree.api.BootstrapService
 
 /**
@@ -19,8 +18,6 @@ import org.kevoree.api.BootstrapService
  * limitations under the License.
  */
 class RemoveInstance(val c: Instance, val nodeName: String, val registry: MutableMap<String, Any>, val bs: BootstrapService) : PrimitiveCommand {
-
-    private val typeDefinitionAspect = TypeDefinitionAspect()
 
     override fun undo() {
         try {

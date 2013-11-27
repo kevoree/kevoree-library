@@ -5,13 +5,11 @@ import org.kevoree.annotation.*;
 import org.kevoree.api.BootstrapService;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
-import org.kevoree.framework.KevoreeXmiHelper;
 import org.kevoree.library.defaultNodeTypes.planning.KevoreeKompareBean;
 import org.kevoree.log.Log;
 import org.kevoreeadaptation.AdaptationModel;
 import org.kevoreeadaptation.AdaptationPrimitive;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -110,12 +108,14 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     public void postRollback(ContainerRoot containerRoot, ContainerRoot containerRoot1) {
         Log.warn("JavaSENode update aborted in {} ms", (System.currentTimeMillis() - preTime) + "");
         try {
+            /*
             File preModel = File.createTempFile("pre" + System.currentTimeMillis(), "pre");
             File afterModel = File.createTempFile("post" + System.currentTimeMillis(), "post");
             KevoreeXmiHelper.instance$.save(preModel.getAbsolutePath(), containerRoot);
             KevoreeXmiHelper.instance$.save(afterModel.getAbsolutePath(), containerRoot1);
             Log.error("PreModel->" + preModel.getAbsolutePath());
             Log.error("PostModel->" + afterModel.getAbsolutePath());
+            */
         } catch (Exception e) {
             Log.error("Error while saving debug model", e);
         }

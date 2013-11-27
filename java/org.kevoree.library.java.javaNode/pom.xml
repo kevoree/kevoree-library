@@ -24,11 +24,6 @@
             <version>${kevoree.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.kevoree.kcl</groupId>
-            <artifactId>org.kevoree.kcl</artifactId>
-            <version>${kcl.version}</version>
-        </dependency>
-        <dependency>
             <groupId>net.sf.jgrapht</groupId>
             <artifactId>jgrapht</artifactId>
             <version>0.8.3</version>

@@ -3,9 +3,6 @@ package org.kevoree.library.defaultNodeTypes.samples;
 import org.kevoree.annotation.ChannelType;
 import org.kevoree.annotation.Start;
 import org.kevoree.annotation.Stop;
-import org.kevoree.framework.AbstractChannelFragment;
-import org.kevoree.framework.ChannelFragmentSender;
-import org.kevoree.framework.message.Message;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,7 +11,7 @@ import org.kevoree.framework.message.Message;
  * Time: 23:28
  */
 @ChannelType
-public class HelloChannel extends AbstractChannelFragment {
+public class HelloChannel {
 
     @Start
     public void start() {
@@ -26,14 +23,11 @@ public class HelloChannel extends AbstractChannelFragment {
         System.out.println("Bye from channel");
     }
 
+    /*
     @Override
     public Object dispatch(Message message) {
         System.out.println("Dispatch :-) "+message.get_content());
         return null;
-    }
+    }*/
 
-    @Override
-    public ChannelFragmentSender createSender(String s, String s2) {
-        return null;
-    }
 }

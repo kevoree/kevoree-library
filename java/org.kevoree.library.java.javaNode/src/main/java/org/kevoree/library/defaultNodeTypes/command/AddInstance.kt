@@ -2,17 +2,15 @@ package org.kevoree.library.defaultNodeTypes.command
 
 import org.kevoree.Instance
 import org.kevoree.api.PrimitiveCommand
-import org.kevoree.framework.AbstractChannelFragment
-import org.kevoree.framework.AbstractGroupType
 import org.kevoree.ComponentInstance
 import org.kevoree.Group
 import org.kevoree.Channel
 import org.kevoree.log.Log
-import org.kevoree.library.defaultNodeTypes.wrapper.KevoreeComponent
-import org.kevoree.library.defaultNodeTypes.wrapper.KevoreeGroup
-import org.kevoree.library.defaultNodeTypes.wrapper.ChannelTypeFragmentThread
+import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
+import org.kevoree.library.defaultNodeTypes.wrapper.GroupWrapper
+import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
 import org.kevoree.ContainerNode
-import org.kevoree.library.defaultNodeTypes.wrapper.KevoreeNodeWrapper
+import org.kevoree.library.defaultNodeTypes.wrapper.NodeWrapper
 import org.kevoree.api.BootstrapService
 import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
 
@@ -76,18 +74,17 @@ class AddInstance(val c: Instance, val nodeName: String, val registry: MutableMa
             val newBeanInstance = bs.createInstance(c)
             var newBeanKInstanceWrapper: KInstanceWrapper? = null
             if(c is ComponentInstance){
-                newBeanKInstanceWrapper = KevoreeComponent(newBeanInstance!!, nodeName, c.name!!, tg!!, bs)
-                (newBeanKInstanceWrapper as KevoreeComponent).initPorts(c, newBeanInstance)
+                newBeanKInstanceWrapper = ComponentWrapper(newBeanInstance!!, nodeName, c.name!!, tg!!, bs)
+                (newBeanKInstanceWrapper as ComponentWrapper).initPorts(c, newBeanInstance)
             }
             if(c is Group){
-                newBeanKInstanceWrapper = KevoreeGroup(newBeanInstance as AbstractGroupType, nodeName, c.name!!, tg!!, bs)
+                newBeanKInstanceWrapper = GroupWrapper(newBeanInstance as Any, nodeName, c.name!!, tg!!, bs)
             }
             if(c is Channel){
-                newBeanKInstanceWrapper = ChannelTypeFragmentThread(newBeanInstance as AbstractChannelFragment, nodeName, c.name!!, tg!!, bs)
-                (newBeanKInstanceWrapper as ChannelTypeFragmentThread).initChannel()
+                newBeanKInstanceWrapper = ChannelWrapper(newBeanInstance as Any, nodeName, c.name!!, tg!!, bs)
             }
             if(c is ContainerNode){
-                newBeanKInstanceWrapper = KevoreeNodeWrapper(c, c.path()!!, tg!!, bs)
+                newBeanKInstanceWrapper = NodeWrapper(c, c.path()!!, tg!!, bs)
             }
 
             registry.put(c.path()!!, newBeanKInstanceWrapper!!)

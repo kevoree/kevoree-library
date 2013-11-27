@@ -11,7 +11,7 @@ import org.kevoree.api.BootstrapService
  * Time: 20:03
  */
 
-public class KevoreeNodeWrapper(override val targetObj: Any,nodePath: String, override var tg : ThreadGroup, override val bs : BootstrapService) : KInstanceWrapper {
+public class NodeWrapper(override val targetObj: Any,nodePath: String, override var tg : ThreadGroup, override val bs : BootstrapService) : KInstanceWrapper {
 
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
     override var isStarted: Boolean = false

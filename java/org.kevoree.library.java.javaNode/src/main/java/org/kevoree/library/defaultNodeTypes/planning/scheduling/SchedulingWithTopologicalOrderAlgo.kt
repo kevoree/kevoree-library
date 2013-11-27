@@ -8,7 +8,6 @@ import org.kevoreeadaptation.AdaptationPrimitive
 import java.util.HashMap
 import org.kevoreeadaptation.ParallelStep
 import org.kevoreeadaptation.KevoreeAdaptationFactory
-import org.kevoree.framework.kaspects.PortAspect
 import org.kevoree.library.defaultNodeTypes.planning.StepBuilder
 import org.kevoree.library.defaultNodeTypes.planning.JavaPrimitive
 
@@ -118,13 +117,8 @@ class SchedulingWithTopologicalOrderAlgo : StepBuilder {
                             for (bindingFromChannel in channel.bindings) {
                                 val portFromBinding = bindingFromChannel.port!!
                                 // each required port connected to the channel is host by a component that is a dependency of the instance (must be start after and stop before the instance) and a dependency of the channel
-                                if (PortAspect().isRequiredPort(bindingFromChannel.port!!) && !portFromBinding.portTypeRef!!.noDependency!! && !instancesDependencyForChannel!!.contains(bindingFromChannel.port!!.eContainer() as Instance)) {
-                                    //                                    System.out.println((portFromBinding.eContainer() as NamedElement).getName() + "\t" + portFromBinding.getPortTypeRef()!!.getName() + "\t" + portFromBinding.getPortTypeRef()!!.getNoDependency())
-                                    //                                    System.out.println(component.getName() + " -> " + channel.getName())
+                                if (isRequiredPort(bindingFromChannel.port!!) && !portFromBinding.portTypeRef!!.noDependency!! && !instancesDependencyForChannel!!.contains(bindingFromChannel.port!!.eContainer() as Instance)) {
                                     instancesDependencyForComponent!!.add(channel)
-
-                                    //                                    System.out.println(component.getName() + " -> " + (bindingFromChannel.getPort()!!.eContainer() as NamedElement).getName())
-                                    //                                    System.out.println(channel.getName() + " -> " + (bindingFromChannel.getPort()!!.eContainer() as NamedElement).getName())
                                     instancesDependencyForComponent!!.add(portFromBinding.eContainer() as Instance)
                                     instancesDependencyForChannel!!.add(portFromBinding.eContainer() as Instance)
                                 }
@@ -137,6 +131,10 @@ class SchedulingWithTopologicalOrderAlgo : StepBuilder {
             }
         }
         return instanceDependencies
+    }
+
+    fun isRequiredPort(port : Port) : Boolean {
+        return (port.eContainer() as ComponentInstance).required.contains(port)
     }
 
 }

@@ -24,7 +24,7 @@ import org.kevoree.library.defaultNodeTypes.wrapper.port.RequiredPortImpl
 import org.kevoree.library.defaultNodeTypes.wrapper.port.ProvidedPortImpl
 import java.util.HashMap
 
-public class KevoreeComponent(override val targetObj: Any, val nodeName: String, val name: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
+public class ComponentWrapper(override val targetObj: Any, val nodeName: String, val name: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
 
     public val providedPorts: HashMap<String, ProvidedPortImpl> = HashMap<String, ProvidedPortImpl>()
     public val requiredPorts: HashMap<String, RequiredPortImpl> = HashMap<String, RequiredPortImpl>()
@@ -43,15 +43,9 @@ public class KevoreeComponent(override val targetObj: Any, val nodeName: String,
             requiredPorts.put(requiredPort.portTypeRef!!.name!!, portWrapper)
         }
         for(providedPort in modelElement.provided){
-            var field = targetObj.javaClass.getDeclaredField(providedPort.portTypeRef!!.name!!)
-            if(!field.isAccessible()){
-                field.setAccessible(true)
-            }
             var portWrapper = ProvidedPortImpl(targetObj, providedPort.portTypeRef!!.name!!)
-            field.set(targetObj, portWrapper)
             providedPorts.put(providedPort.portTypeRef!!.name!!, portWrapper)
         }
-
     }
 
     override val resolver = MethodAnnotationResolver(targetObj.javaClass);
