@@ -1,0 +1,78 @@
+package org.kevoree.library.defaultNodeTypes.samples;
+
+import org.kevoree.ContainerRoot;
+import org.kevoree.annotation.*;
+import org.kevoree.api.ModelService;
+import org.kevoree.api.handler.UpdateCallback;
+import org.kevoree.cloner.DefaultModelCloner;
+import org.kevoree.modeling.api.ModelCloner;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: duke
+ * Date: 16/11/2013
+ * Time: 10:34
+ */
+@ComponentType
+public class HelloWorld {
+
+    ModelCloner cloner = new DefaultModelCloner();
+
+    @Param
+    String message;
+
+    @KevoreeInject
+    ModelService modelService;
+
+    @RequiredPort(optional = true)
+    public org.kevoree.api.Port output;
+
+    @ProvidedPort(optional = true)
+    public void input(Object inp) {
+
+    }
+
+    @Start
+    public void start() {
+        System.out.println("I'm just beginning my life ! ");
+        System.out.println("msg=" + message);
+
+        new Thread() {
+            public void run() {
+                try {
+                    Thread.sleep(500);
+                    output.call("hello", null);
+
+                    // getPortByName("out", MessagePort.class).process("HelloChannel");
+
+                } catch (InterruptedException e) {
+                }
+            }
+        }.start();
+
+        new Thread() {
+            public void run() {
+                try {
+                    Thread.sleep(3000);
+                    ContainerRoot newModel = cloner.clone(modelService.getCurrentModel().getModel());
+                    newModel.findNodesByID(modelService.getNodeName()).getComponents().get(0).setStarted(false);
+                    modelService.update(newModel, new UpdateCallback() {
+                        @Override
+                        public void run(Boolean applied) {
+                            System.out.println("Call after my life !");
+                        }
+                    });
+                } catch (InterruptedException e) {
+                }
+            }
+        }.start();
+
+    }
+
+    @Stop
+    public void stop() {
+        System.out.println("Bye all ! :-)");
+    }
+
+
+}
