@@ -35,19 +35,21 @@ class RemoveBindingCommand(val c: MBinding, val nodeName: String, val registry: 
             val kevoreeChannelFound = registry.get(c.hub!!.path()!!)
             val kevoreeComponentFound = registry.get((c.port!!.eContainer() as ComponentInstance).path()!!)
             if(kevoreeChannelFound != null && kevoreeComponentFound != null && kevoreeComponentFound is ComponentWrapper && kevoreeChannelFound is ChannelWrapper){
-                val foundNeedPort = kevoreeComponentFound.requiredPorts.get(c.port!!.portTypeRef!!.name)
-                val foundHostedPort = kevoreeComponentFound.providedPorts.get(c.port!!.portTypeRef!!.name)
+                val portName = c.port!!.portTypeRef!!.name
+                val foundNeedPort = kevoreeComponentFound.requiredPorts.get(portName)
+                val foundHostedPort = kevoreeComponentFound.providedPorts.get(portName)
                 if(foundNeedPort == null && foundHostedPort == null){
                     Log.info("Port instance not found in component")
                     return false
                 }
                 if (foundNeedPort != null) {
                     foundNeedPort.delegate = null
+                    return true
                 }
                 if(foundHostedPort != null){
-                    //val cname = (c.port!!.eContainer() as ComponentInstance).name!!
-                   // val bindmsg = PortUnbindMessage(nodeName, cname, (foundHostedPort as KevoreePort).getName()!!)
-                    //return (kevoreeChannelFound as KevoreeChannelFragment).processAdminMsg(bindmsg)
+                    kevoreeChannelFound.portsBinded.remove(portName)
+                    return true
+                    //TODO inject
                 }
                 return false
             } else {

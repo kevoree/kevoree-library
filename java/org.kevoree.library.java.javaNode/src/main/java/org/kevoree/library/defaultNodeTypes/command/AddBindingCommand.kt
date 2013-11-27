@@ -28,9 +28,9 @@ class AddBindingCommand(val c: MBinding, val nodeName: String, val registry: Mut
                 return true
             }
             if(foundHostedPort != null){
-                //val compoName = (c.port!!.eContainer() as ComponentInstance).name!!
-                //val bindmsg = PortBindMessage(foundHostedPort as KevoreePort, nodeName, compoName, (foundHostedPort as KevoreePort).getName()!!)
-                //return kevoreeChannelFound.processAdminMsg(bindmsg)
+                kevoreeChannelFound.portsBinded.put(portName,foundHostedPort)
+                //TODO inject
+                return true
             }
             return false
         } else {
