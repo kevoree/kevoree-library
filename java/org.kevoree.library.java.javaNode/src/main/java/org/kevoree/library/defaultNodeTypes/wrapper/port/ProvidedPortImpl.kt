@@ -15,21 +15,23 @@ import org.kevoree.annotation.Input
 
 class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String) : Port {
     override fun call(payload: Any?) {
-       call(payload,null)
+        call(payload, null)
     }
     override fun getPath(): String? {
         return portPath;
     }
 
     var targetMethod: Method? = null
+    var parameter = false
 
     {
         for(method in targetObj.javaClass.getDeclaredMethods()){
             if(method.getName() == name){
                 if(method.getAnnotation(javaClass<Input>()) != null){
                     targetMethod = method;
-                    // method.getParameterTypes()
-                    //todo
+                    if(method.getParameterTypes()!!.size == 1){
+                        parameter = true
+                    }
                 }
             }
         }
@@ -40,7 +42,12 @@ class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String) :
 
     override fun call(payload: Any?, callback: Callback?) {
         try {
-            var result = targetMethod?.invoke(targetObj,payload)
+            var result: Any? = null
+            if(parameter){
+                result = targetMethod?.invoke(targetObj, payload)
+            } else {
+                result = targetMethod?.invoke(targetObj)
+            }
             callback?.run(result)
         } catch (e: Throwable){
             Log.error("This is really bad, exception during port call...", e)
