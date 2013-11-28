@@ -33,36 +33,13 @@ public trait StepBuilder {
         previousStep = null
     }
 
-    public open fun createNextStep(primitiveType: JavaPrimitive, commands: List<AdaptationPrimitive>) {
+    public open fun createNextStep(commands: List<AdaptationPrimitive>) {
         if (!commands.isEmpty()) {
             if (currentSteps == null) {
                 nextStep()
             }
             currentSteps!!.addAllAdaptations(commands)
-
             nextStep()
-        }
-    }
-
-    public open fun insertStep(stepToInsert: ParallelStep) {
-        if (currentSteps == null || !currentSteps!!.adaptations.isEmpty()) {
-            nextStep()
-        }
-
-        currentSteps!!.adaptations = stepToInsert.adaptations
-        currentSteps!!.nextStep = stepToInsert.nextStep
-        goDeeply(stepToInsert, previousStep)
-        nextStep()
-    }
-
-    private fun goDeeply(stepToGoDeeply: ParallelStep, previousStepToRemember: ParallelStep?) {
-        if (stepToGoDeeply.nextStep != null) {
-            goDeeply(stepToGoDeeply.nextStep!!, stepToGoDeeply)
-        } else {
-            if (previousStepToRemember != null) {
-                previousStep = previousStepToRemember
-            }
-            currentSteps = stepToGoDeeply
         }
     }
 

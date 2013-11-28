@@ -2,8 +2,9 @@ package org.kevoree.library.defaultNodeTypes.planning
 
 import org.kevoreeadaptation.AdaptationModel
 import org.kevoreeadaptation.AdaptationPrimitive
+import java.util.HashMap
 import java.util.ArrayList
-import org.kevoree.library.defaultNodeTypes.planning.scheduling.SchedulingWithTopologicalOrderAlgo
+import org.kevoreeadaptation.ParallelStep
 
 /**
  * Created by IntelliJ IDEA.
@@ -16,61 +17,56 @@ trait KevoreeScheduler : StepBuilder {
 
     open fun schedule(adaptionModel: AdaptationModel, nodeName: String): AdaptationModel {
         if (!adaptionModel.adaptations.isEmpty()) {
-
             adaptationModelFactory = org.kevoreeadaptation.impl.DefaultKevoreeAdaptationFactory()
-            val scheduling = SchedulingWithTopologicalOrderAlgo()
+            val classedAdaptations = classify(adaptionModel.adaptations)
+            adaptionModel.orderedPrimitiveSet = createStep(classedAdaptations.get(JavaPrimitive.AddDeployUnit.name()))
+            var currentStep = adaptionModel.orderedPrimitiveSet
+            currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.StopInstance.name()))
+            currentStep = currentStep!!.nextStep
+            currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.RemoveBinding.name()))
+            currentStep = currentStep!!.nextStep
+            currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.RemoveInstance.name()))
+            currentStep = currentStep!!.nextStep
+            currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.AddInstance.name()))
+            currentStep = currentStep!!.nextStep
+            currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.AddBinding.name()))
+            currentStep = currentStep!!.nextStep
+            currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.UpdateDictionaryInstance.name()))
+            currentStep = currentStep!!.nextStep
+            currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.StartInstance.name()))
+            currentStep = currentStep!!.nextStep
+            currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.RemoveDeployUnit.name()))
 
-            nextStep()
-            adaptionModel.orderedPrimitiveSet = currentSteps
-            //STOP INSTANCEs
-            var stepToInsert = scheduling.schedule(adaptionModel.adaptations.filter { adapt -> adapt.primitiveType == JavaPrimitive.StopInstance.name() }, false)
-            if (stepToInsert != null && !stepToInsert!!.adaptations.isEmpty()) {
-                insertStep(stepToInsert!!)
-            }
-
-            // REMOVE BINDINGS
-            createNextStep(JavaPrimitive.RemoveBinding, adaptionModel.adaptations.filter { adapt -> (adapt.primitiveType == JavaPrimitive.RemoveBinding.name() ) })
-
-            // REMOVE INSTANCEs
-            createNextStep(JavaPrimitive.RemoveInstance, adaptionModel.adaptations.filter { adapt -> adapt.primitiveType == JavaPrimitive.RemoveInstance.name() })
-
-            // REMOVE DEPLOYUNITs
-            createNextStep(JavaPrimitive.RemoveDeployUnit, adaptionModel.adaptations.filter { adapt -> adapt.primitiveType == JavaPrimitive.RemoveDeployUnit.name() })
-
-            // UPDATE DEPLOYUNITs
-            createNextStep(JavaPrimitive.UpdateDeployUnit, adaptionModel.adaptations.filter { adapt -> adapt.primitiveType == JavaPrimitive.UpdateDeployUnit.name() })
-
-            // ADD DEPLOYUNITs
-            createNextStep(JavaPrimitive.AddDeployUnit, adaptionModel.adaptations.filter { adapt -> adapt.primitiveType == JavaPrimitive.AddDeployUnit.name() })
-
-            // ADD INSTANCEs
-            // createNextStep(JavaPrimitive.AddInstance, adaptionModel.adaptations.filter{ adapt -> adapt.primitiveType!!.name == JavaSePrimitive.AddInstance })
-
-            adaptionModel.adaptations.filter { adapt -> adapt.primitiveType == JavaPrimitive.AddInstance.name() }.forEach {
-                addInstance ->
-                val list = ArrayList<AdaptationPrimitive>()
-                list.add(addInstance)
-                createNextStep(JavaPrimitive.AddInstance, list)
-            }
-
-            // ADD BINDINGs
-            createNextStep(JavaPrimitive.AddBinding, adaptionModel.adaptations.filter { adapt -> (adapt.primitiveType == JavaPrimitive.AddBinding.name() ) })
-
-            // UPDATE DICTIONARYs
-            createNextStep(JavaPrimitive.UpdateDictionaryInstance, adaptionModel.adaptations.filter { adapt -> adapt.primitiveType == JavaPrimitive.UpdateDictionaryInstance.name() })
-
-            // START INSTANCEs
-            stepToInsert = scheduling.schedule(adaptionModel.adaptations.filter {
-                adapt ->
-                adapt.primitiveType == JavaPrimitive.StartInstance.name()
-            }, true)
-            if (stepToInsert != null && !stepToInsert!!.adaptations.isEmpty()) {
-                insertStep(stepToInsert!!)
-            }
         } else {
             adaptionModel.orderedPrimitiveSet = null
         }
         clearSteps()
         return adaptionModel
     }
+
+    private fun classify(inputs: List<AdaptationPrimitive>): HashMap<String, MutableList<AdaptationPrimitive>> {
+        var result = HashMap<String, MutableList<AdaptationPrimitive>>()
+        for(adapt in inputs){
+            var l: MutableList<AdaptationPrimitive>? = null
+            if(!result.containsKey(adapt.primitiveType)){
+                l = ArrayList<AdaptationPrimitive>()
+                result.put(adapt.primitiveType!!, l!!)
+            } else {
+                l = result.get(adapt.primitiveType!!)
+            }
+            l!!.add(adapt)
+
+        }
+        return result
+    }
+
+    public fun createStep(commands: MutableList<AdaptationPrimitive>?): ParallelStep {
+        var currentSteps = adaptationModelFactory.createParallelStep()
+        if(commands != null){
+            currentSteps.addAllAdaptations(commands)
+        }
+        return currentSteps
+    }
+
+
 }

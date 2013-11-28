@@ -1,11 +1,15 @@
-merge 'mvn:org.kevoree.corelibrary.javase/org.kevoree.library.javase.javaseNode/{project.version}'
-addNode node0:JavaSENode {logLevel = "INFO"}
-addComponent h@node0 : HelloWorld
-addGroup hg : HelloGroup
-addToGroup hg node0
+merge mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:3.0.0-SNAPSHOT
+add node0 : JavaNode
+add chan0 : HelloChannel
+set node0 { debug = "true" }
+add hw1 : HelloWorld
+move hw1 node0
+set hw1 { message = "hw1" }
+add sync : HelloGroup
+attach node0 sync
 
-addChannel ch : HelloChannel
-//bind h.out@node0 => ch
-addNode child:JavaSENode
-addChild child@node0
+bind hw1.output chan0
+bind hw1.input chan0
+
+
 

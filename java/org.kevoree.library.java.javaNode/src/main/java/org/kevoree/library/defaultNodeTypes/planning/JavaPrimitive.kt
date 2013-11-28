@@ -8,7 +8,6 @@ package org.kevoree.library.defaultNodeTypes.planning
  */
 
 enum class JavaPrimitive {
-    UpdateDeployUnit
     AddDeployUnit
     RemoveDeployUnit
     UpdateInstance

@@ -63,11 +63,6 @@ public class CommandMapper {
             toClean.add(res);
             return res;
         }
-        if (pTypeName.equals(JavaPrimitive.UpdateDeployUnit.name())) {
-            UpdateDeployUnit res = new UpdateDeployUnit((DeployUnit) p.getRef(), bs, registry);
-            toClean.add(res);
-            return res;
-        }
         if (pTypeName.equals(JavaPrimitive.AddInstance.name())) {
             return new AddInstance((Instance) p.getRef(), nodeName, registry, bs);
         }
