@@ -38,12 +38,12 @@ public class ComponentWrapper(override val targetObj: Any, val nodeName: String,
             if(!field.isAccessible()){
                 field.setAccessible(true)
             }
-            var portWrapper = RequiredPortImpl()
+            var portWrapper = RequiredPortImpl(requiredPort.path()!!)
             field.set(targetObj, portWrapper)
             requiredPorts.put(requiredPort.portTypeRef!!.name!!, portWrapper)
         }
         for(providedPort in modelElement.provided){
-            var portWrapper = ProvidedPortImpl(targetObj, providedPort.portTypeRef!!.name!!)
+            var portWrapper = ProvidedPortImpl(targetObj, providedPort.portTypeRef!!.name!!, providedPort.path()!!)
             providedPorts.put(providedPort.portTypeRef!!.name!!, portWrapper)
         }
     }

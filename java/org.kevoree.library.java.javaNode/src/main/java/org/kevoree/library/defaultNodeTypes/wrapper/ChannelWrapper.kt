@@ -21,6 +21,10 @@ public class ChannelWrapper(override val targetObj: Any, val _nodeName: String, 
         (targetObj as ChannelDispatch).dispatch(payload, callback)
     }
 
+    override fun getPath(): String {
+        return "";//noop
+    }
+
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
         if (!isStarted) {
             try {

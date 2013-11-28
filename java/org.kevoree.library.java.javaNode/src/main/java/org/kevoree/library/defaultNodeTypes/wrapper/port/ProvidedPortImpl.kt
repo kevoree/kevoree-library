@@ -13,7 +13,10 @@ import org.kevoree.log.Log
  * Time: 11:52
  */
 
-class ProvidedPortImpl(targetObj: Any, name: String) : Port {
+class ProvidedPortImpl(targetObj: Any, name: String, val portPath : String) : Port {
+    override fun getPath(): String? {
+        return portPath;
+    }
 
     var targetMethod: Method? = null
 

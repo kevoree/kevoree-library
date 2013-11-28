@@ -167,7 +167,7 @@ public abstract class Kompare4(val registry: Map<String, Any>) {
                                     if(!stillUsed && !registry.containsKey(oldChannel!!)){
                                         if(!elementAlreadyProcessed.contains(TupleObjPrim(channel!!, JavaPrimitive.RemoveInstance))){
                                             adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, channel, targetModel))
-                                            elementAlreadyProcessed.add(TupleObjPrim(channel!!, JavaPrimitive.RemoveInstance))
+                                            elementAlreadyProcessed.add(TupleObjPrim(channel, JavaPrimitive.RemoveInstance))
                                         }
                                     }
                                     adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveBinding, binding, targetModel))

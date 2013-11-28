@@ -2,6 +2,7 @@ package org.kevoree.library.defaultNodeTypes.samples;
 
 import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.*;
+import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.cloner.DefaultModelCloner;
@@ -18,6 +19,9 @@ public class HelloWorld {
 
     ModelCloner cloner = new DefaultModelCloner();
 
+    @KevoreeInject
+    Context context;
+
     @Param
     String message;
 
@@ -29,11 +33,14 @@ public class HelloWorld {
 
     @ProvidedPort(optional = true)
     public void input(Object inp) {
-
+        System.out.println("Something arrived on the input port " + inp);
     }
 
     @Start
     public void start() {
+
+        System.out.println("Context=" + context.getPath());
+
         System.out.println("I'm just beginning my life ! ");
         System.out.println("msg=" + message);
 
@@ -42,9 +49,6 @@ public class HelloWorld {
                 try {
                     Thread.sleep(500);
                     output.call("hello", null);
-
-                    // getPortByName("out", MessagePort.class).process("HelloChannel");
-
                 } catch (InterruptedException e) {
                 }
             }
