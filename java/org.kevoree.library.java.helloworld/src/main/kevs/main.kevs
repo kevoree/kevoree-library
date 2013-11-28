@@ -1,0 +1,2 @@
+merge mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:3.0.0-SNAPSHOT
+merge mvn:org.kevoree.library.java:org.kevoree.library.java.channels:3.0.0-SNAPSHOT
