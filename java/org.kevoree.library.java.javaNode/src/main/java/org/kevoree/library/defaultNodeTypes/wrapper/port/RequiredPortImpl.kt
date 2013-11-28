@@ -14,6 +14,10 @@ import org.kevoree.log.Log
 
 class RequiredPortImpl(val portPath: String) : Port {
 
+    override fun call(payload: Any?) {
+        call(payload,null)
+    }
+
     override fun getPath(): String? {
         return portPath
     }

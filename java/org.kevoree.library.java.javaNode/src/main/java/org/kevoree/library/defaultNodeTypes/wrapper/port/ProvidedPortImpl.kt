@@ -3,8 +3,8 @@ package org.kevoree.library.defaultNodeTypes.wrapper.port
 import org.kevoree.api.Port
 import org.kevoree.api.Callback
 import java.lang.reflect.Method
-import org.kevoree.annotation.ProvidedPort
 import org.kevoree.log.Log
+import org.kevoree.annotation.Input
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,6 +14,9 @@ import org.kevoree.log.Log
  */
 
 class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String) : Port {
+    override fun call(payload: Any?) {
+       call(payload,null)
+    }
     override fun getPath(): String? {
         return portPath;
     }
@@ -23,7 +26,7 @@ class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String) :
     {
         for(method in targetObj.javaClass.getDeclaredMethods()){
             if(method.getName() == name){
-                if(method.getAnnotation(javaClass<ProvidedPort>()) != null){
+                if(method.getAnnotation(javaClass<Input>()) != null){
                     targetMethod = method;
                     // method.getParameterTypes()
                     //todo

@@ -28,10 +28,10 @@ public class HelloWorld {
     @KevoreeInject
     ModelService modelService;
 
-    @RequiredPort(optional = true)
+    @Output(optional = true)
     public org.kevoree.api.Port output;
 
-    @ProvidedPort(optional = true)
+    @Input(optional = true)
     public void input(Object inp) {
         System.out.println("Something arrived on the input port " + inp);
     }
