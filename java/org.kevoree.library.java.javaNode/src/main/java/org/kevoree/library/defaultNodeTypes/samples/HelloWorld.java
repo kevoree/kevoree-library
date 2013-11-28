@@ -45,7 +45,7 @@ public class HelloWorld {
             public void run() {
                 try {
                     Thread.sleep(500);
-                    output.call("hello " + message, null);
+                    output.call("hello " + message);
                 } catch (InterruptedException e) {
                 }
             }
