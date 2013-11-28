@@ -13,7 +13,7 @@ import org.kevoree.log.Log
  * Time: 11:52
  */
 
-class ProvidedPortImpl(targetObj: Any, name: String, val portPath : String) : Port {
+class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String) : Port {
     override fun getPath(): String? {
         return portPath;
     }
@@ -30,11 +30,15 @@ class ProvidedPortImpl(targetObj: Any, name: String, val portPath : String) : Po
                 }
             }
         }
+        if(targetMethod == null){
+            Log.error("Warning Provided port is not binded ... for name " + name)
+        }
     }
 
     override fun call(payload: Any?, callback: Callback?) {
         try {
-            callback?.run(targetMethod?.invoke(payload))
+            var result = targetMethod?.invoke(targetObj,payload)
+            callback?.run(result)
         } catch (e: Throwable){
             Log.error("This is really bad, exception during port call...", e)
         }

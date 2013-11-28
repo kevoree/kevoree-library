@@ -28,7 +28,7 @@ class AddBindingCommand(val c: MBinding, val nodeName: String, val registry: Mut
                 return true
             }
             if(foundHostedPort != null){
-                kevoreeChannelFound.portsBinded.put(portName,foundHostedPort)
+                kevoreeChannelFound.context.portsBinded.put(portName,foundHostedPort)
                 return true
             }
             return false

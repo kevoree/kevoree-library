@@ -38,17 +38,14 @@ public class HelloWorld {
 
     @Start
     public void start() {
-
         System.out.println("Context=" + context.getPath());
-
         System.out.println("I'm just beginning my life ! ");
         System.out.println("msg=" + message);
-
         new Thread() {
             public void run() {
                 try {
                     Thread.sleep(500);
-                    output.call("hello", null);
+                    output.call("hello " + message, null);
                 } catch (InterruptedException e) {
                 }
             }
