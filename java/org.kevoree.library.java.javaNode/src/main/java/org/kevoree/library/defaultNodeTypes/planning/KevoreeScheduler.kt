@@ -5,6 +5,7 @@ import org.kevoreeadaptation.AdaptationPrimitive
 import java.util.HashMap
 import java.util.ArrayList
 import org.kevoreeadaptation.ParallelStep
+import org.kevoreeadaptation.KevoreeAdaptationFactory
 
 /**
  * Created by IntelliJ IDEA.
@@ -13,7 +14,9 @@ import org.kevoreeadaptation.ParallelStep
  * Time: 17:54
  */
 
-trait KevoreeScheduler : StepBuilder {
+trait KevoreeScheduler {
+
+    var adaptationModelFactory: KevoreeAdaptationFactory
 
     open fun schedule(adaptionModel: AdaptationModel, nodeName: String): AdaptationModel {
         if (!adaptionModel.adaptations.isEmpty()) {
@@ -21,13 +24,13 @@ trait KevoreeScheduler : StepBuilder {
             val classedAdaptations = classify(adaptionModel.adaptations)
             adaptionModel.orderedPrimitiveSet = createStep(classedAdaptations.get(JavaPrimitive.AddDeployUnit.name()))
             var currentStep = adaptionModel.orderedPrimitiveSet
+            currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.AddInstance.name()))
+            currentStep = currentStep!!.nextStep
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.StopInstance.name()))
             currentStep = currentStep!!.nextStep
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.RemoveBinding.name()))
             currentStep = currentStep!!.nextStep
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.RemoveInstance.name()))
-            currentStep = currentStep!!.nextStep
-            currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.AddInstance.name()))
             currentStep = currentStep!!.nextStep
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.AddBinding.name()))
             currentStep = currentStep!!.nextStep
@@ -36,11 +39,9 @@ trait KevoreeScheduler : StepBuilder {
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.StartInstance.name()))
             currentStep = currentStep!!.nextStep
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.RemoveDeployUnit.name()))
-
         } else {
             adaptionModel.orderedPrimitiveSet = null
         }
-        clearSteps()
         return adaptionModel
     }
 

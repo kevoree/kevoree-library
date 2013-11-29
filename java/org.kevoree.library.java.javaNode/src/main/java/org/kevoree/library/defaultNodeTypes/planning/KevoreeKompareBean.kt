@@ -4,9 +4,6 @@ import org.kevoree.*
 import org.kevoreeadaptation.*
 
 open class KevoreeKompareBean(registry: Map<String, Any>) : Kompare4(registry), KevoreeScheduler {
-    override var previousStep: ParallelStep? = null
-    override var currentSteps: ParallelStep? = null
-
     override var adaptationModelFactory: KevoreeAdaptationFactory = org.kevoreeadaptation.impl.DefaultKevoreeAdaptationFactory()
 
     fun plan(actualModel: ContainerRoot, targetModel: ContainerRoot, nodeName: String): AdaptationModel {
