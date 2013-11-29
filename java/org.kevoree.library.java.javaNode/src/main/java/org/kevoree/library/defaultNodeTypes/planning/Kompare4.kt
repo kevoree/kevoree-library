@@ -18,8 +18,9 @@ import org.kevoree.DeployUnit
 import org.kevoree.ContainerNode
 import org.kevoree.modeling.api.trace.ModelTrace
 import org.kevoree.Channel
+import org.kevoree.library.defaultNodeTypes.ModelRegistry
 
-public abstract class Kompare4(val registry: Map<String, Any>) {
+public abstract class Kompare4(val registry: ModelRegistry) {
 
     private val modelCompare = DefaultModelCompare()
     private val adaptationModelFactory = DefaultKevoreeAdaptationFactory()
@@ -143,7 +144,7 @@ public abstract class Kompare4(val registry: Map<String, Any>) {
                                     val binding = targetModel.findByPath(trace.previousPath!!) as? org.kevoree.MBinding
                                     adaptationModel.addAdaptations(adapt(JavaPrimitive.AddBinding, binding, targetModel))
                                     val channel = binding?.hub
-                                    if(channel != null && !registry.containsKey(channel.path())){
+                                    if(channel != null && registry.lookup(channel)==null){
                                         if(!elementAlreadyProcessed.contains(TupleObjPrim(channel, JavaPrimitive.AddInstance))){
                                             adaptationModel.addAdaptations(adapt(JavaPrimitive.AddInstance, channel, targetModel))
                                             elementAlreadyProcessed.add(TupleObjPrim(channel, JavaPrimitive.AddInstance))
@@ -164,7 +165,7 @@ public abstract class Kompare4(val registry: Map<String, Any>) {
                                             }
                                         }
                                     }
-                                    if(!stillUsed && !registry.containsKey(oldChannel!!)){
+                                    if(!stillUsed && registry.lookup(oldChannel!!)!=null){
                                         if(!elementAlreadyProcessed.contains(TupleObjPrim(channel!!, JavaPrimitive.RemoveInstance))){
                                             adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, channel, targetModel))
                                             elementAlreadyProcessed.add(TupleObjPrim(channel, JavaPrimitive.RemoveInstance))
@@ -231,7 +232,7 @@ public abstract class Kompare4(val registry: Map<String, Any>) {
         targetNode?.visit(object : ModelVisitor(){
             override fun visit(elem: KMFContainer, refNameInParent: String, parent: KMFContainer) {
                 if(elem is DeployUnit){
-                    if(!registry.containsKey(elem.path())){
+                    if(registry.lookup(elem)==null){
                         adaptationModel.addAdaptations(adapt(JavaPrimitive.AddDeployUnit, elem, targetModel))
                     }
                     foundDeployUnitsToRemove.remove(elem.path()!!)

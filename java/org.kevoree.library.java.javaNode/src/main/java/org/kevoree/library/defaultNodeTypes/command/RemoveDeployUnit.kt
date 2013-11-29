@@ -2,8 +2,9 @@ package org.kevoree.library.defaultNodeTypes.command
 
 import org.kevoree.DeployUnit
 import java.util.Random
-import org.kevoree.kcl.KevoreeJarClassLoader
 import org.kevoree.log.Log
+import org.kevoree.api.PrimitiveCommand
+import org.kevoree.library.defaultNodeTypes.ModelRegistry
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -25,34 +26,26 @@ import org.kevoree.log.Log
  * Time: 16:35
  */
 
-class RemoveDeployUnit(val du: DeployUnit, val bootstrap: org.kevoree.api.BootstrapService, val registry: MutableMap<String, Any>) : EndAwareCommand {
+class RemoveDeployUnit(val du: DeployUnit, val bootstrap: org.kevoree.api.BootstrapService, val registry: ModelRegistry) : PrimitiveCommand {
 
     var random = Random()
-    var lastKCL: KevoreeJarClassLoader? = null
 
     override fun undo() {
-        if (lastKCL != null) {
-            bootstrap.manualAttach(du, lastKCL!!)
-            registry.put(du.path()!!, lastKCL!!)
-        }
+        AddDeployUnit(du, bootstrap, registry).execute()
     }
 
     //LET THE UNINSTALL
     override fun execute(): Boolean {
         try {
-            lastKCL = bootstrap.get(du)
             bootstrap.removeDeployUnit(du)
-            registry.remove(du.path())
+            registry.drop(du)
+            //TODO cleanup links
             return true
 
         }catch (e: Exception) {
             Log.debug("error ", e)
             return false
         }
-    }
-
-    override fun doEnd() {
-        lastKCL = null
     }
 
     fun toString(): String {

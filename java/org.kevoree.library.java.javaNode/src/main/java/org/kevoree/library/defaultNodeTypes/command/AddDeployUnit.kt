@@ -3,6 +3,7 @@ package org.kevoree.library.defaultNodeTypes.command
 import org.kevoree.DeployUnit
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.log.Log
+import org.kevoree.library.defaultNodeTypes.ModelRegistry
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -24,26 +25,26 @@ import org.kevoree.log.Log
  * Time: 16:35
  */
 
-class AddDeployUnit(val du: DeployUnit, val bs: org.kevoree.api.BootstrapService, val registry: MutableMap<String, Any>) : PrimitiveCommand {
+class AddDeployUnit(val du: DeployUnit, val bs: org.kevoree.api.BootstrapService, val registry: ModelRegistry) : PrimitiveCommand {
 
     override fun undo() {
-        bs.removeDeployUnit(du)
-        registry.remove(du.path()!!)
+        RemoveDeployUnit(du, bs, registry).execute()
     }
 
     override fun execute(): Boolean {
         try {
-            if (bs.get(du) == null) {
+            var kclResolved = bs.get(du)
+            if (kclResolved == null) {
                 val new_kcl = bs.installDeployUnit(du)
                 if (new_kcl != null) {
-                    registry.put(du.path()!!, new_kcl)
+                    registry.register(du, new_kcl)
                     return true
                 } else {
                     return false
                 }
             } else {
-                if (registry.get(du.path()!!) == null) {
-                    registry.put(du.path()!!, bs.get(du)!!)
+                if(registry.lookup(du) == null){
+                    registry.register(du, kclResolved)
                 }
                 return true
             }

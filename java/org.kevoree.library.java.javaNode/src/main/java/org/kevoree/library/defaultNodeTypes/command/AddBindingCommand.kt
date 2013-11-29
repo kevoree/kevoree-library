@@ -6,15 +6,16 @@ import org.kevoree.ComponentInstance
 import org.kevoree.log.Log
 import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
 import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
+import org.kevoree.library.defaultNodeTypes.ModelRegistry
 
-class AddBindingCommand(val c: MBinding, val nodeName: String, val registry: MutableMap<String, Any>) : PrimitiveCommand {
+class AddBindingCommand(val c: MBinding, val nodeName: String, val registry: ModelRegistry) : PrimitiveCommand {
 
     override fun undo() {
         RemoveBindingCommand(c, nodeName, registry).execute()
     }
     override fun execute(): Boolean {
-        val kevoreeChannelFound = registry.get(c.hub!!.path()!!)
-        val kevoreeComponentFound = registry.get((c.port!!.eContainer() as ComponentInstance).path()!!)
+        val kevoreeChannelFound = registry.lookup(c.hub!!)
+        val kevoreeComponentFound = registry.lookup(c.port!!.eContainer() as ComponentInstance)
         if(kevoreeChannelFound != null && kevoreeComponentFound != null && kevoreeComponentFound is ComponentWrapper && kevoreeChannelFound is ChannelWrapper){
             val portName = c.port!!.portTypeRef!!.name!!
             val foundNeedPort = kevoreeComponentFound.requiredPorts.get(portName)

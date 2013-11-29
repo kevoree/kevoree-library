@@ -13,6 +13,7 @@ import org.kevoree.ContainerNode
 import org.kevoree.library.defaultNodeTypes.wrapper.NodeWrapper
 import org.kevoree.api.BootstrapService
 import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
+import org.kevoree.library.defaultNodeTypes.ModelRegistry
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -36,7 +37,7 @@ import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
  * Time: 17:53
  */
 
-class AddInstance(val c: Instance, val nodeName: String, val registry: MutableMap<String, Any>, val bs: BootstrapService) : PrimitiveCommand, Runnable {
+class AddInstance(val c: Instance, val nodeName: String, val registry: ModelRegistry, val bs: BootstrapService) : PrimitiveCommand, Runnable {
 
     var nodeTypeName: String? = null
     var tg: ThreadGroup? = null
@@ -73,22 +74,25 @@ class AddInstance(val c: Instance, val nodeName: String, val registry: MutableMa
         try {
             val newBeanInstance = bs.createInstance(c)
             var newBeanKInstanceWrapper: KInstanceWrapper? = null
-            if(c is ComponentInstance){
-                newBeanKInstanceWrapper = ComponentWrapper(newBeanInstance!!, nodeName, c.name!!, tg!!, bs)
-                (newBeanKInstanceWrapper as ComponentWrapper).initPorts(c, newBeanInstance)
+            when(c){
+                is ComponentInstance -> {
+                    newBeanKInstanceWrapper = ComponentWrapper(newBeanInstance!!, nodeName, c.name!!, tg!!, bs)
+                    (newBeanKInstanceWrapper as ComponentWrapper).initPorts(c, newBeanInstance)
+                }
+                is Group -> {
+                    newBeanKInstanceWrapper = GroupWrapper(newBeanInstance as Any, nodeName, c.name!!, tg!!, bs)
+                }
+                is Channel -> {
+                    newBeanKInstanceWrapper = ChannelWrapper(newBeanInstance as Any, nodeName, c.name!!, tg!!, bs)
+                }
+                is ContainerNode -> {
+                    newBeanKInstanceWrapper = NodeWrapper(c, c.path()!!, tg!!, bs)
+                }
+                else -> {
+                    Log.error("Unknow instance type {}",c)
+                }
             }
-            if(c is Group){
-                newBeanKInstanceWrapper = GroupWrapper(newBeanInstance as Any, nodeName, c.name!!, tg!!, bs)
-            }
-            if(c is Channel){
-                newBeanKInstanceWrapper = ChannelWrapper(newBeanInstance as Any, nodeName, c.name!!, tg!!, bs)
-            }
-            if(c is ContainerNode){
-                newBeanKInstanceWrapper = NodeWrapper(c, c.path()!!, tg!!, bs)
-            }
-
-            registry.put(c.path()!!, newBeanKInstanceWrapper!!)
-
+            registry.register(c, newBeanKInstanceWrapper!!)
             val sub = UpdateDictionary(c, nodeName, registry)
             resultSub = sub.execute()
         } catch(e: Throwable){

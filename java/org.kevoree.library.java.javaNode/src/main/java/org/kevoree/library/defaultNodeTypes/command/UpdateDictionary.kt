@@ -5,6 +5,7 @@ import org.kevoree.Instance
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
 import org.kevoree.log.Log
+import org.kevoree.library.defaultNodeTypes.ModelRegistry
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -20,10 +21,10 @@ import org.kevoree.log.Log
  * limitations under the License.
  */
 
-class UpdateDictionary(val c: Instance, val nodeName: String, val registry: MutableMap<String, Any>) : PrimitiveCommand {
+class UpdateDictionary(val c: Instance, val nodeName: String, val registry: ModelRegistry) : PrimitiveCommand {
 
     override fun execute(): Boolean {
-        val reffound = registry.get(c.path()!!)
+        val reffound = registry.lookup(c)
         if(reffound != null && reffound is KInstanceWrapper){
             val iact = reffound as KInstanceWrapper
             val previousCL = Thread.currentThread().getContextClassLoader()

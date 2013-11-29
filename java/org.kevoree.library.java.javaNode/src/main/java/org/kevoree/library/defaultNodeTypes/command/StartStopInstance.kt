@@ -3,11 +3,10 @@ package org.kevoree.library.defaultNodeTypes.command
 import org.kevoree.ContainerRoot
 import org.kevoree.Instance
 import org.kevoree.log.Log
-import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
-import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
-import org.kevoree.library.defaultNodeTypes.wrapper.GroupWrapper
 import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
 import org.kevoree.api.BootstrapService
+import org.kevoree.api.PrimitiveCommand
+import org.kevoree.library.defaultNodeTypes.ModelRegistry
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -23,7 +22,7 @@ import org.kevoree.api.BootstrapService
  * limitations under the License.
  */
 
-class StartStopInstance(c: Instance, nodeName: String, val start: Boolean, val registry: MutableMap<String, Any>, val bs : BootstrapService) : LifeCycleCommand(c, nodeName), Runnable {
+class StartStopInstance(val c: Instance, val nodeName: String, val start: Boolean, val registry: ModelRegistry, val bs: BootstrapService) : PrimitiveCommand, Runnable {
 
     var t: Thread? = null
     var resultAsync = false
@@ -46,20 +45,19 @@ class StartStopInstance(c: Instance, nodeName: String, val start: Boolean, val r
                 Thread.currentThread().setContextClassLoader(null)
                 resultAsync = res
             }
-        } catch (e : Exception){
+        } catch (e: Exception){
             e.printStackTrace()
         }
     }
 
     override fun undo() {
-        StartStopInstance(c, nodeName, !start, registry,bs).execute()
+        StartStopInstance(c, nodeName, !start, registry, bs).execute()
     }
 
     override fun execute(): Boolean {
-
         //Look thread group
         root = c.typeDefinition!!.eContainer() as ContainerRoot
-        val ref = registry.get(c.path()!!)
+        val ref = registry.lookup(c)
         if(ref != null && ref is KInstanceWrapper){
             iact = ref as KInstanceWrapper
 

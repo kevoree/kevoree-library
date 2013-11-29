@@ -3,6 +3,7 @@ package org.kevoree.library.defaultNodeTypes.command
 import org.kevoree.*
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.api.BootstrapService
+import org.kevoree.library.defaultNodeTypes.ModelRegistry
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -17,7 +18,7 @@ import org.kevoree.api.BootstrapService
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class RemoveInstance(val c: Instance, val nodeName: String, val registry: MutableMap<String, Any>, val bs: BootstrapService) : PrimitiveCommand {
+class RemoveInstance(val c: Instance, val nodeName: String, val registry: ModelRegistry, val bs: BootstrapService) : PrimitiveCommand {
 
     override fun undo() {
         try {
@@ -30,7 +31,7 @@ class RemoveInstance(val c: Instance, val nodeName: String, val registry: Mutabl
 
     override fun execute(): Boolean {
         try {
-            registry.remove(c.path()!!)
+            registry.drop(c)
             return true
         } catch(e: Exception){
             return false

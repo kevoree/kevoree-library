@@ -2,8 +2,9 @@ package org.kevoree.library.defaultNodeTypes.planning
 
 import org.kevoree.*
 import org.kevoreeadaptation.*
+import org.kevoree.library.defaultNodeTypes.ModelRegistry
 
-open class KevoreeKompareBean(registry: Map<String, Any>) : Kompare4(registry), KevoreeScheduler {
+open class KevoreeKompareBean(registry: ModelRegistry) : Kompare4(registry), KevoreeScheduler {
     override var adaptationModelFactory: KevoreeAdaptationFactory = org.kevoreeadaptation.impl.DefaultKevoreeAdaptationFactory()
 
     fun plan(actualModel: ContainerRoot, targetModel: ContainerRoot, nodeName: String): AdaptationModel {

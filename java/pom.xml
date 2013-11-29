@@ -19,6 +19,7 @@
         <module>org.kevoree.library.java.javaNode</module>
         <module>org.kevoree.library.java.channels</module>
         <module>org.kevoree.library.java.helloworld</module>
+        <module>org.kevoree.library.java.ws</module>
     </modules>
 
     <dependencies>

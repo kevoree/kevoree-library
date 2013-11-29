@@ -1,0 +1,10 @@
+merge mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:3.0.0-SNAPSHOT
+merge mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.0.0-SNAPSHOT
+
+add node0 : JavaNode
+add sync : WSGroup
+attach node0 sync
+
+
+
+
