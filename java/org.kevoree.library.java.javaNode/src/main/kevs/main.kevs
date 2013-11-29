@@ -1,15 +1,14 @@
-merge mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:3.0.0-SNAPSHOT
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:3.0.0-SNAPSHOT
 add node0 : JavaNode
 add chan0 : HelloChannel
-set node0 { debug = "true" }
-add hw1 : HelloWorld
-move hw1 node0
-set hw1 { message = "hw1" }
+set node0.debug = "true"
+add node0.hw1 : HelloWorld
+set node0.hw1.message = "hw1"
 add sync : HelloGroup
 attach node0 sync
 
-bind hw1.output chan0
-bind hw1.input chan0
+bind node0.hw1.output chan0
+bind node0.hw1.input chan0
 
 
 
