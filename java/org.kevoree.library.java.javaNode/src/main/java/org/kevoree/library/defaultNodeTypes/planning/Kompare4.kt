@@ -144,7 +144,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                                     val binding = targetModel.findByPath(trace.previousPath!!) as? org.kevoree.MBinding
                                     adaptationModel.addAdaptations(adapt(JavaPrimitive.AddBinding, binding, targetModel))
                                     val channel = binding?.hub
-                                    if(channel != null && registry.lookup(channel)==null){
+                                    if(channel != null && registry.lookup(channel) == null){
                                         if(!elementAlreadyProcessed.contains(TupleObjPrim(channel, JavaPrimitive.AddInstance))){
                                             adaptationModel.addAdaptations(adapt(JavaPrimitive.AddInstance, channel, targetModel))
                                             elementAlreadyProcessed.add(TupleObjPrim(channel, JavaPrimitive.AddInstance))
@@ -165,7 +165,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                                             }
                                         }
                                     }
-                                    if(!stillUsed && registry.lookup(oldChannel!!)!=null){
+                                    if(!stillUsed && registry.lookup(oldChannel!!) != null){
                                         if(!elementAlreadyProcessed.contains(TupleObjPrim(channel!!, JavaPrimitive.RemoveInstance))){
                                             adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, channel, targetModel))
                                             elementAlreadyProcessed.add(TupleObjPrim(channel, JavaPrimitive.RemoveInstance))
@@ -232,8 +232,9 @@ public abstract class Kompare4(val registry: ModelRegistry) {
         targetNode?.visit(object : ModelVisitor(){
             override fun visit(elem: KMFContainer, refNameInParent: String, parent: KMFContainer) {
                 if(elem is DeployUnit){
-                    if(registry.lookup(elem)==null){
+                    if(registry.lookup(elem) == null){
                         adaptationModel.addAdaptations(adapt(JavaPrimitive.AddDeployUnit, elem, targetModel))
+                        adaptationModel.addAdaptations(adapt(JavaPrimitive.LinkDeployUnit, elem, targetModel))
                     }
                     foundDeployUnitsToRemove.remove(elem.path()!!)
                 }

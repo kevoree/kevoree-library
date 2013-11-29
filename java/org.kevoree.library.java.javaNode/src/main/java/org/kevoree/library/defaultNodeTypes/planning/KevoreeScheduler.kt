@@ -24,6 +24,8 @@ trait KevoreeScheduler {
             val classedAdaptations = classify(adaptionModel.adaptations)
             adaptionModel.orderedPrimitiveSet = createStep(classedAdaptations.get(JavaPrimitive.AddDeployUnit.name()))
             var currentStep = adaptionModel.orderedPrimitiveSet
+            currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.LinkDeployUnit.name()))
+            currentStep = currentStep!!.nextStep
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.AddInstance.name()))
             currentStep = currentStep!!.nextStep
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.StopInstance.name()))

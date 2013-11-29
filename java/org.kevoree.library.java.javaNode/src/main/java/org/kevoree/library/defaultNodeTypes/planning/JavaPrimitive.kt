@@ -19,4 +19,5 @@ enum class JavaPrimitive {
     RemoveBinding
     StartInstance
     StopInstance
+    LinkDeployUnit
 }
