@@ -27,7 +27,7 @@ public class WSGroup extends WebSocketServer {
     @KevoreeInject
     public ModelService modelService;
 
-    @Param
+    @Param(optional = true,fragmentDependent = true)
     Integer port = 9000;
     private WSGroup server = null;
 
