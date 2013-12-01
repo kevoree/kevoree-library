@@ -8,7 +8,7 @@ import org.kevoree.annotation.*;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.loader.JSONModelLoader;
-import org.kevoree.loader.XMIModelLoader;
+import org.kevoree.serializer.JSONModelSerializer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -25,11 +25,11 @@ import java.net.UnknownHostException;
 public class WSGroup extends WebSocketServer {
 
     @KevoreeInject
-    ModelService modelService;
+    public ModelService modelService;
 
     @Param
     Integer port = 9000;
-    private WebSocketServer server = null;
+    private WSGroup server = null;
 
     public WSGroup() throws UnknownHostException {
         super();
@@ -42,6 +42,7 @@ public class WSGroup extends WebSocketServer {
     @Start
     public void startWSGroup() throws UnknownHostException {
         server = new WSGroup(port);
+        server.modelService = modelService;
         server.start();
     }
 
@@ -59,20 +60,27 @@ public class WSGroup extends WebSocketServer {
     }
 
     private JSONModelLoader jsonModelLoader = new JSONModelLoader();
-    private XMIModelLoader xmiModelLoader = new XMIModelLoader();
+    private JSONModelSerializer jsonModelSaver = new JSONModelSerializer();
 
     @Override
     public void onMessage(WebSocket webSocket, String s) {
-        try {
-            ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(s).get(0);
-            modelService.update(model, new UpdateCallback() {
-                @Override
-                public void run(Boolean applied) {
-                    System.out.println("WSGroup update result : " + applied);
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (s.startsWith("get")) {
+            //Pull
+            String modelReturn = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
+            webSocket.send(modelReturn);
+        } else {
+            //Push
+            try {
+                ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(s).get(0);
+                modelService.update(model, new UpdateCallback() {
+                    @Override
+                    public void run(Boolean applied) {
+                        System.out.println("WSGroup update result : " + applied);
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
