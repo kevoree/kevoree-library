@@ -27,11 +27,11 @@ public class WebFrontend {
     @Start
     public void startServer() {
         try {
-            mhandler = new ModelServiceSocketHandler(this.m);
+            mhandler = new ModelServiceSocketHandler(modelService);
             webServer = WebServers.createWebServer(port)
                     .add(new MetaDataHandler(modelService))
                     .add("/model/service", mhandler)
-                    .add(new EmbedHandler(this)) // path to web content
+                    .add(new EmbedHandler()) // path to web content
                     .start()
                     .get();
         } catch (Exception e) {
