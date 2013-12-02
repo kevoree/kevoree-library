@@ -1,7 +1,5 @@
 package org.kevoree.library.defaultNodeTypes.wrapper
 
-import org.kevoree.api.ChannelContext
-import org.kevoree.api.Port
 import java.util.HashMap
 
 /**

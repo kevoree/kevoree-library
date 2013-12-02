@@ -1,9 +1,5 @@
 package org.kevoree.library.defaultNodeTypes.command
 
-import org.kevoree.MBinding
-import org.kevoree.api.PrimitiveCommand
-import org.kevoree.ComponentInstance
-import org.kevoree.log.Log
 import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
 import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
 import org.kevoree.library.defaultNodeTypes.ModelRegistry
@@ -29,7 +25,7 @@ class AddBindingCommand(val c: MBinding, val nodeName: String, val registry: Mod
                 return true
             }
             if(foundHostedPort != null){
-                kevoreeChannelFound.context.portsBinded.put(portName,foundHostedPort)
+                kevoreeChannelFound.context.portsBinded.put(portName, foundHostedPort)
                 return true
             }
             return false

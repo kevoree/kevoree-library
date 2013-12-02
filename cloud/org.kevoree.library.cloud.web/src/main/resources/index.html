@@ -1,0 +1,387 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Kevoree Model viewer</title>
+    <script src="lib/reconnecting-websocket.min.js"></script>
+    <script src="lib/jquery.js"></script>
+    <script src="lib/bootstrap.min.js"></script>
+    <script src="lib/bootstrap-notify.js"></script>
+    <script src="lib/bootbox.min.js"></script>
+    <script type="text/javascript" src="lib/org.kevoree.model.js.min.js"></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="css/bootstrap-notify.css" rel="stylesheet">
+</head>
+
+<body>
+
+<img src="images/kevoree-gris.png" style="width: 400px;"/>
+
+<script>
+/* Global variables */
+var kevoreeJSModule, factory, loader, saver, model, ws, nodeName = {};
+
+$(function () {
+
+    /* Model manipulation objects */
+    kevoreeJSModule = Kotlin.modules['org.kevoree.model.js'];
+    loader = new kevoreeJSModule.org.kevoree.loader.JSONModelLoader();
+    saver = new kevoreeJSModule.org.kevoree.serializer.JSONModelSerializer();
+    factory = new kevoreeJSModule.org.kevoree.impl.DefaultKevoreeFactory();
+    /* Meta information set */
+    var request = new XMLHttpRequest();
+    request.open('GET', '/metadata/nodeName', false);  // `false` makes the request synchronous
+    request.send(null);
+    nodeName = request.responseText;
+    console.log("Current Node Name : " + nodeName);
+
+
+    function synchModel() {
+        //send to node
+        var serializedModel = saver.serialize(model);
+        ws.send(serializedModel)
+    }
+
+    /* WS connection set */
+    function refreshModel(text) {
+        model = loader.loadModelFromString(text).get(0);
+        var nodeListElement = $('#nodeList');
+        nodeListElement.empty(); //clear nodeList
+        var nodes = model.findNodesByID(nodeName).hosts;
+        for (var i = 0; i < nodes.$size; i++) {
+            var childName = nodes.get(i).name;
+
+            //TODO look for IP, thanks to maxime
+
+
+            var newStartNStopBt = $('<a></a>');
+            newStartNStopBt.addClass("btn");
+            newStartNStopBt.addClass("btn-warning");
+            newStartNStopBt.get(0).id = 'startnstop' + childName;
+            if (nodes.get(i).started) {
+                newStartNStopBt.append("Stop child");
+            } else {
+                newStartNStopBt.append("Start child");
+            }
+
+            var newRemoveBt = $('<a></a>');
+            newRemoveBt.addClass("btn");
+            newRemoveBt.addClass("btn-danger");
+            newRemoveBt.get(0).id = 'remove' + childName;
+            newRemoveBt.append("Remove child");
+
+            nodeListElement.append($('<tr>').append($('<td>').append(childName)).append($('<td>').append(lookingForIPs(childName))).append($('<td>').append(newStartNStopBt).append(" ").append(newRemoveBt)));
+            newStartNStopBt.click(function () {
+                var currentNode = model.findNodesByID(nodeName);
+                var currentChildNode = currentNode.findHostsByID(this.id.substring("startnstop".length));
+                if (currentChildNode != null && currentChildNode != undefined && currentChildNode.started) {
+                    currentChildNode.started = false;
+                } else {
+                    currentChildNode.started = true;
+                }
+                synchModel();
+            });
+            newRemoveBt.click(function () {
+
+                var childName = this.id.substring("remove".length);
+
+                bootbox.confirm("Are you sure to wants to destroy "+childName+" ?", function(result) {
+                    if(result ==true){
+                        var currentNode = model.findNodesByID(nodeName);
+                        var currentChildNode = currentNode.findHostsByID(childName);
+                        currentNode.removeHosts(currentChildNode);
+                        model.removeNodes(currentChildNode);
+
+                        // NodeNetwork must be removed
+                        var nodeNetworkToRemove = [];
+                        var nodeNetworks = model.nodeNetworks;
+                        for (var i = 0; i < nodeNetworks.$size; i++) {
+                            var nodeNetwork = nodeNetworks.get(i);
+                            if (nodeNetwork.target.name === childName || nodeNetwork.initBy.name === childName) {
+                                nodeNetworkToRemove.push(nodeNetwork)
+                            }
+                        }
+                        for (var i = 0; i < nodeNetworkToRemove.length; i++) {
+                            model.removeNodeNetworks(nodeNetworkToRemove[i]);
+                        }
+                        synchModel();
+                    }
+                });
+
+
+            });
+        }
+    }
+
+    function lookingForIPs(nodeName) {
+        var nodeNetworks = model.nodeNetworks;
+        var ips = "";
+        for (var i = 0; i < nodeNetworks.$size; i++) {
+            var nodeNetwork = nodeNetworks.get(i);
+            if (nodeNetwork.target.name === nodeName) {
+                var links = nodeNetwork.link;
+                for (var j = 0; j < links.$size; j++) {
+                    var link = links.get(j);
+                    var networkProperties = link.networkProperties;
+                    for (var k = 0; k < networkProperties.$size; k++) {
+                        var networkProperty = networkProperties.get(k);
+                        if (networkProperty.name === "KEVOREE.remote.node.ip") {
+                            if (ips === "") {
+                                ips = networkProperty.value;
+                            } else {
+                                ips = ", " + networkProperty.value;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return ips;
+    }
+
+    function refreshEvent(data) {
+        var message = $('#waitingMessage');
+        if (data == "done") {
+            message.fadeOut('slow', function () {
+                $(this).css({"visibility": "hidden"});
+            });
+        }
+        if (data == "update") {
+            message.fadeIn('slow', function () {
+                $(this).css({"visibility": "visible"});
+            });
+        }
+    }
+
+    refreshEvent("done");
+    ws = new ReconnectingWebSocket('ws://' + document.location.host + '/model/service');
+    ws.onopen = function (msg) {
+        $('#unavailable-modal').modal('hide');
+    };
+    ws.onclose /*= ws.onerror*/ = function (msg) {
+        $('#unavailable-modal').modal('show');
+    };
+    ws.onmessage = function (msg) {
+        if (msg.data.startsWith("model=")) {
+            refreshModel(msg.data.substring(6));
+        }
+        if (msg.data.startsWith("event=")) {
+            refreshEvent(msg.data.substring(6));
+        }
+    };
+
+
+    /* UI Bt actions */
+    $("#btnAddChildGenerate").click(function () {
+        var currentNode = model.findNodesByID(nodeName);
+        var paasType = model.findTypeDefinitionsByID("PJavaSENode");
+        if (!paasType) {
+            alert("TypeDefinition PaasNode not found please add it to the platform ")
+        }
+        if (!currentNode) {
+            alert("TypeDefinition PaasNode not found please add it to the platform ")
+        }
+        if (currentNode != undefined && paasType != undefined) {
+            var newChildNode = factory.createContainerNode();
+            newChildNode.name = "node" + Math.floor((Math.random() * 1000) + 1);
+            newChildNode.typeDefinition = paasType;
+            currentNode.addHosts(newChildNode);
+            model.addNodes(newChildNode);
+            synchModel();
+        }
+    });
+
+    $("#submitAddChild").click(function () {
+//        try {
+        var currentNode = model.findNodesByID(nodeName);
+        var paasType = model.findTypeDefinitionsByID("PJavaSENode");
+        if (!paasType) {
+            alert("TypeDefinition PaasNode not found please add it to the platform ")
+        }
+        if (!currentNode) {
+            alert("TypeDefinition PaasNode not found please add it to the platform ")
+        }
+        if (currentNode != undefined && paasType != undefined) {
+            var newChildNode = factory.createContainerNode();
+            newChildNode.typeDefinition = paasType;
+
+            var name = jQuery("#nameInput").get(0).value;
+            newChildNode.name = name;
+
+            currentNode.addHosts(newChildNode);
+            model.addNodes(newChildNode);
+
+            var dictionary = factory.createDictionary();
+            var dictionaryType = paasType.dictionaryType;
+
+            var dictionaryTypeAttributes = dictionaryType.attributes;
+            newChildNode.dictionary = dictionary;
+
+
+            jQuery(".control-group").each(function (index, e) {
+                if (e.id !== "nameControlGroup") {
+                    var id = e.id.substring(0, e.id.length - "ControlGroup".length);
+                    // looking for the dictionaryAttribute into the dictionaryType that correspond to this current attribute
+                    var dictionaryAttribute;
+                    for (var i = 0; i < dictionaryTypeAttributes.size(); i++) {
+                        dictionaryAttribute = dictionaryTypeAttributes.get(i);
+                        if (dictionaryAttribute.name === id) {
+                            break;
+                        }
+                    }
+                    if (dictionaryAttribute != null && dictionaryAttribute != undefined) {
+                        var inputElement = jQuery("#" + id + "Input");
+                        var valueInput = inputElement.get(0);
+                        if (valueInput !== null && valueInput !== undefined) {
+                            var value;
+                            if (valueInput.tagName == "INPUT") {
+                                value = valueInput.value;
+                            } else if (valueInput.tagName == "SELECT") {
+                                var nodeType = inputElement.get(0);
+                                var selectedIndex = nodeType.selectedIndex;
+                                value = nodeType.options[selectedIndex].value;
+                            }
+                            if (value != null && value != undefined) {
+                                var dictionaryValue = factory.createDictionaryValue();
+                                dictionaryValue.value = value;
+                                dictionaryValue.attribute = dictionaryAttribute;
+                                dictionary.addValues(dictionaryValue);
+                            }
+                        }
+                    }
+
+                }
+            });
+            // to close the modal window
+            $("#closeButton").trigger("click");
+            synchModel();
+    }
+        /*} catch (e) {
+            console.log(e.message);
+
+        }*/
+    });
+});
+</script>
+
+<div class="container-fluid">
+    <div class="row-fluid">
+        <a class="btn btn-primary" id="btnAddChildGenerate" title="Create a child with a random name and the default properties">Add default
+            child</a>
+        <a class="btn btn-primary" id="btnAddChild" data-toggle="modal" data-target="#add-modal"
+           title="Create a child specifying the name and the properties">Add child</a>
+
+        <div class="row-fluid">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <td>child node name</td>
+                    <td>ip</td>
+                    <td>action(s)</td>
+                </tr>
+                </thead>
+                <tbody id="nodeList">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="modal hide fade" id="add-modal">
+            <!-- class hide : is used to hide the modal when the page is loaded -->
+            <div class="modal-header">
+                <a id="closeButton" class="close" data-dismiss="modal">&times;</a>
+
+                <h3>Add Child</h3>
+            </div>
+            <div class="modal-body form-horizontal" style="max-height: 600px;">
+                <div class="control-group" id="nameControlGroup">
+                    <label class="control-label mandatory" id="nameLabel">name</label>
+
+                    <div class="controls" id="nameControls"><input id="nameInput"></div>
+                </div>
+
+                <div class="control-group" id="coreLogLevelControlGroup">
+                    <label class="control-label" id="coreLogLevelLabel">coreLogLevel</label>
+
+                    <div class="controls" id="coreLogLevelControls">
+                        <select id="coreLogLevelInput">
+                            <option value="ERROR">ERROR</option>
+                            <option value="WARN">WARN</option>
+                            <option value="INFO" selected>INFO</option>
+                            <option value="DEBUG">DEBUG</option>
+                            <option value="FINE">FINE</option>
+                        </select></div>
+                </div>
+                <div class="control-group" id="logLevelControlGroup">
+                    <label class="control-label" id="logLevelLabel">logLevel</label>
+
+                    <div class="controls" id="logLevelControls"><select id="logLevelInput">
+                        <option value="ERROR">ERROR</option>
+                        <option value="WARN">WARN</option>
+                        <option value="INFO" selected>INFO</option>
+                        <option value="DEBUG">DEBUG</option>
+                        <option value="FINE">FINE</option>
+                    </select></div>
+                </div>
+                <div class="control-group" id="WALLCLOCKTIMEControlGroup">
+                    <label class="control-label" id="WALLCLOCKTIMELabel">WALLCLOCKTIME</label>
+
+                    <div class="controls" id="WALLCLOCKTIMEControls"><input id="WALLCLOCKTIMEInput"></div>
+                </div>
+                <div class="control-group" id="RAMControlGroup">
+                    <label class="control-label" id="RAMLabel">RAM</label>
+
+                    <div class="controls" id="RAMControls"><input id="RAMInput"></div>
+                </div>
+                <div class="control-group" id="DISK_SIZEControlGroup">
+                    <label class="control-label" id="DISK_SIZELabel">DISK_SIZE</label>
+
+                    <div class="controls" id="DISK_SIZEControls"><input id="DISK_SIZEInput"></div>
+                </div>
+                <div class="control-group" id="CPU_COREControlGroup">
+                    <label class="control-label" id="CPU_CORELabel">CPU_CORE</label>
+
+                    <div class="controls" id="CPU_COREControls"><input id="CPU_COREInput"></div>
+                </div>
+                <div class="control-group" id="ARCHControlGroup">
+                    <label class="control-label" id="ARCHLabel">ARCH</label>
+
+                    <div class="controls" id="ARCHControls"><input id="ARCHInput"></div>
+                </div>
+
+
+                <div class="control-group" id="JVMARGSControlGroup">
+                    <label class="control-label" id="JVMARGSLabel">JVMARGS</label>
+
+                    <div class="controls" id="JVMARGSControls"><input id="JVMARGSInput"></div>
+                </div>
+                <div class="control-group" id="CPU_FREQUENCYControlGroup">
+                    <label class="control-label" id="CPU_FREQUENCYLabel">CPU_FREQUENCY</label>
+
+                    <div class="controls" id="CPU_FREQUENCYControls"><input id="CPU_FREQUENCYInput"></div>
+                </div>
+                <div class="control-group" id="OSControlGroup">
+                    <label class="control-label" id="OSLabel">OS</label>
+
+                    <div class="controls" id="OSControls"><input id="OSInput"></div>
+                </div>
+                <div style="text-align:center"><a id="submitAddChild" class="btn">Submit</a><br/></div>
+            </div>
+        </div>
+        <div class="modal hide fade" id="unavailable-modal" data-backdrop="static">
+            <!-- class hide : is used to hide the modal when the page is loaded -->
+            <div class="modal-header">
+                <h3>Unavailable service.<br/>Please wait reconnection ...</h3>
+            </div>
+
+        </div>
+        <div id="waitingMessage">
+            <p>Processing request ... please wait ... </p>
+
+            <div class="progress progress-striped">
+                <div class="bar" style="width: 30%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

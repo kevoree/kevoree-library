@@ -1,8 +1,5 @@
 package org.kevoree.library.defaultNodeTypes.command
 
-import org.kevoree.*
-import org.kevoree.api.PrimitiveCommand
-import org.kevoree.api.BootstrapService
 import org.kevoree.library.defaultNodeTypes.ModelRegistry
 
 /**

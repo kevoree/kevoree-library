@@ -1,9 +1,6 @@
 package org.kevoree.library.defaultNodeTypes.command
 
-import org.kevoree.DeployUnit
 import java.util.Random
-import org.kevoree.log.Log
-import org.kevoree.api.PrimitiveCommand
 import org.kevoree.library.defaultNodeTypes.ModelRegistry
 
 /**

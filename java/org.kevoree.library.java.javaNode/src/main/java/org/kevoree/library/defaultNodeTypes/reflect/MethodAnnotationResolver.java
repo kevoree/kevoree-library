@@ -46,7 +46,7 @@ public class MethodAnnotationResolver {
                 }
             }
         }
-        if(baseClazz.getSuperclass() != null){
+        if (baseClazz.getSuperclass() != null) {
             met = resolve(annotationClass, baseClazz.getSuperclass());
             if (met != null) {
                 return met;

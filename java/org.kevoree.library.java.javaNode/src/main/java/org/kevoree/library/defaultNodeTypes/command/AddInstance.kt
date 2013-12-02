@@ -1,17 +1,9 @@
 package org.kevoree.library.defaultNodeTypes.command
 
-import org.kevoree.Instance
-import org.kevoree.api.PrimitiveCommand
-import org.kevoree.ComponentInstance
-import org.kevoree.Group
-import org.kevoree.Channel
-import org.kevoree.log.Log
 import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
 import org.kevoree.library.defaultNodeTypes.wrapper.GroupWrapper
 import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
-import org.kevoree.ContainerNode
 import org.kevoree.library.defaultNodeTypes.wrapper.NodeWrapper
-import org.kevoree.api.BootstrapService
 import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
 import org.kevoree.library.defaultNodeTypes.ModelRegistry
 
@@ -74,7 +66,7 @@ class AddInstance(val c: Instance, val nodeName: String, val registry: ModelRegi
         try {
             val newBeanInstance = bs.createInstance(c)
             var newBeanKInstanceWrapper: KInstanceWrapper? = null
-            when(c){
+            when(c) {
                 is ComponentInstance -> {
                     newBeanKInstanceWrapper = ComponentWrapper(newBeanInstance!!, nodeName, c.name!!, tg!!, bs)
                     (newBeanKInstanceWrapper as ComponentWrapper).initPorts(c, newBeanInstance)
@@ -89,7 +81,7 @@ class AddInstance(val c: Instance, val nodeName: String, val registry: ModelRegi
                     newBeanKInstanceWrapper = NodeWrapper(c, c.path()!!, tg!!, bs)
                 }
                 else -> {
-                    Log.error("Unknow instance type {}",c)
+                    Log.error("Unknow instance type {}", c)
                 }
             }
             registry.register(c, newBeanKInstanceWrapper!!)

@@ -1,13 +1,8 @@
 package org.kevoree.library.defaultNodeTypes.wrapper;
 
-import org.kevoree.ContainerRoot
 import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.library.defaultNodeTypes.reflect.FieldAnnotationResolver
-import org.kevoree.log.Log
 import java.lang.reflect.InvocationTargetException
-import org.kevoree.api.BootstrapService
-import org.kevoree.api.ChannelDispatch
-import org.kevoree.api.ChannelContext
 
 public class ChannelWrapper(override val targetObj: Any, val _nodeName: String, val _name: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
 
@@ -15,7 +10,7 @@ public class ChannelWrapper(override val targetObj: Any, val _nodeName: String, 
 
     {
         context = ChannelWrapperContext()
-        bs.injectService(javaClass<ChannelContext>(),context,targetObj)
+        bs.injectService(javaClass<ChannelContext>(), context, targetObj)
     }
 
     override var isStarted: Boolean = false
