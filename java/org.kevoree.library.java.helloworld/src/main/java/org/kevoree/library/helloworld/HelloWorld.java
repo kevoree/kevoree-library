@@ -1,8 +1,6 @@
 package org.kevoree.library.helloworld;
 
-import org.kevoree.annotation.ComponentType;
-import org.kevoree.annotation.Input;
-import org.kevoree.annotation.Param;
+import org.kevoree.annotation.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,5 +19,14 @@ public class HelloWorld {
     public String hello(Object msg) {
         return "Hello from " + name + " reply to " + msg;
     }
+
+    @Start
+    public void startComponent() {}
+
+    @Stop
+    public void stopComponent() {}
+
+    @Update
+    public void updateComponent() {}
 
 }
