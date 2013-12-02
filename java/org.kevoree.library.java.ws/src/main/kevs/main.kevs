@@ -3,6 +3,7 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.0.0-SNAPSHOT
 
 add node0 : JavaNode
 add sync : WSGroup
+//set sync.port/node0 = "9001"
 attach node0 sync
 
 
