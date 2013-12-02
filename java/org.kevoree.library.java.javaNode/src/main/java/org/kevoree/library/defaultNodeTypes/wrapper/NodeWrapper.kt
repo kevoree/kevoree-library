@@ -9,6 +9,13 @@ import java.io.InputStreamReader
 import java.io.IOException
 import org.kevoree.library.defaultNodeTypes.wrapper.NodeWrapper.Reader
 import java.io.FileOutputStream
+import org.kevoree.api.BootstrapService
+import org.kevoree.resolver.MavenResolver
+import org.kevoree.serializer.JSONModelSerializer
+import org.kevoree.ContainerRoot
+import org.kevoree.ContainerNode
+import org.kevoree.impl.DefaultKevoreeFactory
+import org.kevoree.log.Log
 
 /**
  * Created with IntelliJ IDEA.

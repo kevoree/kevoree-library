@@ -17,6 +17,9 @@ package org.kevoree.library.defaultNodeTypes.wrapper
 import org.kevoree.library.defaultNodeTypes.reflect.FieldAnnotationResolver
 import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import java.lang.reflect.InvocationTargetException
+import org.kevoree.api.BootstrapService
+import org.kevoree.ContainerRoot
+import org.kevoree.log.Log
 
 public class GroupWrapper(override val targetObj: Any, val nodeName: String, val name: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
 

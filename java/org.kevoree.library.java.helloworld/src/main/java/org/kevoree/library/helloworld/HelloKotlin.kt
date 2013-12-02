@@ -1,5 +1,8 @@
 package org.kevoree.library.helloworld
 
+import org.kevoree.annotation.*
+import org.kevoree.api.Port
+
 /**
  * Created with IntelliJ IDEA.
  * User: duke

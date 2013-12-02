@@ -1,5 +1,7 @@
 package org.kevoree.library.defaultNodeTypes.samples
 
+import org.kevoree.annotation.*
+
 /**
  * Created with IntelliJ IDEA.
  * User: duke

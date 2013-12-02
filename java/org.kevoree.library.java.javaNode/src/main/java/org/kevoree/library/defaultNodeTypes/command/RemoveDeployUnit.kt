@@ -2,6 +2,8 @@ package org.kevoree.library.defaultNodeTypes.command
 
 import java.util.Random
 import org.kevoree.library.defaultNodeTypes.ModelRegistry
+import org.kevoree.api.PrimitiveCommand
+import org.kevoree.DeployUnit
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;

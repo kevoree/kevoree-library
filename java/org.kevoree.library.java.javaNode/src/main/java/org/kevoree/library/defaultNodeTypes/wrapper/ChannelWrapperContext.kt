@@ -1,6 +1,8 @@
 package org.kevoree.library.defaultNodeTypes.wrapper
 
 import java.util.HashMap
+import org.kevoree.api.ChannelContext
+import org.kevoree.api.Port
 
 /**
  * Created with IntelliJ IDEA.

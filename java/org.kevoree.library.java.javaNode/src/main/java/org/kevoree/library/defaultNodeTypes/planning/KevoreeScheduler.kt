@@ -2,6 +2,10 @@ package org.kevoree.library.defaultNodeTypes.planning
 
 import java.util.HashMap
 import java.util.ArrayList
+import org.kevoreeadaptation.KevoreeAdaptationFactory
+import org.kevoreeadaptation.AdaptationModel
+import org.kevoreeadaptation.AdaptationPrimitive
+import org.kevoreeadaptation.ParallelStep
 
 /**
  * Created by IntelliJ IDEA.

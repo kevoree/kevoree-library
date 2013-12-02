@@ -83,6 +83,7 @@
 
     <modules>
         <module>java</module>
+        <module>cloud</module>
     </modules>
 
     <repositories>

@@ -3,6 +3,11 @@ package org.kevoree.library.defaultNodeTypes.wrapper;
 import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.library.defaultNodeTypes.reflect.FieldAnnotationResolver
 import java.lang.reflect.InvocationTargetException
+import org.kevoree.api.BootstrapService
+import org.kevoree.api.ChannelContext
+import org.kevoree.api.ChannelDispatch
+import org.kevoree.ContainerRoot
+import org.kevoree.log.Log
 
 public class ChannelWrapper(override val targetObj: Any, val _nodeName: String, val _name: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
 

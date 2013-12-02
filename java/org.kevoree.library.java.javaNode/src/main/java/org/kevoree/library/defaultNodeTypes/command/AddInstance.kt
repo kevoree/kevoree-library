@@ -6,6 +6,14 @@ import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
 import org.kevoree.library.defaultNodeTypes.wrapper.NodeWrapper
 import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
 import org.kevoree.library.defaultNodeTypes.ModelRegistry
+import org.kevoree.Instance
+import org.kevoree.api.BootstrapService
+import org.kevoree.api.PrimitiveCommand
+import org.kevoree.log.Log
+import org.kevoree.ContainerNode
+import org.kevoree.Channel
+import org.kevoree.Group
+import org.kevoree.ComponentInstance
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;

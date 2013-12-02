@@ -3,6 +3,10 @@ package org.kevoree.library.defaultNodeTypes.command
 import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
 import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
 import org.kevoree.library.defaultNodeTypes.ModelRegistry
+import org.kevoree.MBinding
+import org.kevoree.api.PrimitiveCommand
+import org.kevoree.ComponentInstance
+import org.kevoree.log.Log
 
 class AddBindingCommand(val c: MBinding, val nodeName: String, val registry: ModelRegistry) : PrimitiveCommand {
 
