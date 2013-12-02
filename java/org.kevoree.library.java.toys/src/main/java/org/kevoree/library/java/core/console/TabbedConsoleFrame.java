@@ -22,20 +22,20 @@ import java.util.concurrent.Semaphore;
 public class TabbedConsoleFrame {
 
     private static TabbedConsoleFrame INSTANCE = null;
-    //private static Semaphore initSema = new Semaphore(1);
+    private static Semaphore initSema = new Semaphore(1);
 
 
     public synchronized static TabbedConsoleFrame getInstance() {
-        /*try {
+        try {
             initSema.acquire();
+            if (INSTANCE == null) {
+                INSTANCE = new TabbedConsoleFrame();
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             initSema.release();
-        }*/
-            if (INSTANCE == null) {
-                INSTANCE = new TabbedConsoleFrame();
-            }
+        }
         return INSTANCE;
     }
 

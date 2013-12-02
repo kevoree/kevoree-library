@@ -7,7 +7,10 @@ import org.kevoree.library.java.core.console.ConsoleFrame;
 import org.kevoree.library.java.core.console.ConsolePanel;
 import org.kevoree.library.java.core.console.TabbedConsoleFrame;
 
+import javax.swing.*;
+
 /**
+ * Offers a Graphical frame where input text is displayed and where text can also be typed in.
  * Created with IntelliJ IDEA.
  * User: gregory.nain
  * Date: 02/12/2013
@@ -33,15 +36,16 @@ public class ToyConsole {
     @Start
     public void startConsole() {
         thisConsole = new ConsolePanel(this);
-        // frame.setTitle(getName() + "@@@" + getNodeName());
-        //  frame.setVisible(true);
-        thisConsole.appendSystem("/***** CONSOLE INITIALIZED  ********/ ");
-        thisConsole.appendSystem("//DEBUG " + cmpContext.getInstanceName() + "@" + cmpContext.getNodeName() + ":" + this.toString() + ":" + cmpContext.hashCode());
+        thisConsole.appendSystem("/***** CONSOLE READY ******/ ");
         if(showInTab) {
             TabbedConsoleFrame.getInstance().addTab(thisConsole, cmpContext.getInstanceName() + "@" + cmpContext.getNodeName() + ":" + this.toString());
         } else {
-            standaloneFrame = new ConsoleFrame(cmpContext.getInstanceName() + "@" + cmpContext.getNodeName());
-            standaloneFrame.init(thisConsole);
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    standaloneFrame = new ConsoleFrame(cmpContext.getInstanceName() + "@" + cmpContext.getNodeName());
+                    standaloneFrame.init(thisConsole);
+                }
+            });
         }
     }
 
@@ -70,8 +74,12 @@ public class ToyConsole {
         } else {
             if(standaloneFrame == null) {
                 TabbedConsoleFrame.getInstance().releaseTab(cmpContext.getInstanceName() + "@" + cmpContext.getNodeName() + ":" + this.toString());
-                standaloneFrame = new ConsoleFrame(cmpContext.getInstanceName() + "@" + cmpContext.getNodeName());
-                standaloneFrame.init(thisConsole);
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        standaloneFrame = new ConsoleFrame(cmpContext.getInstanceName() + "@" + cmpContext.getNodeName());
+                        standaloneFrame.init(thisConsole);
+                    }
+                });
             }
         }
     }

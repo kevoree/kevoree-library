@@ -19,15 +19,21 @@ add node0.ConsoleB : ToyConsole
 set node0.ConsoleB.showInTab = "true"
 
 //Creates channels
-add aToB : SyncBroadcast
-add bToA : SyncBroadcast
+//add aToB : SyncBroadcast
+//add bToA : SyncBroadcast
+//add aToB : DelayBufferedBroadcast
+//add bToA : DelayBufferedBroadcast
+add aToB : SizeBufferedBroadcast
+add bToA : SizeBufferedBroadcast
+
+
 
 //Creates a GreenRedStatus
-add node0.ConsoleAUnread : ToyStatusGreenRed
+add node0.ConsoleAUnread : ToyOnOffStatusDisplay
 set node0.ConsoleAUnread.initialState = "false"
 
 //Creates a GreenRedStatus
-add node0.ConsoleBUnread : ToyStatusGreenRed
+add node0.ConsoleBUnread : ToyOnOffStatusDisplay
 set node0.ConsoleBUnread.initialState = "false"
 
 //Connect the ports

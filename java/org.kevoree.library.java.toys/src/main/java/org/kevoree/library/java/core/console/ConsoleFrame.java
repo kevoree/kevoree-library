@@ -27,10 +27,12 @@ public class ConsoleFrame extends JFrame {
     }
 
 
-    public void init(JPanel p) {
+    public void init(final JPanel p) {
+
         setContentPane(p);
         pack();
         setVisible(true);
+
     }
 
 
