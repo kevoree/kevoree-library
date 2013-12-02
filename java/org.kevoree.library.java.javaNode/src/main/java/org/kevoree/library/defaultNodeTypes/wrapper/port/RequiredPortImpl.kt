@@ -1,8 +1,8 @@
 package org.kevoree.library.defaultNodeTypes.wrapper.port
 
+import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
 import org.kevoree.api.Port
 import org.kevoree.api.Callback
-import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
 import org.kevoree.log.Log
 
 /**

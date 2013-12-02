@@ -1,6 +1,5 @@
 package org.kevoree.library.defaultNodeTypes.samples;
 
-import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.GroupType;
 import org.kevoree.annotation.Start;
 import org.kevoree.annotation.Stop;

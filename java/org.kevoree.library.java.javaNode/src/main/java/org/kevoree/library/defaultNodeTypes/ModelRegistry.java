@@ -23,11 +23,11 @@ public class ModelRegistry {
         registry.put(elem.path(), obj);
     }
 
-    public void drop(KMFContainer elem){
+    public void drop(KMFContainer elem) {
         registry.remove(elem.path());
     }
 
-    public void clear(){
+    public void clear() {
         registry.clear();
     }
 

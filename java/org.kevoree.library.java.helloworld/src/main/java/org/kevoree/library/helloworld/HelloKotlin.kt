@@ -1,9 +1,6 @@
 package org.kevoree.library.helloworld
 
-import org.kevoree.annotation.ComponentType
-import org.kevoree.annotation.Param
-import org.kevoree.annotation.Input
-import org.kevoree.annotation.Output
+import org.kevoree.annotation.*
 import org.kevoree.api.Port
 import org.kevoree.annotation.Library
 import org.kevoree.annotation.Start

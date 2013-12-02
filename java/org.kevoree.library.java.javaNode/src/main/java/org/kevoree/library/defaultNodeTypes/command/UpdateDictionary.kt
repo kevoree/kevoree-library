@@ -1,11 +1,11 @@
 package org.kevoree.library.defaultNodeTypes.command
 
-import org.kevoree.ContainerRoot
+import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
+import org.kevoree.library.defaultNodeTypes.ModelRegistry
 import org.kevoree.Instance
 import org.kevoree.api.PrimitiveCommand
-import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
+import org.kevoree.ContainerRoot
 import org.kevoree.log.Log
-import org.kevoree.library.defaultNodeTypes.ModelRegistry
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;

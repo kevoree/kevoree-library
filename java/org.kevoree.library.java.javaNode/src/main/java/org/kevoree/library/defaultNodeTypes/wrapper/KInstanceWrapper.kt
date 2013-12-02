@@ -1,11 +1,11 @@
 package org.kevoree.library.defaultNodeTypes.wrapper
 
-import org.kevoree.ContainerRoot
-import org.kevoree.Instance
 import java.lang.reflect.InvocationTargetException
-import org.kevoree.log.Log
 import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
+import org.kevoree.ContainerRoot
 import org.kevoree.api.BootstrapService
+import org.kevoree.Instance
+import org.kevoree.log.Log
 
 /**
  * Created with IntelliJ IDEA.

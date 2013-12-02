@@ -1,9 +1,9 @@
 package org.kevoree.library.defaultNodeTypes.command
 
+import org.kevoree.library.defaultNodeTypes.ModelRegistry
 import org.kevoree.DeployUnit
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.log.Log
-import org.kevoree.library.defaultNodeTypes.ModelRegistry
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
