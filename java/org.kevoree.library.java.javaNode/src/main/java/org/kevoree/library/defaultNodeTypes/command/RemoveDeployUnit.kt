@@ -4,6 +4,7 @@ import java.util.Random
 import org.kevoree.library.defaultNodeTypes.ModelRegistry
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.DeployUnit
+import org.kevoree.log.Log
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
