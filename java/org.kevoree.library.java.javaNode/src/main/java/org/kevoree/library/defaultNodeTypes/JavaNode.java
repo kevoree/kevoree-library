@@ -33,7 +33,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @KevoreeInject
     public BootstrapService bootstrapService = null;
 
-    @Param(optional = false)
+    @Param(optional = false, defaultValue = "false")
     public Boolean debug;
 
     @Start

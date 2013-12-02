@@ -12,6 +12,9 @@ attach node0 sync
 bind node0.hw1.output chan0
 bind node0.hw1.input chan0
 
-add node0.child1 : JavaNode
+//add node0.child1 : JavaNode
 
+
+
+add node0.hw2 : HelloWorld
 

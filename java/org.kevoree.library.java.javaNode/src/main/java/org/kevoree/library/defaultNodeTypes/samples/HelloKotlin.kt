@@ -10,6 +10,9 @@ import org.kevoree.annotation.*
  */
 
 public ComponentType class HelloKotlin {
+
+    Param val s : String = "init"
+
     Start fun start() {
         println("SayHello")
     }

@@ -27,8 +27,8 @@ public class WSGroup extends WebSocketServer {
     @KevoreeInject
     public ModelService modelService;
 
-    @Param(optional = true, fragmentDependent = true)
-    Integer port = 9000;
+    @Param(optional = true, fragmentDependent = true, defaultValue = "9000")
+    Integer port;
     private WSGroup server = null;
 
     public WSGroup() throws UnknownHostException {
