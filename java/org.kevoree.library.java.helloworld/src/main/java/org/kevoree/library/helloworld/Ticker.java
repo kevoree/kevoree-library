@@ -13,7 +13,7 @@ import org.kevoree.api.Callback;
 public class Ticker implements Runnable {
 
     @Param
-    Long time = 3000l;
+    Long period = 3000l;
 
     private Thread t = null;
 
@@ -35,7 +35,7 @@ public class Ticker implements Runnable {
     public void run() {
         try {
             while (true) {
-                Thread.sleep(time);
+                Thread.sleep(period);
                 tick.call(System.currentTimeMillis(), new Callback() {
                     @Override
                     public void run(Object result) {
