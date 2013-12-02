@@ -3,3 +3,12 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:3.0.0-S
 include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:3.0.0-SNAPSHOT
 
 add node0 : JavaNode
+add node0.h1 : HelloJava
+add node0.h2 : HelloJava
+
+add node0.ticker : Ticker
+add hub : SyncBroadcast
+
+bind node0.h1.hello hub
+bind node0.h2.hello hub
+bind node0.ticker.tick hub
