@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta charset="utf-8"/>
-    <title>Kevoree Model viewer</title>
+    <title>Kevoree Cloud Web Admin</title>
     <script src="lib/reconnecting-websocket.min.js"></script>
     <script src="lib/jquery.js"></script>
     <script src="lib/bootstrap.min.js"></script>
@@ -85,8 +85,8 @@ $(function () {
 
                 var childName = this.id.substring("remove".length);
 
-                bootbox.confirm("Are you sure to wants to destroy "+childName+" ?", function(result) {
-                    if(result ==true){
+                bootbox.confirm("Are you sure to wants to destroy " + childName + " ?", function (result) {
+                    if (result == true) {
                         var currentNode = model.findNodesByID(nodeName);
                         var currentChildNode = currentNode.findHostsByID(childName);
                         currentNode.removeHosts(currentChildNode);
@@ -174,121 +174,128 @@ $(function () {
     /* UI Bt actions */
     $("#btnAddChildGenerate").click(function () {
         var currentNode = model.findNodesByID(nodeName);
-        var paasType = model.findTypeDefinitionsByID("PJavaSENode");
-        if (!paasType) {
-            alert("TypeDefinition PaasNode not found please add it to the platform ")
+        var nodeType = null;
+        model.typeDefinitions.array.forEach(function (elem) {
+            if (elem.name == "JavaNode") {
+                nodeType = elem;
+            }
+        });
+        if (!nodeType) {
+            alert("TypeDefinition JavaNode not found please add it to the platform ")
         }
-        if (!currentNode) {
-            alert("TypeDefinition PaasNode not found please add it to the platform ")
-        }
-        if (currentNode != undefined && paasType != undefined) {
+        if (currentNode != undefined && nodeType !== null) {
             var newChildNode = factory.createContainerNode();
             newChildNode.name = "node" + Math.floor((Math.random() * 1000) + 1);
-            newChildNode.typeDefinition = paasType;
+            newChildNode.typeDefinition = nodeType;
             currentNode.addHosts(newChildNode);
             model.addNodes(newChildNode);
             synchModel();
         }
     });
 
-    $("#submitAddChild").click(function () {
-//        try {
-        var currentNode = model.findNodesByID(nodeName);
-        var paasType = model.findTypeDefinitionsByID("PJavaSENode");
-        if (!paasType) {
-            alert("TypeDefinition PaasNode not found please add it to the platform ")
-        }
-        if (!currentNode) {
-            alert("TypeDefinition PaasNode not found please add it to the platform ")
-        }
-        if (currentNode != undefined && paasType != undefined) {
-            var newChildNode = factory.createContainerNode();
-            newChildNode.typeDefinition = paasType;
+    /*
+     $("#submitAddChild").click(function () {
+     var currentNode = model.findNodesByID(nodeName);
+     var paasType = model.findTypeDefinitionsByID("PJavaSENode");
+     if (!paasType) {
+     alert("TypeDefinition PaasNode not found please add it to the platform ")
+     }
+     if (!currentNode) {
+     alert("TypeDefinition PaasNode not found please add it to the platform ")
+     }
+     if (currentNode != undefined && paasType != undefined) {
+     var newChildNode = factory.createContainerNode();
+     newChildNode.typeDefinition = paasType;
 
-            var name = jQuery("#nameInput").get(0).value;
-            newChildNode.name = name;
+     var name = jQuery("#nameInput").get(0).value;
+     newChildNode.name = name;
 
-            currentNode.addHosts(newChildNode);
-            model.addNodes(newChildNode);
+     currentNode.addHosts(newChildNode);
+     model.addNodes(newChildNode);
 
-            var dictionary = factory.createDictionary();
-            var dictionaryType = paasType.dictionaryType;
+     var dictionary = factory.createDictionary();
+     var dictionaryType = paasType.dictionaryType;
 
-            var dictionaryTypeAttributes = dictionaryType.attributes;
-            newChildNode.dictionary = dictionary;
+     var dictionaryTypeAttributes = dictionaryType.attributes;
+     newChildNode.dictionary = dictionary;
+
+     jQuery(".control-group").each(function (index, e) {
+     if (e.id !== "nameControlGroup") {
+     var id = e.id.substring(0, e.id.length - "ControlGroup".length);
+     // looking for the dictionaryAttribute into the dictionaryType that correspond to this current attribute
+     var dictionaryAttribute;
+     for (var i = 0; i < dictionaryTypeAttributes.size(); i++) {
+     dictionaryAttribute = dictionaryTypeAttributes.get(i);
+     if (dictionaryAttribute.name === id) {
+     break;
+     }
+     }
+     if (dictionaryAttribute != null && dictionaryAttribute != undefined) {
+     var inputElement = jQuery("#" + id + "Input");
+     var valueInput = inputElement.get(0);
+     if (valueInput !== null && valueInput !== undefined) {
+     var value;
+     if (valueInput.tagName == "INPUT") {
+     value = valueInput.value;
+     } else if (valueInput.tagName == "SELECT") {
+     var nodeType = inputElement.get(0);
+     var selectedIndex = nodeType.selectedIndex;
+     value = nodeType.options[selectedIndex].value;
+     }
+     if (value != null && value != undefined) {
+     var dictionaryValue = factory.createDictionaryValue();
+     dictionaryValue.value = value;
+     dictionaryValue.attribute = dictionaryAttribute;
+     dictionary.addValues(dictionaryValue);
+     }
+     }
+     }
+
+     }
+     });
+     // to close the modal window
+     $("#closeButton").trigger("click");
+     synchModel();
+     }
+     });
+     */
 
 
-            jQuery(".control-group").each(function (index, e) {
-                if (e.id !== "nameControlGroup") {
-                    var id = e.id.substring(0, e.id.length - "ControlGroup".length);
-                    // looking for the dictionaryAttribute into the dictionaryType that correspond to this current attribute
-                    var dictionaryAttribute;
-                    for (var i = 0; i < dictionaryTypeAttributes.size(); i++) {
-                        dictionaryAttribute = dictionaryTypeAttributes.get(i);
-                        if (dictionaryAttribute.name === id) {
-                            break;
-                        }
-                    }
-                    if (dictionaryAttribute != null && dictionaryAttribute != undefined) {
-                        var inputElement = jQuery("#" + id + "Input");
-                        var valueInput = inputElement.get(0);
-                        if (valueInput !== null && valueInput !== undefined) {
-                            var value;
-                            if (valueInput.tagName == "INPUT") {
-                                value = valueInput.value;
-                            } else if (valueInput.tagName == "SELECT") {
-                                var nodeType = inputElement.get(0);
-                                var selectedIndex = nodeType.selectedIndex;
-                                value = nodeType.options[selectedIndex].value;
-                            }
-                            if (value != null && value != undefined) {
-                                var dictionaryValue = factory.createDictionaryValue();
-                                dictionaryValue.value = value;
-                                dictionaryValue.attribute = dictionaryAttribute;
-                                dictionary.addValues(dictionaryValue);
-                            }
-                        }
-                    }
-
-                }
-            });
-            // to close the modal window
-            $("#closeButton").trigger("click");
-            synchModel();
-    }
-        /*} catch (e) {
-            console.log(e.message);
-
-        }*/
-    });
 });
 </script>
 
 <div class="container-fluid">
+
     <div class="row-fluid">
-        <a class="btn btn-primary" id="btnAddChildGenerate" title="Create a child with a random name and the default properties">Add default
+        <a class="btn btn-primary" id="btnAddChildGenerate"
+           title="Create a child with a random name and the default properties">Add default
             child</a>
-        <a class="btn btn-primary" id="btnAddChild" data-toggle="modal" data-target="#add-modal"
-           title="Create a child specifying the name and the properties">Add child</a>
+    </div>
 
-        <div class="row-fluid">
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <td>child node name</td>
-                    <td>ip</td>
-                    <td>action(s)</td>
-                </tr>
-                </thead>
-                <tbody id="nodeList">
-                </tbody>
-            </table>
-        </div>
+    <div class="row-fluid">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <td>child node name</td>
+                <td>ip</td>
+                <td>action(s)</td>
+            </tr>
+            </thead>
+            <tbody id="nodeList">
+            </tbody>
+        </table>
+    </div>
 
-        <div class="modal hide fade" id="add-modal">
-            <!-- class hide : is used to hide the modal when the page is loaded -->
-            <div class="modal-header">
-                <a id="closeButton" class="close" data-dismiss="modal">&times;</a>
+    <!--
+<div class="row-fluid">
+
+<a class="btn btn-primary" id="btnAddChild" data-toggle="modal" data-target="#add-modal"
+ title="Create a child specifying the name and the properties">Add child</a>
+
+
+<div class="modal hide fade" id="add-modal">
+  <div class="modal-header">
+      <a id="closeButton" class="close" data-dismiss="modal">&times;</a>
 
                 <h3>Add Child</h3>
             </div>
@@ -367,21 +374,23 @@ $(function () {
                 <div style="text-align:center"><a id="submitAddChild" class="btn">Submit</a><br/></div>
             </div>
         </div>
-        <div class="modal hide fade" id="unavailable-modal" data-backdrop="static">
-            <!-- class hide : is used to hide the modal when the page is loaded -->
-            <div class="modal-header">
-                <h3>Unavailable service.<br/>Please wait reconnection ...</h3>
-            </div>
+            -->
 
+    <div class="modal hide fade" id="unavailable-modal" data-backdrop="static">
+        <!-- class hide : is used to hide the modal when the page is loaded -->
+        <div class="modal-header">
+            <h3>Unavailable service.<br/>Please wait reconnection ...</h3>
         </div>
-        <div id="waitingMessage">
-            <p>Processing request ... please wait ... </p>
 
-            <div class="progress progress-striped">
-                <div class="bar" style="width: 30%;"></div>
-            </div>
+    </div>
+    <div id="waitingMessage">
+        <p>Processing request ... please wait ... </p>
+
+        <div class="progress progress-striped">
+            <div class="bar" style="width: 30%;"></div>
         </div>
     </div>
+</div>
 </div>
 </body>
 </html>
