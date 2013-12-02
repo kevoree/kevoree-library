@@ -18,6 +18,7 @@
     <modules>
         <module>org.kevoree.library.java.javaNode</module>
         <module>org.kevoree.library.java.channels</module>
+        <module>org.kevoree.library.java.toys</module>
         <module>org.kevoree.library.java.helloworld</module>
         <module>org.kevoree.library.java.ws</module>
     </modules>
@@ -27,6 +28,11 @@
             <groupId>org.kevoree</groupId>
             <artifactId>org.kevoree.annotation.api</artifactId>
             <version>${kevoree.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree.log</groupId>
+            <artifactId>org.kevoree.log</artifactId>
+            <version>1</version>
         </dependency>
     </dependencies>
 
