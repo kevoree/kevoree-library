@@ -13,6 +13,9 @@ class AddBindingCommand(val c: MBinding, val nodeName: String, val registry: Mod
     override fun undo() {
         RemoveBindingCommand(c, nodeName, registry).execute()
     }
+
+
+
     override fun execute(): Boolean {
         val kevoreeChannelFound = registry.lookup(c.hub!!)
         val kevoreeComponentFound = registry.lookup(c.port!!.eContainer() as ComponentInstance)
@@ -29,7 +32,8 @@ class AddBindingCommand(val c: MBinding, val nodeName: String, val registry: Mod
                 return true
             }
             if(foundHostedPort != null){
-                kevoreeChannelFound.context.portsBinded.put(portName, foundHostedPort)
+                var component = (c.port!!.eContainer() as ComponentInstance)
+                kevoreeChannelFound.context.portsBinded.put("$component/$portName", foundHostedPort)
                 return true
             }
             return false

@@ -7,7 +7,7 @@ add node0.h1 : HelloJava
 add node0.h2 : HelloJava
 
 add node0.ticker : Ticker
-add hub : AsyncBroadcast
+add hub : SyncBroadcast
 
 bind node0.h1.hello hub
 bind node0.h2.hello hub

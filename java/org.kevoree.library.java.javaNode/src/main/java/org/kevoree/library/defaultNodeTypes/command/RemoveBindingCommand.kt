@@ -48,7 +48,8 @@ class RemoveBindingCommand(val c: MBinding, val nodeName: String, val registry: 
                     return true
                 }
                 if(foundHostedPort != null){
-                    kevoreeChannelFound.context.portsBinded.remove(portName)
+                    var component = (c.port!!.eContainer() as ComponentInstance)
+                    kevoreeChannelFound.context.portsBinded.remove("$component/$portName")
                     return true
                 }
                 return false
