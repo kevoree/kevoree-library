@@ -169,10 +169,10 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                                         }
                                     }
                                     if(!stillUsed && registry.lookup(oldChannel!!) != null){
-                                        if(!elementAlreadyProcessed.contains(TupleObjPrim(channel!!, JavaPrimitive.RemoveInstance))){
-                                            adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, channel, targetModel))
-                                            elementAlreadyProcessed.add(TupleObjPrim(channel, JavaPrimitive.RemoveInstance))
-                                            elementAlreadyProcessed.add(TupleObjPrim(channel, JavaPrimitive.StopInstance))
+                                        if(!elementAlreadyProcessed.contains(TupleObjPrim(oldChannel!!, JavaPrimitive.RemoveInstance))){
+                                            adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, oldChannel, targetModel))
+                                            elementAlreadyProcessed.add(TupleObjPrim(oldChannel!!, JavaPrimitive.RemoveInstance))
+                                            elementAlreadyProcessed.add(TupleObjPrim(oldChannel!!, JavaPrimitive.StopInstance))
                                         }
                                     }
                                     adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveBinding, binding, targetModel))
