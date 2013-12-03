@@ -25,7 +25,7 @@ class RemoveInstance(val wrapperFactory: WrapperFactory, val c: Instance, val no
     override fun undo() {
         try {
             AddInstance(wrapperFactory, c, nodeName, registry, bs).execute()
-            UpdateDictionary(c, nodeName, registry,bs).execute()
+            UpdateDictionary(c, nodeName, registry, bs).execute()
         } catch(e: Exception) {
             //
         }
