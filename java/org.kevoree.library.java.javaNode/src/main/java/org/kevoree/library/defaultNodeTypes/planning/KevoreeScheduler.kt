@@ -6,6 +6,8 @@ import org.kevoreeadaptation.KevoreeAdaptationFactory
 import org.kevoreeadaptation.AdaptationModel
 import org.kevoreeadaptation.AdaptationPrimitive
 import org.kevoreeadaptation.ParallelStep
+import org.kevoreeadaptation.Step
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,7 +25,7 @@ trait KevoreeScheduler {
             adaptationModelFactory = org.kevoreeadaptation.impl.DefaultKevoreeAdaptationFactory()
             val classedAdaptations = classify(adaptionModel.adaptations)
             adaptionModel.orderedPrimitiveSet = createStep(classedAdaptations.get(JavaPrimitive.AddDeployUnit.name()))
-            var currentStep = adaptionModel.orderedPrimitiveSet
+            var currentStep : Step? = adaptionModel.orderedPrimitiveSet
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.LinkDeployUnit.name()))
             currentStep = currentStep!!.nextStep
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.AddInstance.name()))
