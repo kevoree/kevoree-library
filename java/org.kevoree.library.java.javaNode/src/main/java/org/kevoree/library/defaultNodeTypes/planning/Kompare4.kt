@@ -140,6 +140,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                         }
                     }
                     "bindings" -> {
+
                         if(!(targetModel.findByPath(trace.srcPath) is Channel)){
                             when(trace) {
 
@@ -155,7 +156,10 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                                     }
                                 }
                                 is ModelRemoveTrace -> {
-                                    val binding = targetModel.findByPath(trace.objPath) as? org.kevoree.MBinding
+
+                                    println(trace)
+
+                                    val binding = currentModel.findByPath(trace.objPath) as? org.kevoree.MBinding
                                     val previousBinding = currentModel.findByPath(trace.objPath) as? org.kevoree.MBinding
                                     val channel = binding?.hub
                                     var oldChannel = previousBinding?.hub
@@ -168,6 +172,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                                             }
                                         }
                                     }
+
                                     if(!stillUsed && registry.lookup(oldChannel!!) != null){
                                         if(!elementAlreadyProcessed.contains(TupleObjPrim(oldChannel!!, JavaPrimitive.RemoveInstance))){
                                             adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, oldChannel, targetModel))
