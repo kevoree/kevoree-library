@@ -64,28 +64,33 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
     private val modelSaver = JSONModelSerializer()
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
-        var platformJar = mavenResolver.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + DefaultKevoreeFactory().getVersion(), Arrays.asList("http://repo1.maven.org/maven2"));
-        if(platformJar == null){
-            Log.error("Can't download Kevoree platform, abording starting node")
-            return false
+        if(!isStarted){
+            var platformJar = mavenResolver.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + DefaultKevoreeFactory().getVersion(), Arrays.asList("http://repo1.maven.org/maven2"));
+            if(platformJar == null){
+                Log.error("Can't download Kevoree platform, abording starting node")
+                return false
+            }
+            Log.info("Fork platform using {}", platformJar!!.getAbsolutePath())
+            val tempFile = File.createTempFile("bootModel" + modelElement.name, ".json")
+            var tempIO = FileOutputStream(tempFile)
+            modelSaver.serializeToStream(tmodel, tempIO)
+            tempIO.close()
+            tempIO.flush()
+            process = Runtime.getRuntime().exec(array(getJava(), "-Dnode.bootstrap=" + tempFile.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath()))
+            readerOUTthread = Thread(Reader(process!!.getInputStream()!!, modelElement.name!!, false))
+            readerERRthread = Thread(Reader(process!!.getErrorStream()!!, modelElement.name!!, true))
+            readerOUTthread!!.start()
+            readerERRthread!!.start()
         }
-        Log.info("Fork platform using {}", platformJar!!.getAbsolutePath())
-        val tempFile = File.createTempFile("bootModel" + modelElement.name, ".json")
-        var tempIO = FileOutputStream(tempFile)
-        modelSaver.serializeToStream(tmodel, tempIO)
-        tempIO.close()
-        tempIO.flush()
-        process = Runtime.getRuntime().exec(array(getJava(), "-Dnode.bootstrap=" + tempFile.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath()))
-        readerOUTthread = Thread(Reader(process!!.getInputStream()!!, modelElement.name!!, false))
-        readerERRthread = Thread(Reader(process!!.getErrorStream()!!, modelElement.name!!, true))
-        readerOUTthread!!.start()
-        readerERRthread!!.start()
         return true
     }
     override fun kInstanceStop(tmodel: ContainerRoot): Boolean {
-        process?.destroy()
-        readerOUTthread?.stop()
-        readerERRthread?.stop()
+        if(isStarted){
+            process?.destroy()
+            readerOUTthread?.stop()
+            readerERRthread?.stop()
+            isStarted = false
+        }
         return true
     }
 

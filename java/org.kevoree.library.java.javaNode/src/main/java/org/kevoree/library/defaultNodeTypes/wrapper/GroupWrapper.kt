@@ -64,7 +64,7 @@ public class GroupWrapper(val modelElement: Group,override val targetObj: Any, v
                 return false
             }
         } else {
-            return false
+            return true
         }
     }
 

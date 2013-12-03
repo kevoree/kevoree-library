@@ -95,8 +95,7 @@ public class ComponentWrapper(val modelElement: ComponentInstance, override val 
                 return false
             }
         } else {
-            Log.error("Already stopped")
-            return false
+            return true
         }
     }
 

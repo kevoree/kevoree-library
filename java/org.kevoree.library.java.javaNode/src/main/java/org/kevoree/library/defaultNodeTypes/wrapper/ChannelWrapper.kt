@@ -62,7 +62,7 @@ public class ChannelWrapper(val modelElement: Channel, override val targetObj: A
                 return false
             }
         } else {
-            return false
+            return true
         }
     }
 
