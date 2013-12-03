@@ -42,7 +42,7 @@ public class ComponentWrapper(val modelElement: ComponentInstance, override val 
             requiredPorts.put(requiredPort.portTypeRef!!.name!!, portWrapper)
         }
         for(providedPort in modelElement.provided){
-            var portWrapper = ProvidedPortImpl(targetObj, providedPort.portTypeRef!!.name!!, providedPort.path()!!)
+            var portWrapper = ProvidedPortImpl(targetObj, providedPort.portTypeRef!!.name!!, providedPort.path()!!,this)
             providedPorts.put(providedPort.portTypeRef!!.name!!, portWrapper)
         }
     }

@@ -5,6 +5,7 @@ import org.kevoree.api.Callback
 import java.lang.reflect.Method
 import org.kevoree.log.Log
 import org.kevoree.annotation.Input
+import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,7 +14,7 @@ import org.kevoree.annotation.Input
  * Time: 11:52
  */
 
-class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String) : Port {
+class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, val componentWrapper: ComponentWrapper) : Port {
     override fun call(payload: Any?) {
         call(payload, null)
     }
@@ -42,13 +43,15 @@ class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String) :
 
     override fun call(payload: Any?, callback: Callback?) {
         try {
-            var result: Any? = null
-            if(parameter){
-                result = targetMethod?.invoke(targetObj, payload)
-            } else {
-                result = targetMethod?.invoke(targetObj)
+            if(componentWrapper.isStarted){
+                var result: Any? = null
+                if(parameter){
+                    result = targetMethod?.invoke(targetObj, payload)
+                } else {
+                    result = targetMethod?.invoke(targetObj)
+                }
+                callback?.run(result)
             }
-            callback?.run(result)
         } catch (e: Throwable){
             Log.error("This is really bad, exception during port call...", e)
         }
