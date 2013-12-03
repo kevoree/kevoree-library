@@ -11,6 +11,7 @@ import org.kevoree.api.handler.ModelListener;
 import org.kevoree.library.defaultNodeTypes.command.*;
 import org.kevoree.library.defaultNodeTypes.planning.JavaPrimitive;
 import org.kevoree.library.defaultNodeTypes.planning.KevoreeKompareBean;
+import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
 import org.kevoree.log.Log;
 import org.kevoree.modeling.api.KMFContainer;
 import org.kevoreeadaptation.AdaptationModel;
@@ -36,6 +37,8 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Param(optional = false, defaultValue = "false")
     public Boolean debug;
 
+    WrapperFactory wrapperFactory = null;
+
     @Start
     @Override
     public void startNode() {
@@ -45,8 +48,13 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
         modelService.registerModelListener(this);
         kompareBean = new KevoreeKompareBean(modelRegistry);
         updateNode();
-
+        wrapperFactory = createWrapperFactory(modelService.getNodeName());
     }
+
+    protected WrapperFactory createWrapperFactory(String nodeName) {
+        return new WrapperFactory(nodeName);
+    }
+
 
     @Stop
     @Override
@@ -101,10 +109,10 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
             return res;
         }
         if (pTypeName.equals(JavaPrimitive.AddInstance.name())) {
-            return new AddInstance((Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService);
+            return new AddInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService);
         }
         if (pTypeName.equals(JavaPrimitive.RemoveInstance.name())) {
-            return new RemoveInstance((Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService);
+            return new RemoveInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService);
         }
         return null;
     }
@@ -141,18 +149,5 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Override
     public void postRollback(ContainerRoot containerRoot, ContainerRoot containerRoot1) {
         Log.warn("JavaSENode update aborted in {} ms", (System.currentTimeMillis() - preTime) + "");
-        try {
-            /*
-            File preModel = File.createTempFile("pre" + System.currentTimeMillis(), "pre");
-            File afterModel = File.createTempFile("post" + System.currentTimeMillis(), "post");
-            KevoreeXmiHelper.instance$.save(preModel.getAbsolutePath(), containerRoot);
-            KevoreeXmiHelper.instance$.save(afterModel.getAbsolutePath(), containerRoot1);
-            Log.error("PreModel->" + preModel.getAbsolutePath());
-            Log.error("PostModel->" + afterModel.getAbsolutePath());
-            */
-        } catch (Exception e) {
-            Log.error("Error while saving debug model", e);
-        }
-
     }
 }

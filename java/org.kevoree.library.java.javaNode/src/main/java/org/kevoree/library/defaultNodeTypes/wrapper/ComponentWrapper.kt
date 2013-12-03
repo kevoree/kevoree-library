@@ -24,14 +24,13 @@ import org.kevoree.library.defaultNodeTypes.wrapper.port.RequiredPortImpl
 import org.kevoree.library.defaultNodeTypes.wrapper.port.ProvidedPortImpl
 import java.util.HashMap
 
-public class ComponentWrapper(override val targetObj: Any, val nodeName: String, val name: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
+public class ComponentWrapper(val modelElement: ComponentInstance, override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
 
     public val providedPorts: HashMap<String, ProvidedPortImpl> = HashMap<String, ProvidedPortImpl>()
     public val requiredPorts: HashMap<String, RequiredPortImpl> = HashMap<String, RequiredPortImpl>()
-
     override var isStarted: Boolean = false
 
-    public fun initPorts(modelElement: ComponentInstance, targetObj: Any) {
+    {
         /* Init Required and Provided Port */
         for(requiredPort in modelElement.required){
             var field = targetObj.javaClass.getDeclaredField(requiredPort.portTypeRef!!.name!!)

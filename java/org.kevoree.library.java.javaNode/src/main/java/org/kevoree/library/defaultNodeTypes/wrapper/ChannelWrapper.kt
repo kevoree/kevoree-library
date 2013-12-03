@@ -8,8 +8,9 @@ import org.kevoree.api.ChannelContext
 import org.kevoree.api.ChannelDispatch
 import org.kevoree.ContainerRoot
 import org.kevoree.log.Log
+import org.kevoree.Channel
 
-public class ChannelWrapper(override val targetObj: Any, val _nodeName: String, val _name: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
+public class ChannelWrapper(val modelElement: Channel, override val targetObj: Any, val _nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
 
     val context: ChannelWrapperContext
 
@@ -41,7 +42,7 @@ public class ChannelWrapper(override val targetObj: Any, val _nodeName: String, 
                 return false
             }
         } else {
-            Log.error("Try to start the channel {} while it is already start", _name)
+            Log.error("Try to start the channel {} while it is already start", modelElement.name)
             return false
         }
     }

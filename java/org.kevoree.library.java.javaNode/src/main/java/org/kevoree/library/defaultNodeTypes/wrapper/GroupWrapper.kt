@@ -20,8 +20,9 @@ import java.lang.reflect.InvocationTargetException
 import org.kevoree.api.BootstrapService
 import org.kevoree.ContainerRoot
 import org.kevoree.log.Log
+import org.kevoree.Group
 
-public class GroupWrapper(override val targetObj: Any, val nodeName: String, val name: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
+public class GroupWrapper(val modelElement: Group,override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
 
     override var isStarted: Boolean = false
     override val resolver = MethodAnnotationResolver(targetObj.javaClass);

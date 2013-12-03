@@ -1,0 +1,5 @@
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:3.0.0-SNAPSHOT
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:3.0.0-SNAPSHOT
+
+add node0 : LXCNode
+add node0.child : JavaNode
