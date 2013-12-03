@@ -12,7 +12,7 @@ import org.kevoree.api.Callback;
 @ComponentType
 public class Ticker implements Runnable {
 
-    @Param
+    @Param(defaultValue = "3000")
     Long period = 3000l;
 
     private Thread t = null;

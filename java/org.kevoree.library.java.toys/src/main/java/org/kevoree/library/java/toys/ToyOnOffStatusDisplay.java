@@ -18,7 +18,7 @@ import javax.swing.*;
 @Library(name="Java :: Toys")
 public class ToyOnOffStatusDisplay {
 
-    @Param
+    @Param(defaultValue = "false")
     protected Boolean initialState = false;
 
     @KevoreeInject
