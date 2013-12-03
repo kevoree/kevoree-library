@@ -8,6 +8,7 @@ import org.kevoree.annotation.*;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.loader.JSONModelLoader;
+import org.kevoree.log.Log;
 import org.kevoree.serializer.JSONModelSerializer;
 
 import java.io.IOException;
@@ -44,12 +45,20 @@ public class WSGroup extends WebSocketServer {
         server = new WSGroup(port);
         server.modelService = modelService;
         server.start();
+        Log.info("WSGroup listen on " + port);
     }
 
     @Stop
     public void stopWSGroup() throws IOException, InterruptedException {
         server.stop();
     }
+
+    @Update
+    public void updateWSGroup() throws IOException, InterruptedException {
+        stopWSGroup();
+        startWSGroup();
+    }
+
 
     @Override
     public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake) {
