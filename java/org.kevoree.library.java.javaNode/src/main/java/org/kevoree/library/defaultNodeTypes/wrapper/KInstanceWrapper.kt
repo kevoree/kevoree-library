@@ -46,4 +46,13 @@ public trait KInstanceWrapper {
             return false
         }
     }
+
+    fun create(){
+
+    }
+
+    fun destroy(){
+
+    }
+
 }

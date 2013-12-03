@@ -5,6 +5,7 @@ import org.kevoree.Instance
 import org.kevoree.api.BootstrapService
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory
+import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -32,6 +33,10 @@ class RemoveInstance(val wrapperFactory: WrapperFactory, val c: Instance, val no
 
     override fun execute(): Boolean {
         try {
+            var previousWrapper = registry.lookup(c)
+            if(c is KInstanceWrapper){
+                c.destroy()
+            }
             registry.drop(c)
             return true
         } catch(e: Exception){

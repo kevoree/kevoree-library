@@ -156,9 +156,6 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                                     }
                                 }
                                 is ModelRemoveTrace -> {
-
-                                    println(trace)
-
                                     val binding = currentModel.findByPath(trace.objPath) as? org.kevoree.MBinding
                                     val previousBinding = currentModel.findByPath(trace.objPath) as? org.kevoree.MBinding
                                     val channel = binding?.hub
