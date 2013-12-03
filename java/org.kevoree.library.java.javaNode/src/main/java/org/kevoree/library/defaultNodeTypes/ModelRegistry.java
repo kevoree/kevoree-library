@@ -23,6 +23,10 @@ public class ModelRegistry {
         registry.put(elem.path(), obj);
     }
 
+    public void registerFromPath(String path, Object obj) {
+        registry.put(path, obj);
+    }
+
     public void drop(KMFContainer elem) {
         registry.remove(elem.path());
     }

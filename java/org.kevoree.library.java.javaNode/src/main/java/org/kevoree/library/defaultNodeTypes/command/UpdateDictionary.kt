@@ -6,6 +6,8 @@ import org.kevoree.Instance
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.ContainerRoot
 import org.kevoree.log.Log
+import java.lang.reflect.InvocationTargetException
+import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -21,20 +23,38 @@ import org.kevoree.log.Log
  * limitations under the License.
  */
 
-class UpdateDictionary(val c: Instance, val nodeName: String, val registry: ModelRegistry) : PrimitiveCommand {
+class UpdateDictionary(val c: Instance, val nodeName: String, val registry: ModelRegistry, val bs: org.kevoree.api.BootstrapService) : PrimitiveCommand {
 
     override fun execute(): Boolean {
         val reffound = registry.lookup(c)
-        if(reffound != null && reffound is KInstanceWrapper){
-            val iact = reffound as KInstanceWrapper
-            val previousCL = Thread.currentThread().getContextClassLoader()
-            Thread.currentThread().setContextClassLoader(iact.javaClass.getClassLoader())
-            iact.kUpdateDictionary(c.typeDefinition!!.eContainer() as ContainerRoot, c)
-            Thread.currentThread().setContextClassLoader(previousCL)
+        if(reffound != null){
+            if(reffound is KInstanceWrapper){
+                val iact = reffound as KInstanceWrapper
+                val previousCL = Thread.currentThread().getContextClassLoader()
+                Thread.currentThread().setContextClassLoader(iact.javaClass.getClassLoader())
+                iact.kUpdateDictionary(c.typeDefinition!!.eContainer() as ContainerRoot, c)
+                Thread.currentThread().setContextClassLoader(previousCL)
+            } else {
+                //case node type
+                try {
+                    bs.injectDictionary(c, reffound)
+                    val resolver = MethodAnnotationResolver(reffound.javaClass)
+                    val met = resolver.resolve(javaClass<org.kevoree.annotation.Update>())
+                    met?.invoke(reffound)
+                    return true
+                } catch(e: InvocationTargetException){
+                    Log.error("Kevoree NodeType Instance Update Error !", e.getCause())
+                    return false
+                } catch(e: Exception) {
+                    Log.error("Kevoree NodeType Instance Update Error !", e)
+                    return false
+                }
+            }
+            return true
         } else {
+            Log.error("Can update dictionary of " + c.name)
             return false
         }
-        return true
     }
 
     override fun undo() {

@@ -12,11 +12,19 @@ open class KevoreeKompareBean(registry: ModelRegistry) : Kompare4(registry), Kev
         val afterPlan = schedule(adaptationModel, nodeName)
         return afterPlan
     }
-
+        /*
     private fun transformPrimitives(adaptationModel: AdaptationModel, actualModel: ContainerRoot): AdaptationModel {
         //TRANSFORME UPDATE
         for(adaptation in adaptationModel.adaptations){
             when(adaptation.primitiveType) {
+
+                JavaPrimitive.RemoveInstance.name() -> {
+                    val rcmd = adaptationModelFactory.createAdaptationPrimitive()
+                    rcmd.primitiveType = JavaPrimitive.StopInstance.name()
+                    rcmd.ref = adaptation.ref!!
+                    adaptationModel.addAdaptations(rcmd)
+                }
+
                 JavaPrimitive.UpdateBinding.name() -> {
                     val rcmd = adaptationModelFactory.createAdaptationPrimitive()
                     rcmd.primitiveType = JavaPrimitive.RemoveBinding.name()
@@ -62,6 +70,6 @@ open class KevoreeKompareBean(registry: ModelRegistry) : Kompare4(registry), Kev
             }
         }
         return adaptationModel;
-    }
+    }   */
 
 }

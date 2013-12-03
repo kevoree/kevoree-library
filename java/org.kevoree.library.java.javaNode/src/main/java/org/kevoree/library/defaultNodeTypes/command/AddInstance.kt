@@ -68,7 +68,7 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
             val newBeanInstance = bs.createInstance(c)
             var newBeanKInstanceWrapper: KInstanceWrapper? = wrapperFactory.wrap(c, newBeanInstance!!, tg!!, bs)
             registry.register(c, newBeanKInstanceWrapper!!)
-            val sub = UpdateDictionary(c, nodeName, registry)
+            val sub = UpdateDictionary(c, nodeName, registry,bs)
             resultSub = sub.execute()
         } catch(e: Throwable){
             Log.error("Error while adding instance {}", e, c.name)

@@ -6,6 +6,7 @@ import org.kevoree.Instance;
 import org.kevoree.MBinding;
 import org.kevoree.annotation.*;
 import org.kevoree.api.BootstrapService;
+import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.library.defaultNodeTypes.command.*;
@@ -34,6 +35,9 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @KevoreeInject
     public BootstrapService bootstrapService = null;
 
+    @KevoreeInject
+    Context context;
+
     @Param(optional = false, defaultValue = "false")
     public Boolean debug;
 
@@ -49,6 +53,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
         kompareBean = new KevoreeKompareBean(modelRegistry);
         updateNode();
         wrapperFactory = createWrapperFactory(modelService.getNodeName());
+        modelRegistry.registerFromPath(context.getPath(), this);
     }
 
     protected WrapperFactory createWrapperFactory(String nodeName) {
@@ -73,9 +78,6 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Override
     public AdaptationModel plan(ContainerRoot current, ContainerRoot target) {
         KMFContainer elem = target.findNodesByID(modelService.getNodeName());
-        if (modelRegistry.lookup(elem) == null) {
-            modelRegistry.register(elem, this);
-        }
         return kompareBean.plan(current, target, modelService.getNodeName());
     }
 
@@ -84,7 +86,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
         String pTypeName = adaptationPrimitive.getPrimitiveType();
         String nodeName = modelService.getNodeName();
         if (pTypeName.equals(JavaPrimitive.UpdateDictionaryInstance.name())) {
-            return new UpdateDictionary((Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry);
+            return new UpdateDictionary((Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry,bootstrapService);
         }
         if (pTypeName.equals(JavaPrimitive.StartInstance.name())) {
             return new StartStopInstance((Instance) adaptationPrimitive.getRef(), nodeName, true, modelRegistry, bootstrapService);

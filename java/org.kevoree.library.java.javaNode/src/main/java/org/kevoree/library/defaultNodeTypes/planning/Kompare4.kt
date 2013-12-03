@@ -104,6 +104,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                                 is ModelRemoveTrace -> {
                                     val elemToAdd = currentModel.findByPath(trace.objPath)
                                     adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, elemToAdd, targetModel))
+                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.StopInstance, elemToAdd, targetModel))
                                 }
                             }
                         }
@@ -118,6 +119,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                                 is ModelRemoveTrace -> {
                                     val elemToAdd = currentModel.findByPath(trace.objPath)
                                     adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, elemToAdd, targetModel))
+                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.StopInstance, elemToAdd, targetModel))
                                 }
                             }
                         }
@@ -132,6 +134,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                                 is ModelRemoveTrace -> {
                                     val elemToAdd = currentModel.findByPath(trace.objPath)
                                     adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, elemToAdd, targetModel))
+                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.StopInstance, elemToAdd, targetModel))
                                 }
                             }
                         }
@@ -169,6 +172,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                                         if(!elementAlreadyProcessed.contains(TupleObjPrim(channel!!, JavaPrimitive.RemoveInstance))){
                                             adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, channel, targetModel))
                                             elementAlreadyProcessed.add(TupleObjPrim(channel, JavaPrimitive.RemoveInstance))
+                                            elementAlreadyProcessed.add(TupleObjPrim(channel, JavaPrimitive.StopInstance))
                                         }
                                     }
                                     adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveBinding, binding, targetModel))
@@ -202,14 +206,15 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                         }
                     }
                     "value" -> {
-                        if(modelElement is org.kevoree.Dictionary){
+                        if(modelElement is org.kevoree.DictionaryValue){
                             if(!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))){
-                                adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateDictionaryInstance, modelElement, targetModel))
+                                adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateDictionaryInstance, modelElement.eContainer()?.eContainer(), targetModel))
                                 elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))
                             }
                         }
                     }
                     else -> {
+
                     }
                 }
                 processTrace(trace, adaptationModel)
