@@ -6,6 +6,7 @@ import org.kevoree.api.Port;
 import org.kevoree.library.java.core.console.ConsoleFrame;
 import org.kevoree.library.java.core.console.ConsolePanel;
 import org.kevoree.library.java.core.console.TabbedConsoleFrame;
+import org.kevoree.log.Log;
 
 import javax.swing.*;
 
@@ -24,7 +25,7 @@ public class ToyConsole {
     private ConsolePanel thisConsole;
     private ConsoleFrame standaloneFrame;
 
-    @Param
+    @Param(defaultValue = "true")
     protected Boolean showInTab = true;
 
     @Output
@@ -33,16 +34,30 @@ public class ToyConsole {
     @KevoreeInject
     protected Context cmpContext;
 
+    /**
+     * Uniquely identifies the console in tabs panels. Also used as title for the Standalone frame.
+     */
+    private String consoleKey;
+
+    public ToyConsole() {
+        Log.DEBUG();
+    }
+
+
     @Start
     public void startConsole() {
+
+        //Uniquely identifies the console
+        consoleKey = cmpContext.getInstanceName() + "@" + cmpContext.getNodeName();
         thisConsole = new ConsolePanel(this);
         thisConsole.appendSystem("/***** CONSOLE READY ******/ ");
+
         if(showInTab) {
-            TabbedConsoleFrame.getInstance().addTab(thisConsole, cmpContext.getInstanceName() + "@" + cmpContext.getNodeName() + ":" + this.toString());
+            TabbedConsoleFrame.getInstance().addTab(thisConsole, consoleKey);
         } else {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    standaloneFrame = new ConsoleFrame(cmpContext.getInstanceName() + "@" + cmpContext.getNodeName());
+                    standaloneFrame = new ConsoleFrame(consoleKey);
                     standaloneFrame.init(thisConsole);
                 }
             });
@@ -52,7 +67,8 @@ public class ToyConsole {
     @Stop
     public void stop() {
         if(showInTab) {
-            TabbedConsoleFrame.getInstance().releaseTab(cmpContext.getInstanceName() + "@" + cmpContext.getNodeName() + ":" + this.toString());
+            TabbedConsoleFrame.getInstance().releaseTab(consoleKey);
+            Log.debug("Stopped from TAB");
         } else {
             if(standaloneFrame != null) {
                 standaloneFrame.dispose();
@@ -60,6 +76,7 @@ public class ToyConsole {
         }
         standaloneFrame = null;
         thisConsole = null;
+        consoleKey = null;
     }
 
 
@@ -67,16 +84,18 @@ public class ToyConsole {
     public void update() {
         if(showInTab) {
             if(standaloneFrame != null) {
-                TabbedConsoleFrame.getInstance().addTab(thisConsole, cmpContext.getInstanceName() + "@" + cmpContext.getNodeName() + ":" + this.toString());
                 standaloneFrame.dispose();
                 standaloneFrame = null;
+                consoleKey = cmpContext.getInstanceName() + "@" + cmpContext.getNodeName();
+                TabbedConsoleFrame.getInstance().addTab(thisConsole, consoleKey);
             }
         } else {
             if(standaloneFrame == null) {
-                TabbedConsoleFrame.getInstance().releaseTab(cmpContext.getInstanceName() + "@" + cmpContext.getNodeName() + ":" + this.toString());
+                TabbedConsoleFrame.getInstance().releaseTab(consoleKey);
+                consoleKey = cmpContext.getInstanceName() + "@" + cmpContext.getNodeName();
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        standaloneFrame = new ConsoleFrame(cmpContext.getInstanceName() + "@" + cmpContext.getNodeName());
+                        standaloneFrame = new ConsoleFrame(consoleKey);
                         standaloneFrame.init(thisConsole);
                     }
                 });
