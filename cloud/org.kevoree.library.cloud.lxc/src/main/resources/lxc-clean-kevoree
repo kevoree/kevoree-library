@@ -1,0 +1,2 @@
+rm -rf /var/cache/lxc/raring/rootfs-amd64
+lxc-destroy -n baseclonekevoree

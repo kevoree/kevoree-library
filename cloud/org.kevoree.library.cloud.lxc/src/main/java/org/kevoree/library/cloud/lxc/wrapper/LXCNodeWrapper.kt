@@ -17,22 +17,22 @@ class LXCNodeWrapper(val modelElement: ContainerNode,override val targetObj: Any
 
     override var isStarted: Boolean = false
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
+    var lxc : LxcManager =  LxcManager()
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
-
-        System.out.println("Start lxc node ....");
-
-        //TODO non blocking start LXC Child node here
-        return true
+        return  lxc.start_container(modelElement)
     }
     override fun kInstanceStop(tmodel: ContainerRoot): Boolean {
-
-        System.out.println("Stop lxc node ....");
-
-
-        //TODO non blocking stop LXC Child node here
-        return true
+        return   lxc.stop_container(modelElement);
     }
 
+    override fun create(){
+        lxc.create_container(modelElement);
+    }
+
+    override fun destroy()
+    {
+        lxc.destroy_container(modelElement);
+    }
 
 }

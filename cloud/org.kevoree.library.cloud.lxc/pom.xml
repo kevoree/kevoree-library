@@ -17,6 +17,11 @@
             <artifactId>org.kevoree.library.java.javaNode</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.kevoree</groupId>
+            <artifactId>org.kevoree.kevscript</artifactId>
+            <version>${kevoree.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

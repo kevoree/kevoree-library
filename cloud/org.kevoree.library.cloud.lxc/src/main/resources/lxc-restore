@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# jedartois@gmail.com
+
+# What lxc container to clone
+LXC_BASE=""
+# $2 is a path to bind mount e.g. /tmp/foo.
+LXC_BIND=""
+
+usage() {
+    echo "usage: lxc-backup -n name"
+}
+
+help() {
+    usage
+    echo
+    echo "Restore a container"
+    echo
+    echo "Options:"
+    echo "name        : name of the container"
+    echo
+    echo "if a COMMAND is given, then the container will run only as long"
+    echo "as the command runs.  If no COMMAND is given, this command will"
+    echo "wait until the container is shut down"
+}
+
+shortoptions='h:n:'
+longoptions='help,name:'
+
+LXC_RUNNING=0
+
+getopt=$(getopt -o $shortoptions --longoptions  $longoptions -- "$@")
+if [ $? != 0 ]; then
+    usage
+    exit 1;
+fi
+
+eval set -- "$getopt"
+
+while true; do
+    case "$1" in
+        -h|--help)
+            help
+            exit 1
+            ;;
+        -n|--name)
+            shift
+            LXC_NAME=$1
+            shift
+            ;;
+        --)
+            shift
+            break;;
+        *)
+            echo $1
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+
+COMMAND=$@
+COMMAND_LENGTH=$#
+LXC_USER=${LXC_USER:-`id -un`}
+
+
+# validation
+
+if [ -z $LXC_NAME ]; then
+    echo "container must be specified"
+    usage
+    exit 1
+fi
+if [ ! -d var/lib/lxc/$LXC_NAME /usr/share/kevoree/lxc/backup/$LXC_NAME ] ; then
+    echo "no such lxc container $LXC_NAME in backup"
+    exit 1
+fi
+
+
+do_restore()
+{
+    mv /usr/share/kevoree/lxc/backup/$LXC_NAME /var/lib/lxc/
+}
+
+
+do_restore
