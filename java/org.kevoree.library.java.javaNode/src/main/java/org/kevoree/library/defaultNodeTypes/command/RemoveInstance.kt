@@ -33,9 +33,9 @@ class RemoveInstance(val wrapperFactory: WrapperFactory, val c: Instance, val no
 
     override fun execute(): Boolean {
         try {
-            var previousWrapper = registry.lookup(c)
-            if(c is KInstanceWrapper){
-                c.destroy()
+            val previousWrapper = registry.lookup(c)
+            if(previousWrapper is KInstanceWrapper){
+                previousWrapper.destroy()
             }
             registry.drop(c)
             return true
