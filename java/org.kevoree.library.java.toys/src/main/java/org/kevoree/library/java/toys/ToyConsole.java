@@ -40,7 +40,6 @@ public class ToyConsole {
     private String consoleKey;
 
     public ToyConsole() {
-        Log.DEBUG();
     }
 
 
