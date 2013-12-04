@@ -1,0 +1,14 @@
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
+
+add node0 : JavaNode
+add sync : BroadcastGroup
+add external : WSGroup
+add node0.child1 : JavaNode
+attach node0 sync
+attach child1 sync
+attach node0 external
+
+

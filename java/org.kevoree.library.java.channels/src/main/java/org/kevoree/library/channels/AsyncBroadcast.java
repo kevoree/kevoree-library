@@ -41,7 +41,6 @@ public class AsyncBroadcast implements ChannelDispatch {
         executor.submit(new Runnable() {
             @Override
             public void run() {
-                System.out.println("Dispatch to "+channelContext.getLocalPorts().size());
                 for (Port p : channelContext.getLocalPorts()) {
                     p.call(payload, callback);
                 }

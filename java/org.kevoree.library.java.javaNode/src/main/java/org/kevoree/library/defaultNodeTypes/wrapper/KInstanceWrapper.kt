@@ -52,7 +52,6 @@ public trait KInstanceWrapper {
     }
 
     fun destroy(){
-
     }
 
 }

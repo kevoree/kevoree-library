@@ -185,18 +185,23 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                     }
                     "started" -> {
                         if(modelElement is Instance && trace is ModelSetTrace){
-                            if(trace.srcPath == targetNode!!.path()){
-                                //HaraKiri case
+
+                            if(modelElement.eContainer() is ContainerNode && modelElement.eContainer()!!.path() != targetNode!!.path()){
+                               //ignore it, for another node
                             } else {
-                                if (trace.content?.toLowerCase() == "true") {
-                                    if(!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.StartInstance))){
-                                        adaptationModel.addAdaptations(adapt(JavaPrimitive.StartInstance, modelElement, targetModel))
-                                        elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.StartInstance))
-                                    }
+                                if(trace.srcPath == targetNode!!.path()){
+                                    //HaraKiri case
                                 } else {
-                                    if(!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.StopInstance))){
-                                        adaptationModel.addAdaptations(adapt(JavaPrimitive.StopInstance, modelElement, targetModel))
-                                        elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.StopInstance))
+                                    if (trace.content?.toLowerCase() == "true") {
+                                        if(!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.StartInstance))){
+                                            adaptationModel.addAdaptations(adapt(JavaPrimitive.StartInstance, modelElement, targetModel))
+                                            elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.StartInstance))
+                                        }
+                                    } else {
+                                        if(!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.StopInstance))){
+                                            adaptationModel.addAdaptations(adapt(JavaPrimitive.StopInstance, modelElement, targetModel))
+                                            elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.StopInstance))
+                                        }
                                     }
                                 }
                             }

@@ -1,4 +1,4 @@
-package org.kevoree.library.helloworld;
+package org.kevoree.library.java.toys;
 
 import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
