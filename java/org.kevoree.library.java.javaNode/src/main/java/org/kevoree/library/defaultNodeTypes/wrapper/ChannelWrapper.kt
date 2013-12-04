@@ -24,7 +24,9 @@ public class ChannelWrapper(val modelElement: Channel, override val targetObj: A
     private val fieldResolver = FieldAnnotationResolver(targetObj.javaClass);
 
     fun call(payload: Any?, callback: org.kevoree.api.Callback?) {
-        (targetObj as ChannelDispatch).dispatch(payload, callback)
+        if(isStarted){
+            (targetObj as ChannelDispatch).dispatch(payload, callback)
+        }
     }
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
