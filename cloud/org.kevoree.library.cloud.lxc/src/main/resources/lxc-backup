@@ -77,10 +77,6 @@ if [ ! -d /var/lib/lxc/$LXC_NAME ] ; then
     exit 1
 fi
 
-if [ ! -d /usr/share/kevoree ] ; then
-    echo "kevoree watchdog is not configured"
-    exit 1
-fi
 
 
 do_backup()

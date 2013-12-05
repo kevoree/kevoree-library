@@ -35,15 +35,11 @@ public class LxcSupervision implements Runnable {
         this.lxcManager = lxcManager;
     }
 
-
-
-
     @Override
     public void run() {
         ModelCloner cloner = new DefaultModelCloner();
-         DefaultKevoreeFactory factory = new DefaultKevoreeFactory();
+        DefaultKevoreeFactory factory = new DefaultKevoreeFactory();
         ContainerRoot model = lxcHostNode.modelService.getCurrentModel().getModel();
-
 
         List<String> lxNodes = lxcManager.getContainers();
         if (lxNodes.size() > model.getNodes().size()){
@@ -51,7 +47,7 @@ public class LxcSupervision implements Runnable {
             {
                 model = cloner.clone(lxcHostNode.modelService.getCurrentModel().getModel());
                 UUIDModel uuidModel=  lxcHostNode.modelService.getCurrentModel();
-                model = lxcManager.buildModelCurrentLxcState(lxcHostNode.modelService.getNodeName(),model);
+                model = lxcManager.createModelFromSystem(lxcHostNode.modelService.getNodeName(), model);
                 lxcHostNode.modelService.compareAndSwap(model,uuidModel.getUUID(),new UpdateCallback() {
                     @Override
                     public void run(Boolean aBoolean) {

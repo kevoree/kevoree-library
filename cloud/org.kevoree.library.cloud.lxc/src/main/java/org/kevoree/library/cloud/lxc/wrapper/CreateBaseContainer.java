@@ -48,7 +48,7 @@ public class CreateBaseContainer implements Runnable {
 
     @Override
     public void run() {
-
+        Log.info("Lock the model to create Kevoree base Container");
         lxcHostNode.modelService.acquireLock(new LockCallBack() {
             @Override
             public void run(UUID uuid, Boolean locked) {
@@ -64,6 +64,7 @@ public class CreateBaseContainer implements Runnable {
                     e.printStackTrace();
                 }   finally
                 {
+                    Log.info("Unlock the model to create Kevoree base Container");
                     lxcHostNode.modelService.releaseLock(uuid);
                 }
             }

@@ -21,7 +21,7 @@ public class CleanerContainerBackups implements Runnable {
 
     private LXCNode lxcHostNode;
     private LxcManager lxcManager;
-    private final static String backuppath = "/usr/share/kevoree/lxc/backup";   // fix me
+    private final static String backuppath = "/usr/share/kevoree/lxc/backup";   // fix me add param
     private int daysretentions = 30;
 
     public CleanerContainerBackups(LXCNode lxcHostNode, LxcManager lxcManager) {

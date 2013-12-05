@@ -5,6 +5,7 @@ import org.kevoree.ContainerRoot
 import org.kevoree.api.BootstrapService
 import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.ContainerNode
+import org.kevoree.log.Log
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,6 +33,7 @@ class LXCNodeWrapper(val modelElement: ContainerNode,override val targetObj: Any
 
     override fun destroy()
     {
+       Log.info("destroy");
         lxc.destroy_container(modelElement);
     }
 

@@ -40,7 +40,7 @@ public class LXCNode extends JavaNode {
         // schedule the tasks
         executor.schedule(createBaseContainer, 10, TimeUnit.SECONDS);
         executor.scheduleAtFixedRate(cleaner, 1, 1, TimeUnit.DAYS);
-        executor.scheduleAtFixedRate(supervision, 1, 5, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(supervision,5 ,5, TimeUnit.SECONDS);
     }
 
     @Override

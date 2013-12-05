@@ -28,18 +28,9 @@ import java.util.List;
 public class LxcManager {
 
     private DefaultKevoreeFactory defaultKevoreeFactory = new DefaultKevoreeFactory();
-    private String clone_id = "baseclonekevoree";
-    private final int timeout = 50;
 
-    private final static String lxcstart = "lxc-start";
-    private final static String lxcstop = "lxc-stop";
-    // private final static String lxcdestroy = "lxc-destroy";
-    private final static String lxcshutdown = "lxc-shutdown";
-    private final static String lxcclone = "lxc-clone";
-    private final static String lxccreate = "lxc-create";
-    private final static String lxccgroup = "lxc-cgroup";
-    private final static String lxcinfo = "lxc-info";
-    private final static String lxcbackup ="lxc-backup";
+    private String clone_id = "baseclonekevoree";     /// fix me
+
 
     private File watchdogLocalFile = null;
 
@@ -51,45 +42,7 @@ public class LxcManager {
         this.watchdogLocalFile = watchdogLocalFile;
     }
 
-    public static  void setlimitMemory(String id,int limit_in_bytes) throws InterruptedException, IOException
-    {
-        if(id != null && id.length() > 0){
-            Process processcreate = new ProcessBuilder(lxccgroup, "-n", id, "memory.limit_in_bytes", ""+limit_in_bytes).redirectErrorStream(true).start();
-            FileManager.display_message_process(processcreate.getInputStream());
-            processcreate.waitFor();
-        }  else {
-            Log.error("setlimitMemory container id is not set");
-        }
-    }
 
-
-
-    public static  void setCPUAffinity(String id,String cpus) throws InterruptedException, IOException
-    {
-        if(cpus != null && id != null && cpus.length() > 0 && id.length() > 0){
-            //  lxc-cgroup -n node0 300000000           300M
-            Process processcreate = new ProcessBuilder(lxccgroup, "-n", id, "cpuset.cpus", ""+cpus).redirectErrorStream(true).start();
-            FileManager.display_message_process(processcreate.getInputStream());
-            processcreate.waitFor();
-        }  else {
-            Log.error("setCPUAffinity container id is not set");
-        }
-    }
-
-    public static void setlimitCPU(String id,int cpu_shares) throws InterruptedException, IOException
-    {
-        if(id != null && id.length() > 0){
-            if(cpu_shares < 1024){
-                // minimum
-                cpu_shares = 1024;
-            }
-            Process processcreate = new ProcessBuilder(lxccgroup, "-n", id, "cpu.shares", ""+cpu_shares).redirectErrorStream(true).start();
-            FileManager.display_message_process(processcreate.getInputStream());
-            processcreate.waitFor();
-        }  else {
-            Log.error("setlimitCPU container id is not set");
-        }
-    }
 
     public boolean create_container(ContainerNode node) {
         try
@@ -97,7 +50,7 @@ public class LxcManager {
             Log.debug("LxcManager : " + node.getName() + " clone =>" + clone_id);
             if (!getContainers().contains(node.getName())) {
                 Log.debug("Creating container " + node.getName() + " OS " + clone_id);
-                Process processcreate = new ProcessBuilder(lxcclone, "-o", clone_id, "-n", node.getName()).redirectErrorStream(true).start();
+                Process processcreate = new ProcessBuilder(LxcContants.lxcclone, "-o", clone_id, "-n", node.getName()).redirectErrorStream(true).start();
                 FileManager.display_message_process(processcreate.getInputStream());
                 processcreate.waitFor();
             } else {
@@ -113,7 +66,7 @@ public class LxcManager {
     public boolean start_container(ContainerNode node) {
         try {
             Log.debug("Starting container " + node.getName());
-            Process lxcstartprocess = new ProcessBuilder(lxcstart, "-n", node.getName(), "-d").start();
+            Process lxcstartprocess = new ProcessBuilder(LxcContants.lxcstart, "-n", node.getName(), "-d").start();
             FileManager.display_message_process(lxcstartprocess.getInputStream());
             lxcstartprocess.waitFor();
         } catch (Exception e) {
@@ -162,8 +115,14 @@ public class LxcManager {
         return containers;
     }
 
-
-    public ContainerRoot buildModelCurrentLxcState(String nodename,ContainerRoot root) throws Exception {
+    /**
+     * Generate the model of the system
+     * @param nodename
+     * @param root
+     * @return
+     * @throws Exception
+     */
+    public ContainerRoot createModelFromSystem(String nodename, ContainerRoot root) throws Exception {
 
         KevScriptEngine engine = new KevScriptEngine();
         StringBuilder script = new StringBuilder();
@@ -174,7 +133,6 @@ public class LxcManager {
 
                     script.append("add " + nodename + "." + node_child_id+" : JavaNode\n");
                 }
-                //    String ip = LxcManager.getIP(node_child_id);
             }
         }
         engine.execute(script.toString(),root);
@@ -217,8 +175,8 @@ public class LxcManager {
 
     private boolean lxc_stop_container(String id, boolean destroy) {
         try {
-            Log.debug("Stoping container " + id);
-            Process lxcstartprocess = new ProcessBuilder(lxcstop, "-n", id).redirectErrorStream(true).start();
+            Log.info("Stoping container " + id);
+            Process lxcstartprocess = new ProcessBuilder(LxcContants.lxcstop, "-n", id).redirectErrorStream(true).start();
 
             FileManager.display_message_process(lxcstartprocess.getInputStream());
             lxcstartprocess.waitFor();
@@ -228,9 +186,9 @@ public class LxcManager {
         }
         if (destroy) {
             try {
-                Log.debug("Disabling the container " + id);
+                Log.info("Disabling the container " + id);
 
-                Process lxcstartprocess = new ProcessBuilder(lxcbackup, "-n", id).redirectErrorStream(true).start();
+                Process lxcstartprocess = new ProcessBuilder(LxcContants.lxcbackup, "-n", id).redirectErrorStream(true).start();
                 FileManager.display_message_process(lxcstartprocess.getInputStream());
                 lxcstartprocess.waitFor();
 
@@ -255,7 +213,7 @@ public class LxcManager {
     public void createClone() throws IOException, InterruptedException {
         if (!getContainers().contains(clone_id)) {
             Log.info("Creating Kevoree Base Container");
-            Process lxcstartprocess = new ProcessBuilder(lxccreate, "-n", clone_id, "-t", "kevoree").redirectErrorStream(true).start();
+            Process lxcstartprocess = new ProcessBuilder(LxcContants.lxccreate, "-n", clone_id, "-t", "kevoree").redirectErrorStream(true).start();
             FileManager.display_message_process(lxcstartprocess.getInputStream());
             lxcstartprocess.waitFor();
         }
