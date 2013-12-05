@@ -6,8 +6,11 @@ import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
+import org.kevoree.api.handler.UpdateCallback;
+import org.kevoree.cloner.DefaultModelCloner;
 import org.kevoree.kevscript.KevScriptEngine;
 import org.kevoree.log.Log;
+import org.kevoree.modeling.api.ModelCloner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,9 +51,12 @@ public class DummyScaler implements Runnable {
         while (true) {
 
             try {
+                Thread.sleep(5000);
+
 
                 //Collect all instance of NanoServer
-                ContainerRoot model = modelService.getCurrentModel().getModel();
+                ModelCloner cloner = new DefaultModelCloner();
+                ContainerRoot model = cloner.clone(modelService.getCurrentModel().getModel());
 
                 //collect used ports
                 List<String> ports = new ArrayList<String>();
@@ -74,28 +80,44 @@ public class DummyScaler implements Runnable {
                     }
                 }
 
-                KevScriptEngine engine = new KevScriptEngine();
-                //reactions
-                if (ports.size() > target) {
-                    Log.info("To much instance, drop somes");
+                if (ports.size() != target) {
 
-                    for (int i = 0; i < (ports.size() - target); i++) {
-                        engine.execute("delete " + names.get(0), model);
-                        names.remove(names.get(0));
-                    }
-                } else {
-                    for (int i = 0; i < (target - ports.size()); i++) {
-                        Random r = new Random();
-                        Integer basePort = 8010;
-                        while (ports.contains(basePort.toString())) {
-                            basePort++;
+                    KevScriptEngine engine = new KevScriptEngine();
+                    //reactions
+                    if (ports.size() > target) {
+                        Log.info("To much instances, drop some");
+                        while (names.size() > target) {
+                            String toDrop = names.get(0);
+                            names.remove(toDrop);
+                            engine.execute("remove " + context.getNodeName() + "." + toDrop, model);
+                            Log.info("Scaler drop " + toDrop);
                         }
-                        String newName = "backend_" + r.nextInt();
-                        engine.execute("add " + newName + " : NanoBlogServer", model);
-                        engine.execute("set " + context.getNodeName() + "." + newName + " : NanoBlogServer", model);
+                    } else {
+                        while (ports.size() < target) {
+                            Log.info("No enough instances, add some");
+                            Random r = new Random();
+                            Integer basePort = 8010;
+                            while (ports.contains(basePort.toString())) {
+                                basePort++;
+                            }
+                            String newName = "backend_" + Math.abs(r.nextInt());
+                            engine.execute("add " + context.getNodeName() + "." + newName + " : NanoBlogServer", model);
+                            engine.execute("set " + context.getNodeName() + "." + newName + ".http_port = \"" + basePort.toString() + "\"", model);
+                            ports.add(basePort.toString());
+                        }
                     }
+                    Log.info("Nb instances is fine now :-)");
+                    modelService.update(model, new UpdateCallback() {
+                        @Override
+                        public void run(Boolean applied) {
+                            Log.info("Scaler update system");
+                        }
+                    });
+
+                } else {
+                    Log.info("Everything is fine ! nothing to do ...");
                 }
-                Thread.sleep(2000);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
