@@ -2,5 +2,7 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
 include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.web:latest
 
 add node0 : JavaNode
+set node0.debug = "true"
+
 add node0.web : WebFrontend
 
