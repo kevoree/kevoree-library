@@ -65,8 +65,9 @@ trait KevoreeScheduler {
         return result
     }
 
-    public fun createStep(commands: MutableList<AdaptationPrimitive>?): ParallelStep {
-        var currentSteps = adaptationModelFactory.createParallelStep()
+    public fun createStep(commands: MutableList<AdaptationPrimitive>?): Step {
+      //  var currentSteps = adaptationModelFactory.createParallelStep()
+        var currentSteps = adaptationModelFactory.createSequentialStep()
         if(commands != null){
             currentSteps.addAllAdaptations(commands)
         }

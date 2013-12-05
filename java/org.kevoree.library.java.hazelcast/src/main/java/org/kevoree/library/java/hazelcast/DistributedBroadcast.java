@@ -1,5 +1,6 @@
 package org.kevoree.library.java.hazelcast;
 
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.*;
 import org.kevoree.annotation.ChannelType;
@@ -73,7 +74,10 @@ public class DistributedBroadcast implements MessageListener, ChannelDispatch {
     }
 
     //TODO periodic cleanup for TTL
-    private ConcurrentHashMap<UUID, Callback> cache = new ConcurrentHashMap<UUID, Callback>();
+    private ConcurrentLinkedHashMap<UUID, Callback> cache = new ConcurrentLinkedHashMap.Builder<UUID, Callback>().maximumWeightedCapacity(1000).build();
+
+
+    //= new ConcurrentHashMap<UUID, Callback>();
 
     @Override
     public void dispatch(Object payload, Callback callback) {
