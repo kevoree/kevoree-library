@@ -99,9 +99,10 @@ public class HAProxy implements ModelListener {
         HashMap<String, Backend> backends = new HashMap<String, Backend>();
         for (ContainerNode node : model.getNodes()) {
             for (ComponentInstance instance : node.getComponents()) {
-                if (instance.getTypeDefinition().getDictionaryType()!= null
-                        &&instance.getTypeDefinition().getDictionaryType().findAttributesByID("http_port")!=null
-                        && instance.getStarted()) {
+                if (instance.getTypeDefinition().getDictionaryType() != null
+                        && instance.getTypeDefinition().getDictionaryType().findAttributesByID("http_port") != null
+                        && instance.getStarted()
+                        && !instance.getName().equals(context.getInstanceName())) {
 
                     if (!backends.containsKey(instance.getTypeDefinition().getName())) {
                         Backend backend = new Backend();
