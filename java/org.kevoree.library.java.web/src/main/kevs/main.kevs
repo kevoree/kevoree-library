@@ -7,5 +7,5 @@ add node0 : JavaNode
 add sync : WSGroup
 attach node0 sync
 
-add node0.blog : BlogServer2
+add node0.blog : NanoBlogServer
 

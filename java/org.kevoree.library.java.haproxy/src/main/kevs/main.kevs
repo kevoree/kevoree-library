@@ -8,8 +8,8 @@ add sync : WSGroup
 attach node0 sync
 
 add node0.lb : HAProxy
-add node0.srv0 : BlogServer2
-add node0.srv1 : BlogServer2
+add node0.srv0 : NanoBlogServer
+add node0.srv1 : NanoBlogServer
 set node0.srv0.http_port = "8081"
 set node0.srv1.http_port = "8082"
 

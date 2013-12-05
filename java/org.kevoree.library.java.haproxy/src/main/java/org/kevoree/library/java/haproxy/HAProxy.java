@@ -101,7 +101,7 @@ public class HAProxy implements ModelListener {
             for (ComponentInstance instance : node.getComponents()) {
                 if (instance.getTypeDefinition().getDictionaryType()!= null
                         &&instance.getTypeDefinition().getDictionaryType().findAttributesByID("http_port")!=null
-                        && instance.getStarted() == true) {
+                        && instance.getStarted()) {
 
                     if (!backends.containsKey(instance.getTypeDefinition().getName())) {
                         Backend backend = new Backend();
