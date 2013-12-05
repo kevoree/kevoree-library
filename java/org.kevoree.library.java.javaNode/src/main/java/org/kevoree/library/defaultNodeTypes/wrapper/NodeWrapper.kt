@@ -38,9 +38,9 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
             var line: String?;
             try {
                 line = br.readLine()
-                while(line != null){
+                while (line != null) {
                     line = nodeName + "/" + line
-                    if(error){
+                    if (error) {
                         System.err.println(line);
                     } else {
                         System.out.println(line);
@@ -64,17 +64,20 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
     private val modelSaver = JSONModelSerializer()
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
-        if(!isStarted){
+        if (!isStarted) {
             var platformJar = mavenResolver.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + DefaultKevoreeFactory().getVersion(), Arrays.asList("http://repo1.maven.org/maven2"));
-            if(platformJar == null){
+            if (platformJar == null) {
                 Log.error("Can't download Kevoree platform, abording starting node")
                 return false
             }
 
-            var jvmArgsAttribute = modelElement.dictionary!!.findValuesByID("jvmArgs")
-            var jvmArgs = ""
-            if (jvmArgsAttribute != null) {
-                jvmArgs = jvmArgsAttribute.toString()
+
+            var jvmArgs : String? = null
+            if (modelElement.dictionary != null) {
+                var jvmArgsAttribute = modelElement.dictionary!!.findValuesByID("jvmArgs")
+                if (jvmArgsAttribute != null) {
+                    jvmArgs = jvmArgsAttribute.toString()
+                }
             }
 
             Log.info("Fork platform using {}", platformJar!!.getAbsolutePath())
@@ -83,7 +86,11 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
             modelSaver.serializeToStream(tmodel, tempIO)
             tempIO.close()
             tempIO.flush()
-            process = Runtime.getRuntime().exec(array(getJava(), jvmArgs, "-Dnode.bootstrap=" + tempFile.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath()))
+            var execArray = array(getJava(), "-Dnode.bootstrap=" + tempFile.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath())
+            if (jvmArgs != null) {
+                execArray = array(getJava(), jvmArgs!!, "-Dnode.bootstrap=" + tempFile.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath())
+            }
+            process = Runtime.getRuntime().exec(execArray)
             readerOUTthread = Thread(Reader(process!!.getInputStream()!!, modelElement.name!!, false))
             readerERRthread = Thread(Reader(process!!.getErrorStream()!!, modelElement.name!!, true))
             readerOUTthread!!.start()
@@ -92,7 +99,7 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
         return true
     }
     override fun kInstanceStop(tmodel: ContainerRoot): Boolean {
-        if(isStarted){
+        if (isStarted) {
             process?.destroy()
             readerOUTthread?.stop()
             readerERRthread?.stop()

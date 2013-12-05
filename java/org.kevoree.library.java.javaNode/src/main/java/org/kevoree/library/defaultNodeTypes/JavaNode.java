@@ -63,8 +63,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     }
 
     protected WrapperFactory createWrapperFactory(String nodeName) {
-        WrapperFactory wrapper = new WrapperFactory(nodeName);
-        return wrapper;
+        return new WrapperFactory(nodeName);
     }
 
 
