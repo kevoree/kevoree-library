@@ -1,0 +1,7 @@
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.haproxy:latest
+
+add node0 : JavaNode
+
+
+

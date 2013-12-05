@@ -37,6 +37,7 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
 
     var resultSub = false
 
+
     override fun execute(): Boolean {
         var subThread: Thread? = null
         try {
@@ -65,6 +66,10 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
 
     public override fun run() {
         try {
+
+            val kcl = registry.lookup(c.typeDefinition?.deployUnit) as ClassLoader;
+            Thread.currentThread().setContextClassLoader(kcl)
+
             val newBeanInstance = bs.createInstance(c)
             var newBeanKInstanceWrapper: KInstanceWrapper? = wrapperFactory.wrap(c, newBeanInstance!!, tg!!, bs)
             registry.register(c, newBeanKInstanceWrapper!!)
