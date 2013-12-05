@@ -1,0 +1,17 @@
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:3.0.0-SNAPSHOT
+include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:3.0.0-SNAPSHOT
+include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:3.0.0-SNAPSHOT
+include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:3.0.0-SNAPSHOT
+
+
+add node0 : JavaNode
+add node0.ticker : Ticker
+set node0.ticker.period = "500"
+add hub : LoadBalancer
+
+add node0.printer1 : ConsolePrinter
+add node0.printer2 : ConsolePrinter
+
+bind node0.printer1.input hub
+bind node0.printer2.input hub
+bind node0.ticker.tick hub
