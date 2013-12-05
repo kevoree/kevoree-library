@@ -2,11 +2,8 @@ package org.kevoree.library.cloud.lxc.wrapper;
 
 import org.kevoree.ContainerNode;
 import org.kevoree.ContainerRoot;
-
 import org.kevoree.impl.DefaultKevoreeFactory;
-
 import org.kevoree.kevscript.KevScriptEngine;
-import org.kevoree.library.cloud.lxc.LXCNode;
 import org.kevoree.library.cloud.lxc.wrapper.utils.FileManager;
 import org.kevoree.library.cloud.lxc.wrapper.utils.SystemHelper;
 import org.kevoree.log.Log;
@@ -54,7 +51,7 @@ public class LxcManager {
                 FileManager.display_message_process(processcreate.getInputStream());
                 processcreate.waitFor();
             } else {
-                Log.warn("Container {} already exist");
+                Log.warn("Container {} already exists", node.getName());
             }
         } catch (Exception e) {
             Log.error("create_container {} clone =>{}",node.getName(),clone_id, e);

@@ -2,8 +2,8 @@ package org.kevoree.library.cloud.lxc;
 
 import org.kevoree.annotation.NodeType;
 import org.kevoree.annotation.Param;
-import org.kevoree.library.cloud.api.PlatformCloud;
 import org.kevoree.library.cloud.lxc.wrapper.*;
+import org.kevoree.library.defaultNodeTypes.JavaNode;
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 @NodeType
-public class LXCNode extends PlatformCloud {
+public class LXCNode extends JavaNode {
 
     public static final long CREATE_CLONE_TIMEOUT = 180000l;      // todo add dico
     private LxcManager lxcManager  = new LxcManager();
