@@ -12,7 +12,7 @@ import org.kevoree.library.defaultNodeTypes.JavaNode;
  * @author Erwan Daubert
  * @version 1.0
  */
-@NodeType
+//@NodeType
 public abstract class ProxyNode extends JavaNode {
 
     @Param(optional = true)

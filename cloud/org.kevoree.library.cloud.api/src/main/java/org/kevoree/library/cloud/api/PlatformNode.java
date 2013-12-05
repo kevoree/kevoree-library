@@ -11,37 +11,37 @@ import org.kevoree.library.defaultNodeTypes.JavaNode;
  * @author Erwan Daubert
  * @version 1.0
  */
-@NodeType(description = "Represents basic node information (Infrastructure or Platform node)")
-public abstract class PlatformCloud extends JavaNode {
+//@NodeType(description = "Represents basic node information (Infrastructure or Platform node)")
+public interface PlatformNode {
 
     /**
      * Architecture of the node
      */
 
     @Param(optional = true)
-    protected String ARCH;
+    String ARCH = null;
 
     /**
      * Amount of memory (GB, MB, KB is allowed)
      */
     @Param(optional = true)
-    protected String RAM;
+    String RAM = null;
 
     /**
      * number of cores
      */
 
     @Param(optional = true)
-    protected String CPU_CORES;
+    String CPU_CORES = null;
 
     /**
      * Maximum amount of CPU resources
      */
     @Param(optional = true)
-    protected String CPU_SHARES;
+    String CPU_SHARES = null;
     /**
      * the disk size for the node (GB, MB, KB is allowed)
      */
     @Param(optional = true)
-    protected String DISK_SIZE;
+    String DISK_SIZE = null;
 }
