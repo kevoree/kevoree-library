@@ -18,6 +18,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.kevoree.library.cloud</groupId>
+            <artifactId>org.kevoree.library.cloud.api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.kevoree</groupId>
             <artifactId>org.kevoree.kevscript</artifactId>
             <version>${kevoree.version}</version>
