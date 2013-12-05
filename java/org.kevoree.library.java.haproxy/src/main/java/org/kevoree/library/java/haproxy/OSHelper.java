@@ -52,4 +52,13 @@ public class OSHelper {
         return (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS.indexOf("aix") > 0);
     }
 
+    public static boolean is64() {
+        String s = System.getProperty("os.arch");
+        if (s.contains("86") || s.contains("64")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

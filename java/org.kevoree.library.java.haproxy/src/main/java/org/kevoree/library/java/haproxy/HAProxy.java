@@ -52,7 +52,11 @@ public class HAProxy implements ModelListener {
             OSHelper.copy(this.getClass().getClassLoader().getResourceAsStream("mac_haproxy"), executable);
         } else {
             if (OSHelper.isUnix()) {
-                OSHelper.copy(this.getClass().getClassLoader().getResourceAsStream("nux_haproxy"), executable);
+                if(OSHelper.is64()){
+                    OSHelper.copy(this.getClass().getClassLoader().getResourceAsStream("nux_haproxy"), executable);
+                } else {
+                    OSHelper.copy(this.getClass().getClassLoader().getResourceAsStream("nux32_haproxy"), executable);
+                }
             } else {
                 throw new Exception("Unsupported platform");
             }

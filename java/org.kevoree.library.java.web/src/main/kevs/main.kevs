@@ -8,4 +8,5 @@ add sync : WSGroup
 attach node0 sync
 
 add node0.blog : NanoBlogServer
+add node0.scaler : DummyScaler
 
