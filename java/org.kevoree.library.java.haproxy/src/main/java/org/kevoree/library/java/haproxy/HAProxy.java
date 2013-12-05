@@ -99,7 +99,10 @@ public class HAProxy implements ModelListener {
         HashMap<String, Backend> backends = new HashMap<String, Backend>();
         for (ContainerNode node : model.getNodes()) {
             for (ComponentInstance instance : node.getComponents()) {
-                if (instance.getTypeDefinition().getName().toLowerCase().contains("server")) {
+                if (instance.getTypeDefinition().getDictionaryType()!= null
+                        &&instance.getTypeDefinition().getDictionaryType().findAttributesByID("http_port")!=null
+                        && instance.getStarted() == true) {
+
                     if (!backends.containsKey(instance.getTypeDefinition().getName())) {
                         Backend backend = new Backend();
                         backends.put(instance.getTypeDefinition().getName(), backend);
@@ -121,7 +124,6 @@ public class HAProxy implements ModelListener {
             buffer.append(backends.get(firstKey).getName());
             buffer.append("\n");
         }
-
         for (String key : backends.keySet()) {
             buffer.append("\n");
             buffer.append(backends.get(key));
