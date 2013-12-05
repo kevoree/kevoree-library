@@ -70,13 +70,20 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
                 Log.error("Can't download Kevoree platform, abording starting node")
                 return false
             }
+
+            var jvmArgsAttribute = modelElement.dictionary!!.findValuesByID("jvmArgs")
+            var jvmArgs = ""
+            if (jvmArgsAttribute != null) {
+                jvmArgs = jvmArgsAttribute.toString()
+            }
+
             Log.info("Fork platform using {}", platformJar!!.getAbsolutePath())
             val tempFile = File.createTempFile("bootModel" + modelElement.name, ".json")
             var tempIO = FileOutputStream(tempFile)
             modelSaver.serializeToStream(tmodel, tempIO)
             tempIO.close()
             tempIO.flush()
-            process = Runtime.getRuntime().exec(array(getJava(), "-Dnode.bootstrap=" + tempFile.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath()))
+            process = Runtime.getRuntime().exec(array(getJava(), jvmArgs, "-Dnode.bootstrap=" + tempFile.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath()))
             readerOUTthread = Thread(Reader(process!!.getInputStream()!!, modelElement.name!!, false))
             readerERRthread = Thread(Reader(process!!.getErrorStream()!!, modelElement.name!!, true))
             readerOUTthread!!.start()

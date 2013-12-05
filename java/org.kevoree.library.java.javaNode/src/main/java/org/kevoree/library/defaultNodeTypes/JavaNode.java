@@ -38,8 +38,14 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @KevoreeInject
     Context context;
 
-    @Param(optional = false, defaultValue = "false")
+    @Param(optional = true, defaultValue = "false")
     public Boolean debug;
+
+    /**
+     * java VM properties used when this node host some others (can also be used by the watchdog)
+     */
+    @Param(optional = true)
+    public String jvmArgs;
 
     WrapperFactory wrapperFactory = null;
 
@@ -57,7 +63,8 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     }
 
     protected WrapperFactory createWrapperFactory(String nodeName) {
-        return new WrapperFactory(nodeName);
+        WrapperFactory wrapper = new WrapperFactory(nodeName);
+        return wrapper;
     }
 
 
