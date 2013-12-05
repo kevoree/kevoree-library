@@ -41,8 +41,13 @@ public class Backend {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
+        builder.append("backend ");
         builder.append(name);
         builder.append("\n");
+
+        builder.append("mode http\n");
+        builder.append("balance roundrobin\n");
+
         for (Server s : servers) {
             builder.append(s.toString());
             builder.append("\n");

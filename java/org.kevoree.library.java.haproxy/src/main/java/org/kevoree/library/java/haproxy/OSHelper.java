@@ -20,7 +20,7 @@ public class OSHelper {
                 buffer.append("\n");
             }
             br.close();
-            return br.toString();
+            return buffer.toString();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
