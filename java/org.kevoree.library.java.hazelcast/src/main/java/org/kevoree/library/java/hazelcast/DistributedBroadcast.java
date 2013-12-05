@@ -78,7 +78,9 @@ public class DistributedBroadcast implements MessageListener, ChannelDispatch {
     @Override
     public void dispatch(Object payload, Callback callback) {
         Request internalCall = new Request(payload);
-        cache.put(internalCall.getId(), callback);
+        if(callback!= null){
+            cache.put(internalCall.getId(), callback);
+        }
         topic.publish(internalCall);
         for (Port p : channelContext.getLocalPorts()) {
             p.call(payload, callback);
