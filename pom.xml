@@ -11,8 +11,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>0.6.602</kotlin.version>
-        <kevoree.version>3.0.0</kevoree.version>
-        <kcl.version>2</kcl.version>
+        <kevoree.version>3.0.2-SNAPSHOT</kevoree.version>
     </properties>
 
     <organization>

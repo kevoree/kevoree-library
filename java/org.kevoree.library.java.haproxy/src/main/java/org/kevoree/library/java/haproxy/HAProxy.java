@@ -2,6 +2,7 @@ package org.kevoree.library.java.haproxy;
 
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
+import org.kevoree.api.ModelService;
 
 import java.io.File;
 import java.util.HashMap;
@@ -27,6 +28,9 @@ public class HAProxy {
     private Process process;
     private Thread readerOUTthread;
     private Thread readerERRthread;
+
+    @KevoreeInject
+    ModelService modelService;
 
     @Start
     public void start() throws Exception {
