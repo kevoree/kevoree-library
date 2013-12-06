@@ -23,7 +23,7 @@ import org.kevoreeadaptation.AdaptationPrimitive;
  * @author ffouquet
  */
 @NodeType
-@Library(name = "Java")
+@Library(name = "Java :: Nodes")
 public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
 
     protected KevoreeKompareBean kompareBean = null;

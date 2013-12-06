@@ -1,9 +1,6 @@
 package org.kevoree.library.channels;
 
-import org.kevoree.annotation.ChannelType;
-import org.kevoree.annotation.KevoreeInject;
-import org.kevoree.annotation.Start;
-import org.kevoree.annotation.Stop;
+import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
 import org.kevoree.api.ChannelContext;
 import org.kevoree.api.ChannelDispatch;
@@ -19,6 +16,7 @@ import java.util.concurrent.Executors;
  */
 
 @ChannelType
+@Library(name = "Java :: Channels")
 public class LoadBalancer implements ChannelDispatch {
 
     @KevoreeInject

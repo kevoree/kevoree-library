@@ -1,9 +1,6 @@
 package org.kevoree.library.helloworld;
 
-import org.kevoree.annotation.ComponentType;
-import org.kevoree.annotation.Input;
-import org.kevoree.annotation.KevoreeInject;
-import org.kevoree.annotation.Param;
+import org.kevoree.annotation.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,6 +10,7 @@ import org.kevoree.annotation.Param;
  */
 
 @ComponentType
+@Library(name = "Java :: Hello")
 public class HelloJava {
 
     @Param

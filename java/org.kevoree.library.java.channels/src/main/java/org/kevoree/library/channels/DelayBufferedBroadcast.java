@@ -16,6 +16,7 @@ import java.util.concurrent.*;
  * Time: 10:05
  */
 @ChannelType
+@Library(name = "Java :: Channels")
 public class DelayBufferedBroadcast implements ChannelDispatch, Runnable {
 
     class QueuedElement {

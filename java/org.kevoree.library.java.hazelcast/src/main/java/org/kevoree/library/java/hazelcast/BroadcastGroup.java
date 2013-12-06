@@ -3,10 +3,7 @@ package org.kevoree.library.java.hazelcast;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.*;
 import org.kevoree.ContainerRoot;
-import org.kevoree.annotation.GroupType;
-import org.kevoree.annotation.KevoreeInject;
-import org.kevoree.annotation.Start;
-import org.kevoree.annotation.Stop;
+import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
@@ -24,6 +21,7 @@ import org.kevoree.trace.DefaultTraceSequence;
  */
 
 @GroupType
+@Library(name = "Java :: Groups")
 public class BroadcastGroup implements MessageListener, ModelListener {
 
     @KevoreeInject

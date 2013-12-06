@@ -23,6 +23,7 @@ import java.net.UnknownHostException;
  */
 
 @GroupType
+@Library(name = "Java :: Groups")
 public class WSGroup extends WebSocketServer {
 
     @KevoreeInject

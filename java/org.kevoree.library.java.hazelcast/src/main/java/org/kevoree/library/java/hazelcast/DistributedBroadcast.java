@@ -3,10 +3,7 @@ package org.kevoree.library.java.hazelcast;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.*;
-import org.kevoree.annotation.ChannelType;
-import org.kevoree.annotation.KevoreeInject;
-import org.kevoree.annotation.Start;
-import org.kevoree.annotation.Stop;
+import org.kevoree.annotation.*;
 import org.kevoree.api.*;
 import org.kevoree.library.java.hazelcast.message.Request;
 import org.kevoree.library.java.hazelcast.message.Response;
@@ -22,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Time: 11:20
  */
 @ChannelType
+@Library(name = "Java :: Channels")
 public class DistributedBroadcast implements MessageListener, ChannelDispatch {
 
     @KevoreeInject

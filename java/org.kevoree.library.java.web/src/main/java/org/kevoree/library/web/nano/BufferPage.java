@@ -12,6 +12,7 @@ import java.util.Map;
  * Time: 08:09
  */
 @ComponentType
+@Library(name = "Java :: Web")
 public class BufferPage extends NanoHTTPD {
 
     @Param(defaultValue = "8080")

@@ -14,6 +14,7 @@ import java.util.concurrent.*;
  * The size of the buffer can be customized with the bufferSize property.
  */
 @ChannelType
+@Library(name = "Java :: Channels")
 public class SizeBufferedBroadcast implements ChannelDispatch, Runnable {
 
     class QueuedElement {

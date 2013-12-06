@@ -23,6 +23,7 @@ import java.util.HashMap;
  * Time: 18:43
  */
 @ComponentType
+@Library(name = "Java :: Web")
 public class HAProxy implements ModelListener {
 
     @Param
