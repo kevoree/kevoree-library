@@ -45,8 +45,6 @@ public class BufferPage extends NanoHTTPD {
 
     String contentCache = "";
 
-
-
     @Override
     public Response serve(String uri, Method method, Map<String, String> header, Map<String, String> parms, Map<String, String> files) {
         return new Response("<html><script>function timedRefresh(timeoutPeriod) {setTimeout(\"location.reload(true);\",timeoutPeriod);}</script><body onload=\"JavaScript:timedRefresh(1000);\" style=\"background-color:#3498db;color:#fff;\">" + contentCache + "</body></html>");

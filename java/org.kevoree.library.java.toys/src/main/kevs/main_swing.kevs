@@ -1,0 +1,56 @@
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:3.0.0-SNAPSHOT
+include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:3.0.0-SNAPSHOT
+include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:3.0.0-SNAPSHOT
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.0.0-SNAPSHOT
+
+//Creates a node
+add node0 : JavaNode
+
+//Creates a synchronization group and connects the node
+add sync : WSGroup
+attach node0 sync
+
+//Creates a console in a standalone Frame
+add node0.ConsoleA : ToyConsole
+//set node0.ConsoleA.showInTab = "false"
+
+//Creates a console in a tabbed frame
+add node0.ConsoleB : ToyConsole
+set node0.ConsoleB.showInTab = "true"
+
+//Creates channels
+//add aToB : SyncBroadcast
+//add bToA : SyncBroadcast
+//add aToB : DelayBufferedBroadcast
+//add bToA : DelayBufferedBroadcast
+add aToB : SizeBufferedBroadcast
+add bToA : SizeBufferedBroadcast
+
+
+
+//Creates a GreenRedStatus
+add node0.ConsoleAUnread : ToyOnOffStatusDisplay
+set node0.ConsoleAUnread.initialState = "false"
+
+//Creates a GreenRedStatus
+add node0.ConsoleBUnread : ToyOnOffStatusDisplay
+set node0.ConsoleBUnread.initialState = "false"
+
+//Connect the ports
+bind node0.ConsoleA.textEntered aToB
+bind node0.ConsoleB.showText aToB
+bind node0.ConsoleAUnread.off aToB
+bind node0.ConsoleBUnread.on aToB
+
+bind node0.ConsoleB.textEntered bToA
+bind node0.ConsoleA.showText bToA
+bind node0.ConsoleAUnread.on bToA
+bind node0.ConsoleBUnread.off bToA
+
+
+
+
+
+
+
+
