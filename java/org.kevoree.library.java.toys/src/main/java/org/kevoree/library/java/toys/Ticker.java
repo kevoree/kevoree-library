@@ -3,6 +3,8 @@ package org.kevoree.library.java.toys;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
 
+import java.util.Random;
+
 /**
  * Created with IntelliJ IDEA.
  * User: duke
@@ -20,6 +22,11 @@ public class Ticker implements Runnable {
     @Output
     org.kevoree.api.Port tick;
 
+    @Param(optional = true, defaultValue = "false")
+    Boolean random;
+
+    private Random rand = new Random();
+
     @Start
     public void start() {
         t = new Thread(this);
@@ -36,10 +43,16 @@ public class Ticker implements Runnable {
         try {
             while (true) {
                 Thread.sleep(period);
-                tick.call(System.currentTimeMillis(), new Callback() {
+                String value = System.currentTimeMillis() + "";
+                if (random) {
+                    value = rand.nextInt(100) + "";
+                }
+                tick.call(value, new Callback() {
                     @Override
                     public void run(Object result) {
-                        System.out.println(result);
+                        if(result != null){
+                            System.out.println("ticker return : "+result);
+                        }
                     }
                 });
             }
