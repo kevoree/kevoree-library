@@ -265,10 +265,10 @@ public class LxcManager {
         kevoreeTemplate  = kevoreeTemplate.replace("$KEVOREE-VERSION$",version);
 
         kevoreeTemplate = kevoreeTemplate.replace("$KEVOREE-WATCHDOG$",watchdogLocalFile.getAbsolutePath());
+               // FIX ME use lxc-create -f path_template
+        FileManager.writeFile("/usr/lib/lxc/templates/lxc-kevoree",kevoreeTemplate,false);
 
-        FileManager.writeFile("/usr/share/lxc/templates/lxc-kevoree",kevoreeTemplate,false);
-
-        allow_exec("/usr/share/lxc/templates/lxc-kevoree");
+        allow_exec("/usr/lib/lxc/templates/lxc-kevoree");
     }
 
 }

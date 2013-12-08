@@ -16,5 +16,6 @@ public class LxcContants {
     public final static String lxccgroup = "lxc-cgroup";
     public final static String lxcinfo = "lxc-info";
     public final static String lxcbackup ="lxc-backup";
+    public final static String lxcexecute ="lxc-execute";
 
 }

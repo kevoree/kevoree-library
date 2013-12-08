@@ -30,6 +30,7 @@ public class LxcSupervision implements Runnable {
     private LxcManager lxcManager;
     private IPAddressValidator ipvalidator = new IPAddressValidator();
     private boolean starting  = true;
+    ModelCloner cloner = new DefaultModelCloner();
     public LxcSupervision(LXCNode lxcHostNode, LxcManager lxcManager) {
         this.lxcHostNode = lxcHostNode;
         this.lxcManager = lxcManager;
@@ -37,9 +38,11 @@ public class LxcSupervision implements Runnable {
 
     @Override
     public void run() {
-        ModelCloner cloner = new DefaultModelCloner();
+        ContainerRoot model;
+        if(starting){
+
         DefaultKevoreeFactory factory = new DefaultKevoreeFactory();
-        ContainerRoot model = lxcHostNode.modelService.getCurrentModel().getModel();
+        model = lxcHostNode.modelService.getCurrentModel().getModel();
 
         List<String> lxNodes = lxcManager.getContainers();
         if (lxNodes.size() > model.getNodes().size()){
@@ -73,6 +76,8 @@ public class LxcSupervision implements Runnable {
 
             }
 
+        }
+            starting = false;
         }
 
 
