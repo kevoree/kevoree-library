@@ -14,9 +14,17 @@ add hub : DistributedBroadcast
 bind node0.h1.hello hub
 bind node0.ticker.tick hub
 
-set node0.ticker.period = "1000"
+set node0.ticker.period = "5000"
 
 add node0.child1 : JavaNode
 add child1.h2 : HelloJava
 bind child1.h2.hello hub
 
+
+add node0.tconsole : ToyConsole
+bind node0.tconsole.showText hub
+bind node0.tconsole.textEntered hub
+
+add child1.tconsole2 : ToyConsole
+bind child1.tconsole2.showText hub
+bind child1.tconsole2.textEntered hub
