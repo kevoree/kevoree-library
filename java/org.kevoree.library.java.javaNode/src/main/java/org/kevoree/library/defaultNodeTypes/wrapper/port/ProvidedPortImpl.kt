@@ -15,20 +15,32 @@ import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
  */
 
 class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, val componentWrapper: ComponentWrapper) : Port {
-    override fun send(vararg payload: Any?) {
-        call(null, payload)
+    override fun send(payload: Any?) {
+        call(payload, null)
     }
 
-    override fun call(callback: Callback<out Any?>?, vararg payload: Any?) {
+    override fun call(payload: Any?, callback: Callback<out Any?>?) {
         try {
             if (componentWrapper.isStarted) {
                 var result: Any? = null
-                if (parameter) {
-                    result = targetMethod?.invoke(targetObj, payload)
-                } else {
+                if (paramSize == 0) {
                     result = targetMethod?.invoke(targetObj)
+                } else {
+                    if (paramSize == 1) {
+                        result = targetMethod?.invoke(targetObj, payload)
+                    } else {
+                        if (payload is Array<*>) {
+                            if (payload.size == paramSize) {
+                                result = targetMethod?.invoke(targetObj, payload)
+                            } else {
+                                callback?.onError(Exception("Non corresponding parameters, " + paramSize + " expected, found " + payload.size))
+                            }
+                        } else {
+                            callback?.onError(Exception("Non corresponding parameters, " + paramSize + " expected, found : not an array == 1"))
+                        }
+                    }
                 }
-                if(callback!= null){
+                if (callback != null) {
                     CallBackCaller.call(result, callback)
                 }
             }
@@ -42,16 +54,15 @@ class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, v
     }
 
     var targetMethod: Method? = null
-    var parameter = false
+    var paramSize = 0
 
     {
+
         for (method in targetObj.javaClass.getDeclaredMethods()) {
             if (method.getName() == name) {
                 if (method.getAnnotation(javaClass<Input>()) != null) {
                     targetMethod = method;
-                    if (method.getParameterTypes()!!.size == 1) {
-                        parameter = true
-                    }
+                    paramSize = method.getParameterTypes()!!.size
                 }
             }
         }

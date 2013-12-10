@@ -48,7 +48,7 @@ public class SizeBufferedBroadcast implements ChannelDispatch, Runnable {
 
 
     @Override
-    public void dispatch(Object payload, Callback callback) {
+    public void dispatch(final Object payload,final Callback callback) {
         try {
             QueuedElement e = new QueuedElement();
             e.callback = callback;
@@ -68,7 +68,7 @@ public class SizeBufferedBroadcast implements ChannelDispatch, Runnable {
         while(!queue.isEmpty()) {
             QueuedElement e = queue.poll();
             for (Port p : channelContext.getLocalPorts()) {
-                p.call(e.callback,e.payload);
+                p.call(e.payload,e.callback);
             }
         }
     }

@@ -54,7 +54,7 @@ public class DistributedBroadcast implements MessageListener, ChannelDispatch {
             if (payload instanceof Request) {
                 final Request internalCall = (Request) message.getMessageObject();
                 for (Port p : channelContext.getLocalPorts()) {
-                    p.call(new Callback() {
+                    p.call(((Request) payload).getPayload(),new Callback() {
                         @Override
                         public void onSuccess(Object result) {
                             Response response = new Response(internalCall.getId(), result);
@@ -66,10 +66,7 @@ public class DistributedBroadcast implements MessageListener, ChannelDispatch {
                             Response response = new Response(internalCall.getId(), exception);
                             topic.publish(response);
                         }
-                    },((Request) payload).getPayload());
-
-                    System.out.println();
-
+                    });
                 }
             }
             if (payload instanceof Response) {
@@ -105,14 +102,14 @@ public class DistributedBroadcast implements MessageListener, ChannelDispatch {
     //= new ConcurrentHashMap<UUID, Callback>();
 
     @Override
-    public void dispatch(Object payload, Callback callback) {
+    public void dispatch(final Object payload,final Callback callback) {
         Request internalCall = new Request(payload);
         if (callback != null) {
             cache.put(internalCall.getId(), callback);
         }
         topic.publish(internalCall);
         for (Port p : channelContext.getLocalPorts()) {
-            p.call(callback,payload);
+            p.call(payload,callback);
         }
     }
 
