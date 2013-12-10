@@ -13,7 +13,7 @@ import java.util.Random;
  */
 @ComponentType
 @Library(name = "Java :: Toys")
-public class TypedTicker implements Runnable {
+public class TwoValueTicker implements Runnable {
 
     @Param(defaultValue = "3000")
     Long period = 3000l;

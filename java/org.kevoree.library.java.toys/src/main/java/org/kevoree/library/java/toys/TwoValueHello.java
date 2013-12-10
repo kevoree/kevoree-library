@@ -7,7 +7,7 @@ import org.kevoree.annotation.Input;
  * Created by duke on 10/12/2013.
  */
 @ComponentType
-public class TypedConsole {
+public class TwoValueHello {
 
     @Input
     public String input(String p1, String p2) {
