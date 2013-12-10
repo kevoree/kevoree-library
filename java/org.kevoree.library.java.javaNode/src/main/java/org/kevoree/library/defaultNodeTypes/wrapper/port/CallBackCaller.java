@@ -2,6 +2,8 @@ package org.kevoree.library.defaultNodeTypes.wrapper.port;
 
 import org.kevoree.api.Callback;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
@@ -24,6 +26,10 @@ public class CallBackCaller {
                 callback.onError(new Exception("Bad Callback parameter for null"));
             }
         }
+    }
+
+    public static Object callMethod(Method method,Object target,Object params) throws InvocationTargetException, IllegalAccessException {
+       return method.invoke(target,(Object[]) params);
     }
 
 }

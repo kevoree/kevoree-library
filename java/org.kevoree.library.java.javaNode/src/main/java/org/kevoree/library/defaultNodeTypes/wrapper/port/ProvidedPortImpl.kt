@@ -31,7 +31,9 @@ class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, v
                     } else {
                         if (payload is Array<*>) {
                             if (payload.size == paramSize) {
-                                result = targetMethod?.invoke(targetObj, payload)
+                                if (targetMethod != null) {
+                                    result = CallBackCaller.callMethod(targetMethod, targetObj, payload)
+                                }
                             } else {
                                 callback?.onError(Exception("Non corresponding parameters, " + paramSize + " expected, found " + payload.size))
                             }

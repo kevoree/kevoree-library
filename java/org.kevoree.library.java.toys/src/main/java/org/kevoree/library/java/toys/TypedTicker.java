@@ -13,7 +13,7 @@ import java.util.Random;
  */
 @ComponentType
 @Library(name = "Java :: Toys")
-public class Ticker implements Runnable {
+public class TypedTicker implements Runnable {
 
     @Param(defaultValue = "3000")
     Long period = 3000l;
@@ -48,7 +48,8 @@ public class Ticker implements Runnable {
                 if (random) {
                     value = rand.nextInt(100) + "";
                 }
-                tick.call(value, new Callback() {
+                String[] values = {value,period+""};
+                tick.call(values,new Callback() {
                     @Override
                     public void onSuccess(Object result) {
                         if (result != null) {
