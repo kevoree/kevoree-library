@@ -88,6 +88,7 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
                 readerERRthread = Thread(Reader(process!!.getErrorStream()!!, modelElement.name!!, true))
                 readerOUTthread!!.start()
                 readerERRthread!!.start()
+
             }
         }
         return true
