@@ -23,7 +23,7 @@ public class ChannelWrapper(val modelElement: Channel, override val targetObj: A
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
     private val fieldResolver = FieldAnnotationResolver(targetObj.javaClass);
 
-    fun call(payload: Any?, callback: org.kevoree.api.Callback?) {
+    fun call(payload: Any?, callback: org.kevoree.api.Callback<out Any?>?) {
         if(isStarted){
             (targetObj as ChannelDispatch).dispatch(payload, callback)
         }

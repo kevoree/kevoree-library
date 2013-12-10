@@ -9,6 +9,8 @@ import org.kevoree.library.java.hazelcast.message.Request;
 import org.kevoree.library.java.hazelcast.message.Response;
 import org.kevoree.log.Log;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -52,20 +54,45 @@ public class DistributedBroadcast implements MessageListener, ChannelDispatch {
             if (payload instanceof Request) {
                 final Request internalCall = (Request) message.getMessageObject();
                 for (Port p : channelContext.getLocalPorts()) {
-                    p.call(((Request) payload).getPayload(), new Callback() {
+                    p.call(new Callback() {
                         @Override
-                        public void run(Object result) {
+                        public void onSuccess(Object result) {
                             Response response = new Response(internalCall.getId(), result);
                             topic.publish(response);
                         }
-                    });
+
+                        @Override
+                        public void onError(Throwable exception) {
+                            Response response = new Response(internalCall.getId(), exception);
+                            topic.publish(response);
+                        }
+                    },((Request) payload).getPayload());
+
+                    System.out.println();
+
                 }
             }
             if (payload instanceof Response) {
                 Response interalResponse = (Response) message.getMessageObject();
                 Callback correspondingCall = cache.get(interalResponse.getId());
                 if (correspondingCall != null) {
-                    correspondingCall.run(interalResponse.getPayload());
+                    if (interalResponse.getPayload() instanceof Throwable) {
+                        correspondingCall.onError((Throwable) interalResponse.getPayload());
+                    } else {
+                        try {
+                            Type t = correspondingCall.getClass().getGenericInterfaces()[0];
+                            if (t instanceof ParameterizedType) {
+                                ((Class) ((ParameterizedType) t).getActualTypeArguments()[0]).cast(interalResponse.getPayload());
+                            }
+                            correspondingCall.onSuccess(interalResponse.getPayload());
+                        } catch (Exception e) {
+                            if (interalResponse.getPayload() != null) {
+                                correspondingCall.onError(new Exception("Bad Callback parameter " + interalResponse.getPayload().getClass().getName()));
+                            } else {
+                                correspondingCall.onError(new Exception("Bad Callback parameter for null"));
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -80,12 +107,12 @@ public class DistributedBroadcast implements MessageListener, ChannelDispatch {
     @Override
     public void dispatch(Object payload, Callback callback) {
         Request internalCall = new Request(payload);
-        if(callback!= null){
+        if (callback != null) {
             cache.put(internalCall.getId(), callback);
         }
         topic.publish(internalCall);
         for (Port p : channelContext.getLocalPorts()) {
-            p.call(payload, callback);
+            p.call(callback,payload);
         }
     }
 

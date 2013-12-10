@@ -43,7 +43,7 @@ public class LoadBalancer implements ChannelDispatch {
             public void run() {
                 List<Port> ports = channelContext.getLocalPorts();
                 Port selected = ports.get(random.nextInt(ports.size()));
-                selected.call(payload, callback);
+                selected.call(callback,payload);
             }
         });
     }

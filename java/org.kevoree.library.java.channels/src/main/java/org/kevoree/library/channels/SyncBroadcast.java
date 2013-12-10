@@ -24,7 +24,7 @@ public class SyncBroadcast implements ChannelDispatch {
     @Override
     public void dispatch(Object payload, Callback callback) {
         for (Port p : channelContext.getLocalPorts()) {
-            p.call(payload, callback);
+            p.call(callback,payload);
         }
     }
 }

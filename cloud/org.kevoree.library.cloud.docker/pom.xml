@@ -10,12 +10,76 @@
     <artifactId>org.kevoree.library.cloud.docker</artifactId>
     <name>Kevoree :: Library :: Cloud :: Docker</name>
 
+    <properties>
+        <jersey.version>1.17.1</jersey.version>
+        <jersey-apache-client4.version>1.9</jersey-apache-client4.version>
+        <httpclient.version>4.2.5</httpclient.version>
+        <commons-compress.version>1.5</commons-compress.version>
+        <commons-io.version>2.3</commons-io.version>
+        <commons-lang.version>2.6</commons-lang.version>
+        <slf4j.version>1.7.5</slf4j.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.kevoree.library.java</groupId>
             <artifactId>org.kevoree.library.java.javaNode</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-core</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-multipart</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-apache-client4</artifactId>
+            <version>${jersey-apache-client4.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>${commons-compress.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>${commons-lang.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>

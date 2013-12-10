@@ -5,6 +5,8 @@ import org.kevoree.ContainerRoot
 import org.kevoree.api.BootstrapService
 import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.ContainerNode
+import com.kpelykh.docker.client.DockerClient
+import com.kpelykh.docker.client.model.ContainerConfig
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,10 +15,16 @@ import org.kevoree.ContainerNode
  * Time: 09:22
  */
 
-class DockerNodeWrapper(val modelElement: ContainerNode,override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
+class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
 
     override var isStarted: Boolean = false
-    override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
+    override val resolver: MethodAnnotationResolver
+    val dockerClient: DockerClient
+
+    {
+        dockerClient = DockerClient("http://localhost:4243")
+        resolver = MethodAnnotationResolver(targetObj.javaClass)
+    }
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
 
@@ -34,5 +42,20 @@ class DockerNodeWrapper(val modelElement: ContainerNode,override val targetObj: 
         return true
     }
 
+    private var containerID: String? = null;
 
+    override fun create() {
+        val containerConfig = ContainerConfig();
+        containerConfig.setImage("busybox");
+        containerConfig.setCmd(array("touch", "/test"));
+        containerConfig.setHostName(modelElement.name);
+        containerID = dockerClient.createContainer(containerConfig)?.id
+    }
+
+    override fun destroy() {
+        if (containerID != null) {
+            //TODO backup volume before
+            dockerClient.removeContainer(containerID, true)
+        }
+    }
 }

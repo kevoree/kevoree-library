@@ -40,7 +40,7 @@ public class AsyncBroadcast implements ChannelDispatch {
             @Override
             public void run() {
                 for (Port p : channelContext.getLocalPorts()) {
-                    p.call(payload, callback);
+                    p.call(callback, payload);
                 }
             }
         });

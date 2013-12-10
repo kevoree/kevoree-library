@@ -107,7 +107,7 @@ public class ToyConsole {
     }
 
     public void textTypedLocally(String text) {
-        textEntered.call(text);
+        textEntered.send(text);
     }
 
     @Input

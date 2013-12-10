@@ -15,9 +15,28 @@ import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
  */
 
 class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, val componentWrapper: ComponentWrapper) : Port {
-    override fun call(payload: Any?) {
-        call(payload, null)
+    override fun send(vararg payload: Any?) {
+        call(null, payload)
     }
+
+    override fun call(callback: Callback<out Any?>?, vararg payload: Any?) {
+        try {
+            if (componentWrapper.isStarted) {
+                var result: Any? = null
+                if (parameter) {
+                    result = targetMethod?.invoke(targetObj, payload)
+                } else {
+                    result = targetMethod?.invoke(targetObj)
+                }
+                if(callback!= null){
+                    CallBackCaller.call(result, callback)
+                }
+            }
+        } catch (e: Throwable){
+            Log.error("This is really bad, exception during port call...", e)
+        }
+    }
+
     override fun getPath(): String? {
         return portPath;
     }
@@ -26,36 +45,19 @@ class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, v
     var parameter = false
 
     {
-        for(method in targetObj.javaClass.getDeclaredMethods()){
-            if(method.getName() == name){
-                if(method.getAnnotation(javaClass<Input>()) != null){
+        for (method in targetObj.javaClass.getDeclaredMethods()) {
+            if (method.getName() == name) {
+                if (method.getAnnotation(javaClass<Input>()) != null) {
                     targetMethod = method;
-                    if(method.getParameterTypes()!!.size == 1){
+                    if (method.getParameterTypes()!!.size == 1) {
                         parameter = true
                     }
                 }
             }
         }
-        if(targetMethod == null){
+        if (targetMethod == null) {
             Log.error("Warning Provided port is not binded ... for name " + name)
         }
-    }
-
-    override fun call(payload: Any?, callback: Callback?) {
-        try {
-            if(componentWrapper.isStarted){
-                var result: Any? = null
-                if(parameter){
-                    result = targetMethod?.invoke(targetObj, payload)
-                } else {
-                    result = targetMethod?.invoke(targetObj)
-                }
-                callback?.run(result)
-            }
-        } catch (e: Throwable){
-            Log.error("This is really bad, exception during port call...", e)
-        }
-
     }
 
 }

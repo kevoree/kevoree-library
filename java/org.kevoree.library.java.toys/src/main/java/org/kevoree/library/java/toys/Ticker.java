@@ -48,17 +48,21 @@ public class Ticker implements Runnable {
                 if (random) {
                     value = rand.nextInt(100) + "";
                 }
-                tick.call(value, new Callback() {
+                tick.call(new Callback() {
                     @Override
-                    public void run(Object result) {
-                        if(result != null){
-                            System.out.println("ticker return : "+result);
+                    public void onSuccess(Object result) {
+                        if (result != null) {
+                            System.out.println("ticker return : " + result);
                         }
                     }
-                });
+
+                    @Override
+                    public void onError(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                }, value);
             }
         } catch (InterruptedException e) {
-
         }
     }
 }
