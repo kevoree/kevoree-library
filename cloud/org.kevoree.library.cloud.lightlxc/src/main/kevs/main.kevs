@@ -1,0 +1,5 @@
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:latest
+
+add node0 : LightLXCNode
+add node0.child : JavaNode
