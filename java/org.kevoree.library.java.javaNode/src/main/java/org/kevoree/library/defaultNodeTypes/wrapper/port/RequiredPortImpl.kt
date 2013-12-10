@@ -13,18 +13,17 @@ import org.kevoree.log.Log
  */
 
 class RequiredPortImpl(val portPath: String) : Port {
-    override fun send(vararg payload: Any?) {
-        call(null, payload)
-    }
-
-    override fun call(callback: Callback<out Any?>?, vararg payload: Any?) {
+    override fun call(payload: Any?, callback: Callback<out Any?>?) {
         if (delegate != null) {
-            delegate!!.call(payload, callback)
+            delegate!!.call(callback,payload)
             //todo send and put the callback inside
         } else {
             callback?.onError(Exception("Message lost, because port is not bind"))
-            Log.warn("Message lost, because no binding found : {}", payload?.toString())
+            Log.warn("Message lost, because no binding found : {}", payload.toString())
         }
+    }
+    override fun send(payload: Any?) {
+        call(payload,null)
     }
 
     override fun getPath(): String? {

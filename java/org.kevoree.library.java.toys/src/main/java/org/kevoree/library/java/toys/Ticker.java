@@ -48,7 +48,7 @@ public class Ticker implements Runnable {
                 if (random) {
                     value = rand.nextInt(100) + "";
                 }
-                tick.call(new Callback() {
+                tick.call(value,new Callback() {
                     @Override
                     public void onSuccess(Object result) {
                         if (result != null) {
@@ -60,7 +60,7 @@ public class Ticker implements Runnable {
                     public void onError(Throwable exception) {
                         exception.printStackTrace();
                     }
-                }, value);
+                });
             }
         } catch (InterruptedException e) {
         }
