@@ -16,7 +16,7 @@ public class ConfigGenerator {
 
     public static final String[] baseDirNames = {"usr", "lib", "etc", "bin", "sbin", "proc", "var", "dev/pts", "dev/shm", "tmp"};
 
-    public static String generate(String nodeName, String ip, String gateway, String mac) {
+    public static String generate(String nodeName, String ip, String gateway, String mac,String baseRootDirs) {
 
         String base = "lxc.utsname=${nodename}\n" +
                 "lxc.network.type=veth\n" +
@@ -26,27 +26,29 @@ public class ConfigGenerator {
                 "lxc.network.name=eth0 \n" +
                 "lxc.network.ipv4 = ${ip}/24\n" +
                 "lxc.network.ipv4.gateway = ${ip.gw}\n" +
-                "lxc.rootfs = /${nodename}_rootfs\n" +
-                "lxc.mount.entry=/usr /${nodename}_rootfs/usr none ro,bind 0 0\n" +
-                "lxc.mount.entry=/lib /${nodename}_rootfs/lib none ro,bind 0 0\n" +
-                "lxc.mount.entry=/etc /${nodename}_rootfs/etc none ro,bind 0 0\n" +
-                "lxc.mount.entry=/bin /${nodename}_rootfs/bin none ro,bind 0 0\n" +
-                "lxc.mount.entry=/sbin /sbin none ro,bind 0 0\n" +
-                "lxc.mount.entry=proc /${nodename}_rootfs/proc proc nodev,noexec,nosuid 0 0 \n" +
-                "lxc.mount.entry=/var /${nodename}_rootfs/var none ro,bind 0 0 \n" +
-                "lxc.mount.entry = /dev/pts /${nodename}_rootfs/dev/pts devpts nosuid,noexec,mode=0620,ptmxmode=000,newinstance 0 0\n" +
-                "lxc.mount.entry = /dev/shm /${nodename}_rootfs/dev/shm tmpfs nosuid,nodev,mode=1777 0 0\n" +
-                "lxc.mount.entry = /tmp /${nodename}_rootfs/tmp tmpfs nosuid,nodev,noexec,mode=1777,size=1g 0 0";
+                "lxc.rootfs = ${baseRootDirs}/${nodename}_rootfs\n" +
+                "lxc.mount.entry=/usr ${baseRootDirs}/${nodename}_rootfs/usr none ro,bind 0 0\n" +
+                "lxc.mount.entry=/lib ${baseRootDirs}/${nodename}_rootfs/lib none ro,bind 0 0\n" +
+                "lxc.mount.entry=/etc ${baseRootDirs}/${nodename}_rootfs/etc none ro,bind 0 0\n" +
+                "lxc.mount.entry=/bin ${baseRootDirs}/${nodename}_rootfs/bin none ro,bind 0 0\n" +
+                "lxc.mount.entry=/sbin ${baseRootDirs}/${nodename}_rootfs/sbin none ro,bind 0 0\n" +
+                "lxc.mount.entry=proc ${baseRootDirs}/${nodename}_rootfs/proc proc nodev,noexec,nosuid 0 0 \n" +
+                "lxc.mount.entry=/var ${baseRootDirs}/${nodename}_rootfs/var none ro,bind 0 0 \n" +
+                "lxc.mount.entry = /dev/pts ${baseRootDirs}/${nodename}_rootfs/dev/pts devpts nosuid,noexec,mode=0620,ptmxmode=000,newinstance 0 0\n" +
+                "lxc.mount.entry = /dev/shm ${baseRootDirs}/${nodename}_rootfs/dev/shm tmpfs nosuid,nodev,mode=1777 0 0\n" +
+                "lxc.mount.entry = /tmp ${baseRootDirs}/${nodename}_rootfs/tmp tmpfs nosuid,nodev,noexec,mode=1777,size=1g 0 0";
 
         return base
                 .replace("${nodename}", nodeName)
                 .replace("${ip}", ip)
                 .replace("${ip.gw}", gateway)
-                .replace("${mac}", mac);
+                .replace("${mac}", mac)
+                .replace("${baseRootDirs}", baseRootDirs);
 
     }
 
     public static File generateUserDir(File baseRootDirs, ContainerNode element, File platformJar) throws IOException {
+        System.err.println(baseRootDirs.getAbsolutePath());
         if (!baseRootDirs.exists()) {
             baseRootDirs.mkdirs();
         }
@@ -76,7 +78,7 @@ public class ConfigGenerator {
         //generate the lxc config file
         File configLXC = new File(newUserDir, "config");
         FileWriter configLXCprinter = new FileWriter(configLXC);
-        configLXCprinter.write(generate(element.getName(), NetworkGenerator.generateIP(element), NetworkGenerator.generateGW(element),NetworkGenerator.generateGW(element)));
+        configLXCprinter.write(generate(element.getName(), NetworkGenerator.generateIP(element), NetworkGenerator.generateGW(element),NetworkGenerator.generateMAC(element),baseRootDirs.getAbsolutePath()));
         configLXCprinter.flush();
         configLXCprinter.close();
 
