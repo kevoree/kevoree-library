@@ -42,8 +42,8 @@ public class ConfigGenerator {
             if (new File("/lib64").exists())
                 base = base +  "lxc.mount.entry=/lib64 ${baseRootDirs}/${nodename}_rootfs/lib64 none ro,bind 0 0\n";
 
-            new File(baseRootDirs+ "/"+ nodeName+"_rootfs/" + getJava().substring(0,getJava().lastIndexOf("/java")) ).mkdirs();
-            base = base +  "lxc.mount.entry=" +getJava().substring(0,getJava().lastIndexOf("/java"))+" ${baseRootDirs}/${nodename}_rootfs"+ getJava().substring(0,getJava().lastIndexOf("/java"))+" none ro,bind 0 0\n";
+       //     new File(baseRootDirs+ "/"+ nodeName+"_rootfs/" + getJava().substring(0,getJava().lastIndexOf("/java")) ).mkdirs();
+         //   base = base +  "lxc.mount.entry=" +getJava().substring(0,getJava().lastIndexOf("/java"))+" ${baseRootDirs}/${nodename}_rootfs"+ getJava().substring(0,getJava().lastIndexOf("/java"))+" none ro,bind 0 0\n";
 
 
         return base
@@ -56,7 +56,7 @@ public class ConfigGenerator {
     }
 
     public static File generateUserDir(File baseRootDirs, ContainerNode element, File platformJar) throws IOException {
-        System.err.println(baseRootDirs.getAbsolutePath());
+        //System.err.println(baseRootDirs.getAbsolutePath());
         if (!baseRootDirs.exists()) {
             baseRootDirs.mkdirs();
         }
@@ -104,7 +104,7 @@ public class ConfigGenerator {
         //set property
         runnerprinter.write("#!/bin/bash\n");
 
-        runnerprinter.write(getJava());
+        runnerprinter.write("java");
         runnerprinter.write(" ");
         if (jvmArgs != null) {
             runnerprinter.write(jvmArgs);
@@ -113,7 +113,7 @@ public class ConfigGenerator {
         runnerprinter.write("-Dnode.name=\"");
         runnerprinter.write(element.getName());
         runnerprinter.write("\" -Dnode.bootstrap=\"");
-        runnerprinter.write("boot.json -jar runtime.jar");
+        runnerprinter.write("boot.json\" -jar runtime.jar");
         runnerprinter.write("\n");
         runnerprinter.flush();
         runnerprinter.close();

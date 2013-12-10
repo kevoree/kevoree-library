@@ -82,7 +82,7 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
 
                 var rootUserDirs = File("roots");
                 var newUserDir = ConfigGenerator.generateUserDir(rootUserDirs, modelElement, platformJar);
-                val runnerargs = array("lxc-execute", "-n", modelElement.name!!, "-f", File(newUserDir, "config").getAbsolutePath(), "/bin/bash", File(newUserDir, "kevrun").getAbsolutePath())
+                val runnerargs = array("lxc-execute", "-n", modelElement.name!!, "-f", File(newUserDir, "config").getAbsolutePath(), "/kevrun")
                 process = Runtime.getRuntime().exec(runnerargs)
                 readerOUTthread = Thread(Reader(process!!.getInputStream()!!, modelElement.name!!, false))
                 readerERRthread = Thread(Reader(process!!.getErrorStream()!!, modelElement.name!!, true))
