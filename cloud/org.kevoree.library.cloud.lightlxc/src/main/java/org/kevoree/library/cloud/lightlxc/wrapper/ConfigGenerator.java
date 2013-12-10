@@ -14,7 +14,7 @@ import java.util.Arrays;
  */
 public class ConfigGenerator {
 
-    public static final String[] baseDirNames = {"usr", "lib", "etc", "bin", "sbin", "proc", "var", "dev/pts", "dev/shm", "tmp"};
+    public static final String[] baseDirNames = {"usr", "lib", "lib32" , "lib64", "etc", "bin", "sbin", "proc", "var", "dev/pts", "dev/shm", "tmp"};
 
     public static String generate(String nodeName, String ip, String gateway, String mac,String baseRootDirs) {
 
@@ -37,6 +37,14 @@ public class ConfigGenerator {
                 "lxc.mount.entry = /dev/pts ${baseRootDirs}/${nodename}_rootfs/dev/pts devpts nosuid,noexec,mode=0620,ptmxmode=000,newinstance 0 0\n" +
                 "lxc.mount.entry = /dev/shm ${baseRootDirs}/${nodename}_rootfs/dev/shm tmpfs nosuid,nodev,mode=1777 0 0\n" +
                 "lxc.mount.entry = /tmp ${baseRootDirs}/${nodename}_rootfs/tmp tmpfs nosuid,nodev,noexec,mode=1777,size=1g 0 0";
+            if (new File("/lib32").exists())
+                base = base +  "lxc.mount.entry=/lib32 ${baseRootDirs}/${nodename}_rootfs/lib32 none ro,bind 0 0\n";
+            if (new File("/lib64").exists())
+                base = base +  "lxc.mount.entry=/lib64 ${baseRootDirs}/${nodename}_rootfs/lib64 none ro,bind 0 0\n";
+
+            new File(baseRootDirs+ "/"+ nodeName+"_rootfs/" + getJava().substring(0,getJava().lastIndexOf("/java")) ).mkdirs();
+            base = base +  "lxc.mount.entry=" +getJava().substring(0,getJava().lastIndexOf("/java"))+" ${baseRootDirs}/${nodename}_rootfs"+ getJava().substring(0,getJava().lastIndexOf("/java"))+" none ro,bind 0 0\n";
+
 
         return base
                 .replace("${nodename}", nodeName)
