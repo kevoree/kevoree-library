@@ -49,6 +49,11 @@ public class DelayBufferedBroadcast implements ChannelDispatch, Runnable {
         executor = null;
     }
 
+    @Update
+    public void update(){
+        channelStop();
+        channelStart();
+    }
 
     @Override
     public void dispatch(final Object payload,final Callback callback) {
