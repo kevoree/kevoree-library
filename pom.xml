@@ -10,7 +10,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>0.6.1670</kotlin.version>
-        <kevoree.version>3.0.5-SNAPSHOT</kevoree.version>
+        <kevoree.version>3.1.0</kevoree.version>
     </properties>
 
     <organization>
