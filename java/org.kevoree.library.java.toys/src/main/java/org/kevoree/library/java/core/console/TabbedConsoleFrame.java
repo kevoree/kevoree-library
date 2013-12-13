@@ -55,7 +55,7 @@ public class TabbedConsoleFrame {
                 public void run() {
                     content = new JPanel();
                     content.setLayout(new BorderLayout());
-                    frame = new JFrame("Kevoree node : " + System.getProperty("node.name"));
+                    frame = new JFrame("Kevoree Toy Consoles");
                     frame.getRootPane().putClientProperty("apple.awt.brushMetalLook", Boolean.TRUE);
                     tabbedPanel = new JChromeTabbedPane("osx", content);
                     tabbedPanel.setPreferredSize(new Dimension(50, 40));
