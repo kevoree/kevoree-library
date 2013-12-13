@@ -5,12 +5,12 @@
     <artifactId>org.kevoree.library.java.root</artifactId>
     <packaging>pom</packaging>
     <name>Kevoree :: Library :: Java :: Root</name>
-    <version>3.1.0</version>
+    <version>3.1.1-SNAPSHOT</version>
 
     <parent>
         <artifactId>org.kevoree.library</artifactId>
         <groupId>org.kevoree.library</groupId>
-        <version>3.1.0</version>
+        <version>3.1.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
