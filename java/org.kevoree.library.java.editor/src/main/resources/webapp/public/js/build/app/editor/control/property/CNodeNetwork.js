@@ -1,0 +1,1 @@
+define(["abstraction/property/KNodeNetwork","util/Pooffs"],function(e,t){function n(t,n){e.prototype.constructor.call(this,t,n)}return t.extends(n,e),n});

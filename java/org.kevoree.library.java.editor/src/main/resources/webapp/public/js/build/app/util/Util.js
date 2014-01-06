@@ -1,0 +1,1 @@
+define([],function(){return{parseBoolean:function(e){switch(e){case"true":return!0;case"false":return!1;case!0:return!0;case!1:return!1;default:return!1}}}});

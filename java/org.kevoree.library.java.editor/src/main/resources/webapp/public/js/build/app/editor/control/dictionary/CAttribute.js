@@ -1,0 +1,1 @@
+define(["abstraction/dictionary/KAttribute","control/AController","presentation/dictionary/UIAttribute","util/Pooffs"],function(e,t,n,r){function i(){e.prototype.constructor.call(this),this._ui=new n(this)}return r.extends(i,t),r.extends(i,e),i});

@@ -1,0 +1,1 @@
+define([],function(){function e(){}return e.extends=function(e,t){for(var n in t.prototype)e.prototype[n]=t.prototype[n]},e.objectClass=function(e){if(e&&e.constructor&&e.constructor.toString){var t=e.constructor.toString().match(/function\s*(\w+)/);if(t&&t.length==2)return t[1]}return undefined},e});

@@ -1,0 +1,1 @@
+define([],function(){function e(){}return e.prototype.execute=function(e,t){e.p2cZoomTo(t)},e});

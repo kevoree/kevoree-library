@@ -1,0 +1,1 @@
+define([],function(){function e(){}return e.prototype.getUI=function(){return this._ui},e});

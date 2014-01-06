@@ -1,0 +1,1 @@
+define([],function(){function e(){}return e.prototype.update=function(e){console.warn("You did not override update method for your subject's observer. Subject:",e)},e});

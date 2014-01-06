@@ -1,0 +1,1 @@
+var model=null,Kevoree=null;this.addEventListener("message",function(e){var t=e.data;switch(t.cmd){case"vars":model=t.data.model,Kevoree=t.data.kevoree;break;case"start":if(model&&Kevoree){var n=new Kevoree.org.kevoree.loader.JSONModelLoader,r=0;for(;;)n.loadModelFromString(model).get(0),postMessage(++r)}}},!1);

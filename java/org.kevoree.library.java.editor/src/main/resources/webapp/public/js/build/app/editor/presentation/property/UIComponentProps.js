@@ -1,0 +1,1 @@
+define(["util/Pooffs","presentation/property/UIInstanceProps"],function(e,t){function n(e,n){t.prototype.constructor.call(this,e,n)}return e.extends(n,t),n});

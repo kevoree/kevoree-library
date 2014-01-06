@@ -1,0 +1,1 @@
+define(["jquery"],function(e){function t(){}return t.prototype.execute=function(e){e.getUI().getStage().toDataURL({callback:function(e){window.open(e,"_blank")}})},t});

@@ -1,0 +1,1 @@
+define([],function(){function e(){this._timer=0}return e.prototype.delay=function(){return function(e,t){clearTimeout(this._timer),this._timer=setTimeout(e,t)}}(),e});

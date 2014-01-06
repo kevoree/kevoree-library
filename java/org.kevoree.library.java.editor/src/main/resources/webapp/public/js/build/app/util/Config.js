@@ -1,0 +1,1 @@
+define([],function(){function e(){}return e.CONTAINER_ID="editor",e.HTTP="http://",e.WS="ws://",e.TCP="tcp",e.BACKGROUND_IMG="img/background.jpg",e.LS_ASK_BEFORE_LEAVING="askBeforeLeaving",e.LS_COMPONENT_TOOLTIP="componentTooltip",e.LS_DISPLAY_ALERT_POPUPS="displayAlertPopups",e.LS_CONFIRM_ON_LOAD="confirmOnLoad",e});
