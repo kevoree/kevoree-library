@@ -22,7 +22,7 @@ import org.kevoree.library.java.editor.handler.InitHandler;
 public class WebEditorComponent {
 
     @Param(optional = false, defaultValue = "3042")
-    private Integer port = 3042;
+    private Integer port;
 
     @KevoreeInject
     public ModelService modelService;
