@@ -30,7 +30,7 @@ define(
 
             } else {
                 console.warn('Your browser is not compatible with HTML5 Local Storage. ' +
-                    'WebEditorComponent won\'t be able to save/load your settings!');
+                    'WebEditor won\'t be able to save/load your settings!');
             }
         }
 

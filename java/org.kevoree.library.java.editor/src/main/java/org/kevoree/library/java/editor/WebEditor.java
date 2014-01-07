@@ -10,6 +10,7 @@ import org.kevoree.api.ModelService;
 import org.kevoree.library.java.editor.handler.ClasspathResourceHandler;
 import org.kevoree.library.java.editor.handler.IndexHandler;
 import org.kevoree.library.java.editor.handler.InitHandler;
+import org.kevoree.log.Log;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,8 +19,8 @@ import org.kevoree.library.java.editor.handler.InitHandler;
  * Time: 12:37
  */
 @ComponentType
-@Library(name = "Java :: Components")
-public class WebEditorComponent {
+@Library(name = "Java")
+public class WebEditor {
 
     @Param(optional = false, defaultValue = "3042")
     private Integer port;
@@ -31,6 +32,8 @@ public class WebEditorComponent {
 
     @Start
     public void start() throws Exception {
+        Log.debug("WebEditor START");
+        System.out.println("POTATO");
         server = new Server(port);
 
         ResourceHandler resourceHandler = new ClasspathResourceHandler();

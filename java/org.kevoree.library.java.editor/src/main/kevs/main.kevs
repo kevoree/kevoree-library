@@ -4,9 +4,9 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.editor:0.0.1-SNAPS
 
 add node0 : JavaNode
 add sync : WSGroup
-add node0.editor : WebEditorComponent
+add node0.editor : FakeComp
 
 attach node0 sync
 
 set sync.port/node0 = "9000"
-set node0.editor.port = "3042"  // Web editor will be accessible from a browser at http://localhost:3042
+//set node0.editor.port = "3042"
