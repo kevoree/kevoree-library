@@ -4,9 +4,9 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.editor:0.0.1-SNAPS
 
 add node0 : JavaNode
 add sync : WSGroup
-add node0.editor : FakeComp
+add node0.editor : WebEditor
 
 attach node0 sync
 
 set sync.port/node0 = "9000"
-//set node0.editor.port = "3042"
+set node0.editor.port = "3042"
