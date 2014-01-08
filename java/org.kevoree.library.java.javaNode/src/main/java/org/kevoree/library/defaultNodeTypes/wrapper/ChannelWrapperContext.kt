@@ -17,7 +17,7 @@ import org.kevoree.ContainerNode
 
 public class ChannelWrapperContext(val channelPath: String, val localNodePath: String, val modelService: ModelService) : ChannelContext {
 
-    override fun getRemotePaths(): MutableList<String>? {
+    override fun getRemotePortPaths(): MutableList<String>? {
         val channel = modelService.getCurrentModel()?.getModel()?.findByPath(channelPath) as? Channel
         if (channel != null) {
             val result = ArrayList<String>()
