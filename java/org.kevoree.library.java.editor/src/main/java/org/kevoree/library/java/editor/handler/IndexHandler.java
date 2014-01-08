@@ -1,8 +1,5 @@
 package org.kevoree.library.java.editor.handler;
 
-import de.neuland.jade4j.JadeConfiguration;
-import de.neuland.jade4j.template.ClasspathTemplateLoader;
-import de.neuland.jade4j.template.JadeTemplate;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
@@ -10,7 +7,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,14 +21,14 @@ public class IndexHandler extends AbstractHandler {
         try {
             response.setContentType("text/html;charset=utf-8");
             response.setStatus(HttpServletResponse.SC_OK);
-
+             /*
             JadeConfiguration config = new JadeConfiguration();
             config.setTemplateLoader(new ClasspathTemplateLoader());
             config.setCaching(true);
             JadeTemplate template = config.getTemplate("webapp/views/editor.jade");
             String html = config.renderTemplate(template, new HashMap<String, Object>());
-
             response.getWriter().println(html);
+            */
             baseRequest.setHandled(true);
         } catch (Exception e) {
             baseRequest.setHandled(false);
