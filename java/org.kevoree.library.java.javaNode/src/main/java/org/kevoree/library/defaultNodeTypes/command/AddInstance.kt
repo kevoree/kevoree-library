@@ -8,6 +8,7 @@ import org.kevoree.api.PrimitiveCommand
 import org.kevoree.log.Log
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory
 import org.kevoree.kcl.KevoreeJarClassLoader
+import org.kevoree.api.ModelService
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -31,7 +32,7 @@ import org.kevoree.kcl.KevoreeJarClassLoader
  * Time: 17:53
  */
 
-class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeName: String, val registry: ModelRegistry, val bs: BootstrapService) : PrimitiveCommand, Runnable {
+class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeName: String, val registry: ModelRegistry, val bs: BootstrapService, val modelService : ModelService) : PrimitiveCommand, Runnable {
 
     var nodeTypeName: String? = null
     var tg: ThreadGroup? = null
@@ -61,7 +62,7 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
     }
 
     override fun undo() {
-        RemoveInstance(wrapperFactory, c, nodeName, registry, bs).execute()
+        RemoveInstance(wrapperFactory, c, nodeName, registry, bs,modelService).execute()
     }
 
     public override fun run() {
@@ -84,7 +85,7 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
              */
 
             val newBeanInstance = bs.createInstance(c)
-            var newBeanKInstanceWrapper: KInstanceWrapper? = wrapperFactory.wrap(c, newBeanInstance!!, tg!!, bs)
+            var newBeanKInstanceWrapper: KInstanceWrapper? = wrapperFactory.wrap(c, newBeanInstance!!, tg!!, bs,modelService)
             registry.register(c, newBeanKInstanceWrapper!!)
             val sub = UpdateDictionary(c, nodeName, registry, bs)
             resultSub = sub.execute()

@@ -6,6 +6,7 @@ import org.kevoree.Group
 import org.kevoree.Channel
 import org.kevoree.ContainerNode
 import org.kevoree.api.BootstrapService
+import org.kevoree.api.ModelService
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,7 +17,7 @@ import org.kevoree.api.BootstrapService
 
 open class WrapperFactory(val nodeName: String) {
 
-    open fun wrap(modelElement: KMFContainer, newBeanInstance: Any, tg: ThreadGroup, bs: BootstrapService): KInstanceWrapper {
+    open fun wrap(modelElement: KMFContainer, newBeanInstance: Any, tg: ThreadGroup, bs: BootstrapService, modelService : ModelService): KInstanceWrapper {
         when(modelElement) {
             is ComponentInstance -> {
                 return ComponentWrapper(modelElement, newBeanInstance, nodeName, tg, bs)
@@ -25,7 +26,7 @@ open class WrapperFactory(val nodeName: String) {
                 return GroupWrapper(modelElement,newBeanInstance, nodeName, tg, bs)
             }
             is Channel -> {
-                return ChannelWrapper(modelElement, newBeanInstance, nodeName, tg, bs)
+                return ChannelWrapper(modelElement, newBeanInstance, nodeName, tg, bs,modelService)
             }
             is ContainerNode -> {
                 return NodeWrapper(modelElement, newBeanInstance, nodeName, tg, bs)

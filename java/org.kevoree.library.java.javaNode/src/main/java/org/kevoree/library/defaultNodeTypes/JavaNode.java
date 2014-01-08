@@ -117,10 +117,10 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
             return res;
         }
         if (pTypeName.equals(JavaPrimitive.AddInstance.name())) {
-            return new AddInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService);
+            return new AddInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService,modelService);
         }
         if (pTypeName.equals(JavaPrimitive.RemoveInstance.name())) {
-            return new RemoveInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService);
+            return new RemoveInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService,modelService);
         }
         return null;
     }

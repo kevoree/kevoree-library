@@ -9,13 +9,14 @@ import org.kevoree.api.ChannelDispatch
 import org.kevoree.ContainerRoot
 import org.kevoree.log.Log
 import org.kevoree.Channel
+import org.kevoree.api.ModelService
 
-public class ChannelWrapper(val modelElement: Channel, override val targetObj: Any, val _nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
+public class ChannelWrapper(val modelElement: Channel, override val targetObj: Any, val _nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService, val modelService : ModelService) : KInstanceWrapper {
 
     val context: ChannelWrapperContext
 
     {
-        context = ChannelWrapperContext()
+        context = ChannelWrapperContext(modelElement.path()!!,_nodeName,modelService)
         bs.injectService(javaClass<ChannelContext>(), context, targetObj)
     }
 
