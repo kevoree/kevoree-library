@@ -3,8 +3,6 @@ package org.kevoree.library.cloud.lightlxc.wrapper;
 import org.kevoree.ContainerNode;
 
 import java.util.Random;
-import java.util.UUID;
-import java.util.regex.Pattern;
 
 /**
  * Created by duke on 09/12/2013.
@@ -29,7 +27,7 @@ public class NetworkGenerator {
             }
             String end = String.format("%x", b[i]);
             if (end.length() == 1) {
-                end = end+"0";
+                end = end + "0";
             }
             buffer.append(end);
         }

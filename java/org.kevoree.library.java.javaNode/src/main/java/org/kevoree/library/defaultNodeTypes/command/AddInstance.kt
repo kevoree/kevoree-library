@@ -38,7 +38,6 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
 
     var resultSub = false
 
-
     override fun execute(): Boolean {
         var subThread: Thread? = null
         try {

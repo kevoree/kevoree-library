@@ -10,7 +10,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>0.6.1670</kotlin.version>
-        <kevoree.version>3.1.0</kevoree.version>
+        <kevoree.version>3.1.1-SNAPSHOT</kevoree.version>
     </properties>
 
     <organization>
@@ -94,6 +94,21 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
+
+		<repositories>
+	         <repository>
+	             <id>kevoree-oss</id>
+	             <url>https://oss.sonatype.org/content/groups/public/</url>
+	         </repository>
+	     </repositories>
+	 
+	    <pluginRepositories>
+	        <pluginRepository>
+	             <id>plugin.kevoree-oss</id>
+	             <url>https://oss.sonatype.org/content/groups/public/</url>
+	        </pluginRepository>
+	     </pluginRepositories>
+
 
     <build>
         <plugins>
