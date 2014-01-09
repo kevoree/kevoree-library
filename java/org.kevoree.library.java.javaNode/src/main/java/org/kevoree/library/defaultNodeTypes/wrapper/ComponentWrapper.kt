@@ -15,7 +15,6 @@ package org.kevoree.library.defaultNodeTypes.wrapper;
 
 import org.kevoree.ComponentInstance
 import org.kevoree.ContainerRoot
-import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.library.defaultNodeTypes.reflect.FieldAnnotationResolver
 import org.kevoree.log.Log
 import java.lang.reflect.InvocationTargetException
@@ -23,6 +22,8 @@ import org.kevoree.api.BootstrapService
 import org.kevoree.library.defaultNodeTypes.wrapper.port.RequiredPortImpl
 import org.kevoree.library.defaultNodeTypes.wrapper.port.ProvidedPortImpl
 import java.util.HashMap
+import java.lang.reflect.Field
+import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 
 public class ComponentWrapper(val modelElement: ComponentInstance, override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
 
@@ -33,17 +34,33 @@ public class ComponentWrapper(val modelElement: ComponentInstance, override val 
     {
         /* Init Required and Provided Port */
         for(requiredPort in modelElement.required){
-            var field = targetObj.javaClass.getDeclaredField(requiredPort.portTypeRef!!.name!!)
-            if(!field.isAccessible()){
-                field.setAccessible(true)
+            var field = recursivelyLookForDeclaredRequiredPort(requiredPort.portTypeRef!!.name!!, targetObj.javaClass)
+            if (field != null) {
+            if(!field!!.isAccessible()){
+                field!!.setAccessible(true)
             }
             var portWrapper = RequiredPortImpl(requiredPort.path()!!)
-            field.set(targetObj, portWrapper)
+            field!!.set(targetObj, portWrapper)
             requiredPorts.put(requiredPort.portTypeRef!!.name!!, portWrapper)
+            } else {
+                Log.warn("A required Port is defined at the model level but is not available at the implementation level")
+            }
         }
         for(providedPort in modelElement.provided){
             var portWrapper = ProvidedPortImpl(targetObj, providedPort.portTypeRef!!.name!!, providedPort.path()!!,this)
             providedPorts.put(providedPort.portTypeRef!!.name!!, portWrapper)
+        }
+    }
+
+    private fun recursivelyLookForDeclaredRequiredPort(name : String, javaClass : Class<in Any>) : Field? {
+        try {
+            return javaClass.getDeclaredField(name)
+        } catch (e: NoSuchFieldException) {
+            if (javaClass.getSuperclass() != null) {
+                return recursivelyLookForDeclaredRequiredPort(name, javaClass.getSuperclass()!!)
+            } else {
+                return null
+            }
         }
     }
 
