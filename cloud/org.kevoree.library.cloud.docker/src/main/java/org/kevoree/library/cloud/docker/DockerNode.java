@@ -16,6 +16,6 @@ public class DockerNode extends JavaNode {
 
     @Override
     protected WrapperFactory createWrapperFactory(String nodeName) {
-        return new DockerWrapperFactory(nodeName, modelService);
+        return new DockerWrapperFactory(nodeName);
     }
 }

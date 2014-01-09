@@ -14,6 +14,6 @@ public class LightLXCNode extends JavaNode implements PlatformNode {
 
     @Override
     protected WrapperFactory createWrapperFactory(String nodeName) {
-        return new LightLXCWrapperFactory(nodeName, modelService);
+        return new LightLXCWrapperFactory(nodeName);
     }
 }

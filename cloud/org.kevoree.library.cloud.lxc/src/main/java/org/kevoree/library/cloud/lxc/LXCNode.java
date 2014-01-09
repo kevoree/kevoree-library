@@ -46,6 +46,6 @@ public class LXCNode extends JavaNode {
 
     @Override
     protected WrapperFactory createWrapperFactory(String nodeName) {
-        return new LXCWrapperFactory(nodeName, modelService);
+        return new LXCWrapperFactory(nodeName);
     }
 }
