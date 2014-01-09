@@ -38,8 +38,8 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @KevoreeInject
     Context context;
 
-    @Param(optional = true, defaultValue = "false")
-    public Boolean debug;
+    @Param(optional = true, defaultValue = "INFO")
+    public String log;
 
     /**
      * java VM properties used when this node host some others (can also be used by the watchdog)
@@ -53,7 +53,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Override
     public void startNode() {
         Log.debug("Starting node type of {}", this);
-        Log.info("Debug mode : {} ", debug);
+        Log.info("Log level: {} ", log);
         preTime = System.currentTimeMillis();
         modelService.registerModelListener(this);
         kompareBean = new KevoreeKompareBean(modelRegistry);
@@ -63,7 +63,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     }
 
     protected WrapperFactory createWrapperFactory(String nodeName) {
-        return new WrapperFactory(nodeName);
+        return new WrapperFactory(nodeName, modelService);
     }
 
 
@@ -79,6 +79,24 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Update
     @Override
     public void updateNode() {
+        if ("DEBUG".equals(log)) {
+            Log.set(Log.LEVEL_DEBUG);
+        } else if ("WARN".equals(log)) {
+            Log.set(Log.LEVEL_WARN);
+        } else if ("INFO".equals(log)) {
+            Log.set(Log.LEVEL_INFO);
+        } else if ("ERROR".equals(log)) {
+            Log.set(Log.LEVEL_ERROR);
+        } else if ("TRACE".equals(log)) {
+            Log.set(Log.LEVEL_TRACE);
+        } else if ("NONE".equals(log)) {
+            Log.set(Log.LEVEL_NONE);
+        } else {
+            // default value
+            Log.set(Log.LEVEL_INFO);
+            Log.warn("Unable to find the corresponding log level. Default value (INFO) is set.");
+            log = "INFO";
+        }
     }
 
     @Override
@@ -92,7 +110,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
         String pTypeName = adaptationPrimitive.getPrimitiveType();
         String nodeName = modelService.getNodeName();
         if (pTypeName.equals(JavaPrimitive.UpdateDictionaryInstance.name())) {
-            return new UpdateDictionary((Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry,bootstrapService);
+            return new UpdateDictionary((Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService);
         }
         if (pTypeName.equals(JavaPrimitive.StartInstance.name())) {
             return new StartStopInstance((Instance) adaptationPrimitive.getRef(), nodeName, true, modelRegistry, bootstrapService);

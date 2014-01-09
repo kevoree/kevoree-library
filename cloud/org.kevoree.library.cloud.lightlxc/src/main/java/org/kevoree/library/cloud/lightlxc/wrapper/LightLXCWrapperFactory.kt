@@ -14,7 +14,7 @@ import org.kevoree.api.ModelService
  * Time: 09:59
  */
 
-class LightLXCWrapperFactory(nodeName: String) : WrapperFactory(nodeName) {
+class LightLXCWrapperFactory(nodeName: String, modelService : ModelService) : WrapperFactory(nodeName, modelService) {
 
     override fun wrap(modelElement: KMFContainer, newBeanInstance: Any, tg: ThreadGroup, bs: BootstrapService,modelService: ModelService): KInstanceWrapper {
         when(modelElement) {
