@@ -81,7 +81,7 @@ public class WSGroup extends WebSocketServer {
         } else {
             //Push
             try {
-                ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(s).get(0);
+                ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(s.substring(5)).get(0);
                 modelService.update(model, new UpdateCallback() {
                     @Override
                     public void run(Boolean applied) {
