@@ -33,16 +33,12 @@ public class WebEditor {
     @Start
     public void start() throws Exception {
         Log.debug("WebEditor START");
-        System.out.println("POTATO");
         server = new Server(port);
-
         ResourceHandler resourceHandler = new ClasspathResourceHandler();
         resourceHandler.setResourceBase("webapp/public");
-
         ContextHandler initContext = new ContextHandler();
         initContext.setContextPath("/init");
         initContext.setHandler(new InitHandler(modelService));
-
         ContextHandler indexContext = new ContextHandler();
         indexContext.setContextPath("/");
         indexContext.setHandler(new IndexHandler());

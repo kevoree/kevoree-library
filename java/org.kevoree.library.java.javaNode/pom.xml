@@ -16,7 +16,7 @@
         <dependency>
             <groupId>org.kevoree</groupId>
             <artifactId>org.kevoree.maven.resolver</artifactId>
-            <version>4</version>
+            <version>6</version>
         </dependency>
         <dependency>
             <groupId>org.kevoree</groupId>

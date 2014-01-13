@@ -7,7 +7,6 @@ import org.kevoree.api.BootstrapService
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.log.Log
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory
-import org.kevoree.kcl.KevoreeJarClassLoader
 import org.kevoree.api.ModelService
 
 /**
@@ -67,23 +66,6 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
 
     public override fun run() {
         try {
-              /*
-            val kcl = registry.lookup(c.typeDefinition?.deployUnit) as KevoreeJarClassLoader;
-            Thread.currentThread().setContextClassLoader(kcl)
-
-            print(kcl);
-            println("->" + c.typeDefinition?.deployUnit!!.path())
-            for(du in c.typeDefinition?.deployUnit!!.requiredLibs){
-                val child = registry.lookup(du) as KevoreeJarClassLoader;
-                print("\t" + child)
-                println("->" + du.path())
-                for(du2 in du.requiredLibs){
-                    print("\t\t" + du2)
-                    println("->" + du2.path())
-                }
-            }
-             */
-
             val newBeanInstance = bs.createInstance(c)
             var newBeanKInstanceWrapper: KInstanceWrapper? = wrapperFactory.wrap(c, newBeanInstance!!, tg!!, bs,modelService)
             registry.register(c, newBeanKInstanceWrapper!!)
