@@ -74,7 +74,7 @@ public class WSGroup extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket webSocket, String s) {
-        if (s.startsWith("pull")) {
+        if (s.startsWith("pull") || s.startsWith("get")) {
             //Pull
             String modelReturn = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
             webSocket.send(modelReturn);
