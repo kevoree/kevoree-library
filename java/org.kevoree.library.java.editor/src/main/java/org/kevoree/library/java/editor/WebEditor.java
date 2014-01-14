@@ -8,7 +8,6 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.kevoree.annotation.*;
 import org.kevoree.api.ModelService;
 import org.kevoree.library.java.editor.handler.ClasspathResourceHandler;
-import org.kevoree.library.java.editor.handler.IndexHandler;
 import org.kevoree.library.java.editor.handler.InitHandler;
 import org.kevoree.log.Log;
 
@@ -34,19 +33,10 @@ public class WebEditor {
     public void start() throws Exception {
         Log.debug("WebEditor START");
         server = new Server(port);
-        ResourceHandler resourceHandler = new ClasspathResourceHandler();
-        resourceHandler.setResourceBase("webapp/public");
-        ContextHandler initContext = new ContextHandler();
-        initContext.setContextPath("/init");
-        initContext.setHandler(new InitHandler(modelService));
-        ContextHandler indexContext = new ContextHandler();
-        indexContext.setContextPath("/");
-        indexContext.setHandler(new IndexHandler());
-
+        Handler resourceHandler = new ClasspathResourceHandler();
         HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] { resourceHandler, initContext, indexContext });
+        handlers.setHandlers(new Handler[] { resourceHandler});
         server.setHandler(handlers);
-
         server.start();
     }
 

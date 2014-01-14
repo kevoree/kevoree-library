@@ -1,1 +1,0 @@
-define(["util/AlertPopupHelper"],function(e){function t(){}return t.prototype.execute=function(){e.setText("CheckModel: not implemented yet"),e.setType(e.WARN),e.show(5e3)},t});

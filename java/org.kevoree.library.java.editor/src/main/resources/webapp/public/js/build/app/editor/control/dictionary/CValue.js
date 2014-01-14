@@ -1,1 +1,0 @@
-define(["abstraction/dictionary/KValue","control/AController","presentation/dictionary/UIValue","util/Pooffs"],function(e,t,n,r){function i(){e.prototype.constructor.call(this),this._ui=new n(this)}return r.extends(i,t),r.extends(i,e),i});

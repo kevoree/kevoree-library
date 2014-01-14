@@ -1,1 +1,0 @@
-define([],function(){function e(e){this.strings=[],e&&this.append(e)}return e.prototype.append=function(e){return e&&this.strings.push(e),this},e.prototype.clear=function(){return this.strings.length=0,this},e.prototype.toString=function(){return this.strings.join("")},e});

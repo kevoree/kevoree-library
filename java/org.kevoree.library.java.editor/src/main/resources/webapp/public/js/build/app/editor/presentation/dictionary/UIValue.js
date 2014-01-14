@@ -1,1 +1,0 @@
-define(["templates/attribute"],function(e){function t(e){this._ctrl=e}return t.prototype.getHTML=function(){return e({node:this._ctrl.getNodeName(),name:this._ctrl.getName(),value:this._ctrl.getValue(),type:"raw",possibleValues:[],selected:0,optional:!1})},t.prototype.onHTMLAppended=function(){},t});

@@ -1,1 +1,0 @@
-define(["abstraction/KInputPort","abstraction/KOutputPort","control/CPort","presentation/UIInputPort","util/Pooffs"],function(e,t,n,r,i){function s(e){n.prototype.constructor.call(this,e),this._ui=new r(this)}return i.extends(s,n),i.extends(s,e),s.prototype.isConnectable=function(e){return e.getOrigin()!=this&&e.getOrigin().getEntityType()==t.ENTITY_TYPE},s});

@@ -1,6 +1,6 @@
 include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.editor:0.0.1-SNAPSHOT
+include mvn:org.kevoree.library.java:org.kevoree.library.java.editor:latest
 
 add node0 : JavaNode
 add sync : WSGroup

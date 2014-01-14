@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.java.editor</artifactId>
     <name>Kevoree :: Library :: Java :: Editor</name>
-    <version>0.0.4-SNAPSHOT</version>
+    <version>3.1.4-SNAPSHOT</version>
 
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
@@ -18,13 +18,6 @@
             <artifactId>org.kevoree.api</artifactId>
             <version>${kevoree.version}</version>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>de.neuland-bfi</groupId>
-            <artifactId>jade4j</artifactId>
-            <version>0.4.0</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
@@ -41,5 +34,38 @@
             <version>1</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.8</version>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.kevoree</groupId>
+                                    <artifactId>org.kevoree.webeditor</artifactId>
+                                    <version>0.0.1-SNAPSHOT</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                            <excludes>**/*.class</excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 
 </project>

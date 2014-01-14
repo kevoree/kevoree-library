@@ -1,1 +1,0 @@
-define([],function(){function e(){}return e.prototype.execute=function(e){e.clearInstances()},e});

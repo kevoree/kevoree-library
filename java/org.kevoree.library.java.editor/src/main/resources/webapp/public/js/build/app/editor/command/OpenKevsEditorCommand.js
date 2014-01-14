@@ -1,1 +1,0 @@
-define(["jquery"],function(e){function t(){}return t.prototype.execute=function(t){e("#kevs-editor").modal({show:!0})},t});
