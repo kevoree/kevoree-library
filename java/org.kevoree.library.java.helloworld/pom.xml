@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.java.helloworld</artifactId>
     <name>Kevoree :: Library :: Java :: HelloWorld</name>
-    <version>3.1.4</version>
+    <version>3.1.5-SNAPSHOT</version>
 
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
         <groupId>org.kevoree.library.java</groupId>
-        <version>3.1.4</version>
+        <version>3.1.5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
