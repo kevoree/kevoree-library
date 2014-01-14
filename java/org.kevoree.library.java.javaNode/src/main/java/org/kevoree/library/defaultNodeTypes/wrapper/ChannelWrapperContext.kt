@@ -18,9 +18,9 @@ import org.kevoree.ContainerNode
 public class ChannelWrapperContext(val channelPath: String, val localNodePath: String, val modelService: ModelService) : ChannelContext {
 
     override fun getRemotePortPaths(): MutableList<String>? {
+        val result = ArrayList<String>()
         val channel = modelService.getCurrentModel()?.getModel()?.findByPath(channelPath) as? Channel
         if (channel != null) {
-            val result = ArrayList<String>()
             for (binding in channel.bindings) {
                 if ( (binding.port?.eContainer()?.eContainer() as? ContainerNode)?.name != localNodePath) {
                     if (binding.port != null) {
@@ -29,7 +29,7 @@ public class ChannelWrapperContext(val channelPath: String, val localNodePath: S
                 }
             }
         }
-        return null
+        return result
     }
 
     val portsBinded: MutableMap<String, Port> = HashMap<String, Port>()
