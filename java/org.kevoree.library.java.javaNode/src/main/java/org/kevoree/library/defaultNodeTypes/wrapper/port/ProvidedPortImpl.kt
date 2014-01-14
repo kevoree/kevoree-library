@@ -59,17 +59,11 @@ class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, v
     var paramSize = 0
 
     {
-
-        for (method in targetObj.javaClass.getDeclaredMethods()) {
-            if (method.getName() == name) {
-                if (method.getAnnotation(javaClass<Input>()) != null) {
-                    targetMethod = method;
-                    paramSize = method.getParameterTypes()!!.size
-                }
-            }
-        }
+        targetMethod = MethodResolver.resolve(name,targetObj.javaClass)
         if (targetMethod == null) {
             Log.error("Warning Provided port is not binded ... for name " + name)
+        } else {
+            paramSize = targetMethod!!.getParameterTypes()!!.size
         }
     }
 
