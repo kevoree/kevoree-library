@@ -7,9 +7,7 @@ import org.kevoree.log.Log;
 import org.kevoree.resolver.MavenResolver;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,7 +24,7 @@ public class CreateBaseContainer implements Runnable {
     public CreateBaseContainer(LXCNode lxcHostNode, LxcManager lxcManager) {
         this.lxcHostNode = lxcHostNode;
         this.lxcManager = lxcManager;
-        List<String> urls = new ArrayList<String>();
+        Set<String> urls = new HashSet<String>();
         MavenResolver resolver = new MavenResolver();
         for(Repository repo : lxcHostNode.modelService.getCurrentModel().getModel().getRepositories())
         {

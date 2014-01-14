@@ -16,6 +16,7 @@ import org.kevoree.ContainerRoot
 import org.kevoree.ContainerNode
 import org.kevoree.impl.DefaultKevoreeFactory
 import org.kevoree.log.Log
+import java.util.HashSet
 
 /**
  * Created with IntelliJ IDEA.
@@ -65,7 +66,11 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
         if (!isStarted) {
-            var platformJar = mavenResolver.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + DefaultKevoreeFactory().getVersion(), Arrays.asList("http://repo1.maven.org/maven2"));
+
+            var urls = HashSet<String>()
+            urls.add("http://repo1.maven.org/maven2")
+
+            var platformJar = mavenResolver.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + DefaultKevoreeFactory().getVersion(), urls);
             if (platformJar == null) {
                 Log.error("Can't download Kevoree platform, abording starting node")
                 return false

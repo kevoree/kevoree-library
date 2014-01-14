@@ -17,6 +17,7 @@ import java.io.FileOutputStream
 import org.kevoree.impl.DefaultKevoreeFactory
 import java.util.Arrays
 import org.kevoree.library.cloud.lightlxc.wrapper.ConfigGenerator
+import java.util.HashSet
 
 /**
  * Created with IntelliJ IDEA.
@@ -66,14 +67,16 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
     private val modelSaver = JSONModelSerializer()
 
 
-
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
         if (!isStarted) {
 
-            if(process!=null){
+            if (process != null) {
                 freeze(true)
             } else {
-                var platformJar = mavenResolver.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + DefaultKevoreeFactory().getVersion(), Arrays.asList("http://repo1.maven.org/maven2"));
+
+                var urls = HashSet<String>()
+                urls.add("http://repo1.maven.org/maven2")
+                var platformJar = mavenResolver.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + DefaultKevoreeFactory().getVersion(), urls);
                 if (platformJar == null) {
                     Log.error("Can't download Kevoree platform, abording starting node")
                     return false
