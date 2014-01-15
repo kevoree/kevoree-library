@@ -38,8 +38,8 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @KevoreeInject
     Context context;
 
-    @Param(optional = true, defaultValue = "false")
-    public Boolean debug;
+    @Param(optional = true, defaultValue = "INFO")
+    public String log;
 
     /**
      * java VM properties used when this node host some others (can also be used by the watchdog)
@@ -52,12 +52,12 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Start
     @Override
     public void startNode() {
+        updateNode();
         Log.debug("Starting node type of {}", this);
-        Log.info("Debug mode : {} ", debug);
+        Log.info("Log level: {} ", log);
         preTime = System.currentTimeMillis();
         modelService.registerModelListener(this);
         kompareBean = new KevoreeKompareBean(modelRegistry);
-        updateNode();
         wrapperFactory = createWrapperFactory(modelService.getNodeName());
         modelRegistry.registerFromPath(context.getPath(), this);
     }
@@ -79,6 +79,24 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Update
     @Override
     public void updateNode() {
+        if ("DEBUG".equalsIgnoreCase(log)) {
+            Log.set(Log.LEVEL_DEBUG);
+        } else if ("WARN".equalsIgnoreCase(log)) {
+            Log.set(Log.LEVEL_WARN);
+        } else if ("INFO".equalsIgnoreCase(log)) {
+            Log.set(Log.LEVEL_INFO);
+        } else if ("ERROR".equalsIgnoreCase(log)) {
+            Log.set(Log.LEVEL_ERROR);
+        } else if ("TRACE".equalsIgnoreCase(log)) {
+            Log.set(Log.LEVEL_TRACE);
+        } else if ("NONE".equalsIgnoreCase(log)) {
+            Log.set(Log.LEVEL_NONE);
+        } else {
+            // default value
+            Log.set(Log.LEVEL_INFO);
+            Log.warn("Unable to find the corresponding log level. Default value (INFO) is set.");
+            log = "INFO";
+        }
     }
 
     @Override
