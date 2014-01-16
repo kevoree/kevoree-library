@@ -13,9 +13,12 @@ public class LxcContants {
     public final static String lxcstop = "lxc-stop";
     public final static String lxcclone = "lxc-clone";
     public final static String lxccreate = "lxc-create";
+    public final static String lxcdestroy = "lxc-destroy";
     public final static String lxccgroup = "lxc-cgroup";
     public final static String lxcinfo = "lxc-info";
     public final static String lxcbackup ="lxc-backup";
     public final static String lxcexecute ="lxc-execute";
+    public final static String lxcconsole = "lxc-console";
+    public final static String lxcattach = "lxc-attach";
 
 }

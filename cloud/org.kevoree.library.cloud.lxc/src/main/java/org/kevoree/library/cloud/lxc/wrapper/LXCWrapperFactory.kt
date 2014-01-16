@@ -14,12 +14,12 @@ import org.kevoree.api.ModelService
  * Time: 09:59
  */
 
-class LXCWrapperFactory(nodeName: String) : WrapperFactory(nodeName) {
+class LXCWrapperFactory(nodeName: String, val lxc : LxcManager) : WrapperFactory(nodeName) {
 
     override fun wrap(modelElement: KMFContainer, newBeanInstance: Any, tg: ThreadGroup, bs: BootstrapService,modelService: ModelService): KInstanceWrapper {
         when(modelElement) {
             is ContainerNode -> {
-                return LXCNodeWrapper(modelElement, newBeanInstance, tg, bs)
+                return LXCNodeWrapper(modelElement, lxc, newBeanInstance, tg, bs)
             }
             else -> {
                 return super.wrap(modelElement, newBeanInstance, tg, bs,modelService)

@@ -14,11 +14,10 @@ import org.kevoree.log.Log
  * Time: 09:22
  */
 
-class LXCNodeWrapper(val modelElement: ContainerNode,override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
+class LXCNodeWrapper(val modelElement: ContainerNode, val lxc: LxcManager, override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
 
     override var isStarted: Boolean = false
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
-    var lxc : LxcManager =  LxcManager()
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
         return  lxc.start_container(modelElement)
@@ -27,13 +26,12 @@ class LXCNodeWrapper(val modelElement: ContainerNode,override val targetObj: Any
         return   lxc.stop_container(modelElement);
     }
 
-    override fun create(){
+    override fun create() {
         lxc.create_container(modelElement);
     }
 
     override fun destroy()
     {
-       Log.info("destroy");
         lxc.destroy_container(modelElement);
     }
 

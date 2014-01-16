@@ -1,13 +1,10 @@
 package org.kevoree.library.cloud.lxc.wrapper;
 
-import org.kevoree.Repository;
 import org.kevoree.api.handler.LockCallBack;
 import org.kevoree.library.cloud.lxc.LXCNode;
 import org.kevoree.log.Log;
-import org.kevoree.resolver.MavenResolver;
 
-import java.io.File;
-import java.util.*;
+import java.util.UUID;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,50 +21,32 @@ public class CreateBaseContainer implements Runnable {
     public CreateBaseContainer(LXCNode lxcHostNode, LxcManager lxcManager) {
         this.lxcHostNode = lxcHostNode;
         this.lxcManager = lxcManager;
-        Set<String> urls = new HashSet<String>();
-        MavenResolver resolver = new MavenResolver();
-        for(Repository repo : lxcHostNode.modelService.getCurrentModel().getModel().getRepositories())
-        {
-            urls.add(repo.getUrl());
-        }
-        urls.add("https://oss.sonatype.org/content/groups/public/");//not mandatory but for early release
-        File watchdog = resolver.resolve("org.kevoree.watchdog", "org.kevoree.watchdog", "RELEASE", "deb",urls);
-
-        if(watchdog != null && watchdog.exists())
-        {
-            lxcManager.setWatchdogLocalFile(watchdog);
-        }
-        else
-        {
-
-            Log.error("The LxcManager cannot download the kevoree watchdog");
-        }
     }
 
     @Override
     public void run() {
-        Log.info("Lock the model to create Kevoree base Container");
-        lxcHostNode.modelService.acquireLock(new LockCallBack() {
-            @Override
-            public void run(UUID uuid, Boolean locked) {
-                try {
-                    if (!locked) {
-                        lxcManager.install();
-                        lxcManager.createClone();
+        if (!lxcManager.getContainers().contains(lxcManager.clone_id)) {
+            Log.info("Lock the model to create Kevoree base Container");
+            lxcHostNode.modelService.acquireLock(new LockCallBack() {
+                @Override
+                public void run(UUID uuid, Boolean locked) {
+                    try {
+                        if (!locked) {
+                            lxcManager.install();
+                            lxcManager.createClone();
 
-                    } else {
-                        Log.error("Cannot lock the model to create the base container used for clone");
+                        } else {
+                            Log.error("Cannot lock the model to create the base container used for clone");
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        Log.info("Unlock the model to create Kevoree base Container");
+                        lxcHostNode.modelService.releaseLock(uuid);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }   finally
-                {
-                    Log.info("Unlock the model to create Kevoree base Container");
-                    lxcHostNode.modelService.releaseLock(uuid);
                 }
-            }
-        }, LXCNode.CREATE_CLONE_TIMEOUT);
-
+            }, LXCNode.CREATE_CLONE_TIMEOUT);
+        }
 
 
     }
