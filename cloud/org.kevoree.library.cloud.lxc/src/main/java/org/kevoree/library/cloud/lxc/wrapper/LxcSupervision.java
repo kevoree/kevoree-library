@@ -8,7 +8,6 @@ import org.kevoree.api.handler.UUIDModel;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.cloner.DefaultModelCloner;
 import org.kevoree.kevscript.KevScriptEngine;
-import org.kevoree.library.cloud.api.helper.CloudModelHelper;
 import org.kevoree.library.cloud.lxc.LXCNode;
 import org.kevoree.library.cloud.lxc.wrapper.utils.IPAddressValidator;
 import org.kevoree.log.Log;
@@ -73,32 +72,30 @@ public class LxcSupervision implements Runnable {
 
         String script = "";
         for (ContainerNode containerNode : lxcHostNode.modelService.getCurrentModel().getModel().findNodesByID(lxcHostNode.getNodeName()).getHosts()) {
-            if (CloudModelHelper.isASubType(containerNode.getTypeDefinition(), "LXCNode")) {
-                if (LxcManager.isRunning(containerNode.getName())) {
-                    String ip = LxcManager.getIP(containerNode.getName());
-                    if (ip != null) {
-                        if (ipvalidator.validate(ip)) {
-                            Boolean found = false;
-                            for (NetworkInfo n : containerNode.getNetworkInformation()) {
-                                for (NetworkProperty p : n.getValues()) {
-                                    if (ip.equals(p.getValue())) {
-                                        found = true;
-                                    }
+            if (LxcManager.isRunning(containerNode.getName())) {
+                String ip = LxcManager.getIP(containerNode.getName());
+                if (ip != null) {
+                    if (ipvalidator.validate(ip)) {
+                        Boolean found = false;
+                        for (NetworkInfo n : containerNode.getNetworkInformation()) {
+                            for (NetworkProperty p : n.getValues()) {
+                                if (ip.equals(p.getValue())) {
+                                    found = true;
                                 }
                             }
-                            if (!found) {
-                                Log.info("The Container {} has the IP address => {}", containerNode.getName(), ip);
-                                script = "network " + containerNode.getName() + ".ip.eth0 " + ip + "\n";
-                            }
-                        } else {
-                            Log.error("The format of the ip is not well defined");
                         }
+                        if (!found) {
+                            Log.info("The Container {} has the IP address => {}", containerNode.getName(), ip);
+                            script = "network " + containerNode.getName() + ".ip.eth0 " + ip + "\n";
+                        }
+                    } else {
+                        Log.error("The format of the ip is not well defined");
                     }
-                } else {
-                    if (containerNode.getStarted()) {
-                        Log.warn("The container {} is not running. Trying to start it", containerNode.getName());
-                        lxcManager.start_container(containerNode);
-                    }
+                }
+            } else {
+                if (containerNode.getStarted()) {
+                    Log.warn("The container {} is not running. Trying to start it", containerNode.getName());
+                    lxcManager.start_container(containerNode);
                 }
             }
         }
