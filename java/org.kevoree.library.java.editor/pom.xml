@@ -4,6 +4,10 @@
     <artifactId>org.kevoree.library.java.editor</artifactId>
     <name>Kevoree :: Library :: Java :: Editor</name>
     <version>3.1.5-SNAPSHOT</version>
+    
+    <properties>
+        <jetty-version>9.1.0.v20131115</jetty-version>
+    </properties>
 
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
@@ -21,17 +25,32 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.1.0.v20131115</version>
+            <version>${jetty-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-http</artifactId>
-            <version>9.1.0.v20131115</version>
+            <version>${jetty-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-client</artifactId>
+            <version>${jetty-version}</version>
         </dependency>
         <dependency>
             <groupId>org.kevoree.log</groupId>
             <artifactId>org.kevoree.log</artifactId>
             <version>1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.zafarkhaja</groupId>
+            <artifactId>java-semver</artifactId>
+            <version>0.7.2</version>
         </dependency>
     </dependencies>
 

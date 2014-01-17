@@ -2,13 +2,12 @@ package org.kevoree.library.java.editor;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.kevoree.annotation.*;
 import org.kevoree.api.ModelService;
 import org.kevoree.library.java.editor.handler.ClasspathResourceHandler;
-import org.kevoree.library.java.editor.handler.InitHandler;
+import org.kevoree.library.java.editor.handler.LoadHandler;
+import org.kevoree.library.java.editor.handler.MergeHandler;
 import org.kevoree.log.Log;
 
 /**
@@ -33,9 +32,14 @@ public class WebEditor {
     public void start() throws Exception {
         Log.debug("WebEditor START");
         server = new Server(port);
+
         Handler resourceHandler = new ClasspathResourceHandler();
+        Handler loadHandler = new LoadHandler();
+        Handler mergeHandler = new MergeHandler();
+
         HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] { resourceHandler});
+        handlers.setHandlers(new Handler[] { resourceHandler, loadHandler, mergeHandler });
+        
         server.setHandler(handlers);
         server.start();
     }

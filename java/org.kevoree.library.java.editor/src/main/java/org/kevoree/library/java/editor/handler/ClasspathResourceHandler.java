@@ -36,7 +36,5 @@ public class ClasspathResourceHandler extends AbstractHandler {
                 httpServletResponse.getWriter().write(res.read());
             }
         }
-
-
     }
 }

@@ -35,7 +35,7 @@ public class InitHandler extends AbstractHandler {
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println(strModel);
         } catch (Exception e) {
-            response.sendError(500, "Unable to serialize model");
+            response.sendError(500, "Unable to serialize parser");
         }
     }
 }
