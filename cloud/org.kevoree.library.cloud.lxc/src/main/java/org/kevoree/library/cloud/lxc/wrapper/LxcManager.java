@@ -149,11 +149,7 @@ public class LxcManager {
             BufferedReader input = new BufferedReader(new InputStreamReader(processcreate.getInputStream()));
             line = input.readLine();
             input.close();
-            if (line.contains("RUNNING")) {
-                return true;
-            } else {
-                return false;
-            }
+            return line.contains("RUNNING");
 
         } catch (Exception e) {
             return false;
@@ -163,26 +159,27 @@ public class LxcManager {
 
 
     private boolean lxc_stop_container(String id, boolean destroy) {
-        try {
+        if (!destroy) {
             Log.info("Stopping container " + id);
+        } else {
+            Log.info("Destroying container " + id);
+        }
+        try {
             Process lxcstopprocess = new ProcessBuilder(LxcContants.lxcstop, "-n", id).redirectErrorStream(true).start();
 
             FileManager.display_message_process(lxcstopprocess.getInputStream());
             lxcstopprocess.waitFor();
         } catch (Exception e) {
-            Log.error("lxc_stop_container ", e);
+            Log.error("Unable to stop the container {}", e, id);
             return false;
         }
         if (destroy) {
             try {
-                Log.info("Disabling the container " + id);
-
-                Process lxcstartprocess = new ProcessBuilder(LxcContants.lxcbackup, "-n", id).redirectErrorStream(true).start();
-                FileManager.display_message_process(lxcstartprocess.getInputStream());
-                lxcstartprocess.waitFor();
-
+                Process lxcstopprocess = new ProcessBuilder(LxcContants.lxcbackup, "-n", id).redirectErrorStream(true).start();
+                FileManager.display_message_process(lxcstopprocess.getInputStream());
+                lxcstopprocess.waitFor();
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.error("Unable to destroy the container {}", e, id);
                 return false;
             }
         }
