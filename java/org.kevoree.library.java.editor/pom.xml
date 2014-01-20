@@ -75,10 +75,9 @@
                                     <version>0.0.11-SNAPSHOT</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                                    <outputDirectory>${project.build.outputDirectory}/webapp</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
-                            <includes>**/*</includes>
                             <excludes>**/*.class</excludes>
                         </configuration>
                     </execution>
