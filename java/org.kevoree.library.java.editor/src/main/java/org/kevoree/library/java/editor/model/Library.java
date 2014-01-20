@@ -54,7 +54,6 @@ public class Library {
     }
     
     private String getLatest() {
-        System.out.println("nb versions = "+this.versions.size());
         String latest = this.versions.get(0);
         for (int i=1; i < this.versions.size(); i++) {
             Version v1 = Version.valueOf(latest);
