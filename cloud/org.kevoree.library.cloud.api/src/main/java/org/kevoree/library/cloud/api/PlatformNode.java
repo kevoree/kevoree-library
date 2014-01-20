@@ -1,7 +1,7 @@
 package org.kevoree.library.cloud.api;
 
-import org.kevoree.annotation.*;
-import org.kevoree.library.defaultNodeTypes.JavaNode;
+import org.kevoree.annotation.NodeType;
+import org.kevoree.annotation.Param;
 
 /**
  * User: Erwan Daubert - erwan.daubert@gmail.com
@@ -11,7 +11,7 @@ import org.kevoree.library.defaultNodeTypes.JavaNode;
  * @author Erwan Daubert
  * @version 1.0
  */
-//@NodeType(description = "Represents basic node information (Infrastructure or Platform node)")
+@NodeType(description = "Represents basic node information (Infrastructure or Platform node)")
 public interface PlatformNode {
 
     /**
