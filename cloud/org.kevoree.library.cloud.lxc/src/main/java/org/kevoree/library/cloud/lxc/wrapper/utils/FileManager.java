@@ -13,8 +13,6 @@
  */
 package org.kevoree.library.cloud.lxc.wrapper.utils;
 
-import org.kevoree.log.Log;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -159,29 +157,6 @@ public class FileManager {
             return copy.getAbsolutePath();
         }
         return null;
-    }
-
-    public static void display_message_process(final InputStream data){
-
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String line;
-                BufferedReader input =  new BufferedReader(new InputStreamReader(data));
-                try
-                {
-                    while ((line = input.readLine()) != null)
-                        Log.info(line);
-
-                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                }
-
-            }
-        });
-        t.start();
-
     }
 
 }

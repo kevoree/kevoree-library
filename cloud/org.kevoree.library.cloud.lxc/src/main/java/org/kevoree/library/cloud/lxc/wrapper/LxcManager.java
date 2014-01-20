@@ -2,9 +2,11 @@ package org.kevoree.library.cloud.lxc.wrapper;
 
 import org.kevoree.ContainerNode;
 import org.kevoree.ContainerRoot;
+import org.kevoree.DictionaryValue;
 import org.kevoree.impl.DefaultKevoreeFactory;
 import org.kevoree.kevscript.KevScriptEngine;
 import org.kevoree.library.cloud.api.helper.ProcessStreamFileLogger;
+import org.kevoree.library.cloud.api.helper.ResourceConstraintManager;
 import org.kevoree.library.cloud.lxc.wrapper.utils.FileManager;
 import org.kevoree.library.cloud.lxc.wrapper.utils.SystemHelper;
 import org.kevoree.log.Log;
@@ -27,46 +29,71 @@ public class LxcManager {
     final String clone_id = "baseclonekevoree";     // fix me
 
     private String initialTemplate;
+    private ResourceConstraintManager constraintManager;
 
-    public LxcManager(String initialTemplate) {
+    public LxcManager(String initialTemplate, ResourceConstraintManager constraintManager) {
         this.initialTemplate = initialTemplate;
+        this.constraintManager = constraintManager;
     }
 
-
-    public boolean create_container(ContainerNode node) {
+    public boolean createContainer(ContainerNode node) {
         try {
-            Log.debug("LxcManager : " + node.getName() + " clone =>" + clone_id);
             if (!getContainers().contains(node.getName())) {
-                Log.debug("Creating container " + node.getName() + " OS " + clone_id);
+                File standardOutput = File.createTempFile(node.getName(), ".log");
+                Log.debug("Creating container using {} as clone", node.getName(), clone_id);
                 Process processcreate = new ProcessBuilder(LxcContants.lxcclone, "-o", clone_id, "-n", node.getName()).redirectErrorStream(true).start();
-                FileManager.display_message_process(processcreate.getInputStream());
-                processcreate.waitFor();
+                new Thread(new ProcessStreamFileLogger(processcreate.getInputStream(), standardOutput)).start();
+                if (processcreate.waitFor() == 0) {
+                    standardOutput.delete();
+                    return true;
+                } else {
+                    Log.error("Unable to create container {} using clone {}. Please look at {} for further information.", node.getName(), clone_id, standardOutput.getAbsolutePath());
+                    return false;
+                }
             } else {
-                Log.warn("Container {} already exists", node.getName());
+                Log.debug("Container {} already exists so it is not created", node.getName());
+                return true;
             }
         } catch (Exception e) {
-            Log.error("create_container {} clone =>{}", node.getName(), clone_id, e);
+            Log.error("Unable to create container {} using clone {}", e, node.getName(), clone_id);
             return false;
         }
-        return true;
     }
 
-    public boolean start_container(ContainerNode node) {
+    public boolean startContainer(ContainerNode node) {
+        String[] cmd = new String[]{LxcContants.lxcstart, "-n", node.getName(), "-d"};
+        if (node.getDictionary() != null) {
+            DictionaryValue dictionaryValue = node.getDictionary().findValuesByID("ARCH");
+            if (dictionaryValue != null) {
+                cmd = new String[]{LxcContants.lxcstart, "-n", node.getName(), "-d", "-s", "lxc.arch=" + dictionaryValue.getValue()};
+            }
+        }
         try {
-            Log.debug("Starting container " + node.getName());
-            Process lxcstartprocess = new ProcessBuilder(LxcContants.lxcstart, "-n", node.getName(), "-d").start();
-            FileManager.display_message_process(lxcstartprocess.getInputStream());
-            lxcstartprocess.waitFor();
+            File standardOutput = File.createTempFile(node.getName(), ".log");
+            Log.debug("Starting container {}", node.getName());
+            Process lxcstartprocess = new ProcessBuilder(cmd).start();
+            new Thread(new ProcessStreamFileLogger(lxcstartprocess.getInputStream(), standardOutput)).start();
+            if (lxcstartprocess.waitFor() == 0) {
+                standardOutput.delete();
+                constraintManager.defineConstraints(node);
+                return true;
+            } else {
+                Log.error("Unable to start the container {}. Please look at {} for further information.", node.getName(), standardOutput.getAbsolutePath());
+                return false;
+            }
         } catch (Exception e) {
-            Log.error("start_container", e);
+            Log.error("Unable to start the container {}", e, node.getName());
             return false;
         }
-        return true;
+    }
+
+    public boolean defineConstraints(ContainerNode node) {
+        return constraintManager.defineConstraints(node);
     }
 
     public List<String> getBackupContainers() {
         List<String> containers = new ArrayList<String>();
-        Process processcreate = null;
+        Process processcreate;
         try {
             processcreate = new ProcessBuilder("/bin/lxc-backup-list-containers").redirectErrorStream(true).start();
 
@@ -77,7 +104,7 @@ public class LxcManager {
             }
             input.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.debug("Unable to get backup containers list", e);
         }
         return containers;
     }
@@ -95,7 +122,7 @@ public class LxcManager {
             }
             input.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.debug("Unable to get containers list", e);
         }
         return containers;
     }
@@ -103,29 +130,40 @@ public class LxcManager {
     /**
      * Generate the model of the system
      *
-     * @param nodename
+     * @param nodeName
      * @param root
      * @return
-     * @throws Exception
      */
-    public boolean createModelFromSystem(String nodename, ContainerRoot root) throws Exception {
+    public boolean createModelFromSystem(String nodeName, ContainerRoot root) {
 
         KevScriptEngine engine = new KevScriptEngine();
         StringBuilder script = new StringBuilder();
 
-        boolean updateIsDone = false;
+        boolean updateIsNeeded = false;
         if (getContainers().size() > 0) {
             for (String node_child_id : getContainers()) {
                 if (!node_child_id.equals(clone_id)) {
-                    script.append("add " + nodename + "." + node_child_id + " : LXCNode\n");
-                    updateIsDone = true;
+                    script.append("add ").append(nodeName).append(".").append(node_child_id).append(" : LXCNode\n");
+                    if (isRunning(nodeName)) {
+                        script.append("set ").append(nodeName).append(".started = 'true'\n");
+                    } else {
+                        script.append("set ").append(nodeName).append(".started = 'false'\n");
+                    }
+                    updateIsNeeded = true;
                 }
             }
         }
-        if (updateIsDone) {
-            engine.execute(script.toString(), root);
+        if (updateIsNeeded) {
+            try {
+                engine.execute(script.toString(), root);
+                return true;
+            } catch (Exception e) {
+                Log.debug("Unable to apply the kevScript:\n{}", e, script.toString());
+                return false;
+            }
+        } else {
+            return false;
         }
-        return updateIsDone;
     }
 
     public synchronized static String getIP(String id) {
@@ -137,6 +175,7 @@ public class LxcManager {
             input.close();
             return line;
         } catch (Exception e) {
+            Log.debug("Unable to find IP for container {}", e, id);
             return null;
         }
 
@@ -152,96 +191,112 @@ public class LxcManager {
             return line.contains("RUNNING");
 
         } catch (Exception e) {
+            Log.debug("Unable to know if container {} is running", e, id);
             return false;
         }
 
     }
 
 
-    private boolean lxc_stop_container(String id, boolean destroy) {
+    private boolean stopNDestroy(String id, boolean destroy) {
         if (!destroy) {
             Log.info("Stopping container " + id);
         } else {
             Log.info("Destroying container " + id);
         }
         try {
+            File standardOutput = File.createTempFile(id, ".log");
             Process lxcstopprocess = new ProcessBuilder(LxcContants.lxcstop, "-n", id).redirectErrorStream(true).start();
 
-            FileManager.display_message_process(lxcstopprocess.getInputStream());
-            lxcstopprocess.waitFor();
+            new Thread(new ProcessStreamFileLogger(lxcstopprocess.getInputStream(), standardOutput)).start();
+            if (lxcstopprocess.waitFor() == 0) {
+                standardOutput.delete();
+                if (destroy) {
+                    try {
+                        lxcstopprocess = new ProcessBuilder(LxcContants.lxcbackup, "-n", id).redirectErrorStream(true).start();
+                        new Thread(new ProcessStreamFileLogger(lxcstopprocess.getInputStream(), standardOutput)).start();
+                        if (lxcstopprocess.waitFor() == 0) {
+                            standardOutput.delete();
+                            return true;
+                        } else {
+                            Log.warn("Unable to destroy container {}. Please look at {} for further information.", id, standardOutput.getAbsolutePath());
+                            return false;
+                        }
+                    } catch (Exception e) {
+                        Log.error("Unable to destroy the container {}", e, id);
+                        return false;
+                    }
+                } else {
+                    return true;
+                }
+            } else {
+                Log.warn("Unable to stop container {}. Please look at {} for further information.", id, standardOutput.getAbsolutePath());
+                return false;
+            }
         } catch (Exception e) {
             Log.error("Unable to stop the container {}", e, id);
             return false;
         }
-        if (destroy) {
-            try {
-                Process lxcstopprocess = new ProcessBuilder(LxcContants.lxcbackup, "-n", id).redirectErrorStream(true).start();
-                FileManager.display_message_process(lxcstopprocess.getInputStream());
-                lxcstopprocess.waitFor();
-            } catch (Exception e) {
-                Log.error("Unable to destroy the container {}", e, id);
-                return false;
-            }
-        }
-
-
-        return true;
     }
 
-    public boolean stop_container(ContainerNode node) {
-        return lxc_stop_container(node.getName(), false);
+    public boolean stopContainer(ContainerNode node) {
+        return stopNDestroy(node.getName(), false);
     }
 
-    public boolean destroy_container(ContainerNode node) {
-        return lxc_stop_container(node.getName(), true);
+    public boolean destroyContainer(ContainerNode node) {
+        return stopNDestroy(node.getName(), true);
     }
 
     public void createClone() throws Exception {
         if (!getContainers().contains(clone_id)) {
+            boolean throwException = false;
             Log.info("Creating Kevoree Base Container");
             File standardOutput = File.createTempFile(clone_id, ".log");
             Process lxccreateprocess = new ProcessBuilder(LxcContants.lxccreate, "-n", clone_id, "-t", initialTemplate).redirectErrorStream(true).start();
             new Thread(new ProcessStreamFileLogger(lxccreateprocess.getInputStream(), standardOutput)).start();
-            lxccreateprocess.waitFor();
+            if (lxccreateprocess.waitFor() == 0) {
+                // start Kevoree Base Container
+                Log.debug("Starting Kevoree Base Container");
+                Process lxcstartprocess = new ProcessBuilder(LxcContants.lxcstart, "-n", clone_id, "-d").redirectErrorStream(true).start();
+                new Thread(new ProcessStreamFileLogger(lxcstartprocess.getInputStream(), standardOutput)).start();
+                if (lxcstartprocess.waitFor() == 0) {
+                    // configure the clone with some specificities
+                    Log.debug("Configuring Kevoree Base Container with some specificities");
+                    Process lxcConsole = new ProcessBuilder(LxcContants.lxcattach, "-n", clone_id, "--").redirectErrorStream(true).start();
+                    new Thread(new ProcessStreamFileLogger(lxcConsole.getInputStream(), standardOutput)).start();
 
-            // start Kevoree Base Container
-            Log.debug("Starting Kevoree Base Container");
-            Process lxcstartprocess = new ProcessBuilder(LxcContants.lxcstart, "-n", clone_id, "-d").redirectErrorStream(true).start();
-            new Thread(new ProcessStreamFileLogger(lxcstartprocess.getInputStream(), standardOutput)).start();
-            lxcstartprocess.waitFor();
+                    String kevoreeTemplate = new String(FileManager.load(LxcManager.class.getClassLoader().getResourceAsStream("kevoree-template-specific")));
 
+                    try {
+                        OutputStream stream = lxcConsole.getOutputStream();
+                        stream.write(kevoreeTemplate.getBytes());
+                        stream.flush();
 
-            // configure the clone with some specificities
-            Log.debug("Configuring Kevoree Base Container with some specificities");
-            Process lxcConsole = new ProcessBuilder(LxcContants.lxcattach, "-n", clone_id, "--").redirectErrorStream(true).start();
-            new Thread(new ProcessStreamFileLogger(lxcConsole.getInputStream(), standardOutput)).start();
+                    } catch (IOException e) {
+                        lxcConsole.destroy();
+                    } finally {
+                        int result = lxcConsole.waitFor();
+                        if (result == 0) {
+                            standardOutput.delete();
+                        } else {
+                            Log.error("Unable to build a proper Kevoree Base Container. Please have a look to {} for more information", standardOutput.getAbsolutePath());
+                            throwException = true;
+                        }
+                    }
 
-            String kevoreeTemplate = new String(FileManager.load(LxcManager.class.getClassLoader().getResourceAsStream("kevoree-template-specific")));
-
-            boolean throwException = false;
-            try {
-                OutputStream stream = lxcConsole.getOutputStream();
-                stream.write(kevoreeTemplate.getBytes());
-                stream.flush();
-
-            } catch (IOException e) {
-                lxcConsole.destroy();
-            } finally {
-                int result = lxcConsole.waitFor();
-                if (result == 0) {
-                    standardOutput.delete();
+                    // stop Kevoree Base Container
+                    Log.debug("Stopping Kevoree Base Container");
+                    Process lxcstopprocess = new ProcessBuilder(LxcContants.lxcstop, "-n", clone_id).redirectErrorStream(true).start();
+                    new Thread(new ProcessStreamFileLogger(lxcstopprocess.getInputStream(), new File("/dev/null"))).start();
+                    lxcstopprocess.waitFor();
                 } else {
-                    Log.error("Unable to build a proper Kevoree Base Container. Please have a look to {} for more information", standardOutput.getAbsolutePath());
+                    Log.error("Unable to start Kevoree Base Container to finish its configuration. Please have a look to {} for more information", standardOutput.getAbsolutePath());
                     throwException = true;
                 }
+            } else {
+                Log.error("Unable to create Kevoree Base Container. Please have a look to {} for more information", standardOutput.getAbsolutePath());
+                throwException = true;
             }
-
-            // stop Kevoree Base Container
-            Log.debug("Stopping Kevoree Base Container");
-            Process lxcstopprocess = new ProcessBuilder(LxcContants.lxcstop, "-n", clone_id).redirectErrorStream(true).start();
-            new Thread(new ProcessStreamFileLogger(lxcstopprocess.getInputStream(), new File("/dev/null"))).start();
-            lxcstopprocess.waitFor();
-
             if (throwException) {
                 // do we need to remove the Kevoree Base Container ?
                 Process lxcdestroyprocess = new ProcessBuilder(LxcContants.lxcdestroy, "-n", clone_id).redirectErrorStream(true).start();
@@ -250,11 +305,6 @@ public class LxcManager {
                 throw new Exception("Unable to define Kevoree Base Container.");
             }
         }
-    }
-
-
-    public void copy(String file, String path) throws IOException {
-        FileManager.copyFileFromStream(LxcManager.class.getClassLoader().getResourceAsStream(file), path, file, true);
     }
 
     public void allow_exec(String path_file_exec) throws IOException {
@@ -274,23 +324,22 @@ public class LxcManager {
     public void install() throws IOException {
         Log.info("install lxc tools");
 
-        copy("lxc-ip", "/bin");
+        FileManager.copyFileFromStream(LxcManager.class.getClassLoader().getResourceAsStream("lxc-ip"), "/bin", "lxc-ip", true);
         allow_exec("/bin/lxc-ip");
 
-        copy("lxc-list-containers", "/bin");
+        FileManager.copyFileFromStream(LxcManager.class.getClassLoader().getResourceAsStream("lxc-list-containers"), "/bin", "lxc-list-containers", true);
         allow_exec("/bin/lxc-list-containers");
 
-        copy("lxc-backup", "/bin");
+        FileManager.copyFileFromStream(LxcManager.class.getClassLoader().getResourceAsStream("lxc-backup"), "/bin", "lxc-backup", true);
         allow_exec("/bin/lxc-backup");
 
-        copy("lxc-backup-list-containers", "/bin");
+        FileManager.copyFileFromStream(LxcManager.class.getClassLoader().getResourceAsStream("lxc-backup-list-containers"), "/bin", "lxc-backup-list-containers", true);
         allow_exec("/bin/lxc-backup-list-containers");
 
-        copy("lxc-restore", "/bin");
+        FileManager.copyFileFromStream(LxcManager.class.getClassLoader().getResourceAsStream("lxc-restore"), "/bin", "lxc-restore", true);
         allow_exec("/bin/lxc-restore");
 
-        copy("lxc-backup-list-containers", "/bin");
+        FileManager.copyFileFromStream(LxcManager.class.getClassLoader().getResourceAsStream("lxc-backup-list-containers"), "/bin", "lxc-backup-list-containers", true);
         allow_exec("/bin/lxc-backup-list-containers");
     }
-
 }

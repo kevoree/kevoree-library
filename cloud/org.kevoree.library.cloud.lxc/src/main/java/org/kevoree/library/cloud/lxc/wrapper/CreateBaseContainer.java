@@ -26,23 +26,21 @@ public class CreateBaseContainer implements Runnable {
     @Override
     public void run() {
         if (!lxcManager.getContainers().contains(lxcManager.clone_id)) {
-            Log.info("Lock the model to create Kevoree base Container");
+            Log.debug("Lock the model to create Kevoree base Container");
             lxcHostNode.modelService.acquireLock(new LockCallBack() {
                 @Override
-                public void run(UUID uuid, Boolean locked) {
-                    try {
-                        if (!locked) {
+                public void run(UUID uuid, Boolean error) {
+                    if (uuid != null && !error) {
+                        try {
                             lxcManager.install();
                             lxcManager.createClone();
-
-                        } else {
-                            Log.error("Cannot lock the model to create the base container used for clone");
+                        } catch (Exception e) {
+                            Log.error("Unable to configure current system to manage LXC containers", e);
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        Log.info("Unlock the model to create Kevoree base Container");
+                        Log.debug("Unlock the model to create Kevoree base Container");
                         lxcHostNode.modelService.releaseLock(uuid);
+                    } else {
+                        Log.error("Cannot lock the model to create the base container used for clone");
                     }
                 }
             }, LXCNode.CREATE_CLONE_TIMEOUT);

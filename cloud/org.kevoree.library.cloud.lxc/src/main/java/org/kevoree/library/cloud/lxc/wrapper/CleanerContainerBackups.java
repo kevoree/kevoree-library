@@ -43,7 +43,7 @@ public class CleanerContainerBackups implements Runnable {
             long diff = (today.getTime() -  lxcnode.lastModified()) / (1000*60*60*24);
 
             if(diff > daysretentions ){
-                Log.info("WatchBackupsContainers is destroying "+node);
+                Log.debug("WatchBackupsContainers is destroying "+node);
                 // backup has more than 30 days
                 FileManager.deleteOldFile(lxcnode);
             } else {
