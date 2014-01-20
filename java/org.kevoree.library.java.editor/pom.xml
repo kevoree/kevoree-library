@@ -72,12 +72,13 @@
                                 <artifactItem>
                                     <groupId>org.kevoree</groupId>
                                     <artifactId>org.kevoree.webeditor</artifactId>
-                                    <version>0.0.1-SNAPSHOT</version>
+                                    <version>0.0.11-SNAPSHOT</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/classes</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
+                            <includes>**/*</includes>
                             <excludes>**/*.class</excludes>
                         </configuration>
                     </execution>
