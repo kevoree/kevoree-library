@@ -18,7 +18,6 @@ public class Library {
 
     private String groupId;
     private String artifactId;
-    private String latest;
     private String simpleName;
     private List<String> versions;
     
