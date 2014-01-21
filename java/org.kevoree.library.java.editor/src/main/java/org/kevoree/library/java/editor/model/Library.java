@@ -19,6 +19,12 @@ public class Library {
     private String groupId;
     private String artifactId;
     private String simpleName;
+    private String type;
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     private List<String> versions;
     
     public Library() {
@@ -43,9 +49,10 @@ public class Library {
     
     public JsonObject toJsonObject() {
         JsonObject obj = new JsonObject();
-        obj.add("groupID", new JsonPrimitive(groupId));
+        if (groupId != null) obj.add("groupID", new JsonPrimitive(groupId));
         obj.add("artifactID", new JsonPrimitive(artifactId));
         obj.add("simpleName", new JsonPrimitive(simpleName));
+        if (type != null) obj.add("type", new JsonPrimitive(type));
         obj.add("latest", new JsonPrimitive(getLatest()));
         JsonArray jsonVersions = new JsonArray();
         for (String version : versions) jsonVersions.add(new JsonPrimitive(version));
