@@ -30,4 +30,7 @@ PING_PORT=9999
 PING_TIMEOUT=3000
 EOF
 
+echo "Configure File descriptor limitation"
+sysctl -w fs.file-max=40000
+
 exit

@@ -4,6 +4,7 @@ import org.kevoree.annotation.KevoreeInject;
 import org.kevoree.annotation.NodeType;
 import org.kevoree.annotation.Param;
 import org.kevoree.api.Context;
+import org.kevoree.library.cloud.api.PlatformNode;
 import org.kevoree.library.cloud.lxc.wrapper.*;
 import org.kevoree.library.defaultNodeTypes.JavaNode;
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
@@ -19,12 +20,13 @@ import java.util.concurrent.TimeUnit;
  */
 
 @NodeType
-public class LXCNode extends JavaNode {
+public class LXCNode extends JavaNode implements PlatformNode {
 
     @KevoreeInject
     protected Context context;
 
     public static final long CREATE_CLONE_TIMEOUT = 180000l;      // todo add dico
+    public static final long SUPERVISION_TIMEOUT = 10000l;      // todo add dico
     private LxcManager lxcManager;
     private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
@@ -40,7 +42,9 @@ public class LXCNode extends JavaNode {
 
     @Override
     public void startNode() {
-        lxcManager = new LxcManager(initialTemplate);
+        // TODO check if the node is run on top of a linux OS and maybe also check if LXC is well configured (?)
+
+        lxcManager = new LxcManager(initialTemplate, new LxcRessourceConstraintManager());
         super.startNode();
         cleaner = new CleanerContainerBackups(this, lxcManager);    // in charge of remove the backup models
         createBaseContainer = new CreateBaseContainer(this, lxcManager);     // in charge of create the base container
@@ -49,7 +53,12 @@ public class LXCNode extends JavaNode {
         // schedule the tasks
         executor.schedule(createBaseContainer, 10, TimeUnit.SECONDS);
         executor.scheduleAtFixedRate(cleaner, 1, 1, TimeUnit.DAYS);
-        executor.scheduleAtFixedRate(supervision, 5, 5, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(supervision, 1, 30, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void stopNode() {
+        executor.shutdown();
     }
 
     @Override

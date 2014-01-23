@@ -134,15 +134,12 @@ $(function () {
     }
 
     function lookingForIPs(nodePath) {
-        console.log("Looking for IP on " + nodePath);
         var ips = "";
         var node = model.findByPath(nodePath);
-        console.log(node.networkInformation);
         for (var i = 0; i < node.networkInformation.$size; i++) {
             var networkInfo = node.networkInformation.get(i);
             for (var j = 0; j < networkInfo.values.$size; j++) {
                 var networkProperty = networkInfo.values.get(j);
-                console.log(networkProperty);
                 if (ips === "") {
                     ips = networkProperty.value;
                 } else {

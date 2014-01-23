@@ -20,19 +20,19 @@ class LXCNodeWrapper(val modelElement: ContainerNode, val lxc: LxcManager, overr
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
-        return  lxc.start_container(modelElement)
+        return  lxc.startContainer(modelElement)
     }
     override fun kInstanceStop(tmodel: ContainerRoot): Boolean {
-        return   lxc.stop_container(modelElement);
+        return   lxc.stopContainer(modelElement);
     }
 
     override fun create() {
-        lxc.create_container(modelElement);
+        lxc.createContainer(modelElement);
     }
 
     override fun destroy()
     {
-        lxc.destroy_container(modelElement);
+        lxc.destroyContainer(modelElement);
     }
 
 }

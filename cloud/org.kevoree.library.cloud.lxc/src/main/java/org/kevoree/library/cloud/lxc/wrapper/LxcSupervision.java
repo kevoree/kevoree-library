@@ -4,7 +4,7 @@ import org.kevoree.ContainerNode;
 import org.kevoree.ContainerRoot;
 import org.kevoree.NetworkInfo;
 import org.kevoree.NetworkProperty;
-import org.kevoree.api.handler.UUIDModel;
+import org.kevoree.api.handler.LockCallBack;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.cloner.DefaultModelCloner;
 import org.kevoree.kevscript.KevScriptEngine;
@@ -14,6 +14,7 @@ import org.kevoree.log.Log;
 import org.kevoree.modeling.api.ModelCloner;
 
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -27,7 +28,7 @@ public class LxcSupervision implements Runnable {
     private LXCNode lxcHostNode;
     private LxcManager lxcManager;
     private IPAddressValidator ipvalidator = new IPAddressValidator();
-    private boolean starting = true;
+    //    private boolean starting = true;
     ModelCloner cloner = new DefaultModelCloner();
 
     private EmptyCallback callback = new EmptyCallback();
@@ -39,39 +40,54 @@ public class LxcSupervision implements Runnable {
 
     @Override
     public void run() {
-        ContainerRoot model;
-        if (starting) {
-            model = lxcHostNode.modelService.getCurrentModel().getModel();
-            ContainerNode nodeElement = model.findNodesByID(lxcHostNode.getNodeName());
-            List<String> lxcNodes = lxcManager.getContainers();
-            boolean updateIsNeeded = false;
-            if (lxcNodes.size() > nodeElement.getHosts().size()) {
-                updateIsNeeded = true;
-            }
-            if (!updateIsNeeded) {
-                for (String nodeName : lxcNodes) {
-                    if (model.findNodesByID(nodeName).getHost().getName().equals(nodeElement.getName())) {
-                        updateIsNeeded = true;
-                        break;
-                    }
-                }
-            }
-            if (updateIsNeeded) {
-                try {
-                    model = cloner.clone(lxcHostNode.modelService.getCurrentModel().getModel());
-                    UUIDModel uuidModel = lxcHostNode.modelService.getCurrentModel();
-                    if (lxcManager.createModelFromSystem(lxcHostNode.getNodeName(), model)) {
-                        lxcHostNode.modelService.compareAndSwap(model, uuidModel.getUUID(), callback);
-                    }
-                } catch (Exception e) {
-                    Log.error("Unable to update the model from lxc-ls", e);
-                }
-            }
-            starting = false;
-        }
 
+        lxcHostNode.modelService.acquireLock(new LockCallBack() {
+            @Override
+            public void run(final UUID uuid, Boolean error) {
+                if (uuid != null && !error) {
+                    Log.debug("Lock the model to manage supervision");
+                    ContainerRoot model;
+                    model = lxcHostNode.modelService.getCurrentModel().getModel();
+                    ContainerNode nodeElement = model.findNodesByID(lxcHostNode.getNodeName());
+                    List<String> lxcNodes = lxcManager.getContainers();
+                    boolean updateIsNeeded = false;
+                    if (lxcNodes.size() - 1 > nodeElement.getHosts().size()) { // -1 correspond to the basekevoreecontainer which is use to clone
+                        updateIsNeeded = true;
+                    }
+                    if (!updateIsNeeded) {
+                        for (String nodeName : lxcNodes) {
+                            if (model.findNodesByID(nodeName) != null) {
+                                updateIsNeeded = true;
+                                break;
+                            }
+                        }
+                    }
+                    boolean updateMustBeApplied = false;
+                    if (updateIsNeeded) {
+                        model = cloner.clone(lxcHostNode.modelService.getCurrentModel().getModel());
+                        if (lxcManager.createModelFromSystem(lxcHostNode.getNodeName(), model)) {
+//                                    lxcHostNode.modelService.compareAndSwap(model, uuid, callback);
+                            updateMustBeApplied = true;
+                        }
+                    } else {
+                        Log.error("Unable to update the model according to existing containers (not defined on the model)");
+                    }
+
+                    callback.initialize(uuid);
+                    if (manageIPAddresses(model) || updateMustBeApplied) {
+                        lxcHostNode.modelService.compareAndSwap(model, uuid, callback);
+                    } else {
+                        callback.run(false);
+                    }
+                }
+            }
+        }, LXCNode.SUPERVISION_TIMEOUT);
+    }
+
+    private boolean manageIPAddresses(ContainerRoot model) {
+        Log.debug("Trying to update ip addresses for already known containers");
         String script = "";
-        for (ContainerNode containerNode : lxcHostNode.modelService.getCurrentModel().getModel().findNodesByID(lxcHostNode.getNodeName()).getHosts()) {
+        for (ContainerNode containerNode : model.findNodesByID(lxcHostNode.getNodeName()).getHosts()) {
             if (LxcManager.isRunning(containerNode.getName())) {
                 String ip = LxcManager.getIP(containerNode.getName());
                 if (ip != null) {
@@ -85,7 +101,7 @@ public class LxcSupervision implements Runnable {
                             }
                         }
                         if (!found) {
-                            Log.info("The Container {} has the IP address => {}", containerNode.getName(), ip);
+                            Log.debug("The Container {} has the IP address => {}", containerNode.getName(), ip);
                             script = "network " + containerNode.getName() + ".ip.eth0 " + ip + "\n";
                         }
                     } else {
@@ -94,30 +110,37 @@ public class LxcSupervision implements Runnable {
                 }
             } else {
                 if (containerNode.getStarted()) {
-                    Log.warn("The container {} is not running. Trying to start it", containerNode.getName());
-                    lxcManager.start_container(containerNode);
+                    // FIXME Do we really need to start the node ?
+                    Log.warn("The container {} is not running while it must be running. Trying to start it", containerNode.getName());
+                    lxcManager.startContainer(containerNode);
                 }
             }
         }
 
-        if (!script.equals("")) {
+        if (!"".equals(script)) {
             try {
-                model = cloner.clone(lxcHostNode.modelService.getCurrentModel().getModel());
-                UUIDModel uuidModel = lxcHostNode.modelService.getCurrentModel();
                 KevScriptEngine engine = new KevScriptEngine();
                 engine.execute(script, model);
-                lxcHostNode.modelService.compareAndSwap(model, uuidModel.getUUID(), callback);
+                return true;
             } catch (Exception e) {
                 Log.error("Unable to update the model with the IP addresses", e);
             }
         }
+        return false;
     }
 
     private class EmptyCallback implements UpdateCallback {
 
+        private UUID uuid;
+
+        private void initialize(UUID uuid) {
+            this.uuid = uuid;
+        }
+
         @Override
         public void run(Boolean aBoolean) {
-
+            Log.debug("Unlock model after managing supervision");
+            lxcHostNode.modelService.releaseLock(uuid);
         }
     }
 }

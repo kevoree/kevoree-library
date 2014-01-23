@@ -2,6 +2,7 @@ package org.kevoree.sky.web;
 
 import org.kevoree.ContainerRoot;
 import org.kevoree.api.ModelService;
+import org.kevoree.api.handler.LockCallBack;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.loader.JSONModelLoader;
@@ -13,6 +14,7 @@ import org.webbitserver.WebSocketConnection;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,6 +28,9 @@ public class ModelServiceSocketHandler extends BaseWebSocketHandler implements M
     private ArrayList<WebSocketConnection> connections = new ArrayList<WebSocketConnection>();
     private JSONModelSerializer jsonSaver = new JSONModelSerializer();
     private JSONModelLoader jsonLoader = new JSONModelLoader();
+
+
+    private RepeatLockCallBack callback = new RepeatLockCallBack();
 
     public ModelServiceSocketHandler(ModelService _modelService) {
         modelService = _modelService;
@@ -52,17 +57,58 @@ public class ModelServiceSocketHandler extends BaseWebSocketHandler implements M
     }
 
     public void onMessage(WebSocketConnection connection, String message) {
-        try {
-            ContainerRoot model = (ContainerRoot) jsonLoader.loadModelFromString(message).get(0);
-            broadcastMessage("event=update");
-            modelService.update(model, new UpdateCallback() {
-                @Override
-                public void run(Boolean applied) {
-                    broadcastMessage("event=done");
-                }
-            });
-        } catch (Exception e) {
-            Log.error("Can't send base model", e);
+        ContainerRoot model = (ContainerRoot) jsonLoader.loadModelFromString(message).get(0);
+        broadcastMessage("event=update");
+        int index = 10;
+        boolean updateDone;
+        while (!(updateDone = applyUpdate(model)) && index > 0) {
+            index--;
+        }
+        if (!updateDone) {
+            Log.error("After many tries (10), it is not possible to update the current configuration...");
+        }
+    }
+
+    private boolean applyUpdate(final ContainerRoot model) {
+        callback.initialize(model);
+        modelService.acquireLock(callback, 10000l);
+        return callback.isUpdateDone();
+    }
+
+    private class RepeatLockCallBack implements LockCallBack {
+        private boolean updateDone;
+        private ContainerRoot model;
+
+        private RepeatLockCallBack() {
+        }
+
+        void initialize(ContainerRoot model) {
+            updateDone = false;
+            this.model = model;
+        }
+
+        @Override
+        public void run(UUID uuid, Boolean error) {
+            if (uuid != null && !error) {
+                modelService.compareAndSwap(model, uuid, new UpdateCallback() {
+                    @Override
+                    public void run(Boolean applied) {
+                        broadcastMessage("event=done");
+                        updateDone = true;
+                        notify();
+                    }
+                });
+            } else {
+                notify();
+            }
+        }
+
+        public boolean isUpdateDone() {
+            try {
+                wait(10000);
+            } catch (InterruptedException ignored) {
+            }
+            return updateDone;
         }
     }
 
