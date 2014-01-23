@@ -1,5 +1,6 @@
 package org.kevoree.library.channels;
 
+import com.rits.cloning.Cloner;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
 import org.kevoree.api.ChannelContext;
@@ -19,6 +20,9 @@ import java.util.concurrent.*;
 @Library(name = "Java :: Channels")
 public class DelayBufferedBroadcast implements ChannelDispatch, Runnable {
 
+    @Param(defaultValue = "false")
+    boolean clone;
+
     class QueuedElement {
         Object payload;
         Callback callback;
@@ -32,6 +36,7 @@ public class DelayBufferedBroadcast implements ChannelDispatch, Runnable {
 
     private ScheduledExecutorService executor;
     private ArrayBlockingQueue<QueuedElement> queue = new ArrayBlockingQueue<QueuedElement>(30);
+    private Cloner cloner = new Cloner();
 
     public DelayBufferedBroadcast() {
     }
@@ -73,6 +78,13 @@ public class DelayBufferedBroadcast implements ChannelDispatch, Runnable {
         while(!queue.isEmpty()) {
             QueuedElement e = queue.poll();
             for (Port p : channelContext.getLocalPorts()) {
+
+                if (clone) {
+                    p.call(cloner.deepClone(e.payload), e.callback);
+                } else {
+                    p.call(e.payload, e.callback);
+                }
+
                 p.call(e.payload,e.callback);
             }
         }

@@ -1,5 +1,6 @@
 package org.kevoree.library.channels;
 
+import com.rits.cloning.Cloner;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
 import org.kevoree.api.ChannelContext;
@@ -21,6 +22,9 @@ public class SizeBufferedBroadcast implements ChannelDispatch, Runnable {
         Object payload;
         Callback callback;
     }
+
+    @Param(defaultValue = "false")
+    boolean clone;
 
     @Param(optional = true)
     int bufferSize = 5;
@@ -46,6 +50,7 @@ public class SizeBufferedBroadcast implements ChannelDispatch, Runnable {
         executor = null;
     }
 
+    private Cloner cloner=new Cloner();
 
     @Override
     public void dispatch(final Object payload,final Callback callback) {
@@ -68,7 +73,11 @@ public class SizeBufferedBroadcast implements ChannelDispatch, Runnable {
         while(!queue.isEmpty()) {
             QueuedElement e = queue.poll();
             for (Port p : channelContext.getLocalPorts()) {
-                p.call(e.payload,e.callback);
+                if(clone){
+                    p.call(cloner.deepClone(e.payload),e.callback);
+                } else {
+                    p.call(e.payload,e.callback);
+                }
             }
         }
     }

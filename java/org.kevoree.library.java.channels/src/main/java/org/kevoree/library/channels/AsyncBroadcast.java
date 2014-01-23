@@ -1,5 +1,6 @@
 package org.kevoree.library.channels;
 
+import com.rits.cloning.Cloner;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
 import org.kevoree.api.ChannelContext;
@@ -19,10 +20,14 @@ import java.util.concurrent.Executors;
 @Library(name = "Java :: Channels")
 public class AsyncBroadcast implements ChannelDispatch {
 
+    @Param(defaultValue = "false")
+    boolean clone;
+
     @KevoreeInject
     ChannelContext channelContext;
 
     ExecutorService executor = null;
+    private Cloner cloner=new Cloner();
 
     @Start
     public void start() {
@@ -40,7 +45,11 @@ public class AsyncBroadcast implements ChannelDispatch {
             @Override
             public void run() {
                 for (Port p : channelContext.getLocalPorts()) {
-                    p.call(payload,callback);
+                    if(clone){
+                        p.call(cloner.deepClone(payload),callback);
+                    } else {
+                        p.call(payload,callback);
+                    }
                 }
             }
         });
