@@ -8,8 +8,8 @@ add node0 : JavaNode
 add node0.ticker : Ticker
 set node0.ticker.period = "500"
 //add hub : LoadBalancer
-add hub : SyncBroadcast
-
+add hub : AsyncBroadcast
+set hub.clone = "true"
 
 add node0.printer1 : ConsolePrinter
 add node0.printer2 : ConsolePrinter
