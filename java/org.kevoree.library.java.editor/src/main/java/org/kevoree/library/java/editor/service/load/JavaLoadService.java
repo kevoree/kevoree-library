@@ -1,10 +1,13 @@
-package org.kevoree.library.java.editor.service;
+package org.kevoree.library.java.editor.service.load;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.kevoree.library.java.editor.model.Library;
 import org.kevoree.library.java.editor.parser.XMLLibraryParser;
+import org.kevoree.library.java.editor.service.ServiceCallback;
+import org.kevoree.library.java.editor.service.load.LoadService;
+import org.kevoree.library.java.editor.service.load.LoadService;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -21,7 +24,7 @@ import java.util.Collection;
  * Date: 20/01/14
  * Time: 11:56
  */
-public class JavaLoadService implements Service {
+public class JavaLoadService implements LoadService {
 
     @Override
     public void process(ServiceCallback cb) {

@@ -46,7 +46,19 @@ public class Library {
     public void addVersion(String version) {
         this.versions.add(version);
     }
-    
+
+    public List<String> getVersions() {
+        return versions;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public String getArtifactId() {
+        return artifactId;
+    }
+
     public JsonObject toJsonObject() {
         JsonObject obj = new JsonObject();
         if (groupId != null) obj.add("groupID", new JsonPrimitive(groupId));
@@ -69,5 +81,16 @@ public class Library {
         }
         
         return latest;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(groupId)
+                .append(", ")
+                .append(artifactId)
+                .append(", ")
+                .append(versions);
+        return builder.toString();
     }
 }

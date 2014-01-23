@@ -1,9 +1,12 @@
-package org.kevoree.library.java.editor.service;
+package org.kevoree.library.java.editor.service.load;
 
 import com.google.gson.*;
 import fr.braindead.npmjava.command.NpmSearch;
 import fr.braindead.npmjava.command.NpmView;
 import org.kevoree.library.java.editor.model.Library;
+import org.kevoree.library.java.editor.service.ServiceCallback;
+import org.kevoree.library.java.editor.service.load.LoadService;
+import org.kevoree.library.java.editor.service.load.LoadService;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -15,7 +18,7 @@ import java.util.Map;
  * Date: 20/01/14
  * Time: 11:56
  */
-public class NpmLoadService implements Service {
+public class NpmLoadService implements LoadService {
     
     private static final String KEVOREE_PATTERN = "(^kevoree-chan-|^kevoree-node-|^kevoree-group-|^kevoree-comp-).*";
     

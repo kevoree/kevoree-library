@@ -3,9 +3,10 @@ package org.kevoree.library.java.editor.handler;
 import com.google.gson.JsonObject;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.kevoree.library.java.editor.service.JavaLoadService;
-import org.kevoree.library.java.editor.service.NpmLoadService;
-import org.kevoree.library.java.editor.service.Service;
+import org.kevoree.library.java.editor.service.ServiceCallback;
+import org.kevoree.library.java.editor.service.load.JavaLoadService;
+import org.kevoree.library.java.editor.service.load.LoadService;
+import org.kevoree.library.java.editor.service.load.NpmLoadService;
 import org.kevoree.log.Log;
 
 import javax.servlet.ServletException;
@@ -28,7 +29,7 @@ public class LoadHandler extends AbstractHandler {
             final String callback = request.getParameter("callback");
             final String platform = request.getParameter("platform");
             
-            Service.ServiceCallback serviceCallback = new Service.ServiceCallback() {
+            ServiceCallback serviceCallback = new ServiceCallback() {
                 @Override
                 public void onSuccess(JsonObject jsonRes) {
                     try {
