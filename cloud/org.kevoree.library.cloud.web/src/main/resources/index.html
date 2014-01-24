@@ -7,7 +7,7 @@
     <script src="lib/bootstrap.min.js"></script>
     <script src="lib/bootstrap-notify.js"></script>
     <script src="lib/bootbox.min.js"></script>
-    <script type="text/javascript" src="lib/org.kevoree.modeling.sample.kevoree.js.min.js"></script>
+    <script type="text/javascript" src="lib/org.kevoree.model.js.min.js"></script>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
     <link href="css/bootstrap-notify.css" rel="stylesheet">
@@ -35,28 +35,23 @@
 
 <script>
 /* Global variables */
-var kevoreeJSModule, factory, loader, saver, model, ws, nodeName = {};
+var kevoreeJSModule, factory, compare, cloner, loader, saver, model, ws, nodeName = {};
 
 $(function () {
 
     /* Model manipulation objects */
-    kevoreeJSModule = Kotlin.modules['org.kevoree.modeling.sample.kevoree.js'];
+    kevoreeJSModule = Kotlin.modules['org.kevoree.model.js'];
     loader = new kevoreeJSModule.org.kevoree.loader.JSONModelLoader();
     saver = new kevoreeJSModule.org.kevoree.serializer.JSONModelSerializer();
     factory = new kevoreeJSModule.org.kevoree.impl.DefaultKevoreeFactory();
+    compare = new kevoreeJSModule.org.kevoree.compare.DefaultModelCompare();
+    cloner  = new kevoreeJSModule.org.kevoree.cloner.DefaultModelCloner();
     /* Meta information set */
     var request = new XMLHttpRequest();
     request.open('GET', '/metadata/nodeName', false);  // `false` makes the request synchronous
     request.send(null);
     nodeName = request.responseText;
     console.log("Current Node Name : " + nodeName);
-
-
-    function synchModel() {
-        //send to node
-        var serializedModel = saver.serialize(model);
-        ws.send(serializedModel)
-    }
 
     /* WS connection set */
     function refreshModel(text) {
@@ -86,10 +81,14 @@ $(function () {
 
             nodeListElement.append($('<tr>').append($('<td>').append(childName)).append($('<td>').append(lookingForIPs(childPath))).append($('<td>').append(newStartNStopBt).append(" ").append(newRemoveBt)));
             newStartNStopBt.click(function () {
+                var currentModel = cloner.clone(model, true);
                 var currentNode = model.findNodesByID(nodeName);
                 var currentChildNode = currentNode.findHostsByID(this.id.substring("startnstop".length));
                 currentChildNode.started = !(currentChildNode != null && currentChildNode != undefined && currentChildNode.started);
-                synchModel();
+
+                var diff = compare.diff(currentModel, model).exportToString();
+                sendDiff(diff);
+//                synchModel();
             });
             newRemoveBt.click(function () {
 
@@ -97,6 +96,7 @@ $(function () {
 
                 bootbox.confirm("Are you sure to wants to destroy " + childName + " ?", function (result) {
                     if (result == true) {
+                        var currentModel = cloner.clone(model, true);
                         var currentNode = model.findNodesByID(nodeName);
                         var currentChildNode = currentNode.findHostsByID(childName);
                         currentNode.removeHosts(currentChildNode);
@@ -114,7 +114,10 @@ $(function () {
                         for (var i = 0; i < nodeNetworkToRemove.length; i++) {
                             model.removeNodeNetworks(nodeNetworkToRemove[i]);
                         }
-                        synchModel();
+
+                        var diff = compare.diff(currentModel, model).exportToString();
+                        sendDiff(diff);
+//                        synchModel();
                     }
                 });
 
@@ -173,11 +176,12 @@ $(function () {
         $('#unavailable-modal').modal('show');
     };
     ws.onmessage = function (msg) {
-        if (msg.data.startsWith("model=")) {
-            refreshModel(msg.data.substring(6));
+        var json = JSON.parse(msg.data);
+        if (json.model != null && json.model != undefined) {
+            refreshModel(json.model);
         }
-        if (msg.data.startsWith("event=")) {
-            refreshEvent(msg.data.substring(6));
+        if (json.event != null && json.event != undefined) {
+            refreshEvent(json.event);
         }
     };
 
@@ -194,12 +198,16 @@ $(function () {
             alert("TypeDefinition JavaNode not found please add it to the platform ")
         }
         if (currentNode != undefined && nodeType !== null) {
+            var currentModel = cloner.clone(model, true);
             var newChildNode = factory.createContainerNode();
             newChildNode.name = "node" + Math.floor((Math.random() * 1000) + 1);
             newChildNode.typeDefinition = nodeType;
             currentNode.addHosts(newChildNode);
             model.addNodes(newChildNode);
-            synchModel();
+
+            var diff = compare.diff(currentModel, model).exportToString();
+            sendDiff(diff);
+//            synchModel();
         }
     });
 
@@ -397,6 +405,7 @@ $(function () {
     }
 
     function buildNode() {
+        var currentModel = cloner.clone(model, true);
         var currentNode = model.findNodesByID(nodeName);
         var typeDefinitionPath = jQuery("#nodeType").find("option:selected").val();
         var paasType = model.findByPath(typeDefinitionPath);
@@ -458,9 +467,16 @@ $(function () {
                     }
                 }
             });
-            synchModel();
+
+            var diff = compare.diff(currentModel, model).exportToString();
+            sendDiff(diff);
+//            synchModel();
             return true;
         }
+    }
+
+    function sendDiff(diff) {
+        ws.send(JSON.stringify({"diff": diff}));
     }
 });
 </script>

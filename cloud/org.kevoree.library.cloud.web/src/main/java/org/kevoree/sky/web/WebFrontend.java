@@ -21,13 +21,20 @@ public class WebFrontend {
     @KevoreeInject
     ModelService modelService;
 
+
+    @Param(optional = true, defaultValue = "10")
+    int maxRetry;
+
+    @Param(optional = true, defaultValue = "1000")
+    long delayWhenNothing;
+
     private WebServer webServer;
     private ModelServiceSocketHandler mhandler = null;
 
     @Start
     public void startServer() {
         try {
-            mhandler = new ModelServiceSocketHandler(modelService);
+            mhandler = new ModelServiceSocketHandler(modelService, delayWhenNothing, maxRetry);
             webServer = WebServers.createWebServer(port)
                     .add(new MetaDataHandler(modelService))
                     .add("/model/service", mhandler)
