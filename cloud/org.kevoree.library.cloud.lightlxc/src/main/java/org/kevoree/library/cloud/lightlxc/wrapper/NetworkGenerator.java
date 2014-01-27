@@ -2,6 +2,8 @@ package org.kevoree.library.cloud.lightlxc.wrapper;
 
 import org.kevoree.ContainerNode;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -9,21 +11,45 @@ import java.util.Random;
  */
 public class NetworkGenerator {
 
-    public static String generateIP(ContainerNode element) {
-        return "192.168.1.110";
+
+    private List<Integer> ips = new ArrayList<Integer>();
+
+    //192.168.1.1
+    String baseIP;
+    //192.168.1.1
+    String gateway;
+    NetworkGenerator(String baseIP, String gateway){
+     this.baseIP = baseIP;
+     this.gateway= gateway;
     }
 
-    public static String generateGW(ContainerNode element) {
-        return "192.168.1.110";
+    public String generateIP(ContainerNode element) {
+        Random rand = new Random();
+        Integer ip = 1+rand.nextInt(98);
+        int i = 0;
+
+        while (ips.contains(ip) && i<200){
+            ip = 1+rand.nextInt(98);
+            i++;
+        }
+        if (i==200)
+            return null;
+
+            ips.add(ip);
+            return baseIP + ip;
     }
 
-    public static String generateMAC(ContainerNode element) {
+    public String generateGW(ContainerNode element) {
+        return gateway;
+    }
+
+    public String generateMAC(ContainerNode element) {
         byte[] b = new byte[6];
         random.nextBytes(b);
         StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < b.length; i++) {
             if (buffer.length() != 0) {
-                buffer.append("-");
+                buffer.append(":");
             }
             String end = String.format("%x", b[i]);
             if (end.length() == 1) {
@@ -37,6 +63,11 @@ public class NetworkGenerator {
     private static Random random = new Random();
 
     public static void main(String[] args) {
+        NetworkGenerator ng = new NetworkGenerator("192.168.1.1","192.168.1.1");
+        System.out.println( ng.generateMAC(null));
+        System.out.println( ng.generateIP(null));
+        System.out.println( ng.generateGW(null));
+
 
     }
 

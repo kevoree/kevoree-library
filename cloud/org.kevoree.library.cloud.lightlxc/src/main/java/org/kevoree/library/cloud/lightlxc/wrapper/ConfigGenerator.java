@@ -14,9 +14,9 @@ import java.util.Arrays;
  */
 public class ConfigGenerator {
 
-    public static final String[] baseDirNames = {"usr", "lib", "lib32" , "lib64", "etc", "bin", "sbin", "proc", "var", "dev/pts", "dev/shm", "tmp"};
+    public final String[] baseDirNames = {"usr", "lib", "lib32" , "lib64", "etc", "bin", "sbin", "proc", "var", "dev/pts", "dev/shm", "tmp"};
 
-    public static String generate(String nodeName, String ip, String gateway, String mac,String baseRootDirs) {
+    public String generate(String nodeName, String ip, String gateway, String mac,String baseRootDirs) {
 
         String base = "lxc.utsname=${nodename}\n" +
                 "lxc.network.type=veth\n" +
@@ -36,7 +36,7 @@ public class ConfigGenerator {
                 "lxc.mount.entry=/var ${baseRootDirs}/${nodename}_rootfs/var none ro,bind 0 0 \n" +
                 "lxc.mount.entry = /dev/pts ${baseRootDirs}/${nodename}_rootfs/dev/pts devpts nosuid,noexec,mode=0620,ptmxmode=000,newinstance 0 0\n" +
                 "lxc.mount.entry = /dev/shm ${baseRootDirs}/${nodename}_rootfs/dev/shm tmpfs nosuid,nodev,mode=1777 0 0\n" +
-                "lxc.mount.entry = /tmp ${baseRootDirs}/${nodename}_rootfs/tmp tmpfs nosuid,nodev,noexec,mode=1777,size=1g 0 0";
+                "lxc.mount.entry = /tmp ${baseRootDirs}/${nodename}_rootfs/tmp tmpfs nosuid,nodev,noexec,mode=1777,size=1g 0 0\n";
             if (new File("/lib32").exists())
                 base = base +  "lxc.mount.entry=/lib32 ${baseRootDirs}/${nodename}_rootfs/lib32 none ro,bind 0 0\n";
             if (new File("/lib64").exists())
@@ -55,7 +55,7 @@ public class ConfigGenerator {
 
     }
 
-    public static File generateUserDir(File baseRootDirs, ContainerNode element, File platformJar) throws IOException {
+    public File generateUserDir(File baseRootDirs, ContainerNode element, File platformJar) throws IOException {
         //System.err.println(baseRootDirs.getAbsolutePath());
         if (!baseRootDirs.exists()) {
             baseRootDirs.mkdirs();
@@ -86,7 +86,8 @@ public class ConfigGenerator {
         //generate the lxc config file
         File configLXC = new File(newUserDir, "config");
         FileWriter configLXCprinter = new FileWriter(configLXC);
-        configLXCprinter.write(generate(element.getName(), NetworkGenerator.generateIP(element), NetworkGenerator.generateGW(element),NetworkGenerator.generateMAC(element),baseRootDirs.getAbsolutePath()));
+        NetworkGenerator ng = new NetworkGenerator("192.168.1.1","192.168.1.1");
+        configLXCprinter.write(generate(element.getName(), ng.generateIP(element), ng.generateGW(element),ng.generateMAC(element),baseRootDirs.getAbsolutePath()));
         configLXCprinter.flush();
         configLXCprinter.close();
 
@@ -120,12 +121,12 @@ public class ConfigGenerator {
         return newUserDir;
     }
 
-    private static String getJava() {
+    private String getJava() {
         String java_home = System.getProperty("java.home");
         return java_home + File.separator + "bin" + File.separator + "java";
     }
 
-    private static void copy(File source, File dest)
+    private void copy(File source, File dest)
             throws IOException {
         FileChannel inputChannel = null;
         FileChannel outputChannel = null;
@@ -137,6 +138,17 @@ public class ConfigGenerator {
             inputChannel.close();
             outputChannel.close();
         }
+    }
+
+
+
+    public static void main(String[] args) {
+        NetworkGenerator ng = new NetworkGenerator("192.168.1.1","192.168.1.1");
+
+        ConfigGenerator cg = new ConfigGenerator();
+        System.out.println( cg.generate("test2",ng.generateIP(null),ng.generateGW(null),ng.generateMAC(null),"/toto"));
+
+
     }
 
 }
