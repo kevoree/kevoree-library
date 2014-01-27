@@ -79,7 +79,7 @@ public class ModelServiceSocketHandler extends BaseWebSocketHandler implements M
     }
 
     public void onMessage(WebSocketConnection connection, String message) {
-        Log.info("Receiving request: {}", message);
+        Log.trace("Receiving request: {}", message);
         try {
             JSONObject jsonReader = new JSONObject(message);
             if (jsonReader.get("diff") != null) {
@@ -92,7 +92,7 @@ public class ModelServiceSocketHandler extends BaseWebSocketHandler implements M
                 updatesToApply.put(connection, sequence);
             }
         } catch (JSONException e) {
-            Log.warn("unable to manage the type of message", e);
+            Log.warn("unable to manage the type of message: {}", e, message);
         }
     }
 

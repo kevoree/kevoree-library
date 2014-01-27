@@ -67,7 +67,6 @@ public class UpdateApplier implements Runnable {
                 ContainerRoot model = (ContainerRoot) cloner.clone(modelService.getCurrentModel().getModel());
                 if (model != null) {
                     sequence.applyOn(model);
-
                     modelService.update(model, new SynchronizedUpdateCallBack(connection, sequence));
                 }
             }
