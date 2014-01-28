@@ -72,10 +72,13 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
             if (process != null) {
                 freeze(true)
             } else {
-
+                var factory = DefaultKevoreeFactory()
                 var urls = HashSet<String>()
                 urls.add("http://repo1.maven.org/maven2")
-                var platformJar = mavenResolver.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + DefaultKevoreeFactory().getVersion(), urls);
+                if(factory.getVersion().toLowerCase().contains("snapshot")){
+                    urls.add("http://oss.sonatype.org/content/groups/public/")
+                }
+                var platformJar = mavenResolver.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + factory.getVersion(), urls);
                 if (platformJar == null) {
                     Log.error("Can't download Kevoree platform, abording starting node")
                     return false
