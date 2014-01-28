@@ -64,11 +64,12 @@ $(function () {
 
             var newStartNStopBt = $('<a></a>');
             newStartNStopBt.addClass("btn");
-            newStartNStopBt.addClass("btn-warning");
             newStartNStopBt.get(0).id = 'startnstop' + childName;
             if (nodes.get(i).started) {
+                newStartNStopBt.addClass("btn-warning");
                 newStartNStopBt.append("Stop child");
             } else {
+                newStartNStopBt.addClass("btn-info");
                 newStartNStopBt.append("Start child");
             }
 
