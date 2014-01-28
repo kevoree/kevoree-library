@@ -49,6 +49,7 @@ public class LxcSupervision implements Runnable {
                     ContainerRoot model;
                     model = lxcHostNode.modelService.getCurrentModel().getModel();
                     ContainerNode nodeElement = model.findNodesByID(lxcHostNode.getNodeName());
+                    
                     List<String> lxcNodes = lxcManager.getContainers();
                     boolean updateIsNeeded = false;
                     if (lxcNodes.size() - 1 > nodeElement.getHosts().size()) { // -1 correspond to the basekevoreecontainer which is use to clone
@@ -66,11 +67,10 @@ public class LxcSupervision implements Runnable {
                     if (updateIsNeeded) {
                         model = cloner.clone(lxcHostNode.modelService.getCurrentModel().getModel());
                         if (lxcManager.createModelFromSystem(lxcHostNode.getNodeName(), model)) {
-//                                    lxcHostNode.modelService.compareAndSwap(model, uuid, callback);
                             updateMustBeApplied = true;
                         }
                     } else {
-                        Log.error("Unable to update the model according to existing containers (not defined on the model)");
+                        Log.trace("Update the model according to existing containers is not needed because there seems not to have unknown container");
                     }
 
                     callback.initialize(uuid);
