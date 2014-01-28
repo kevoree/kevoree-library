@@ -18,6 +18,7 @@ import org.kevoree.impl.DefaultKevoreeFactory
 import java.util.Arrays
 import org.kevoree.library.cloud.lightlxc.wrapper.ConfigGenerator
 import java.util.HashSet
+import java.nio.file.Files
 
 /**
  * Created with IntelliJ IDEA.
@@ -66,8 +67,10 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
     private val modelSaver = JSONModelSerializer()
 
 
+
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
-        if (!isStarted) {
+        Log.info("go there 1")
+        /*if (!isStarted) {
 
             if (process != null) {
                 freeze(true)
@@ -82,7 +85,10 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
                 }
                 Log.info("Fork platform using {}", platformJar!!.getAbsolutePath())
 
-                var rootUserDirs = File("roots");
+
+                var rootUserDirs =  Files.createTempDirectory("rootfs").toFile();
+                Log.error("go there")
+                Log.error("file" + rootUserDirs?.getAbsolutePath())
                 var cg = ConfigGenerator();
                 var newUserDir = cg.generateUserDir(rootUserDirs, modelElement, platformJar);
                 val runnerargs = array("lxc-execute", "-n", modelElement.name!!, "-f", File(newUserDir, "config").getAbsolutePath(), "/kevrun")
@@ -92,7 +98,7 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
                 readerOUTthread!!.start()
                 readerERRthread!!.start()
             }
-        }
+        }*/
         return true
     }
     override fun kInstanceStop(tmodel: ContainerRoot): Boolean {

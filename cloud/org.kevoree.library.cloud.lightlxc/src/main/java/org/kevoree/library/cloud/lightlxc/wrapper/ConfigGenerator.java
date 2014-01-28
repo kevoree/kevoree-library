@@ -14,6 +14,8 @@ import java.util.Arrays;
  */
 public class ConfigGenerator {
 
+
+
     public final String[] baseDirNames = {"usr", "lib", "lib32" , "lib64", "etc", "bin", "sbin", "proc", "var", "dev/pts", "dev/shm", "tmp"};
 
     public String generate(String nodeName, String ip, String gateway, String mac,String baseRootDirs) {
