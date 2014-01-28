@@ -7,7 +7,7 @@
     <script src="lib/bootstrap.min.js"></script>
     <script src="lib/bootstrap-notify.js"></script>
     <script src="lib/bootbox.min.js"></script>
-    <script type="text/javascript" src="org.kevoree.model.js.min.js"></script>
+    <script type="text/javascript" src="lib/org.kevoree.model.js.min.js"></script>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
     <link href="css/bootstrap-notify.css" rel="stylesheet">
@@ -24,7 +24,6 @@
         .controls > span {
             margin-left: 20px;
         }
-
         .mandatory {
             color: #F90
         }
@@ -85,10 +84,7 @@ $(function () {
                 var currentNode = model.findNodesByID(nodeName);
                 var currentChildNode = currentNode.findHostsByID(this.id.substring("startnstop".length));
                 currentChildNode.started = !(currentChildNode != null && currentChildNode != undefined && currentChildNode.started);
-
-                var diff = compare.diff(currentModel, model).exportToString();
-                sendDiff(diff);
-//                synchModel();
+                sendDiff(currentModel);
             });
             newRemoveBt.click(function () {
 
@@ -114,10 +110,7 @@ $(function () {
                         for (var i = 0; i < nodeNetworkToRemove.length; i++) {
                             model.removeNodeNetworks(nodeNetworkToRemove[i]);
                         }
-
-                        var diff = compare.diff(currentModel, model).exportToString();
-                        sendDiff(diff);
-//                        synchModel();
+                        sendDiff(currentModel);
                     }
                 });
 
@@ -165,6 +158,12 @@ $(function () {
                 $(this).css({"visibility": "visible"});
             });
         }
+        if (data == "error") {
+            //TODO
+            message.fadeIn('slow', function () {
+                $(this).css({"visibility": "hidden"});
+            });
+        }
     }
 
     refreshEvent("done");
@@ -176,12 +175,11 @@ $(function () {
         $('#unavailable-modal').modal('show');
     };
     ws.onmessage = function (msg) {
-        var json = JSON.parse(msg.data);
-        if (json.model != null && json.model != undefined) {
-            refreshModel(json.model);
+        if (msg.data.startsWith("model=")) {
+            refreshModel(msg.data.substring(6));
         }
-        if (json.event != null && json.event != undefined) {
-            refreshEvent(json.event);
+        if (msg.data.startsWith("event=")) {
+            refreshEvent(msg.data.substring(6));
         }
     };
 
@@ -204,10 +202,7 @@ $(function () {
             newChildNode.typeDefinition = nodeType;
             currentNode.addHosts(newChildNode);
             model.addNodes(newChildNode);
-
-            var diff = compare.diff(currentModel, model).exportToString();
-            sendDiff(diff);
-//            synchModel();
+            sendDiff(currentModel);
         }
     });
 
@@ -450,11 +445,6 @@ $(function () {
                             if (valueInput.tagName == "INPUT" && valueInput.value !== "") {
                                 value = valueInput.value;
                             }
-                            /*else if (valueInput.tagName == "SELECT") {
-                             var nodeType = inputElement.get(0);
-                             var selectedIndex = nodeType.selectedIndex;
-                             value = nodeType.options[selectedIndex].value;
-                             }*/
                             if (value !== null && value !== undefined) {
                                 var dictionaryValue = factory.createDictionaryValue();
                                 dictionaryValue.name = id;
@@ -466,16 +456,14 @@ $(function () {
                     }
                 }
             });
-
-            var diff = compare.diff(currentModel, model).exportToString();
-            sendDiff(diff);
-//            synchModel();
+            sendDiff(currentModel);
             return true;
         }
     }
 
-    function sendDiff(diff) {
-        ws.send(JSON.stringify({"diff": diff}));
+    function sendDiff(newModel) {
+        var diff = compare.diff(newModel, model).exportToString();
+        ws.send(diff);
     }
 });
 </script>

@@ -3,8 +3,9 @@ package org.kevoree.sky.web;
 import org.kevoree.annotation.*;
 import org.kevoree.api.ModelService;
 import org.kevoree.log.Log;
-import org.webbitserver.WebServer;
-import org.webbitserver.WebServers;
+import org.webbitserver.*;
+
+import java.nio.charset.Charset;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,7 +14,7 @@ import org.webbitserver.WebServers;
  * Time: 11:52
  */
 @ComponentType
-public class WebFrontend {
+public class WebFrontend implements HttpHandler {
 
     @Param
     Integer port = 8080;
@@ -34,13 +35,14 @@ public class WebFrontend {
     @Start
     public void startServer() {
         try {
-            mhandler = new ModelServiceSocketHandler(modelService, delayWhenNothing, maxRetry);
+            mhandler = new ModelServiceSocketHandler(modelService);
             webServer = WebServers.createWebServer(port)
-                    .add(new MetaDataHandler(modelService))
+                    .add(this)
                     .add("/model/service", mhandler)
                     .add(new EmbedHandler()) // path to web content
                     .start()
                     .get();
+            Log.info("Cloud Web Interface started on http://localhost:{}", port);
         } catch (Exception e) {
             Log.error("Error while starting Kloud Web front end", e);
         }
@@ -50,6 +52,17 @@ public class WebFrontend {
     public void stopServer() {
         webServer.stop();
         mhandler.destroy();
+    }
+
+    @Override
+    public void handleHttpRequest(HttpRequest httpRequest, HttpResponse httpResponse, HttpControl httpControl) throws Exception {
+        if (httpRequest.uri().equals("/metadata/nodeName")) {
+            httpResponse.charset(Charset.forName("UTF-8"));
+            httpResponse.content(modelService.getNodeName());
+            httpResponse.end();
+            return;
+        }
+        httpControl.nextHandler();
     }
 
 }
