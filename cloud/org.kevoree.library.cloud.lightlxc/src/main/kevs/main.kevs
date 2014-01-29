@@ -29,14 +29,17 @@ include mvn:org.jetbrains.kotlin:kotlin-stdlib:0.6.1673
 include mvn:org.kevoree.modeling:org.kevoree.modeling.microframework:1.9.8
 
 add node0 : LightLXCNode/3.1.6-SNAPSHOT
+
+//Here it will create a network with a bridge connected to eth1 and routed to wlan0 with ip 19.168.1.1 for eth1 (container) and 192.168.1XX for the container
 set node0.containeripbaseaddress = "192.168.1.1"
-set node0.hostitfname = "eth1"
-set node0.createBridge = "true"
-set node0.freeze = "false"
 set node0.hostitfip = "192.168.1.1"
+set node0.hostitfname = "eth1"
 set node0.routeditfname = "wlan0"
+//Create automatically the bridge
+set node0.createBridge = "true"
 set node0.log = "INFO"
 set node0.started = "true"
+set node0.freeze = "false"
 
 add node0.child : JavaNode/3.1.6-SNAPSHOT
 
