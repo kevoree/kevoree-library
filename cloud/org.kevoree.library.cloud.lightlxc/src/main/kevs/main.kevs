@@ -1,32 +1,59 @@
 repo "http://oss.sonatype.org/content/groups/public/"
 repo "https://oss.sonatype.org/content/repositories/snapshots/"
-
-
-
-include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
-include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.1.6-SNAPSHOT
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:3.1.6-SNAPSHOT
+include mvn:org.kevoree:org.kevoree.api:3.2.3-SNAPSHOT
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.api:3.1.6-SNAPSHOT
+include mvn:org.kevoree:org.kevoree.model:3.2.3-SNAPSHOT
+include mvn:org.objenesis:objenesis:1.2
+include mvn:org.kevoree:org.kevoree.maven.resolver:16
+include mvn:org.kevoree:org.kevoree.api:3.2.3
+include mvn:org.java-websocket:Java-WebSocket:1.3.0
+include mvn:uk.com.robust-it:cloning:1.9.0
+include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:3.1.6-SNAPSHOT
+include mvn:fr.inria.jfilter:jfilter-library:1.3
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.1.6-SNAPSHOT
+include mvn:org.kevoree:org.kevoree.model:3.2.3
+include mvn:org.jetbrains.kotlin:kotlin-runtime:0.6.1673
+include mvn:org.kevoree:org.kevoree.api:3.2.3-20140128.074947-3
 include mvn:org.kevoree.library.java:org.kevoree.library.java.web:3.1.6-SNAPSHOT
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.1.6-SNAPSHOT
+include mvn:org.kevoree.kcl:org.kevoree.kcl:6
+include mvn:org.kevoree:org.kevoree.annotation.api:3.2.3
+include mvn:org.kevoree:org.kevoree.annotation.api:3.2.3-SNAPSHOT
+include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:3.1.6-SNAPSHOT
+include mvn:org.kevoree:org.kevoree.annotation.api:3.2.3-20140128.074705-3
+include mvn:org.kevoree:org.kevoree.kevscript:3.2.3
+include mvn:org.kevoree.log:org.kevoree.log:1
+include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:3.1.6-SNAPSHOT
+include mvn:org.jetbrains.kotlin:kotlin-stdlib:0.6.1673
+include mvn:org.kevoree.modeling:org.kevoree.modeling.microframework:1.9.8
 
-
-
-add node0 : LightLXCNode
-add node0.child: JavaNode
-set node0.routeditfname = "wlan0"
-set node0.hostitfname = "eth1"
-set node0.hostitfip = "192.168.1.1"
+add node0 : LightLXCNode/3.1.6-SNAPSHOT
 set node0.containeripbaseaddress = "192.168.1.1"
+set node0.hostitfname = "eth1"
 set node0.createBridge = "true"
+set node0.freeze = "false"
+set node0.hostitfip = "192.168.1.1"
+set node0.routeditfname = "wlan0"
+set node0.log = "INFO"
+set node0.started = "true"
 
-add child.NanoBlogS124 : NanoBlogServer/3.1.6-SNAPSHOT
-set child.NanoBlogS124.http_port = "8080"
-set child.NanoBlogS124.started = "true"
+add node0.child : JavaNode/3.1.6-SNAPSHOT
 
-add sync : WSGroup
-set sync.port/node0 = "9000"
-attach node0 sync
+set child.started = "true"
+add child.TwoValueT187 : TwoValueTicker/3.1.6-SNAPSHOT
+set child.TwoValueT187.started = "true"
+add child.ConsolePr25 : ConsolePrinter/3.1.6-SNAPSHOT
+set child.ConsolePr25.started = "true"
+
+
+add AsyncBroa936 : AsyncBroadcast/3.1.6-SNAPSHOT
+set AsyncBroa936.started = "true"
+add sync : WSGroup/3.1.6-SNAPSHOT
 set sync.port/child = "9002"
+set sync.port/node0 = "9000"
+set sync.started = "true"
+bind child.ConsolePr25.input AsyncBroa936
+bind child.TwoValueT187.tick AsyncBroa936
 attach child sync
-
-
-
-
+attach node0 sync
