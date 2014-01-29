@@ -95,7 +95,7 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
 
                 var rootUserDirs =  Files.createTempDirectory("rootfs").toFile();
                 //Log.error("go there")
-                Log.error("file" + rootUserDirs?.getAbsolutePath())
+                Log.info("file" + rootUserDirs?.getAbsolutePath())
                 val ng = NetworkGenerator(this.containeripbaseaddress, this.hostitfip)
 
                 var cg = ConfigGenerator();
@@ -203,17 +203,23 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
         return true
     }
 
+    var freeze = false;
+
     public fun freeze(un: Boolean) {
+        Log.info("freeze call " + un)
+        if (freeze == un)
+            return
+        freeze = un
         var command = "lxc-freeze"
-        if (un) {
+        if (!un) {
             command = "lxc-unfreeze"
         }
         val args = array(command, "-n", modelElement.name!!)
-        val readerOUTthread1 = Thread(Reader(process!!.getInputStream()!!, modelElement.name!!, false))
-        val readerERRthread1 = Thread(Reader(process!!.getErrorStream()!!, modelElement.name!!, true))
+        val process1 = Runtime.getRuntime().exec(args)
+        val readerOUTthread1 = Thread(Reader(process1!!.getInputStream()!!, modelElement.name!!, false))
+        val readerERRthread1 = Thread(Reader(process1!!.getErrorStream()!!, modelElement.name!!, true))
         readerOUTthread1!!.start()
         readerERRthread1!!.start()
-
         Runtime.getRuntime().exec(args).waitFor()
     }
 

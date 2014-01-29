@@ -64,4 +64,14 @@ public class LightLXCNode extends JavaNode implements PlatformNode {
         fact =  new LightLXCWrapperFactory(nodeName,routeditfname, hostitfname,hostitfip,containeripbaseaddress,createBridge);
         return fact;
     }
+
+    @org.kevoree.annotation.Update
+    public void updateNode(){
+        super.updateNode();
+        if (fact !=null)
+            fact.getWrap().freeze(freeze);
+
+
+    }
+
 }
