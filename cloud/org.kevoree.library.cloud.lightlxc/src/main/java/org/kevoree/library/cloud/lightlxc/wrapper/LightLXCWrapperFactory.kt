@@ -16,10 +16,16 @@ import org.kevoree.api.ModelService
 
 class LightLXCWrapperFactory(nodeName: String, val routeditfname : String ,val hostitfname : String , val hostitfip : String ,val containeripbaseaddress : String,val createBrdge : Boolean) : WrapperFactory(nodeName) {
 
+
+
+    public var wrap :LightLXCNodeWrapper?=null
+
+
     override fun wrap(modelElement: KMFContainer, newBeanInstance: Any, tg: ThreadGroup, bs: BootstrapService,modelService: ModelService): KInstanceWrapper {
         when(modelElement) {
             is ContainerNode -> {
-                return LightLXCNodeWrapper(modelElement, newBeanInstance, tg, bs,routeditfname, hostitfname,hostitfip,containeripbaseaddress, createBrdge)
+                wrap =  LightLXCNodeWrapper(modelElement, newBeanInstance, tg, bs,routeditfname, hostitfname,hostitfip,containeripbaseaddress, createBrdge)
+                return wrap!!;
             }
             else -> {
                 return super.wrap(modelElement, newBeanInstance, tg, bs,modelService)

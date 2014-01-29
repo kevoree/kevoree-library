@@ -203,7 +203,7 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
         return true
     }
 
-    private fun freeze(un: Boolean) {
+    public fun freeze(un: Boolean) {
         var command = "lxc-freeze"
         if (un) {
             command = "lxc-unfreeze"

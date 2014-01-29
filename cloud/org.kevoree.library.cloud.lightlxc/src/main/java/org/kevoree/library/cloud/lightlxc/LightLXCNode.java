@@ -41,14 +41,27 @@ public class LightLXCNode extends JavaNode implements PlatformNode {
     @Param(defaultValue = "192.168.1.1")
     String containeripbaseaddress;
 
+    @Param(defaultValue = "false")
+    boolean freeze;
+
+
+    public void setFreeze(boolean freeze){
+        this.freeze = freeze;
+        fact.getWrap().freeze(freeze);
+
+    }
+
     /**
      * Parameter to Decide if the node has to create a bridge or if the bridge is managed directly by the hosted platform.
      */
     @Param(defaultValue = "true")
     boolean createBridge;
 
+    LightLXCWrapperFactory fact = null;
+
     @Override
     protected WrapperFactory createWrapperFactory(String nodeName) {
-        return new LightLXCWrapperFactory(nodeName,routeditfname, hostitfname,hostitfip,containeripbaseaddress,createBridge);
+        fact =  new LightLXCWrapperFactory(nodeName,routeditfname, hostitfname,hostitfip,containeripbaseaddress,createBridge);
+        return fact;
     }
 }
