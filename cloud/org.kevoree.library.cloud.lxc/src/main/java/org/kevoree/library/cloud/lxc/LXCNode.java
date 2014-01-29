@@ -34,9 +34,6 @@ public class LXCNode extends JavaNode implements PlatformNode {
     private CreateBaseContainer createBaseContainer;
     private LxcSupervision supervision;
 
-//    @Param(optional = true, defaultValue = "1024")
-//    public int limit_ram;
-
     @Param(optional = true, defaultValue = "ubuntu")
     private String initialTemplate;
 
@@ -53,7 +50,7 @@ public class LXCNode extends JavaNode implements PlatformNode {
         // schedule the tasks
         executor.schedule(createBaseContainer, 10, TimeUnit.SECONDS);
         executor.scheduleAtFixedRate(cleaner, 1, 1, TimeUnit.DAYS);
-        executor.scheduleAtFixedRate(supervision, 1, 30, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(supervision, 20, 30, TimeUnit.SECONDS);
     }
 
     @Override
