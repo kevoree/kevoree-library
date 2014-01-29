@@ -45,10 +45,10 @@ public class LightLXCNode extends JavaNode implements PlatformNode {
      * Parameter to Decide if the node has to create a bridge or if the bridge is managed directly by the hosted platform.
      */
     @Param(defaultValue = "true")
-    boolean createBrdge;
+    boolean createBridge;
 
     @Override
     protected WrapperFactory createWrapperFactory(String nodeName) {
-        return new LightLXCWrapperFactory(nodeName,routeditfname, hostitfname,hostitfip,containeripbaseaddress,createBrdge);
+        return new LightLXCWrapperFactory(nodeName,routeditfname, hostitfname,hostitfip,containeripbaseaddress,createBridge);
     }
 }

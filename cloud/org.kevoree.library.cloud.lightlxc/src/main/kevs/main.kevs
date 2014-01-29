@@ -9,4 +9,13 @@ set node0.routeditfname = "wlan0"
 set node0.hostitfname = "eth1"
 set node0.hostitfip = "192.168.1.1"
 set node0.containeripbaseaddress = "192.168.1.1"
-set node0.createBrdge = "true"
+set node0.createBridge = "true"
+
+
+add node1 : LightLXCNode
+add node1.child: JavaNode
+set node1.routeditfname = "wlan0"
+set node1.hostitfname = "eth1"
+set node1.hostitfip = "192.168.1.1"
+set node1.containeripbaseaddress = "192.168.1.1"
+set node1.createBridge = "true"
