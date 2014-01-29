@@ -18,12 +18,12 @@ public class ConfigGenerator {
 
     public final String[] baseDirNames = {"usr", "lib", "lib32" , "lib64", "etc", "bin", "sbin", "proc", "var", "dev/pts", "dev/shm", "tmp"};
 
-    public String generate(String nodeName, String ip, String gateway, String mac,String baseRootDirs) {
+    public String generate(String nodeName, String ip, String gateway, String mac,String bridgename,String baseRootDirs) {
 
         String base = "lxc.utsname=${nodename}\n" +
                 "lxc.network.type=veth\n" +
-                "lxc.network.hwaddr = ${mac}\n" +
-                "lxc.network.link=br0\n" +
+                "#lxc.network.hwaddr = ${mac}\n" +
+                "lxc.network.link="+bridgename+"\n" +
                 "lxc.network.flags=up\n" +
                 "lxc.network.name=eth0 \n" +
                 "lxc.network.ipv4 = ${ip}/24\n" +
@@ -57,7 +57,7 @@ public class ConfigGenerator {
 
     }
 
-    public File generateUserDir(File baseRootDirs, ContainerNode element, File platformJar) throws IOException {
+    public File generateUserDir(File baseRootDirs, ContainerNode element, File platformJar,String bridgename, NetworkGenerator ng) throws IOException {
         //System.err.println(baseRootDirs.getAbsolutePath());
         if (!baseRootDirs.exists()) {
             baseRootDirs.mkdirs();
@@ -88,8 +88,7 @@ public class ConfigGenerator {
         //generate the lxc config file
         File configLXC = new File(newUserDir, "config");
         FileWriter configLXCprinter = new FileWriter(configLXC);
-        NetworkGenerator ng = new NetworkGenerator("192.168.1.1","192.168.1.1");
-        configLXCprinter.write(generate(element.getName(), ng.generateIP(element), ng.generateGW(element),ng.generateMAC(element),baseRootDirs.getAbsolutePath()));
+        configLXCprinter.write(generate(element.getName(), ng.generateIP(element), ng.generateGW(element),ng.generateMAC(element),bridgename,baseRootDirs.getAbsolutePath()));
         configLXCprinter.flush();
         configLXCprinter.close();
 
@@ -148,7 +147,7 @@ public class ConfigGenerator {
         NetworkGenerator ng = new NetworkGenerator("192.168.1.1","192.168.1.1");
 
         ConfigGenerator cg = new ConfigGenerator();
-        System.out.println( cg.generate("test2",ng.generateIP(null),ng.generateGW(null),ng.generateMAC(null),"/toto"));
+        System.out.println( cg.generate("test2",ng.generateIP(null),ng.generateGW(null),ng.generateMAC(null),"br0","/toto"));
 
 
     }

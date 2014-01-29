@@ -18,7 +18,7 @@ public class NetworkGenerator {
     String baseIP;
     //192.168.1.1
     String gateway;
-    NetworkGenerator(String baseIP, String gateway){
+    public NetworkGenerator(String baseIP, String gateway){
      this.baseIP = baseIP;
      this.gateway= gateway;
     }
