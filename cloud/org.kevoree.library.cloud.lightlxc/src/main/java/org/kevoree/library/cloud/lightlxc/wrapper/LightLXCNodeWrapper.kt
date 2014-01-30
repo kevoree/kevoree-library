@@ -13,15 +13,12 @@ import org.kevoree.resolver.MavenResolver
 import org.kevoree.serializer.JSONModelSerializer
 import org.kevoree.log.Log
 import java.io.File
-import java.io.FileOutputStream
 import org.kevoree.impl.DefaultKevoreeFactory
-import java.util.Arrays
 import org.kevoree.library.cloud.lightlxc.wrapper.ConfigGenerator
 import java.util.HashSet
 import java.nio.file.Files
 import org.kevoree.library.cloud.lightlxc.wrapper.NetworkGenerator
 import org.kevoree.library.cloud.lightlxc.wrapper.NodeManager
-import java.util.Random
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,7 +27,7 @@ import java.util.Random
  * Time: 09:22
  */
 
-class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService,val routeditfname : String , val hostitfname : String , val hostitfip : String , val containeripbaseaddress : String, val createBrdge : Boolean) : KInstanceWrapper {
+class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService, val routeditfname: String, val hostitfname: String, val hostitfip: String, val containeripbaseaddress: String, val createBrdge: Boolean, val bridgeName : String) : KInstanceWrapper {
 
 
     class Reader(inputStream: InputStream, val nodeName: String, val error: Boolean) : Runnable{
@@ -69,8 +66,6 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
     var readerERRthread: Thread? = null
     private val modelSaver = JSONModelSerializer()
 
-    val bridgename = "testbr0";
-
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
         //Log.info("go there 1" + isStarted)
@@ -82,7 +77,7 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
                 var factory = DefaultKevoreeFactory()
                 var urls = HashSet<String>()
                 urls.add("http://repo1.maven.org/maven2")
-                if(factory.getVersion().toLowerCase().contains("snapshot")){
+                if (factory.getVersion().toLowerCase().contains("snapshot")) {
                     urls.add("http://oss.sonatype.org/content/groups/public/")
                 }
                 var platformJar = mavenResolver.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + factory.getVersion(), urls);
@@ -93,98 +88,100 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
                 Log.info("Fork platform using {}", platformJar!!.getAbsolutePath())
 
 
-                var rootUserDirs =  Files.createTempDirectory("rootfs").toFile();
+                var rootUserDirs = Files.createTempDirectory("rootfs").toFile();
                 //Log.error("go there")
                 Log.info("file" + rootUserDirs?.getAbsolutePath())
                 val ng = NetworkGenerator(this.containeripbaseaddress, this.hostitfip)
 
                 var cg = ConfigGenerator();
 
-                val ethname= this.hostitfname
-                var newUserDir = cg.generateUserDir(rootUserDirs, modelElement, platformJar,bridgename,ng)
+                val ethname = this.hostitfname
+                var newUserDir = cg.generateUserDir(rootUserDirs, modelElement, platformJar, bridgeName, ng, routeditfname)
 
-                if (createBrdge){
+                if (createBrdge) {
+                    // TODO check and fix according to kevoree properties
+                    // netmask should be properties
                     val command0 = array("/sbin/ifdown", ethname)
                     val process0 = Runtime.getRuntime().exec(command0)
-                    readerOUTthread = Thread(Reader(process0!!.getInputStream()!!, modelElement.name!!, false))
-                    readerERRthread = Thread(Reader(process0!!.getErrorStream()!!, modelElement.name!!, true))
+                    readerOUTthread = Thread(Reader(process0.getInputStream()!!, modelElement.name!!, false))
+                    readerERRthread = Thread(Reader(process0.getErrorStream()!!, modelElement.name!!, true))
                     readerOUTthread!!.start()
                     readerERRthread!!.start()
                     process0.waitFor()
 
-                    val command1 = array("/sbin/brctl", "addbr", bridgename)
-                val process1 = Runtime.getRuntime().exec(command1)
-                readerOUTthread = Thread(Reader(process1!!.getInputStream()!!, modelElement.name!!, false))
-                readerERRthread = Thread(Reader(process1!!.getErrorStream()!!, modelElement.name!!, true))
-                readerOUTthread!!.start()
-                readerERRthread!!.start()
-                process1.waitFor()
+                    val command1 = array("/sbin/brctl", "addbr", bridgeName)
+                    val process1 = Runtime.getRuntime().exec(command1)
+                    readerOUTthread = Thread(Reader(process1.getInputStream()!!, modelElement.name!!, false))
+                    readerERRthread = Thread(Reader(process1.getErrorStream()!!, modelElement.name!!, true))
+                    readerOUTthread!!.start()
+                    readerERRthread!!.start()
+                    process1.waitFor()
 
-                val command2 = array("/sbin/brctl", "addif", bridgename,ethname)
-                val process2 = Runtime.getRuntime().exec(command2)
-                readerOUTthread = Thread(Reader(process2!!.getInputStream()!!, modelElement.name!!, false))
-                readerERRthread = Thread(Reader(process2!!.getErrorStream()!!, modelElement.name!!, true))
-                readerOUTthread!!.start()
-                readerERRthread!!.start()
-                process2.waitFor()
+                    val command2 = array("/sbin/brctl", "addif", bridgeName, ethname)
+                    val process2 = Runtime.getRuntime().exec(command2)
+                    readerOUTthread = Thread(Reader(process2.getInputStream()!!, modelElement.name!!, false))
+                    readerERRthread = Thread(Reader(process2.getErrorStream()!!, modelElement.name!!, true))
+                    readerOUTthread!!.start()
+                    readerERRthread!!.start()
+                    process2.waitFor()
 
-                val command3 = array("/sbin/ifconfig", ethname,"0.0.0.0")
-                val process3 = Runtime.getRuntime().exec(command3)
-                readerOUTthread = Thread(Reader(process3!!.getInputStream()!!, modelElement.name!!, false))
-                readerERRthread = Thread(Reader(process3!!.getErrorStream()!!, modelElement.name!!, true))
-                readerOUTthread!!.start()
-                readerERRthread!!.start()
-                process3.waitFor()
-
-
-                val ip = ng.generateGW(null)!!
-                val command4 = array("/sbin/ifconfig", bridgename, ip ,"netmask", "255.255.2550.0", "up")
-                val process4 = Runtime.getRuntime().exec(command4)
-                readerOUTthread = Thread(Reader(process4!!.getInputStream()!!, modelElement.name!!, false))
-                readerERRthread = Thread(Reader(process4!!.getErrorStream()!!, modelElement.name!!, true))
-                readerOUTthread!!.start()
-                readerERRthread!!.start()
-                process4.waitFor()
+                    val command3 = array("/sbin/ifconfig", ethname, "0.0.0.0")
+                    val process3 = Runtime.getRuntime().exec(command3)
+                    readerOUTthread = Thread(Reader(process3.getInputStream()!!, modelElement.name!!, false))
+                    readerERRthread = Thread(Reader(process3.getErrorStream()!!, modelElement.name!!, true))
+                    readerOUTthread!!.start()
+                    readerERRthread!!.start()
+                    process3.waitFor()
 
 
-//                val command5 = array("/sbin/ifconfig", "eth1","promisc", "up")
-                val command5 = array("/sbin/ifconfig", ethname,ip,"netmask","255.255.2550.0","promisc", "up")
-                val process5 = Runtime.getRuntime().exec(command5)
-                readerOUTthread = Thread(Reader(process5!!.getInputStream()!!, modelElement.name!!, false))
-                readerERRthread = Thread(Reader(process5!!.getErrorStream()!!, modelElement.name!!, true))
-                readerOUTthread!!.start()
-                readerERRthread!!.start()
-                process5.waitFor()
-
-                val file = File(rootUserDirs.toString() +"/"+  modelElement.name!!+"_rootfs/kevrun")
-                if (file.exists()) {
-                    val bval = file.setExecutable(true);
-                }
+                    val ip = ng.generateGW(null)!!
+                    val command4 = array("/sbin/ifconfig", bridgeName, ip, "netmask", "255.255.255.0", "up")
+                    val process4 = Runtime.getRuntime().exec(command4)
+                    readerOUTthread = Thread(Reader(process4.getInputStream()!!, modelElement.name!!, false))
+                    readerERRthread = Thread(Reader(process4.getErrorStream()!!, modelElement.name!!, true))
+                    readerOUTthread!!.start()
+                    readerERRthread!!.start()
+                    process4.waitFor()
 
 
-                    if (this.routeditfname!=null){
+                    //                val command5 = array("/sbin/ifconfig", "eth1","promisc", "up")
+                    val command5 = array("/sbin/ifconfig", ethname, ip, "netmask", "255.255.255.0", "promisc", "up")
+                    val process5 = Runtime.getRuntime().exec(command5)
+                    readerOUTthread = Thread(Reader(process5.getInputStream()!!, modelElement.name!!, false))
+                    readerERRthread = Thread(Reader(process5.getErrorStream()!!, modelElement.name!!, true))
+                    readerOUTthread!!.start()
+                    readerERRthread!!.start()
+                    process5.waitFor()
+
+                    val file = File(rootUserDirs.toString() + "/" + modelElement.name!! + "_rootfs/kevrun")
+                    if (file.exists()) {
+                        val bval = file.setExecutable(true);
+                    }
+
+
+                    if (!"".equals(routeditfname)) {
                         //echo 1 > /proc/sys/net/ipv4/ip_forward
                         val command6 = array("/bin/echo", ">", "1", "/proc/sys/net/ipv4/ip_forward")
                         val process6 = Runtime.getRuntime().exec(command6)
-                        readerOUTthread = Thread(Reader(process6!!.getInputStream()!!, modelElement.name!!, false))
-                        readerERRthread = Thread(Reader(process6!!.getErrorStream()!!, modelElement.name!!, true))
+                        readerOUTthread = Thread(Reader(process6.getInputStream()!!, modelElement.name!!, false))
+                        readerERRthread = Thread(Reader(process6.getErrorStream()!!, modelElement.name!!, true))
                         readerOUTthread!!.start()
                         readerERRthread!!.start()
                         process6.waitFor()
 
 
                         //iptables -t nat -A POSTROUTING -o wlan0 -j SNAT --to-source 10.20.41.39
-                        val command7 = array("/sbin/iptables", "-t", "nat", "-A", "POSTROUTING","-o","wlan0","-j","SNAT","--to-source",NodeManager.getAddressForItf("wlan0")!!)
+                        val command7 = array("/sbin/iptables", "-t", "nat", "-A", "POSTROUTING", "-o", "wlan0", "-j", "SNAT", "--to-source", NodeManager.getAddressForItf(routeditfname)!!)
                         val process7 = Runtime.getRuntime().exec(command7)
-                        readerOUTthread = Thread(Reader(process7!!.getInputStream()!!, modelElement.name!!, false))
-                        readerERRthread = Thread(Reader(process7!!.getErrorStream()!!, modelElement.name!!, true))
+                        readerOUTthread = Thread(Reader(process7.getInputStream()!!, modelElement.name!!, false))
+                        readerERRthread = Thread(Reader(process7.getErrorStream()!!, modelElement.name!!, true))
                         readerOUTthread!!.start()
                         readerERRthread!!.start()
                         process7.waitFor()
                     }
 
                 }
-                val runnerargs = array("lxc-execute", "-n", modelElement.name!!, "-f", rootUserDirs.toString() +"/"+  modelElement.name!!+"_rootfs/config", "/kevrun")
+                val runnerargs = array("lxc-execute", "-n", modelElement.name!!, "-f", rootUserDirs.toString() + "/" + modelElement.name!! + "_rootfs/config", "/kevrun")
                 process = Runtime.getRuntime().exec(runnerargs)
 
                 readerOUTthread = Thread(Reader(process!!.getInputStream()!!, modelElement.name!!, false))
@@ -216,55 +213,55 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
         }
         val args = array(command, "-n", modelElement.name!!)
         val process1 = Runtime.getRuntime().exec(args)
-        val readerOUTthread1 = Thread(Reader(process1!!.getInputStream()!!, modelElement.name!!, false))
-        val readerERRthread1 = Thread(Reader(process1!!.getErrorStream()!!, modelElement.name!!, true))
-        readerOUTthread1!!.start()
-        readerERRthread1!!.start()
+        val readerOUTthread1 = Thread(Reader(process1.getInputStream()!!, modelElement.name!!, false))
+        val readerERRthread1 = Thread(Reader(process1.getErrorStream()!!, modelElement.name!!, true))
+        readerOUTthread1.start()
+        readerERRthread1.start()
         Runtime.getRuntime().exec(args).waitFor()
     }
 
     override fun destroy() {
 
-        if (createBrdge){
+        if (createBrdge) {
             val command1 = array("/sbin/ifconfig", this.hostitfname, "down")
             val process1 = Runtime.getRuntime().exec(command1)
-            val readerOUTthread1 = Thread(Reader(process1!!.getInputStream()!!, modelElement.name!!, false))
-            val readerERRthread1 = Thread(Reader(process1!!.getErrorStream()!!, modelElement.name!!, true))
-            readerOUTthread1!!.start()
-            readerERRthread1!!.start()
+            val readerOUTthread1 = Thread(Reader(process1.getInputStream()!!, modelElement.name!!, false))
+            val readerERRthread1 = Thread(Reader(process1.getErrorStream()!!, modelElement.name!!, true))
+            readerOUTthread1.start()
+            readerERRthread1.start()
             process1.waitFor()
 
-            val command2 = array("/sbin/ifconfig", this.bridgename, "down")
+            val command2 = array("/sbin/ifconfig", bridgeName, "down")
             val process2 = Runtime.getRuntime().exec(command2)
-            val readerOUTthread2 = Thread(Reader(process2!!.getInputStream()!!, modelElement.name!!, false))
-            val readerERRthread2 = Thread(Reader(process2!!.getErrorStream()!!, modelElement.name!!, true))
-            readerOUTthread2!!.start()
-            readerERRthread2!!.start()
+            val readerOUTthread2 = Thread(Reader(process2.getInputStream()!!, modelElement.name!!, false))
+            val readerERRthread2 = Thread(Reader(process2.getErrorStream()!!, modelElement.name!!, true))
+            readerOUTthread2.start()
+            readerERRthread2.start()
             process1.waitFor()
 
-            val command3 = array("/sbin/brctl", "delif",this.hostitfname)
+            val command3 = array("/sbin/brctl", "delif", this.hostitfname)
             val process3 = Runtime.getRuntime().exec(command3)
-            val readerOUTthread3 = Thread(Reader(process3!!.getInputStream()!!, modelElement.name!!, false))
-            val readerERRthread3 = Thread(Reader(process3!!.getErrorStream()!!, modelElement.name!!, true))
-            readerOUTthread3!!.start()
-            readerERRthread3!!.start()
+            val readerOUTthread3 = Thread(Reader(process3.getInputStream()!!, modelElement.name!!, false))
+            val readerERRthread3 = Thread(Reader(process3.getErrorStream()!!, modelElement.name!!, true))
+            readerOUTthread3.start()
+            readerERRthread3.start()
             process3.waitFor()
 
-            val command4 = array("/sbin/brctl", "delbr",this.bridgename)
+            val command4 = array("/sbin/brctl", "delbr", bridgeName)
             val process4 = Runtime.getRuntime().exec(command3)
-            val readerOUTthread4 = Thread(Reader(process4!!.getInputStream()!!, modelElement.name!!, false))
-            val readerERRthread4 = Thread(Reader(process4!!.getErrorStream()!!, modelElement.name!!, true))
-            readerOUTthread4!!.start()
-            readerERRthread4!!.start()
+            val readerOUTthread4 = Thread(Reader(process4.getInputStream()!!, modelElement.name!!, false))
+            val readerERRthread4 = Thread(Reader(process4.getErrorStream()!!, modelElement.name!!, true))
+            readerOUTthread4.start()
+            readerERRthread4.start()
             process4.waitFor()
 
 
-            val command0 = array("/sbin/ifup", this.hostitfname)
+            val command0 = array("/sbin/ifup", hostitfname)
             val process0 = Runtime.getRuntime().exec(command0)
-            val readerOUTthread0 = Thread(Reader(process0!!.getInputStream()!!, modelElement.name!!, false))
-            val readerERRthread0 = Thread(Reader(process0!!.getErrorStream()!!, modelElement.name!!, true))
-            readerOUTthread0!!.start()
-            readerERRthread0!!.start()
+            val readerOUTthread0 = Thread(Reader(process0.getInputStream()!!, modelElement.name!!, false))
+            val readerERRthread0 = Thread(Reader(process0.getErrorStream()!!, modelElement.name!!, true))
+            readerOUTthread0.start()
+            readerERRthread0.start()
             process0.waitFor()
 
         }
@@ -273,9 +270,6 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
 
         readerOUTthread?.stop()
         readerERRthread?.stop()
-
-
-
     }
     private fun getJava(): String {
         val java_home: String? = System.getProperty("java.home");

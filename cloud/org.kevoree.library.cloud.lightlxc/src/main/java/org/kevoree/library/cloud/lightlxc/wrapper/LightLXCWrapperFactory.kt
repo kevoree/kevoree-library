@@ -14,7 +14,7 @@ import org.kevoree.api.ModelService
  * Time: 09:59
  */
 
-class LightLXCWrapperFactory(nodeName: String, val routeditfname : String ,val hostitfname : String , val hostitfip : String ,val containeripbaseaddress : String,val createBrdge : Boolean) : WrapperFactory(nodeName) {
+class LightLXCWrapperFactory(nodeName: String, val routeditfname : String ,val hostitfname : String , val hostitfip : String ,val containeripbaseaddress : String,val createBrdge : Boolean, val bridgeName : String) : WrapperFactory(nodeName) {
 
 
 
@@ -24,7 +24,7 @@ class LightLXCWrapperFactory(nodeName: String, val routeditfname : String ,val h
     override fun wrap(modelElement: KMFContainer, newBeanInstance: Any, tg: ThreadGroup, bs: BootstrapService,modelService: ModelService): KInstanceWrapper {
         when(modelElement) {
             is ContainerNode -> {
-                wrap =  LightLXCNodeWrapper(modelElement, newBeanInstance, tg, bs,routeditfname, hostitfname,hostitfip,containeripbaseaddress, createBrdge)
+                wrap =  LightLXCNodeWrapper(modelElement, newBeanInstance, tg, bs,routeditfname, hostitfname,hostitfip,containeripbaseaddress, createBrdge, bridgeName)
                 return wrap!!;
             }
             else -> {

@@ -19,7 +19,7 @@ public class LightLXCNode extends JavaNode implements PlatformNode {
     /**
      * Parameter to automatically create a route within the hosted platform between two network interfaces
      */
-    @Param()
+    @Param
     String routeditfname;
 
     /**
@@ -44,32 +44,29 @@ public class LightLXCNode extends JavaNode implements PlatformNode {
     @Param(defaultValue = "false")
     boolean freeze;
 
-
-    public void setFreeze(boolean freeze){
-        this.freeze = freeze;
-        fact.getWrap().freeze(freeze);
-
-    }
-
     /**
      * Parameter to Decide if the node has to create a bridge or if the bridge is managed directly by the hosted platform.
      */
     @Param(defaultValue = "true")
     boolean createBridge;
 
+    @Param(defaultValue = "lxcbr0")
+    String bridgeName;
+
     LightLXCWrapperFactory fact = null;
 
     @Override
     protected WrapperFactory createWrapperFactory(String nodeName) {
-        fact =  new LightLXCWrapperFactory(nodeName,routeditfname, hostitfname,hostitfip,containeripbaseaddress,createBridge);
+        fact = new LightLXCWrapperFactory(nodeName, routeditfname, hostitfname, hostitfip, containeripbaseaddress, createBridge, bridgeName);
         return fact;
     }
 
     @org.kevoree.annotation.Update
-    public void updateNode(){
+    public void updateNode() {
         super.updateNode();
-        if (fact !=null)
+        if (fact != null && fact.getWrap() != null) {
             fact.getWrap().freeze(freeze);
+        }
 
 
     }
