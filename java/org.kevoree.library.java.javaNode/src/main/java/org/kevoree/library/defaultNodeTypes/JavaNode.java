@@ -1,10 +1,8 @@
 package org.kevoree.library.defaultNodeTypes;
 
-import org.kevoree.ContainerRoot;
-import org.kevoree.DeployUnit;
-import org.kevoree.Instance;
-import org.kevoree.MBinding;
+import org.kevoree.*;
 import org.kevoree.annotation.*;
+import org.kevoree.annotation.NodeType;
 import org.kevoree.api.BootstrapService;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
@@ -38,11 +36,30 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @KevoreeInject
     Context context;
 
+    public void setLog(String log) {
+        this.log = log;
+        if ("DEBUG".equalsIgnoreCase(log)) {
+            Log.set(Log.LEVEL_DEBUG);
+        } else if ("WARN".equalsIgnoreCase(log)) {
+            Log.set(Log.LEVEL_WARN);
+        } else if ("INFO".equalsIgnoreCase(log)) {
+            Log.set(Log.LEVEL_INFO);
+        } else if ("ERROR".equalsIgnoreCase(log)) {
+            Log.set(Log.LEVEL_ERROR);
+        } else if ("TRACE".equalsIgnoreCase(log)) {
+            Log.set(Log.LEVEL_TRACE);
+        } else if ("NONE".equalsIgnoreCase(log)) {
+            Log.set(Log.LEVEL_NONE);
+        }
+        Log.info("JavaNode, changing LOG level to {}", this.log);
+    }
+
     @Param(optional = true, defaultValue = "INFO")
     public String log;
 
+
     /**
-     * java VM properties used when this node host some others (can also be used by the watchdog)
+     * java VM properties used when this node is hosted by a parent node (parent can be also the watchdog)
      */
     @Param(optional = true)
     public String jvmArgs;
@@ -52,9 +69,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Start
     @Override
     public void startNode() {
-        updateNode();
         Log.debug("Starting node type of {}", this);
-        Log.info("Log level: {} ", log);
         preTime = System.currentTimeMillis();
         modelService.registerModelListener(this);
         kompareBean = new KevoreeKompareBean(modelRegistry);
@@ -65,7 +80,6 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     protected WrapperFactory createWrapperFactory(String nodeName) {
         return new WrapperFactory(nodeName);
     }
-
 
     @Stop
     @Override
@@ -79,29 +93,12 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Update
     @Override
     public void updateNode() {
-        if ("DEBUG".equalsIgnoreCase(log)) {
-            Log.set(Log.LEVEL_DEBUG);
-        } else if ("WARN".equalsIgnoreCase(log)) {
-            Log.set(Log.LEVEL_WARN);
-        } else if ("INFO".equalsIgnoreCase(log)) {
-            Log.set(Log.LEVEL_INFO);
-        } else if ("ERROR".equalsIgnoreCase(log)) {
-            Log.set(Log.LEVEL_ERROR);
-        } else if ("TRACE".equalsIgnoreCase(log)) {
-            Log.set(Log.LEVEL_TRACE);
-        } else if ("NONE".equalsIgnoreCase(log)) {
-            Log.set(Log.LEVEL_NONE);
-        } else {
-            // default value
-            Log.set(Log.LEVEL_INFO);
-            Log.warn("Unable to find the corresponding log level. Default value (INFO) is set.");
-            log = "INFO";
-        }
+
     }
 
     @Override
     public AdaptationModel plan(ContainerRoot current, ContainerRoot target) {
-        KMFContainer elem = target.findNodesByID(modelService.getNodeName());
+        // KMFContainer elem = target.findNodesByID(modelService.getNodeName());
         return kompareBean.plan(current, target, modelService.getNodeName());
     }
 
@@ -110,7 +107,11 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
         String pTypeName = adaptationPrimitive.getPrimitiveType();
         String nodeName = modelService.getNodeName();
         if (pTypeName.equals(JavaPrimitive.UpdateDictionaryInstance.name())) {
-            return new UpdateDictionary((Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry,bootstrapService);
+            Object[] values = (Object[]) adaptationPrimitive.getRef();
+            return new UpdateDictionary((Instance) values[0], (DictionaryValue) values[1], nodeName, modelRegistry, bootstrapService,modelService);
+        }
+        if (pTypeName.equals(JavaPrimitive.UpdateCallMethod.name())) {
+            return new UpdateCallMethod((Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService);
         }
         if (pTypeName.equals(JavaPrimitive.StartInstance.name())) {
             return new StartStopInstance((Instance) adaptationPrimitive.getRef(), nodeName, true, modelRegistry, bootstrapService);
@@ -135,10 +136,10 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
             return res;
         }
         if (pTypeName.equals(JavaPrimitive.AddInstance.name())) {
-            return new AddInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService,modelService);
+            return new AddInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService, modelService);
         }
         if (pTypeName.equals(JavaPrimitive.RemoveInstance.name())) {
-            return new RemoveInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService,modelService);
+            return new RemoveInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService, modelService);
         }
         return null;
     }

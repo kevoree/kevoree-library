@@ -31,7 +31,7 @@ import org.kevoree.api.ModelService
  * Time: 17:53
  */
 
-class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeName: String, val registry: ModelRegistry, val bs: BootstrapService, val modelService : ModelService) : PrimitiveCommand, Runnable {
+class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeName: String, val registry: ModelRegistry, val bs: BootstrapService, val modelService: ModelService) : PrimitiveCommand, Runnable {
 
     var nodeTypeName: String? = null
     var tg: ThreadGroup? = null
@@ -47,7 +47,7 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
             subThread!!.join()
             return resultSub
         } catch(e: Throwable) {
-            if(subThread != null){
+            if (subThread != null) {
                 try {
                     subThread!!.stop() //kill sub thread
                 } catch(t: Throwable){
@@ -61,17 +61,17 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
     }
 
     override fun undo() {
-        RemoveInstance(wrapperFactory, c, nodeName, registry, bs,modelService).execute()
+        RemoveInstance(wrapperFactory, c, nodeName, registry, bs, modelService).execute()
     }
 
     public override fun run() {
         try {
             val newBeanInstance = bs.createInstance(c)
-            var newBeanKInstanceWrapper: KInstanceWrapper? = wrapperFactory.wrap(c, newBeanInstance!!, tg!!, bs,modelService)
+            var newBeanKInstanceWrapper: KInstanceWrapper? = wrapperFactory.wrap(c, newBeanInstance!!, tg!!, bs, modelService)
             registry.register(c, newBeanKInstanceWrapper!!)
-            val sub = UpdateDictionary(c, nodeName, registry, bs)
-            resultSub = sub.execute()
+            bs.injectDictionary(c, newBeanInstance, true)
             newBeanKInstanceWrapper?.create()
+            resultSub = true
         } catch(e: Throwable){
             Log.error("Error while adding instance {}", e, c.name)
             resultSub = false

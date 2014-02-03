@@ -44,30 +44,30 @@ public abstract class Kompare4(val registry: ModelRegistry) {
         var traces: TraceSequence? = null
 
         fun fillAdditional() {
-            for(n in targetNode!!.hosts){
+            for (n in targetNode!!.hosts) {
                 val previousNode = currentModel.findByPath(n.path()!!)
-                if(previousNode != null){
+                if (previousNode != null) {
                     traces!!.append(modelCompare.diff(previousNode, n))
                 } else {
                     traces!!.populate(n.toTraces(true, true))
                 }
             }
-            for(g in targetNode.groups){
+            for (g in targetNode.groups) {
                 val previousGroup = currentModel.findByPath(g.path()!!)
-                if(previousGroup != null){
+                if (previousGroup != null) {
                     traces!!.append(modelCompare.diff(previousGroup, g))
                 } else {
                     traces!!.populate(g.toTraces(true, true))
                 }
             }
             //This process can really slow down
-            for(comp in targetNode.components){
+            for (comp in targetNode.components) {
                 fun fillPort(ports: List<Port>) {
-                    for(port in ports){
-                        for(b in port.bindings){
-                            if(b.hub != null){
+                    for (port in ports) {
+                        for (b in port.bindings) {
+                            if (b.hub != null) {
                                 val previousChannel = currentModel.findByPath(b.hub!!.path()!!)
-                                if(previousChannel != null){
+                                if (previousChannel != null) {
                                     traces!!.append(modelCompare.diff(previousChannel, b.hub!!))
                                 } else {
                                     traces!!.populate(b.hub!!.toTraces(true, true))
@@ -85,17 +85,17 @@ public abstract class Kompare4(val registry: ModelRegistry) {
             traces = modelCompare.diff(currentNode, targetNode)
             fillAdditional()
         } else {
-            if(targetNode != null){
+            if (targetNode != null) {
                 traces = modelCompare.inter(targetNode, targetNode)
                 fillAdditional()
             }
         }
         if (traces != null) {
-            for(trace in traces!!.traces) {
+            for (trace in traces!!.traces) {
                 val modelElement = targetModel.findByPath(trace.srcPath)
                 when(trace.refName) {
                     "components" -> {
-                        if(trace.srcPath == targetNode!!.path()){
+                        if (trace.srcPath == targetNode!!.path()) {
                             when(trace) {
                                 is ModelAddTrace -> {
                                     val elemToAdd = targetModel.findByPath(trace.previousPath!!)
@@ -110,7 +110,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                         }
                     }
                     "hosts" -> {
-                        if(trace.srcPath == targetNode!!.path()){
+                        if (trace.srcPath == targetNode!!.path()) {
                             when(trace) {
                                 is ModelAddTrace -> {
                                     val elemToAdd = targetModel.findByPath(trace.previousPath!!)
@@ -125,7 +125,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                         }
                     }
                     "groups" -> {
-                        if(trace.srcPath == targetNode!!.path()){
+                        if (trace.srcPath == targetNode!!.path()) {
                             when(trace) {
                                 is ModelAddTrace -> {
                                     val elemToAdd = targetModel.findByPath(trace.previousPath!!)
@@ -141,15 +141,15 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                     }
                     "bindings" -> {
 
-                        if(!(targetModel.findByPath(trace.srcPath) is Channel)){
+                        if (!(targetModel.findByPath(trace.srcPath) is Channel)) {
                             when(trace) {
 
                                 is ModelAddTrace -> {
                                     val binding = targetModel.findByPath(trace.previousPath!!) as? org.kevoree.MBinding
                                     adaptationModel.addAdaptations(adapt(JavaPrimitive.AddBinding, binding, targetModel))
                                     val channel = binding?.hub
-                                    if(channel != null && registry.lookup(channel) == null){
-                                        if(!elementAlreadyProcessed.contains(TupleObjPrim(channel, JavaPrimitive.AddInstance))){
+                                    if (channel != null && registry.lookup(channel) == null) {
+                                        if (!elementAlreadyProcessed.contains(TupleObjPrim(channel, JavaPrimitive.AddInstance))) {
                                             adaptationModel.addAdaptations(adapt(JavaPrimitive.AddInstance, channel, targetModel))
                                             elementAlreadyProcessed.add(TupleObjPrim(channel, JavaPrimitive.AddInstance))
                                         }
@@ -162,16 +162,16 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                                     var oldChannel = previousBinding?.hub
                                     //check if not no current usage of this channel
                                     var stillUsed: Boolean = (channel != null)
-                                    if(channel != null){
-                                        for(loopBinding in channel.bindings){
-                                            if(loopBinding.port?.eContainer() == targetNode){
+                                    if (channel != null) {
+                                        for (loopBinding in channel.bindings) {
+                                            if (loopBinding.port?.eContainer() == targetNode) {
                                                 stillUsed = true
                                             }
                                         }
                                     }
 
-                                    if(!stillUsed && registry.lookup(oldChannel!!) != null){
-                                        if(!elementAlreadyProcessed.contains(TupleObjPrim(oldChannel!!, JavaPrimitive.RemoveInstance))){
+                                    if (!stillUsed && registry.lookup(oldChannel!!) != null) {
+                                        if (!elementAlreadyProcessed.contains(TupleObjPrim(oldChannel!!, JavaPrimitive.RemoveInstance))) {
                                             adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, oldChannel, targetModel))
                                             elementAlreadyProcessed.add(TupleObjPrim(oldChannel!!, JavaPrimitive.RemoveInstance))
                                             elementAlreadyProcessed.add(TupleObjPrim(oldChannel!!, JavaPrimitive.StopInstance))
@@ -184,21 +184,21 @@ public abstract class Kompare4(val registry: ModelRegistry) {
 
                     }
                     "started" -> {
-                        if(modelElement is Instance && trace is ModelSetTrace){
+                        if (modelElement is Instance && trace is ModelSetTrace) {
 
-                            if(modelElement.eContainer() is ContainerNode && modelElement.eContainer()!!.path() != targetNode!!.path()){
-                               //ignore it, for another node
+                            if (modelElement.eContainer() is ContainerNode && modelElement.eContainer()!!.path() != targetNode!!.path()) {
+                                //ignore it, for another node
                             } else {
-                                if(trace.srcPath == targetNode!!.path()){
+                                if (trace.srcPath == targetNode!!.path()) {
                                     //HaraKiri case
                                 } else {
                                     if (trace.content?.toLowerCase() == "true") {
-                                        if(!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.StartInstance))){
+                                        if (!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.StartInstance))) {
                                             adaptationModel.addAdaptations(adapt(JavaPrimitive.StartInstance, modelElement, targetModel))
                                             elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.StartInstance))
                                         }
                                     } else {
-                                        if(!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.StopInstance))){
+                                        if (!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.StopInstance))) {
                                             adaptationModel.addAdaptations(adapt(JavaPrimitive.StopInstance, modelElement, targetModel))
                                             elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.StopInstance))
                                         }
@@ -208,15 +208,23 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                         }
                     }
                     "typeDefinition" -> {
-                        if(modelElement is Instance){
+                        if (modelElement is Instance) {
                             //TODO continuous design
                         }
                     }
                     "value" -> {
-                        if(modelElement is org.kevoree.DictionaryValue){
-                            if(!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))){
-                                adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateDictionaryInstance, modelElement.eContainer()?.eContainer(), targetModel))
+                        if (modelElement is org.kevoree.DictionaryValue) {
+                            if (!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))) {
+                                var values = array<Any?>(modelElement.eContainer()?.eContainer(), modelElement)
+                                adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateDictionaryInstance, values, targetModel))
                                 elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))
+                            }
+                            val parentInstance = modelElement.eContainer()?.eContainer() as? Instance
+                            if (parentInstance != null) {
+                                if (!elementAlreadyProcessed.contains(TupleObjPrim(parentInstance, JavaPrimitive.UpdateCallMethod))) {
+                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateCallMethod, parentInstance, targetModel))
+                                    elementAlreadyProcessed.add(TupleObjPrim(parentInstance, JavaPrimitive.UpdateCallMethod))
+                                }
                             }
                         }
                     }
@@ -230,11 +238,11 @@ public abstract class Kompare4(val registry: ModelRegistry) {
         var foundDeployUnitsToRemove = HashSet<String>()
         currentNode?.visit(object : ModelVisitor(){
             override fun visit(elem: KMFContainer, refNameInParent: String, parent: KMFContainer) {
-                if(elem is DeployUnit){
+                if (elem is DeployUnit) {
                     foundDeployUnitsToRemove.add(elem.path()!!)
                 }
                 //optimization purpose
-                if( (elem is ContainerNode && elem != currentNode)){
+                if ( (elem is ContainerNode && elem != currentNode)) {
                     noChildrenVisit()
                     noReferencesVisit()
                 }
@@ -243,21 +251,21 @@ public abstract class Kompare4(val registry: ModelRegistry) {
         }, true, true, true)
         targetNode?.visit(object : ModelVisitor(){
             override fun visit(elem: KMFContainer, refNameInParent: String, parent: KMFContainer) {
-                if(elem is DeployUnit){
-                    if(registry.lookup(elem) == null){
+                if (elem is DeployUnit) {
+                    if (registry.lookup(elem) == null) {
                         adaptationModel.addAdaptations(adapt(JavaPrimitive.AddDeployUnit, elem, targetModel))
                         adaptationModel.addAdaptations(adapt(JavaPrimitive.LinkDeployUnit, elem, targetModel))
                     }
                     foundDeployUnitsToRemove.remove(elem.path()!!)
                 }
                 //optimization purpose
-                if( (elem is ContainerNode && elem != currentNode) ){
+                if ( (elem is ContainerNode && elem != currentNode) ) {
                     noChildrenVisit()
                     noReferencesVisit()
                 }
             }
         }, true, true, true)
-        for(pathDeployUnitToDrop in foundDeployUnitsToRemove){
+        for (pathDeployUnitToDrop in foundDeployUnitsToRemove) {
             adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveDeployUnit, currentModel.findByPath(pathDeployUnitToDrop), targetModel))
         }
         return adaptationModel

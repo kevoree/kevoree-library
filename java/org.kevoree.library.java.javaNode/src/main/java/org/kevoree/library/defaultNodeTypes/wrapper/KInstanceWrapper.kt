@@ -30,9 +30,10 @@ public trait KInstanceWrapper {
 
     val bs: BootstrapService
 
+    /*
     fun kUpdateDictionary(tmodel: ContainerRoot, instance: Instance): Boolean {
         try {
-            bs.injectDictionary(instance, targetObj)
+            //bs.injectDictionary(instance, targetObj)
             if (isStarted) {
                 val met = resolver.resolve(javaClass<org.kevoree.annotation.Update>())
                 met?.invoke(targetObj)
@@ -45,7 +46,7 @@ public trait KInstanceWrapper {
             Log.error("Kevoree Component Instance Update Error !", e)
             return false
         }
-    }
+    }*/
 
     fun create(){
 

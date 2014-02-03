@@ -7,6 +7,7 @@ import org.kevoree.api.PrimitiveCommand
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory
 import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
 import org.kevoree.api.ModelService
+import org.kevoree.log.Log
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -26,9 +27,12 @@ class RemoveInstance(val wrapperFactory: WrapperFactory, val c: Instance, val no
     override fun undo() {
         try {
             AddInstance(wrapperFactory, c, nodeName, registry, bs,modelService).execute()
-            UpdateDictionary(c, nodeName, registry, bs).execute()
+            val newCreatedWrapper = registry.lookup(c)
+            if(newCreatedWrapper is KInstanceWrapper){
+                bs.injectDictionary(c,newCreatedWrapper.targetObj,false)
+            }
         } catch(e: Exception) {
-            //
+            Log.error("Error during rollback",e)
         }
     }
 

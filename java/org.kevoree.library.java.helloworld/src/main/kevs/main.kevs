@@ -4,9 +4,15 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
+
 
 add node0 : JavaNode
+add sync : WSGroup
+attach node0 sync
+
 add node0.h1 : HelloJava
+set node0.h1.message = "payload"
 add node0.h2 : HelloJava
 
 add node0.ticker : Ticker

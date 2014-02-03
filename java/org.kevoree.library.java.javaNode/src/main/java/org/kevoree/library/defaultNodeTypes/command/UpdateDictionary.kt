@@ -8,6 +8,9 @@ import org.kevoree.ContainerRoot
 import org.kevoree.log.Log
 import java.lang.reflect.InvocationTargetException
 import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
+import org.kevoree.DictionaryValue
+import org.kevoree.api.ModelService
+import org.kevoree.impl.DefaultKevoreeFactory
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -23,24 +26,23 @@ import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
  * limitations under the License.
  */
 
-class UpdateDictionary(val c: Instance, val nodeName: String, val registry: ModelRegistry, val bs: org.kevoree.api.BootstrapService) : PrimitiveCommand {
+class UpdateDictionary(val c: Instance, val dicValue: DictionaryValue, val nodeName: String, val registry: ModelRegistry, val bs: org.kevoree.api.BootstrapService, val modelService : ModelService) : PrimitiveCommand {
 
     override fun execute(): Boolean {
         val reffound = registry.lookup(c)
-        if(reffound != null){
-            if(reffound is KInstanceWrapper){
-                val iact = reffound as KInstanceWrapper
+        if (reffound != null) {
+            if (reffound is KInstanceWrapper) {
                 val previousCL = Thread.currentThread().getContextClassLoader()
-                Thread.currentThread().setContextClassLoader(iact.javaClass.getClassLoader())
-                iact.kUpdateDictionary(c.typeDefinition!!.eContainer() as ContainerRoot, c)
+                Thread.currentThread().setContextClassLoader(reffound.targetObj.javaClass.getClassLoader())
+                bs.injectDictionaryValue(dicValue, reffound.targetObj)
                 Thread.currentThread().setContextClassLoader(previousCL)
             } else {
                 //case node type
                 try {
-                    bs.injectDictionary(c, reffound)
-                    val resolver = MethodAnnotationResolver(reffound.javaClass)
-                    val met = resolver.resolve(javaClass<org.kevoree.annotation.Update>())
-                    met?.invoke(reffound)
+                    val previousCL = Thread.currentThread().getContextClassLoader()
+                    Thread.currentThread().setContextClassLoader(reffound.javaClass.getClassLoader())
+                    bs.injectDictionaryValue(dicValue, reffound)
+                    Thread.currentThread().setContextClassLoader(previousCL)
                     return true
                 } catch(e: InvocationTargetException){
                     Log.error("Kevoree NodeType Instance Update Error !", e.getCause())
@@ -58,20 +60,41 @@ class UpdateDictionary(val c: Instance, val nodeName: String, val registry: Mode
     }
 
     override fun undo() {
-        Log.error("hum, hum this is ambarrasing .....")
-        /*
-        val mapFound = registry.get(c.path()!!)
-        val tempHash = HashMap<String, Any>()
-        if (lastDictioanry != null) {
-            tempHash.putAll(lastDictioanry!!);
+        try {
+            //try to found old value
+            var valueToInject : String? = null
+            val previousValue = modelService.getCurrentModel()?.getModel()?.findByPath(dicValue.path()!!)
+            if(previousValue != null && previousValue is DictionaryValue){
+                valueToInject = previousValue.value
+            } else {
+                val instance : Instance = dicValue.eContainer()?.eContainer() as Instance
+                val dicAtt = instance.typeDefinition!!.dictionaryType!!.findAttributesByID(dicValue.name!!)!!
+                if(dicAtt.defaultValue != null && dicAtt.defaultValue != ""){
+                    valueToInject = dicAtt.defaultValue
+                }
+            }
+            if(valueToInject!= null){
+                val fakeDicoValue = DefaultKevoreeFactory().createDictionaryValue()
+                fakeDicoValue.value = valueToInject
+                fakeDicoValue.name = dicValue.name
+                val reffound = registry.lookup(c)
+                if (reffound != null) {
+                    if (reffound is KInstanceWrapper) {
+                        val previousCL = Thread.currentThread().getContextClassLoader()
+                        Thread.currentThread().setContextClassLoader(reffound.targetObj.javaClass.getClassLoader())
+                        bs.injectDictionaryValue(fakeDicoValue, reffound.targetObj)
+                        Thread.currentThread().setContextClassLoader(previousCL)
+                    } else {
+                        val previousCL = Thread.currentThread().getContextClassLoader()
+                        Thread.currentThread().setContextClassLoader(reffound.javaClass.getClassLoader())
+                        bs.injectDictionaryValue(fakeDicoValue, reffound)
+                        Thread.currentThread().setContextClassLoader(previousCL)
+                    }
+                }
+            }
+        } catch (e:Throwable){
+           Log.debug("Error during rollback ",e)
         }
-        if(mapFound != null && mapFound is KInstanceWrapper){
-            val iact = mapFound as KInstanceWrapper
-            val previousCL = Thread.currentThread().getContextClassLoader()
-            Thread.currentThread().setContextClassLoader(iact.javaClass.getClassLoader())
-            lastDictioanry = iact.kUpdateDictionary(tempHash, c.typeDefinition!!.eContainer() as ContainerRoot)
-            Thread.currentThread().setContextClassLoader(previousCL)
-        } */
     }
 
     fun toString(): String {

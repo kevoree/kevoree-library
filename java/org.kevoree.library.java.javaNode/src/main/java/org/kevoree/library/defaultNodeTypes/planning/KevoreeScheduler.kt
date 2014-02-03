@@ -40,6 +40,8 @@ trait KevoreeScheduler {
             currentStep = currentStep!!.nextStep
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.UpdateDictionaryInstance.name()))
             currentStep = currentStep!!.nextStep
+            currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.UpdateCallMethod.name()))
+            currentStep = currentStep!!.nextStep
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.StartInstance.name()))
             currentStep = currentStep!!.nextStep
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.RemoveDeployUnit.name()))

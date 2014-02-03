@@ -20,4 +20,5 @@ enum class JavaPrimitive {
     StartInstance
     StopInstance
     LinkDeployUnit
+    UpdateCallMethod
 }
