@@ -49,7 +49,8 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                 if (previousNode != null) {
                     traces!!.append(modelCompare.diff(previousNode, n))
                 } else {
-                    traces!!.populate(n.toTraces(true, true))
+//                    traces!!.populate(n.toTraces(true, true))
+                    traces!!.populate(modelCompare.inter(n, n).traces)
                 }
             }
             for (g in targetNode.groups) {
@@ -57,7 +58,8 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                 if (previousGroup != null) {
                     traces!!.append(modelCompare.diff(previousGroup, g))
                 } else {
-                    traces!!.populate(g.toTraces(true, true))
+//                    traces!!.populate(g.toTraces(true, true))
+                    traces!!.populate(modelCompare.inter(g, g).traces)
                 }
             }
             //This process can really slow down
@@ -70,7 +72,8 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                                 if (previousChannel != null) {
                                     traces!!.append(modelCompare.diff(previousChannel, b.hub!!))
                                 } else {
-                                    traces!!.populate(b.hub!!.toTraces(true, true))
+//                                    traces!!.populate(b.hub!!.toTraces(true, true))
+                                    traces!!.populate(modelCompare.inter(b.hub!!, b.hub!!).traces)
                                 }
                             }
                         }
@@ -90,6 +93,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                 fillAdditional()
             }
         }
+
         if (traces != null) {
             for (trace in traces!!.traces) {
                 val modelElement = targetModel.findByPath(trace.srcPath)
