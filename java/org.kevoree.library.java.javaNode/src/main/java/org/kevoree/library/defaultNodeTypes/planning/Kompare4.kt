@@ -19,6 +19,8 @@ import org.kevoree.ContainerNode
 import org.kevoree.modeling.api.trace.ModelTrace
 import org.kevoree.Channel
 import org.kevoree.library.defaultNodeTypes.ModelRegistry
+import org.kevoree.impl.DefaultKevoreeFactory
+import java.util.ArrayList
 
 public abstract class Kompare4(val registry: ModelRegistry) {
 
@@ -50,7 +52,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                     traces!!.append(modelCompare.diff(previousNode, n))
                 } else {
 //                    traces!!.populate(n.toTraces(true, true))
-                    traces!!.populate(modelCompare.inter(n, n).traces)
+                    traces!!.populate(modelCompare.diff(DefaultKevoreeFactory().createContainerNode(), n).traces)
                 }
             }
             for (g in targetNode.groups) {
@@ -59,22 +61,24 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                     traces!!.append(modelCompare.diff(previousGroup, g))
                 } else {
 //                    traces!!.populate(g.toTraces(true, true))
-                    traces!!.populate(modelCompare.inter(g, g).traces)
+                    traces!!.populate(modelCompare.diff(DefaultKevoreeFactory().createGroup(), g).traces)
                 }
             }
             //This process can really slow down
+            val channelsAlreadySeen = ArrayList<String>()
             for (comp in targetNode.components) {
                 fun fillPort(ports: List<Port>) {
                     for (port in ports) {
                         for (b in port.bindings) {
-                            if (b.hub != null) {
+                            if (b.hub != null && !channelsAlreadySeen.contains(b.hub!!.path())) {
                                 val previousChannel = currentModel.findByPath(b.hub!!.path()!!)
                                 if (previousChannel != null) {
                                     traces!!.append(modelCompare.diff(previousChannel, b.hub!!))
                                 } else {
 //                                    traces!!.populate(b.hub!!.toTraces(true, true))
-                                    traces!!.populate(modelCompare.inter(b.hub!!, b.hub!!).traces)
+                                    traces!!.populate(modelCompare.diff(DefaultKevoreeFactory().createChannel(), b.hub!!).traces)
                                 }
+                                channelsAlreadySeen.add(b.hub!!.path()!!)
                             }
                         }
                     }
@@ -95,6 +99,8 @@ public abstract class Kompare4(val registry: ModelRegistry) {
         }
 
         if (traces != null) {
+            System.err.println(traces!!.exportToString() + "\n\n\n")
+
             for (trace in traces!!.traces) {
                 val modelElement = targetModel.findByPath(trace.srcPath)
                 when(trace.refName) {
