@@ -51,7 +51,6 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                 if (previousNode != null) {
                     traces!!.append(modelCompare.diff(previousNode, n))
                 } else {
-//                    traces!!.populate(n.toTraces(true, true))
                     traces!!.populate(modelCompare.diff(DefaultKevoreeFactory().createContainerNode(), n).traces)
                 }
             }
@@ -60,12 +59,11 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                 if (previousGroup != null) {
                     traces!!.append(modelCompare.diff(previousGroup, g))
                 } else {
-//                    traces!!.populate(g.toTraces(true, true))
                     traces!!.populate(modelCompare.diff(DefaultKevoreeFactory().createGroup(), g).traces)
                 }
             }
             //This process can really slow down
-            val channelsAlreadySeen = ArrayList<String>()
+            val channelsAlreadySeen = HashSet<String>()
             for (comp in targetNode.components) {
                 fun fillPort(ports: List<Port>) {
                     for (port in ports) {
@@ -75,7 +73,6 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                                 if (previousChannel != null) {
                                     traces!!.append(modelCompare.diff(previousChannel, b.hub!!))
                                 } else {
-//                                    traces!!.populate(b.hub!!.toTraces(true, true))
                                     traces!!.populate(modelCompare.diff(DefaultKevoreeFactory().createChannel(), b.hub!!).traces)
                                 }
                                 channelsAlreadySeen.add(b.hub!!.path()!!)
@@ -99,8 +96,6 @@ public abstract class Kompare4(val registry: ModelRegistry) {
         }
 
         if (traces != null) {
-            System.err.println(traces!!.exportToString() + "\n\n\n")
-
             for (trace in traces!!.traces) {
                 val modelElement = targetModel.findByPath(trace.srcPath)
                 when(trace.refName) {
