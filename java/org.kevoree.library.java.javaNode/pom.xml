@@ -15,11 +15,6 @@
     <dependencies>
         <dependency>
             <groupId>org.kevoree</groupId>
-            <artifactId>org.kevoree.maven.resolver</artifactId>
-            <version>16</version>
-        </dependency>
-        <dependency>
-            <groupId>org.kevoree</groupId>
             <artifactId>org.kevoree.api</artifactId>
             <version>${kevoree.version}</version>
         </dependency>

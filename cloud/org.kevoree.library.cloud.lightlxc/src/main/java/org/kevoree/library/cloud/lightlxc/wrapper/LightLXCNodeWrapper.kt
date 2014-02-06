@@ -9,7 +9,6 @@ import java.io.InputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.IOException
-import org.kevoree.resolver.MavenResolver
 import org.kevoree.serializer.JSONModelSerializer
 import org.kevoree.log.Log
 import java.io.File
@@ -59,7 +58,6 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
 
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
     override var isStarted: Boolean = false
-    val mavenResolver = MavenResolver()
     var process: Process? = null
 
     var readerOUTthread: Thread? = null
@@ -80,7 +78,7 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
                 if (factory.getVersion().toLowerCase().contains("snapshot")) {
                     urls.add("http://oss.sonatype.org/content/groups/public/")
                 }
-                var platformJar = mavenResolver.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + factory.getVersion(), urls);
+                var platformJar = bs.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + factory.getVersion(), urls);
                 if (platformJar == null) {
                     Log.error("Can't download Kevoree platform, abording starting node")
                     return false

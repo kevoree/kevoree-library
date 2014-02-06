@@ -22,4 +22,4 @@ bind node0.h1.hello hub
 bind node0.h2.hello hub
 bind node0.ticker.tick hub
 
-set node0.ticker.period = "500"
+set node0.ticker.period = "3000"

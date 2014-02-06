@@ -10,7 +10,6 @@ import java.io.IOException
 import org.kevoree.library.defaultNodeTypes.wrapper.NodeWrapper.Reader
 import java.io.FileOutputStream
 import org.kevoree.api.BootstrapService
-import org.kevoree.resolver.MavenResolver
 import org.kevoree.serializer.JSONModelSerializer
 import org.kevoree.ContainerRoot
 import org.kevoree.ContainerNode
@@ -57,7 +56,6 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
 
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
     override var isStarted: Boolean = false
-    val mavenResolver = MavenResolver()
     var process: Process? = null
 
     var readerOUTthread: Thread? = null
@@ -66,25 +64,20 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
         if (!isStarted) {
-
             var urls = HashSet<String>()
             urls.add("http://repo1.maven.org/maven2")
-
-            var platformJar = mavenResolver.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + DefaultKevoreeFactory().getVersion(), urls);
+            var platformJar = bs.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + DefaultKevoreeFactory().getVersion(), urls);
             if (platformJar == null) {
                 Log.error("Can't download Kevoree platform, abording starting node")
                 return false
             }
-
-
-            var jvmArgs : String? = null
+            var jvmArgs: String? = null
             if (modelElement.dictionary != null) {
                 var jvmArgsAttribute = modelElement.dictionary!!.findValuesByID("jvmArgs")
                 if (jvmArgsAttribute != null) {
                     jvmArgs = jvmArgsAttribute.toString()
                 }
             }
-
             Log.info("Fork platform using {}", platformJar!!.getAbsolutePath())
             val tempFile = File.createTempFile("bootModel" + modelElement.name, ".json")
             var tempIO = FileOutputStream(tempFile)

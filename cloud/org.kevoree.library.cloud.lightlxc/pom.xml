@@ -21,7 +21,15 @@
             <artifactId>org.kevoree.library.cloud.api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
     </dependencies>
+    <properties>
+        <kotlin.version>0.6.1673</kotlin.version>
+    </properties>
 
     <build>
         <plugins>

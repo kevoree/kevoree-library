@@ -90,12 +90,6 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
         modelRegistry.clear();
     }
 
-    @Update
-    @Override
-    public void updateNode() {
-
-    }
-
     @Override
     public AdaptationModel plan(ContainerRoot current, ContainerRoot target) {
         // KMFContainer elem = target.findNodesByID(modelService.getNodeName());
