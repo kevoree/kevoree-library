@@ -12,13 +12,15 @@ attach node0 sync
 //bind node0.breakdown.input hub
 //add node0.ticker : Ticker
 //bind node0.ticker.tick hub
-//set node0.ticker.period = "1000"
-
 
 add node0.typedtic : TwoValueTicker
+set node0.typedtic.period = "1000"
+
 add node0.typedconsole : TwoValueHello
 add hub2 : SyncBroadcast
 bind node0.typedconsole.input hub2
 bind node0.typedtic.tick hub2
+set hub2.clone = "true"
+
 
 

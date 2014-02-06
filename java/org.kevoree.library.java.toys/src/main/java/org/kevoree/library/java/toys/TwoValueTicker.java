@@ -56,7 +56,6 @@ public class TwoValueTicker implements Runnable {
                             System.out.println("ticker return : " + result);
                         }
                     }
-
                     @Override
                     public void onError(Throwable exception) {
                         exception.printStackTrace();

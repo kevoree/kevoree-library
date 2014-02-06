@@ -55,7 +55,6 @@ public class Ticker implements Runnable {
                             System.out.println("ticker return : " + result);
                         }
                     }
-
                     @Override
                     public void onError(Throwable exception) {
                         exception.printStackTrace();
@@ -63,6 +62,7 @@ public class Ticker implements Runnable {
                 });
             }
         } catch (InterruptedException e) {
+
         }
     }
 }

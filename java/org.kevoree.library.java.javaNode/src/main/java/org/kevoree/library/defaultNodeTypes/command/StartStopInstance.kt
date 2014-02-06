@@ -30,7 +30,6 @@ class StartStopInstance(val c: Instance, val nodeName: String, val start: Boolea
     var iact: KInstanceWrapper? = null
 
     public override fun run() {
-
         try {
             Thread.currentThread().setContextClassLoader(iact.javaClass.getClassLoader())
             if(start){

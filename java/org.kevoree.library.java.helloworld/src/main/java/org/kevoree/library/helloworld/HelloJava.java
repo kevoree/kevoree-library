@@ -30,7 +30,7 @@ public class HelloJava {
         buffer.append("path=");
         buffer.append(context.getPath());
         buffer.append("\n");
-        buffer.append("message=" + msg+"/"+message);
+        buffer.append("message=" + msg + "/" + message);
         return buffer.toString();
     }
 

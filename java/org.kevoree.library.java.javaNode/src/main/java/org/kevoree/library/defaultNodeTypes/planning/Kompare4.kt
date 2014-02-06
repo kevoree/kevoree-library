@@ -21,6 +21,7 @@ import org.kevoree.Channel
 import org.kevoree.library.defaultNodeTypes.ModelRegistry
 import org.kevoree.impl.DefaultKevoreeFactory
 import java.util.ArrayList
+import org.kevoree.log.Log
 
 public abstract class Kompare4(val registry: ModelRegistry) {
 
@@ -51,7 +52,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                 if (previousNode != null) {
                     traces!!.append(modelCompare.diff(previousNode, n))
                 } else {
-                    traces!!.populate(modelCompare.diff(DefaultKevoreeFactory().createContainerNode(), n).traces)
+                    traces!!.populate(deepToTrace(n))
                 }
             }
             for (g in targetNode.groups) {
@@ -59,7 +60,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                 if (previousGroup != null) {
                     traces!!.append(modelCompare.diff(previousGroup, g))
                 } else {
-                    traces!!.populate(modelCompare.diff(DefaultKevoreeFactory().createGroup(), g).traces)
+                    traces!!.populate(deepToTrace(g))
                 }
             }
             //This process can really slow down
@@ -73,7 +74,7 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                                 if (previousChannel != null) {
                                     traces!!.append(modelCompare.diff(previousChannel, b.hub!!))
                                 } else {
-                                    traces!!.populate(modelCompare.diff(DefaultKevoreeFactory().createChannel(), b.hub!!).traces)
+                                    traces!!.populate(deepToTrace(b.hub!!))
                                 }
                                 channelsAlreadySeen.add(b.hub!!.path()!!)
                             }
@@ -277,7 +278,20 @@ public abstract class Kompare4(val registry: ModelRegistry) {
     }
 
     open fun processTrace(trace: ModelTrace, adaptationModel: AdaptationModel) {
-
+         //Log.info(trace.toString())
     }
+
+
+    private fun deepToTrace(elem : KMFContainer) : List<ModelTrace> {
+        val result = ArrayList<ModelTrace>()
+        result.addAll(elem.toTraces(true,true))
+        elem.visit(object : ModelVisitor(){
+            override fun visit(child: KMFContainer, refNameInParent: String, parent: KMFContainer) {
+                result.addAll(child.toTraces(true,true))
+            }
+        },true,true,false)
+        return result
+    }
+
 
 }
