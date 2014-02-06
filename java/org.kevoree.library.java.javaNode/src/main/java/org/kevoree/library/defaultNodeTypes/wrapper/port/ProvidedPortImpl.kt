@@ -6,6 +6,10 @@ import java.lang.reflect.Method
 import org.kevoree.log.Log
 import org.kevoree.annotation.Input
 import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
+import java.lang.invoke.MethodHandles
+import java.lang.invoke.MethodType
+import java.lang.invoke.MethodHandle
+import java.beans.MethodDescriptor
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,7 +28,11 @@ class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, v
             if (componentWrapper.isStarted) {
                 var result: Any? = null
                 if (paramSize == 0) {
-                    result = targetMethod?.invoke(targetObj)
+                    if(methodHandler!=null){
+                        result = methodHandler?.invokeExact(targetObj)
+                    } else {
+                        result = targetMethod?.invoke(targetObj)
+                    }
                 } else {
                     if (paramSize == 1) {
                         result = targetMethod?.invoke(targetObj, payload)
@@ -57,14 +65,20 @@ class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, v
 
     var targetMethod: Method? = null
     var paramSize = 0
+    var methodHandler: MethodHandle? = null;
 
     {
-        targetMethod = MethodResolver.resolve(name,targetObj.javaClass)
+        targetMethod = MethodResolver.resolve(name, targetObj.javaClass)
+        targetMethod?.setAccessible(true)
         if (targetMethod == null) {
             Log.error("Warning Provided port is not binded ... for name " + name)
         } else {
             paramSize = targetMethod!!.getParameterTypes()!!.size
         }
+
+        var mt = MethodType.methodType(targetMethod!!.getReturnType()!!,targetMethod!!.getParameterTypes()!!)
+        methodHandler = MethodHandles.lookup().findVirtual(targetObj.javaClass, name, mt)
+
     }
 
 }

@@ -52,7 +52,10 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                 if (previousNode != null) {
                     traces!!.append(modelCompare.diff(previousNode, n))
                 } else {
-                    traces!!.populate(deepToTrace(n))
+                    traces!!.populate(n.toTraces(true,true))
+                    if(n.dictionary!=null){
+                        traces!!.populate(n.toTraces(true,true))
+                    }
                 }
             }
             for (g in targetNode.groups) {

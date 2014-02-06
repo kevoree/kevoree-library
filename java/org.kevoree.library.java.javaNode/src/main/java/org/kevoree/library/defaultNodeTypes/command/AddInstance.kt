@@ -73,7 +73,7 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
             newBeanKInstanceWrapper?.create()
             resultSub = true
         } catch(e: Throwable){
-            Log.error("Error while adding instance {}", e, c.name)
+            Log.error("Error while adding instance {}", c.name,e)
             resultSub = false
         }
     }
