@@ -35,7 +35,11 @@ class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, v
                     }
                 } else {
                     if (paramSize == 1) {
-                        result = targetMethod?.invoke(targetObj, payload)
+                        if(methodHandler!=null){
+                            result = methodHandler?.invokeExact(targetObj,payload)
+                        } else {
+                            result = targetMethod?.invoke(targetObj,payload)
+                        }
                     } else {
                         if (payload is Array<*>) {
                             if (payload.size == paramSize) {
@@ -76,8 +80,8 @@ class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, v
             paramSize = targetMethod!!.getParameterTypes()!!.size
         }
 
-        var mt = MethodType.methodType(targetMethod!!.getReturnType()!!,targetMethod!!.getParameterTypes()!!)
-        methodHandler = MethodHandles.lookup().findVirtual(targetObj.javaClass, name, mt)
+       // var mt = MethodType.methodType(targetMethod!!.getReturnType()!!,targetMethod!!.getParameterTypes()!!)
+      //  methodHandler = MethodHandles.lookup().findVirtual(targetObj.javaClass, name, mt)
 
     }
 

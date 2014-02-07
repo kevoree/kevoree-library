@@ -223,16 +223,20 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                     }
                     "value" -> {
                         if (modelElement is org.kevoree.DictionaryValue) {
-                            if (!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))) {
-                                var values = array<Any?>(modelElement.eContainer()?.eContainer(), modelElement)
-                                adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateDictionaryInstance, values, targetModel))
-                                elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))
-                            }
                             val parentInstance = modelElement.eContainer()?.eContainer() as? Instance
-                            if (parentInstance != null) {
-                                if (!elementAlreadyProcessed.contains(TupleObjPrim(parentInstance, JavaPrimitive.UpdateCallMethod))) {
-                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateCallMethod, parentInstance, targetModel))
-                                    elementAlreadyProcessed.add(TupleObjPrim(parentInstance, JavaPrimitive.UpdateCallMethod))
+                            if(parentInstance!= null && parentInstance is ContainerNode && parentInstance.name == nodeName && currentNode == null){
+                               //noop
+                            } else {
+                                if (!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))) {
+                                    var values = array<Any?>(modelElement.eContainer()?.eContainer(), modelElement)
+                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateDictionaryInstance, values, targetModel))
+                                    elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))
+                                }
+                                if (parentInstance != null) {
+                                    if (!elementAlreadyProcessed.contains(TupleObjPrim(parentInstance, JavaPrimitive.UpdateCallMethod))) {
+                                        adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateCallMethod, parentInstance, targetModel))
+                                        elementAlreadyProcessed.add(TupleObjPrim(parentInstance, JavaPrimitive.UpdateCallMethod))
+                                    }
                                 }
                             }
                         }

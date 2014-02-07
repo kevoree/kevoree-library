@@ -6,6 +6,7 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
 add node0 : JavaNode
 add sync : WSGroup
 attach node0 sync
+set node0.log = "DEBUG"
 
 //add node0.breakdown : Breakdown
 //add hub : SyncBroadcast
