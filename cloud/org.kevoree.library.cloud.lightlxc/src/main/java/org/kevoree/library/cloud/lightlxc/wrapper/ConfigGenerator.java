@@ -13,7 +13,7 @@ import java.nio.channels.FileChannel;
  */
 public class ConfigGenerator {
 
-    public final String[] baseDirNames = {"usr", "lib", "lib32" , "lib64", "etc", "bin", "sbin", "proc", "var", "dev/pts", "dev/shm", "tmp"};
+    public final String[] baseDirNames = {"usr", "lib", "lib32" , "lib64", "etc", "bin", "sbin", "proc", "var", "dev/pts", "dev/shm", "tmp","run"};
 
     public String generate(String nodeName, String ip, String gateway, String mac,String bridgeName,String baseRootDirs, String intfName) {
 
@@ -38,6 +38,8 @@ public class ConfigGenerator {
                 "lxc.mount.entry = /tmp ${baseRootDirs}/${nodename}_rootfs/tmp tmpfs nosuid,nodev,noexec,mode=1777,size=1g 0 0\n";
             if (new File("/lib32").exists())
                 base = base +  "lxc.mount.entry=/lib32 ${baseRootDirs}/${nodename}_rootfs/lib32 none ro,bind 0 0\n";
+            if (new File("/run").exists())
+                base = base +  "lxc.mount.entry=/run ${baseRootDirs}/${nodename}_rootfs/runn none ro,bind 0 0\n";
             if (new File("/lib64").exists())
                 base = base +  "lxc.mount.entry=/lib64 ${baseRootDirs}/${nodename}_rootfs/lib64 none ro,bind 0 0\n";
 

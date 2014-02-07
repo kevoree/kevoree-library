@@ -19,13 +19,13 @@ public class LightLXCNode extends JavaNode implements PlatformNode {
     /**
      * Parameter to automatically create a route within the hosted platform between two network interfaces
      */
-    @Param
+    @Param(defaultValue = "eth0")
     String routeditfname;
 
     /**
      * Parameter to set the network alias
      */
-    @Param(defaultValue = "eth1")
+    @Param(defaultValue = "eth0")
     String hostitfname;
 
     /**
@@ -47,7 +47,7 @@ public class LightLXCNode extends JavaNode implements PlatformNode {
     /**
      * Parameter to Decide if the node has to create a bridge or if the bridge is managed directly by the hosted platform.
      */
-    @Param(defaultValue = "true")
+    @Param(defaultValue = "false")
     boolean createBridge;
 
     @Param(defaultValue = "lxcbr0")
