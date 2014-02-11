@@ -205,17 +205,27 @@ public class LxcManager {
             Log.info("Destroying container " + id);
         }
         try {
+            boolean done;
             File standardOutput = File.createTempFile(id, ".log");
-            Process lxcstopprocess = new ProcessBuilder(LxcContants.lxcstop, "-n", id).redirectErrorStream(true).start();
+            Process process;
+            if (isRunning(id)) {
+                process = new ProcessBuilder(LxcContants.lxcstop, "-n", id).redirectErrorStream(true).start();
 
-            new Thread(new ProcessStreamFileLogger(lxcstopprocess.getInputStream(), standardOutput)).start();
-            if (lxcstopprocess.waitFor() == 0) {
-                standardOutput.delete();
+                new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
+                done = process.waitFor() == 0;
+
+                if (done) {
+                    standardOutput.delete();
+                }
+            } else {
+                done = true;
+            }
+            if (done) {
                 if (destroy) {
                     try {
-                        lxcstopprocess = new ProcessBuilder(LxcContants.lxcbackup, "-n", id).redirectErrorStream(true).start();
-                        new Thread(new ProcessStreamFileLogger(lxcstopprocess.getInputStream(), standardOutput)).start();
-                        if (lxcstopprocess.waitFor() == 0) {
+                        process = new ProcessBuilder(LxcContants.lxcbackup, "-n", id).redirectErrorStream(true).start();
+                        new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
+                        if (process.waitFor() == 0) {
                             standardOutput.delete();
                             return true;
                         } else {
