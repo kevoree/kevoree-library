@@ -43,7 +43,7 @@ public class CreateBaseContainer implements Runnable {
                         Log.error("Cannot lock the model to create the base container used for clone");
                     }
                 }
-            }, LXCNode.CREATE_CLONE_TIMEOUT);
+            }, lxcHostNode.getCREATE_CLONE_TIMEOUT());
         }
 
 

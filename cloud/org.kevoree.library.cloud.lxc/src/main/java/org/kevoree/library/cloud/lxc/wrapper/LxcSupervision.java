@@ -81,7 +81,7 @@ public class LxcSupervision implements Runnable {
                     }
                 }
             }
-        }, LXCNode.SUPERVISION_TIMEOUT);
+        }, lxcHostNode.getSUPERVISION_TIMEOUT());
     }
 
     private boolean manageIPAddresses(ContainerRoot model) {

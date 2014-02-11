@@ -25,8 +25,19 @@ public class LXCNode extends JavaNode implements PlatformNode {
     @KevoreeInject
     protected Context context;
 
-    public static final long CREATE_CLONE_TIMEOUT = 180000l;      // todo add dico
-    public static final long SUPERVISION_TIMEOUT = 10000l;      // todo add dico
+    @Param(defaultValue = "180000")
+    long CREATE_CLONE_TIMEOUT;
+    @Param(defaultValue = "10000")
+    long SUPERVISION_TIMEOUT;
+
+    public long getCREATE_CLONE_TIMEOUT() {
+        return CREATE_CLONE_TIMEOUT;
+    }
+
+    public long getSUPERVISION_TIMEOUT() {
+        return SUPERVISION_TIMEOUT;
+    }
+
     private LxcManager lxcManager;
     private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
