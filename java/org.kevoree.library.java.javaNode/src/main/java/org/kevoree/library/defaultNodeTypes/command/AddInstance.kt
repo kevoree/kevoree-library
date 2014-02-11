@@ -8,6 +8,7 @@ import org.kevoree.api.PrimitiveCommand
 import org.kevoree.log.Log
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory
 import org.kevoree.api.ModelService
+import org.kevoree.ContainerNode
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -69,7 +70,11 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
             val newBeanInstance = bs.createInstance(c)
             var newBeanKInstanceWrapper: KInstanceWrapper? = wrapperFactory.wrap(c, newBeanInstance!!, tg!!, bs, modelService)
             registry.register(c, newBeanKInstanceWrapper!!)
-            bs.injectDictionary(c, newBeanInstance, true)
+            if (!(c is ContainerNode)) {
+                // Node are started in external process so we do not need to inject Dictionary.
+                // Moreover, nodes are able to update the log level for all the runtime and if we inject the dictionary for child node than the log level will be the one from the child node and not for the hosting node
+                bs.injectDictionary(c, newBeanInstance, true)
+            }
             newBeanKInstanceWrapper?.create()
             resultSub = true
         } catch(e: Throwable){
