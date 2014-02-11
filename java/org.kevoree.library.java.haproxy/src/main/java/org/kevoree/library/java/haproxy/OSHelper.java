@@ -54,7 +54,7 @@ public class OSHelper {
 
     public static boolean is64() {
         String s = System.getProperty("os.arch");
-        if (s.contains("86") || s.contains("64")) {
+        if (s.contains("64")) {
             return true;
         } else {
             return false;
