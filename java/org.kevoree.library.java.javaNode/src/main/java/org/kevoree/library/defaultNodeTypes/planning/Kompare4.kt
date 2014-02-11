@@ -149,8 +149,8 @@ public abstract class Kompare4(val registry: ModelRegistry) {
                         }
                     }
                     "bindings" -> {
-
-                        if (!(targetModel.findByPath(trace.srcPath) is Channel)) {
+                        // as the traces propose to much reconfiguration and especially those for the child nodes, we need to check if the binding is related to the node
+                        if (!(targetModel.findByPath(trace.srcPath) is Channel) && (trace.srcPath.startsWith(targetNode?.path()!!) || trace.srcPath.startsWith(currentNode?.path()!!))) {
                             when(trace) {
 
                                 is ModelAddTrace -> {
