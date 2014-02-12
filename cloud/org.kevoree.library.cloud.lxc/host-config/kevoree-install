@@ -12,8 +12,8 @@ alreadyAPTDone=`cat /etc/apt/sources.list | grep "http://ppa.launchpad.net/webup
 if [ "$alreadyAPTDone" == "" ]; then
 	echo "Updating /etc/apt/sources.list"
 	cp /etc/apt/sources.list /etc/apt/sources.list.back
-	echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu sausing main" | tee -a /etc/apt/sources.list
-	echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu saucing main" | tee -a /etc/apt/sources.list
+	echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu saucy main" | tee -a /etc/apt/sources.list
+	echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu saucy main" | tee -a /etc/apt/sources.list
 	# Update local software list
 	sudo apt-get update
 fi
@@ -26,7 +26,7 @@ sudo apt-get install oracle-java7-installer --force-yes -y
 
 kevoreeVersion="RELEASE"
 kevoreeLibraryVersion="RELEASE"
-watchdogVersion="0.20"
+watchdogVersion="RELEASE"
 
 echo "Can you please tell me the version of kevoree ?"
 read kevoreeVersion
@@ -36,6 +36,16 @@ read kevoreeLibraryVersion
 
 echo "Can you please tell me the version of the kevoree-watchdog(eg. 0.20) ?"
 read watchdogVersion
+
+if [ $kevoreeVersion == "" ] ; then
+    kevoreeVersion="RELEASE"
+fi
+if [ $kevoreeLibraryVersion == "" ] ; then
+    kevoreeLibraryVersion="RELEASE"
+fi
+if [ $watchdogVersion == "" ] ; then
+    watchdogVersion="RELEASE"
+fi
 
 echo "Configure Kevoree Watchdog"
 apt-get install wget
@@ -68,6 +78,8 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:$kevoreeLibrary
 include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:$kevoreeLibraryVersion
 
 add $(hostname) : LXCNode
+
+set $(hostname).CREATE_CLONE_TIMEOUT = "300000"
 
 add sync : WSGroup
 set sync.port/$(hostname) = "9000"
