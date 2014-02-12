@@ -61,15 +61,15 @@ public class ModelServiceSocketHandler extends BaseWebSocketHandler implements M
         try {
             //JSONObject jsonReader = new JSONObject(message);
             //if (jsonReader.get("diff") != null) {
-                connection.send("{\"event\":\"update\"}");
+                connection.send("event=update");
                 final TraceSequence sequence = new DefaultTraceSequence().populateFromString(message);
                 modelService.submitSequence(sequence, new UpdateCallback() {
                     @Override
                     public void run(Boolean applied) {
                         if (applied) {
-                            connection.send("{\"event\":\"done\"}");
+                            connection.send("event=done");
                         } else {
-                            connection.send("{\"event\":\"error\"}");
+                            connection.send("event=error");
                         }
                         Log.info("model updated : {}", applied);
                     }
