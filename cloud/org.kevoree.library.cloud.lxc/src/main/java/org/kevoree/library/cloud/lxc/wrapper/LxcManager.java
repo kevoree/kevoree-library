@@ -40,7 +40,7 @@ public class LxcManager {
         try {
             if (!getContainers().contains(node.getName())) {
                 File standardOutput = File.createTempFile(node.getName(), ".log");
-                Log.debug("Creating container using {} as clone", node.getName(), clone_id);
+                Log.debug("Creating container {} using {} as clone", node.getName(), clone_id);
                 Process processcreate = new ProcessBuilder(LxcContants.lxcclone, "-o", clone_id, "-n", node.getName()).redirectErrorStream(true).start();
                 new Thread(new ProcessStreamFileLogger(processcreate.getInputStream(), standardOutput)).start();
                 if (processcreate.waitFor() == 0) {
@@ -299,6 +299,8 @@ public class LxcManager {
                     Process lxcstopprocess = new ProcessBuilder(LxcContants.lxcstop, "-n", clone_id).redirectErrorStream(true).start();
                     new Thread(new ProcessStreamFileLogger(lxcstopprocess.getInputStream(), new File("/dev/null"))).start();
                     lxcstopprocess.waitFor();
+
+                    Log.info("Kevoree Base Container created");
                 } else {
                     Log.error("Unable to start Kevoree Base Container to finish its configuration. Please have a look to {} for more information", standardOutput.getAbsolutePath());
                     throwException = true;
