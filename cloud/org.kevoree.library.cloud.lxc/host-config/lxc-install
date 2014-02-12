@@ -73,8 +73,7 @@ EOF
 echo "configure NAT"
 echo 1 > /proc/sys/net/ipv4/ip_forward
 
-echo "Reboot"
-sudo sleep 5
-
-# reboot 
+# reboot
+echo "Press enter when you are ready to reboot:
+read
 sudo reboot
