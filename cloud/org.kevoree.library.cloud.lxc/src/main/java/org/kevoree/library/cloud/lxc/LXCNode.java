@@ -4,9 +4,8 @@ import org.kevoree.annotation.KevoreeInject;
 import org.kevoree.annotation.NodeType;
 import org.kevoree.annotation.Param;
 import org.kevoree.api.Context;
-import org.kevoree.library.cloud.api.PlatformNode;
+import org.kevoree.library.cloud.api.PlatformJavaNode;
 import org.kevoree.library.cloud.lxc.wrapper.*;
-import org.kevoree.library.defaultNodeTypes.JavaNode;
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -20,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 @NodeType
-public class LXCNode extends JavaNode implements PlatformNode {
+public class LXCNode extends PlatformJavaNode {
 
     @KevoreeInject
     protected Context context;

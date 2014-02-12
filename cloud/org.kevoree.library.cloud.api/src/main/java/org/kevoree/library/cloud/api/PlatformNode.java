@@ -1,7 +1,6 @@
 package org.kevoree.library.cloud.api;
 
 import org.kevoree.annotation.NodeType;
-import org.kevoree.annotation.Param;
 
 /**
  * User: Erwan Daubert - erwan.daubert@gmail.com
@@ -18,30 +17,35 @@ public interface PlatformNode {
      * Architecture of the node
      */
 
-    @Param(optional = true)
-    String ARCH = null;
+//    @Param(optional = true)
+//    String ARCH = null;
+    void setARCH(String arch);
 
     /**
      * Amount of memory (GB, MB, KB is allowed)
      */
-    @Param(optional = true)
-    String RAM = null;
+//    @Param(optional = true)
+//    String RAM = null;
+    void setRAM(String ram);
 
     /**
      * number of cores
      */
 
-    @Param(optional = true)
-    String CPU_CORES = null;
+//    @Param(optional = true)
+//    String CPU_CORES = null;
+    void setCPU_CORES(String cpu_cores);
 
     /**
      * Maximum amount of CPU resources
      */
-    @Param(optional = true)
-    String CPU_SHARES = null;
+//    @Param(optional = true)
+//    String CPU_SHARES = null;
+    void setCPU_SHARES(String cpu_shares);
     /**
      * the disk size for the node (GB, MB, KB is allowed)
      */
-    @Param(optional = true)
-    String DISK_SIZE = null;
+//    @Param(optional = true)
+//    String DISK_SIZE = null;
+    void setDISK_SIZE(String disk_size);
 }

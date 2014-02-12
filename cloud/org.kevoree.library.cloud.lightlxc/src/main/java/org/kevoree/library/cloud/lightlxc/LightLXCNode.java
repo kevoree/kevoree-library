@@ -3,9 +3,8 @@ package org.kevoree.library.cloud.lightlxc;
 import org.kevoree.annotation.Library;
 import org.kevoree.annotation.NodeType;
 import org.kevoree.annotation.Param;
-import org.kevoree.library.cloud.api.PlatformNode;
+import org.kevoree.library.cloud.api.PlatformJavaNode;
 import org.kevoree.library.cloud.docker.wrapper.LightLXCWrapperFactory;
-import org.kevoree.library.defaultNodeTypes.JavaNode;
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
 
 /**
@@ -13,7 +12,7 @@ import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
  */
 @NodeType
 @Library(name = "Cloud")
-public class LightLXCNode extends JavaNode implements PlatformNode {
+public class LightLXCNode extends PlatformJavaNode {
 
 
     /**

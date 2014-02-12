@@ -22,7 +22,7 @@ public class LxcRessourceConstraintManager extends ResourceConstraintManager {
         Log.debug("Defining constraints about RAM on {}", nodeName);
         try {
             File standardOutput = File.createTempFile(nodeName, ".log");
-            Process lxcConstraintsProcess = new ProcessBuilder(cmd + nodeName + " " + "memory.limit_in_bytes=" + getRAM(value)).redirectErrorStream(true).start();
+            Process lxcConstraintsProcess = new ProcessBuilder(cmd + nodeName + " memory.limit_in_bytes=" + getRAM(value)).redirectErrorStream(true).start();
             new Thread(new ProcessStreamFileLogger(lxcConstraintsProcess.getInputStream(), standardOutput)).start();
             if (lxcConstraintsProcess.waitFor() == 0) {
                 standardOutput.delete();
@@ -41,7 +41,7 @@ public class LxcRessourceConstraintManager extends ResourceConstraintManager {
         Log.debug("Defining constraints about CPU core affinity on {}", nodeName);
         try {
             File standardOutput = File.createTempFile(nodeName, ".log");
-            Process lxcConstraintsProcess = new ProcessBuilder(cmd + nodeName + " " + "cpuset.cpus=" + value).redirectErrorStream(true).start();
+            Process lxcConstraintsProcess = new ProcessBuilder(cmd + nodeName + " cpuset.cpus=" + value).redirectErrorStream(true).start();
             new Thread(new ProcessStreamFileLogger(lxcConstraintsProcess.getInputStream(), standardOutput)).start();
             if (lxcConstraintsProcess.waitFor() == 0) {
                 standardOutput.delete();
@@ -60,7 +60,7 @@ public class LxcRessourceConstraintManager extends ResourceConstraintManager {
         Log.debug("Defining constraints about CPU shares on {}", nodeName);
         try {
             File standardOutput = File.createTempFile(nodeName, ".log");
-            Process lxcConstraintsProcess = new ProcessBuilder(cmd + nodeName + " " + "cpu.shares=" + value).redirectErrorStream(true).start();
+            Process lxcConstraintsProcess = new ProcessBuilder(cmd + nodeName + " cpu.shares=" + value).redirectErrorStream(true).start();
             new Thread(new ProcessStreamFileLogger(lxcConstraintsProcess.getInputStream(), standardOutput)).start();
             if (lxcConstraintsProcess.waitFor() == 0) {
                 standardOutput.delete();

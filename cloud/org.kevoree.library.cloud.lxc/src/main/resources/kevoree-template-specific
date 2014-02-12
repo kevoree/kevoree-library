@@ -8,8 +8,8 @@ dpkg -i /tmp/kevoree.watchdog.deb
 rm /tmp/kevoree.watchdog.deb
 
 
-echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu precise main" | tee -a /etc/apt/sources.list
-echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu precise main" | tee -a /etc/apt/sources.list
+echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu saucy main" | tee -a /etc/apt/sources.list
+echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu saucy main" | tee -a /etc/apt/sources.list
 # Update local software list
 apt-get update
  
@@ -19,7 +19,8 @@ echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /u
 # Install Oracle JDK7
 apt-get install oracle-java7-installer --force-yes -y
 
-
+# clean package system
+apt-get clean
 
 #Update Version /etc/kevoree/config
 echo "Configure kevoree watchdog"
@@ -30,7 +31,27 @@ PING_PORT=9999
 PING_TIMEOUT=3000
 EOF
 
-echo "Configure File descriptor limitation"
-sysctl -w fs.file-max=40000
+echo "Configure kevoree bootstrap model"
+touch /etc/kevoree/boot.kevs
+cat > "/etc/kevoree/boot.kevs" << EOF
+repo "https://repo1.maven.org/maven2"
+repo "https://oss.sonatype.org/content/groups/public/"
+
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:latest
+
+add $(hostname) : JavaNode
+
+add sync : WSGroup
+set sync.port/$(hostname) = "9000"
+attach $(hostname) sync
+
+EOF
+
+update-rc.d kevoree defaults
+
+# Not working as expected
+#echo "Configure File descriptor limitation"
+#sysctl -w fs.file-max=40000
 
 exit
