@@ -84,7 +84,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Stop
     @Override
     public void stopNode() {
-        Log.debug("Stopping node type of {}", modelService.getNodeName());
+        Log.info("Stopping node type of {}", modelService.getNodeName());
         modelService.unregisterModelListener(this);
         kompareBean = null;
         modelRegistry.clear();
