@@ -15,7 +15,7 @@ import org.kevoree.api.ModelService
  */
 
 class LightLXCWrapperFactory(nodeName: String, val routeditfname : String ,val hostitfname : String , val hostitfip : String ,val containeripbaseaddress : String,val createBrdge : Boolean,
-                             val bridgeName : String, val ipStep : Integer , val ipStart : Integer, val networkMask:String ,val sshdStart : Boolean) : WrapperFactory(nodeName) {
+                             val bridgeName : String, val ipStep : Int , val ipStart : Int, val networkMask:String ,val sshdStart : Boolean) : WrapperFactory(nodeName) {
 
     public var wrap :LightLXCNodeWrapper?=null
 
