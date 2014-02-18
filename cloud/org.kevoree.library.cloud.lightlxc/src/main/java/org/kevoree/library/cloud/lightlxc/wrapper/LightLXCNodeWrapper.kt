@@ -26,7 +26,9 @@ import org.kevoree.library.cloud.lightlxc.wrapper.NodeManager
  * Time: 09:22
  */
 
-class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService, val routeditfname: String, val hostitfname: String, val hostitfip: String, val containeripbaseaddress: String, val createBrdge: Boolean, val bridgeName : String) : KInstanceWrapper {
+class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService, val routeditfname: String, val hostitfname: String,
+                          val hostitfip: String, val containeripbaseaddress: String,
+                          val createBrdge: Boolean, val bridgeName : String,val ipStep : Int , val ipStart : Int,val networkMask:String,val sshdStart : Boolean) : KInstanceWrapper {
 
 
     class Reader(inputStream: InputStream, val nodeName: String, val error: Boolean) : Runnable{
@@ -89,12 +91,12 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
                 var rootUserDirs = Files.createTempDirectory("rootfs").toFile();
                 //Log.error("go there")
                 Log.info("file" + rootUserDirs?.getAbsolutePath())
-                val ng = NetworkGenerator(this.containeripbaseaddress, this.hostitfip)
+                val ng = NetworkGenerator(this.containeripbaseaddress, this.hostitfip,ipStep ,ipStart )
 
                 var cg = ConfigGenerator();
 
                 val ethname = this.hostitfname
-                var newUserDir = cg.generateUserDir(rootUserDirs, modelElement, platformJar, bridgeName, ng, routeditfname)
+                var newUserDir = cg.generateUserDir(rootUserDirs, modelElement, platformJar, bridgeName, ng, routeditfname,sshdStart)
 
                 if (createBrdge) {
                     // TODO check and fix according to kevoree properties
@@ -133,7 +135,7 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
 
 
                     val ip = ng.generateGW(null)!!
-                    val command4 = array("/sbin/ifconfig", bridgeName, ip, "netmask", "255.255.255.0", "up")
+                    val command4 = array("/sbin/ifconfig", bridgeName, ip, "netmask", networkMask, "up")
                     val process4 = Runtime.getRuntime().exec(command4)
                     readerOUTthread = Thread(Reader(process4.getInputStream()!!, modelElement.name!!, false))
                     readerERRthread = Thread(Reader(process4.getErrorStream()!!, modelElement.name!!, true))
@@ -143,7 +145,7 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
 
 
                     //                val command5 = array("/sbin/ifconfig", "eth1","promisc", "up")
-                    val command5 = array("/sbin/ifconfig", ethname, ip, "netmask", "255.255.255.0", "promisc", "up")
+                    val command5 = array("/sbin/ifconfig", ethname, ip, "netmask", networkMask, "promisc", "up")
                     val process5 = Runtime.getRuntime().exec(command5)
                     readerOUTthread = Thread(Reader(process5.getInputStream()!!, modelElement.name!!, false))
                     readerERRthread = Thread(Reader(process5.getErrorStream()!!, modelElement.name!!, true))

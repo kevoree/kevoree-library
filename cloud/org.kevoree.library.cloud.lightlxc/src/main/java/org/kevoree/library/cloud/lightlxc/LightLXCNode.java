@@ -52,11 +52,25 @@ public class LightLXCNode extends PlatformJavaNode {
     @Param(defaultValue = "lxcbr0")
     String bridgeName;
 
+    @Param(defaultValue = "255.255.255.0")
+    String networkMask;
+
+
+    @Param(defaultValue = "98")
+    Integer ipStep;
+
+    @Param(defaultValue = "1")
+    Integer ipStart;
+
+
+    @Param(defaultValue = "false")
+    boolean sshdStart;
+
     LightLXCWrapperFactory fact = null;
 
     @Override
     protected WrapperFactory createWrapperFactory(String nodeName) {
-        fact = new LightLXCWrapperFactory(nodeName, routeditfname, hostitfname, hostitfip, containeripbaseaddress, createBridge, bridgeName);
+        fact = new LightLXCWrapperFactory(nodeName, routeditfname, hostitfname, hostitfip, containeripbaseaddress, createBridge, bridgeName,ipStep,ipStart,networkMask,sshdStart);
         return fact;
     }
 

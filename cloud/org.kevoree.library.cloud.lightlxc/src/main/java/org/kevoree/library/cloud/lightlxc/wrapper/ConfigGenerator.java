@@ -39,7 +39,7 @@ public class ConfigGenerator {
             if (new File("/lib32").exists())
                 base = base +  "lxc.mount.entry=/lib32 ${baseRootDirs}/${nodename}_rootfs/lib32 none ro,bind 0 0\n";
             if (new File("/run").exists())
-                base = base +  "lxc.mount.entry=/run ${baseRootDirs}/${nodename}_rootfs/runn none ro,bind 0 0\n";
+                base = base +  "lxc.mount.entry=/run ${baseRootDirs}/${nodename}_rootfs/run none ro,bind 0 0\n";
             if (new File("/lib64").exists())
                 base = base +  "lxc.mount.entry=/lib64 ${baseRootDirs}/${nodename}_rootfs/lib64 none ro,bind 0 0\n";
 
@@ -58,7 +58,7 @@ public class ConfigGenerator {
 
     }
 
-    public File generateUserDir(File baseRootDirs, ContainerNode element, File platformJar,String bridgeName, NetworkGenerator ng, String intfName) throws IOException {
+    public File generateUserDir(File baseRootDirs, ContainerNode element, File platformJar,String bridgeName, NetworkGenerator ng, String intfName, Boolean sshdStart) throws IOException {
         //System.err.println(baseRootDirs.getAbsolutePath());
         if (!baseRootDirs.exists()) {
             baseRootDirs.mkdirs();
@@ -105,6 +105,8 @@ public class ConfigGenerator {
         FileWriter runnerprinter = new FileWriter(runner);
         //set property
         runnerprinter.write("#!/bin/bash\n");
+        if (sshdStart)
+            runnerprinter.write("/usr/bin/dropbear\n");
 
         runnerprinter.write("java");
         runnerprinter.write(" ");
@@ -152,7 +154,7 @@ public class ConfigGenerator {
 
 
     public static void main(String[] args) {
-        NetworkGenerator ng = new NetworkGenerator("192.168.1.1","192.168.1.1");
+        NetworkGenerator ng = new NetworkGenerator("192.168.1.1","192.168.1.1",1,17);
 
         ConfigGenerator cg = new ConfigGenerator();
         System.out.println( cg.generate("test2",ng.generateIP(null),ng.generateGW(null),ng.generateMAC(null),"br0","/toto", "eth0"));

@@ -18,18 +18,28 @@ public class NetworkGenerator {
     String baseIP;
     //192.168.1.1
     String gateway;
-    public NetworkGenerator(String baseIP, String gateway){
+
+
+    //18
+    Integer ipStep;
+
+    //1
+    Integer ipStart;
+
+    public NetworkGenerator(String baseIP, String gateway,Integer ipStep , Integer ipStart ){
      this.baseIP = baseIP;
      this.gateway= gateway;
+     this.ipStep = ipStep;
+     this.ipStart = ipStart;
     }
 
     public String generateIP(ContainerNode element) {
         Random rand = new Random();
-        Integer ip = 1+rand.nextInt(98);
+        Integer ip = ipStart+rand.nextInt(ipStep);
         int i = 0;
 
         while (ips.contains(ip) && i<200){
-            ip = 1+rand.nextInt(98);
+            ip = ipStart+rand.nextInt(ipStep);
             i++;
         }
         if (i==200)
@@ -63,7 +73,7 @@ public class NetworkGenerator {
     private static Random random = new Random();
 
     public static void main(String[] args) {
-        NetworkGenerator ng = new NetworkGenerator("192.168.1.1","192.168.1.1");
+        NetworkGenerator ng = new NetworkGenerator("192.168.1.1","192.168.1.1", 1, 17);
         System.out.println( ng.generateMAC(null));
         System.out.println( ng.generateIP(null));
         System.out.println( ng.generateGW(null));
