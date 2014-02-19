@@ -10,44 +10,23 @@ import org.kevoree.library.defaultNodeTypes.ModelRegistry;
 import org.kevoree.library.defaultNodeTypes.planning.KevoreeKompareBean;
 import org.kevoree.modeling.api.trace.TraceSequence;
 import org.kevoree.serializer.JSONModelSerializer;
+import org.kevoree.tools.test.KevoreeTestCase;
 import org.kevoreeadaptation.AdaptationModel;
 
 
 /**
  * Created by duke on 13/02/2014.
  */
-public class SubChildrenTest {
-
-    private KevScriptEngine engine = new KevScriptEngine();
-    private DefaultKevoreeFactory factory = new DefaultKevoreeFactory();
-    private KevoreeKompareBean kompare = new KevoreeKompareBean(new ModelRegistry());
-    private DefaultModelCloner cloner = new DefaultModelCloner();
-
-    private DefaultModelCompare modelCompare = new DefaultModelCompare();
-
+public class SubChildrenTest extends KevoreeTestCase {
 
     @Test
-    public void childrenTest() throws Exception {
+    public void startupChildTest() throws Exception {
+        bootstrap("node0", "oneChild.kevs");
+        exec("node0", "set child1.started = \"false\"");
+        assert(getCurrentModel("node0").findNodesByID("child1").getStarted() == false);
+        exec("node0", "set child1.started = \"true\"");
+        assert(getCurrentModel("node0").findNodesByID("child1").getStarted() == true);
 
-        ContainerRoot model = factory.createContainerRoot();
-        TypeDefinition javaNode = factory.createNodeType();
-        javaNode.setName("JavaNode");
-        model.addTypeDefinitions(javaNode);
-        engine.execute("add parentNode : JavaNode",model);
-
-        ContainerRoot modelEmpty = (ContainerRoot) cloner.clone(model);
-
-        engine.execute("add parentNode.child1 : JavaNode",model);
-        engine.execute("add parentNode.child2 : JavaNode",model);
-
-        TraceSequence sequence = modelCompare.diff(modelEmpty.findNodesByID("parentNode"), model.findNodesByID("parentNode"));
-        AdaptationModel modelAdapt = kompare.compareModels(factory.createContainerRoot(), model, "parentNode");
-
-        /*
-        System.out.println(sequence);
-        JSONModelSerializer saver = new JSONModelSerializer();
-        saver.serializeToStream(modelAdapt, System.out);
-        */
     }
 
 }
