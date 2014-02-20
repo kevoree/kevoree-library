@@ -69,7 +69,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Start
     @Override
     public void startNode() {
-        Log.debug("Starting node type of {}", this);
+        Log.info("Starting node type of {}", modelService.getNodeName());
         preTime = System.currentTimeMillis();
         modelService.registerModelListener(this);
         kompareBean = new KevoreeKompareBean(modelRegistry);

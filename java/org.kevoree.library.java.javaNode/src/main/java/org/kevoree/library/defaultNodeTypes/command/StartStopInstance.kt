@@ -56,6 +56,13 @@ class StartStopInstance(val c: Instance, val nodeName: String, val start: Boolea
     }
 
     override fun execute(): Boolean {
+
+        if(start){
+            Log.info("Starting {}",c.path())
+        } else {
+            Log.info("Stopping {}",c.path())
+        }
+
         //Look thread group
         root = c.typeDefinition!!.eContainer() as ContainerRoot
         val ref = registry.lookup(c)
@@ -77,7 +84,6 @@ class StartStopInstance(val c: Instance, val nodeName: String, val start: Boolea
                     }
                 }
             }
-
             //call sub
             return resultAsync
         } else {
