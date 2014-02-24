@@ -15,23 +15,22 @@ class AddBindingCommand(val c: MBinding, val nodeName: String, val registry: Mod
     }
 
 
-
     override fun execute(): Boolean {
         val kevoreeChannelFound = registry.lookup(c.hub!!)
         val kevoreeComponentFound = registry.lookup(c.port!!.eContainer() as ComponentInstance)
-        if(kevoreeChannelFound != null && kevoreeComponentFound != null && kevoreeComponentFound is ComponentWrapper && kevoreeChannelFound is ChannelWrapper){
+        if (kevoreeChannelFound != null && kevoreeComponentFound != null && kevoreeComponentFound is ComponentWrapper && kevoreeChannelFound is ChannelWrapper) {
             val portName = c.port!!.portTypeRef!!.name!!
             val foundNeedPort = kevoreeComponentFound.requiredPorts.get(portName)
             val foundHostedPort = kevoreeComponentFound.providedPorts.get(portName)
-            if(foundNeedPort == null && foundHostedPort == null){
+            if (foundNeedPort == null && foundHostedPort == null) {
                 Log.info("Port instance {} not found in component", portName)
                 return false
             }
             if (foundNeedPort != null) {
-                foundNeedPort.delegate = kevoreeChannelFound as ChannelWrapper?
+                foundNeedPort.delegate.add(kevoreeChannelFound as ChannelWrapper)
                 return true
             }
-            if(foundHostedPort != null){
+            if (foundHostedPort != null) {
                 var component = (c.port!!.eContainer() as ComponentInstance)
                 kevoreeChannelFound.context.portsBinded.put("$component/$portName", foundHostedPort)
                 return true

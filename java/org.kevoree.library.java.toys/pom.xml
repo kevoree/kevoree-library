@@ -51,6 +51,14 @@
             <artifactId>org.kevoree.api</artifactId>
             <version>${kevoree.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.kevoree.tools</groupId>
+            <artifactId>org.kevoree.tools.test</artifactId>
+            <version>${kevoree.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

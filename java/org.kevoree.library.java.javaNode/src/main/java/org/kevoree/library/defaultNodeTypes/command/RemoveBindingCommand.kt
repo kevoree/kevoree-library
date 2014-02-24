@@ -44,7 +44,7 @@ class RemoveBindingCommand(val c: MBinding, val nodeName: String, val registry: 
                     return false
                 }
                 if (foundNeedPort != null) {
-                    foundNeedPort.delegate = null
+                    foundNeedPort.delegate.remove(kevoreeChannelFound as ChannelWrapper)
                     return true
                 }
                 if(foundHostedPort != null){

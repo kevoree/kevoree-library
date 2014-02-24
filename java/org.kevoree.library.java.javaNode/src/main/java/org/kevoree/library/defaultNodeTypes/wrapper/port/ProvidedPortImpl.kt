@@ -19,6 +19,7 @@ import java.beans.MethodDescriptor
  */
 
 class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, val componentWrapper: ComponentWrapper) : Port {
+
     override fun send(payload: Any?) {
         call(payload, null)
     }
@@ -28,17 +29,17 @@ class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, v
             if (componentWrapper.isStarted) {
                 var result: Any? = null
                 if (paramSize == 0) {
-                    if(methodHandler!=null){
+                    if (methodHandler != null) {
                         result = methodHandler?.invokeExact(targetObj)
                     } else {
                         result = targetMethod?.invoke(targetObj)
                     }
                 } else {
                     if (paramSize == 1) {
-                        if(methodHandler!=null){
-                            result = methodHandler?.invokeExact(targetObj,payload)
+                        if (methodHandler != null) {
+                            result = methodHandler?.invokeExact(targetObj, payload)
                         } else {
-                            result = targetMethod?.invoke(targetObj,payload)
+                            result = targetMethod?.invoke(targetObj, payload)
                         }
                     } else {
                         if (payload is Array<*>) {
@@ -80,8 +81,8 @@ class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, v
             paramSize = targetMethod!!.getParameterTypes()!!.size
         }
 
-       // var mt = MethodType.methodType(targetMethod!!.getReturnType()!!,targetMethod!!.getParameterTypes()!!)
-      //  methodHandler = MethodHandles.lookup().findVirtual(targetObj.javaClass, name, mt)
+        // var mt = MethodType.methodType(targetMethod!!.getReturnType()!!,targetMethod!!.getParameterTypes()!!)
+        //  methodHandler = MethodHandles.lookup().findVirtual(targetObj.javaClass, name, mt)
 
     }
 

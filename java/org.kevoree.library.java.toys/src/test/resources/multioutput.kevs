@@ -1,0 +1,24 @@
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
+
+add node0 : JavaNode
+
+add node0.ticker : Ticker
+set node0.ticker.period = "1000"
+
+add hub0 : SyncBroadcast
+add hub1 : SyncBroadcast
+
+add node0.h1 : HelloJava
+set node0.h1.message = "payload"
+add node0.h2 : HelloJava
+set node0.h1.message = "payload2"
+
+bind node0.ticker.tick hub0
+bind node0.ticker.tick hub1
+
+bind node0.h1.hello hub0
+bind node0.h2.hello hub1
+

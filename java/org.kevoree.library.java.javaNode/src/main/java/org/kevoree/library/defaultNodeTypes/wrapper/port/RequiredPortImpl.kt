@@ -4,6 +4,7 @@ import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
 import org.kevoree.api.Port
 import org.kevoree.api.Callback
 import org.kevoree.log.Log
+import java.util.ArrayList
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,22 +15,23 @@ import org.kevoree.log.Log
 
 class RequiredPortImpl(val portPath: String) : Port {
     override fun call(payload: Any?, callback: Callback<out Any?>?) {
-        if (delegate != null) {
-            delegate!!.call(callback,payload)
-            //todo send and put the callback inside
+        if (!delegate.empty) {
+            for (wrapper in delegate) {
+                wrapper.call(callback, payload)
+            }
         } else {
             callback?.onError(Exception("Message lost, because port is not bind"))
             Log.warn("Message lost, because no binding found : {}", payload.toString())
         }
     }
     override fun send(payload: Any?) {
-        call(payload,null)
+        call(payload, null)
     }
 
     override fun getPath(): String? {
         return portPath
     }
 
-    var delegate: ChannelWrapper? = null
+    var delegate: MutableList<ChannelWrapper> = ArrayList<ChannelWrapper>()
 
 }
