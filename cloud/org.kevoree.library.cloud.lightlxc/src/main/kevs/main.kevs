@@ -12,7 +12,7 @@ add node0 : LightLXCNode
 //Here it will create a network with a bridge connected to eth1 and routed to wlan0 with ip 19.168.1.1 for eth1 (container) and 192.168.1XX for the container
 set node0.containeripbaseaddress = "192.168.1.1"
 set node0.hostitfip = "192.168.1.1"
-set node0.hostitfname = "eth1"
+set node0.hostitfname = "eth0"
 //set node0.routeditfname = ""
 //Create automatically the bridge
 set node0.createBridge = "false"
@@ -32,3 +32,19 @@ bind child.ConsolePr25.input AsyncBroa936
 bind child.TwoValueT187.tick AsyncBroa936
 attach child sync
 attach node0 sync
+
+add node0.child1 : JavaNode
+add child1.TwoValueT187 : TwoValueTicker
+add child1.ConsolePr25 : ConsolePrinter
+add AsyncBroa936 : AsyncBroadcast
+bind child1.ConsolePr25.input AsyncBroa936
+bind child1.TwoValueT187.tick AsyncBroa936
+set sync.port/child1 = "9004"
+
+add node0.child2 : JavaNode
+add child2.TwoValueT187 : TwoValueTicker
+add child2.ConsolePr25 : ConsolePrinter
+add AsyncBroa936 : AsyncBroadcast
+bind child2.ConsolePr25.input AsyncBroa936
+bind child2.TwoValueT187.tick AsyncBroa936
+set sync.port/child2 = "9006"
