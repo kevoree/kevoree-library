@@ -13,7 +13,7 @@ import java.nio.channels.FileChannel;
  */
 public class ConfigGenerator {
 
-    public final String[] baseDirNames = {"usr", "lib", "lib32" , "lib64", "etc", "bin", "sbin", "proc", "var", "dev/pts", "dev/shm", "tmp","run"};
+    public final String[] baseDirNames = {"usr", "lib", "lib32" , "lib64", "opt","etc", "bin", "sbin", "proc", "var", "dev/pts", "dev/shm", "tmp","run"};
 
     public String generate(String nodeName, String ip, String gateway, String mac,String bridgeName,String baseRootDirs, String intfName) {
 
@@ -42,6 +42,8 @@ public class ConfigGenerator {
                 base = base +  "lxc.mount.entry=/run ${baseRootDirs}/${nodename}_rootfs/run none ro,bind 0 0\n";
             if (new File("/lib64").exists())
                 base = base +  "lxc.mount.entry=/lib64 ${baseRootDirs}/${nodename}_rootfs/lib64 none ro,bind 0 0\n";
+            if (new File("/opt").exists())
+                base = base +  "lxc.mount.entry=/opt ${baseRootDirs}/${nodename}_rootfs/opt none ro,bind 0 0\n";
 
        //     new File(baseRootDirs+ "/"+ nodeName+"_rootfs/" + getJava().substring(0,getJava().lastIndexOf("/java")) ).mkdirs();
          //   base = base +  "lxc.mount.entry=" +getJava().substring(0,getJava().lastIndexOf("/java"))+" ${baseRootDirs}/${nodename}_rootfs"+ getJava().substring(0,getJava().lastIndexOf("/java"))+" none ro,bind 0 0\n";
@@ -105,8 +107,16 @@ public class ConfigGenerator {
         FileWriter runnerprinter = new FileWriter(runner);
         //set property
         runnerprinter.write("#!/bin/bash\n");
+        String jrePath = System.getProperty("java.home");
+        runnerprinter.write(" export PATH="+ jrePath+"/bin:$PATH\n");
+        runnerprinter.write(" export JAVA_HOME="+ jrePath +"\n");
+//        export PATH=/usr/lib/jvm/jdk1.8.0/bin:$PATH
+//export JAVA_HOME=/usr/lib/jvm/jdk1.8.0
+
+
+
         if (sshdStart)
-            runnerprinter.write("/usr/bin/dropbear\n");
+            runnerprinter.write("/usr/sbin/dropbear\n");
 
         runnerprinter.write("java");
         runnerprinter.write(" ");

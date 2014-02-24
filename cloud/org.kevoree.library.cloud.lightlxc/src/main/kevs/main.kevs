@@ -12,11 +12,12 @@ add node0 : LightLXCNode
 //Here it will create a network with a bridge connected to eth1 and routed to wlan0 with ip 19.168.1.1 for eth1 (container) and 192.168.1XX for the container
 set node0.containeripbaseaddress = "192.168.1.1"
 set node0.hostitfip = "192.168.1.1"
-set node0.hostitfname = "eth0"
-set node0.routeditfname = ""
+set node0.hostitfname = "eth1"
+//set node0.routeditfname = ""
 //Create automatically the bridge
 set node0.createBridge = "false"
-set node0.bridgeName = "lxcbr0"
+set node0.sshdStart = "true"
+set node0.bridgeName = "br0"
 set node0.log = "INFO"
 set node0.started = "true"
 set node0.freeze = "false"
