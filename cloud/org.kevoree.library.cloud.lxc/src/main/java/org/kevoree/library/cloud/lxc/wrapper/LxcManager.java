@@ -39,10 +39,10 @@ public class LxcManager {
     public boolean createContainer(ContainerNode node) {
         try {
             if (!getContainers().contains(node.getName())) {
-                File standardOutput = File.createTempFile(node.getName(), ".log");
+                File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + node.getName() + ".log");
                 Log.debug("Creating container {} using {} as clone", node.getName(), clone_id);
                 Process processcreate = new ProcessBuilder(LxcContants.lxcclone, "-o", clone_id, "-n", node.getName()).redirectErrorStream(true).start();
-                new Thread(new ProcessStreamFileLogger(processcreate.getInputStream(), standardOutput)).start();
+                new Thread(new ProcessStreamFileLogger(processcreate.getInputStream(), standardOutput, true)).start();
                 if (processcreate.waitFor() == 0) {
                     standardOutput.delete();
                     return true;
@@ -69,10 +69,10 @@ public class LxcManager {
             }
         }
         try {
-            File standardOutput = File.createTempFile(node.getName(), ".log");
+            File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + node.getName() + ".log");
             Log.debug("Starting container {}", node.getName());
             Process lxcstartprocess = new ProcessBuilder(cmd).start();
-            new Thread(new ProcessStreamFileLogger(lxcstartprocess.getInputStream(), standardOutput)).start();
+            new Thread(new ProcessStreamFileLogger(lxcstartprocess.getInputStream(), standardOutput, true)).start();
             if (lxcstartprocess.waitFor() == 0) {
                 standardOutput.delete();
                 constraintManager.defineConstraints(node);
@@ -206,12 +206,12 @@ public class LxcManager {
         }
         try {
             boolean done;
-            File standardOutput = File.createTempFile(id, ".log");
+            File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + id + ".log");
             Process process;
             if (isRunning(id)) {
                 process = new ProcessBuilder(LxcContants.lxcstop, "-n", id).redirectErrorStream(true).start();
 
-                new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
+                new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput, true)).start();
                 done = process.waitFor() == 0;
 
                 if (done) {
@@ -224,7 +224,7 @@ public class LxcManager {
                 if (destroy) {
                     try {
                         process = new ProcessBuilder(LxcContants.lxcbackup, "-n", id).redirectErrorStream(true).start();
-                        new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput)).start();
+                        new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput, true)).start();
                         if (process.waitFor() == 0) {
                             standardOutput.delete();
                             return true;
@@ -261,19 +261,19 @@ public class LxcManager {
         if (!getContainers().contains(clone_id)) {
             boolean throwException = false;
             Log.info("Creating Kevoree Base Container");
-            File standardOutput = File.createTempFile(clone_id, ".log");
+            File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + clone_id + ".log");
             Process lxccreateprocess = new ProcessBuilder(LxcContants.lxccreate, "-n", clone_id, "-t", initialTemplate).redirectErrorStream(true).start();
-            new Thread(new ProcessStreamFileLogger(lxccreateprocess.getInputStream(), standardOutput)).start();
+            new Thread(new ProcessStreamFileLogger(lxccreateprocess.getInputStream(), standardOutput, true)).start();
             if (lxccreateprocess.waitFor() == 0) {
                 // start Kevoree Base Container
                 Log.debug("Starting Kevoree Base Container");
                 Process lxcstartprocess = new ProcessBuilder(LxcContants.lxcstart, "-n", clone_id, "-d").redirectErrorStream(true).start();
-                new Thread(new ProcessStreamFileLogger(lxcstartprocess.getInputStream(), standardOutput)).start();
+                new Thread(new ProcessStreamFileLogger(lxcstartprocess.getInputStream(), standardOutput, true)).start();
                 if (lxcstartprocess.waitFor() == 0) {
                     // configure the clone with some specificities
                     Log.debug("Configuring Kevoree Base Container with some specificities");
                     Process lxcConsole = new ProcessBuilder(LxcContants.lxcattach, "-n", clone_id, "--").redirectErrorStream(true).start();
-                    new Thread(new ProcessStreamFileLogger(lxcConsole.getInputStream(), standardOutput)).start();
+                    new Thread(new ProcessStreamFileLogger(lxcConsole.getInputStream(), standardOutput, true)).start();
 
                     String kevoreeTemplate = new String(FileManager.load(LxcManager.class.getClassLoader().getResourceAsStream("kevoree-template-specific")));
 
@@ -297,7 +297,7 @@ public class LxcManager {
                     // stop Kevoree Base Container
                     Log.debug("Stopping Kevoree Base Container");
                     Process lxcstopprocess = new ProcessBuilder(LxcContants.lxcstop, "-n", clone_id).redirectErrorStream(true).start();
-                    new Thread(new ProcessStreamFileLogger(lxcstopprocess.getInputStream(), new File("/dev/null"))).start();
+                    new Thread(new ProcessStreamFileLogger(lxcstopprocess.getInputStream(), new File("/dev/null"), false)).start();
                     lxcstopprocess.waitFor();
 
                     Log.info("Kevoree Base Container created");
@@ -312,7 +312,7 @@ public class LxcManager {
             if (throwException) {
                 // do we need to remove the Kevoree Base Container ?
                 Process lxcdestroyprocess = new ProcessBuilder(LxcContants.lxcdestroy, "-n", clone_id).redirectErrorStream(true).start();
-                new Thread(new ProcessStreamFileLogger(lxcdestroyprocess.getInputStream(), new File("/dev/null"))).start();
+                new Thread(new ProcessStreamFileLogger(lxcdestroyprocess.getInputStream(), new File("/dev/null"), false)).start();
                 lxcdestroyprocess.waitFor();
                 throw new Exception("Unable to define Kevoree Base Container.");
             }
