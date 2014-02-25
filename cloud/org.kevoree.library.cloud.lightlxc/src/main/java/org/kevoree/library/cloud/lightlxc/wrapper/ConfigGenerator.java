@@ -20,12 +20,43 @@ public class ConfigGenerator {
         String base = "lxc.utsname=${nodename}\n" +
                 "lxc.network.type=veth\n" +
                 "#lxc.network.hwaddr = ${mac}\n" +
+                "lxc.devttydir =\n"+
+                "lxc.tty = 2\n"+
+                "lxc.pts = 1024\n"+
                 "lxc.network.link=${bridgeName}\n" +
                 "lxc.network.flags=up\n" +
                 "lxc.network.name=${intfName} \n" +
                 "lxc.network.ipv4 = ${ip}/24\n" +
                 "lxc.network.ipv4.gateway = ${ip.gw}\n" +
                 "lxc.rootfs = ${baseRootDirs}/${nodename}_rootfs\n" +
+                 "# Allow any mknod (but not using the node)"+
+                "lxc.cgroup.devices.allow = c *:* m"+
+                "lxc.cgroup.devices.allow = b *:* m"+
+                "# /dev/null and zero"+
+                "lxc.cgroup.devices.allow = c 1:3 rwm"+
+                "lxc.cgroup.devices.allow = c 1:5 rwm"+
+                "# consoles"+
+                "lxc.cgroup.devices.allow = c 5:1 rwm"+
+                "lxc.cgroup.devices.allow = c 5:0 rwm"+
+                "#lxc.cgroup.devices.allow = c 4:0 rwm"+
+                "#lxc.cgroup.devices.allow = c 4:1 rwm"+
+                "# /dev/{,u}random"+
+                "lxc.cgroup.devices.allow = c 1:9 rwm"+
+                "lxc.cgroup.devices.allow = c 1:8 rwm"+
+                "lxc.cgroup.devices.allow = c 136:* rwm"+
+                "lxc.cgroup.devices.allow = c 5:2 rwm"+
+                "# rtc"+
+                "lxc.cgroup.devices.allow = c 254:0 rwm"+
+                "#fuse"+
+                "lxc.cgroup.devices.allow = c 10:229 rwm"+
+                "#tun"+
+                "lxc.cgroup.devices.allow = c 10:200 rwm"+
+                "#full"+
+                "lxc.cgroup.devices.allow = c 1:7 rwm"+
+                "#hpet"+
+                "lxc.cgroup.devices.allow = c 10:228 rwm"+
+                "#kvm"+
+                "lxc.cgroup.devices.allow = c 10:232 rwm"+
                 "lxc.mount.entry=/usr ${baseRootDirs}/${nodename}_rootfs/usr none ro,bind 0 0\n" +
                 "lxc.mount.entry=/lib ${baseRootDirs}/${nodename}_rootfs/lib none ro,bind 0 0\n" +
                 "lxc.mount.entry=/etc ${baseRootDirs}/${nodename}_rootfs/etc none ro,bind 0 0\n" +
@@ -44,10 +75,8 @@ public class ConfigGenerator {
                 base = base +  "lxc.mount.entry=/lib64 ${baseRootDirs}/${nodename}_rootfs/lib64 none ro,bind 0 0\n";
             if (new File("/opt").exists())
                 base = base +  "lxc.mount.entry=/opt ${baseRootDirs}/${nodename}_rootfs/opt none ro,bind 0 0\n";
-
        //     new File(baseRootDirs+ "/"+ nodeName+"_rootfs/" + getJava().substring(0,getJava().lastIndexOf("/java")) ).mkdirs();
          //   base = base +  "lxc.mount.entry=" +getJava().substring(0,getJava().lastIndexOf("/java"))+" ${baseRootDirs}/${nodename}_rootfs"+ getJava().substring(0,getJava().lastIndexOf("/java"))+" none ro,bind 0 0\n";
-
 
         return base
                 .replace("${nodename}", nodeName)
@@ -57,7 +86,6 @@ public class ConfigGenerator {
                 .replace("${ip.gw}", gateway)
                 .replace("${mac}", mac)
                 .replace("${baseRootDirs}", baseRootDirs);
-
     }
 
     public File generateUserDir(File baseRootDirs, ContainerNode element, File platformJar,String bridgeName, NetworkGenerator ng, String intfName, Boolean sshdStart) throws IOException {
@@ -69,6 +97,8 @@ public class ConfigGenerator {
         if (!newUserDir.exists()) {
             newUserDir.mkdirs();
         }
+
+
         //copy the platform jar
         File platform = new File(newUserDir, "runtime.jar");
         copy(platformJar, platform);
@@ -88,6 +118,10 @@ public class ConfigGenerator {
                 sub.mkdirs();
             }
         }
+
+        MkNodeCommandExecutor.instance$.mkNode(newUserDir.getAbsolutePath(),element.getName());
+
+
         //generate the lxc config file
         File configLXC = new File(newUserDir, "config");
         FileWriter configLXCprinter = new FileWriter(configLXC);
@@ -111,12 +145,10 @@ public class ConfigGenerator {
         runnerprinter.write(" export PATH="+ jrePath+"/bin:$PATH\n");
         runnerprinter.write(" export JAVA_HOME="+ jrePath +"\n");
 //        export PATH=/usr/lib/jvm/jdk1.8.0/bin:$PATH
-//export JAVA_HOME=/usr/lib/jvm/jdk1.8.0
-
-
+        //export JAVA_HOME=/usr/lib/jvm/jdk1.8.0
 
         if (sshdStart)
-            runnerprinter.write("/usr/sbin/dropbear\n");
+            runnerprinter.write("/usr/sbin/dropbear -E -P /tmp/"+ element.getName()+ ".pid\n");
 
         runnerprinter.write("java");
         runnerprinter.write(" ");
@@ -159,17 +191,6 @@ public class ConfigGenerator {
             outputChannel.close();
             }
         }
-    }
-
-
-
-    public static void main(String[] args) {
-        NetworkGenerator ng = new NetworkGenerator("192.168.1.1","192.168.1.1",1,17);
-
-        ConfigGenerator cg = new ConfigGenerator();
-        System.out.println( cg.generate("test2",ng.generateIP(null),ng.generateGW(null),ng.generateMAC(null),"br0","/toto", "eth0"));
-
-
     }
 
 }

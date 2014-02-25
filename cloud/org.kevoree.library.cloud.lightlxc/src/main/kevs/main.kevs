@@ -22,29 +22,29 @@ set node0.log = "INFO"
 set node0.started = "true"
 set node0.freeze = "false"
 add node0.child : JavaNode
-add child.TwoValueT187 : TwoValueTicker
-add child.ConsolePr25 : ConsolePrinter
-add AsyncBroa936 : AsyncBroadcast
-add sync : WSGroup
-set sync.port/child = "9002"
-set sync.port/node0 = "9000"
-bind child.ConsolePr25.input AsyncBroa936
-bind child.TwoValueT187.tick AsyncBroa936
-attach child sync
-attach node0 sync
+//add child.TwoValueT187 : TwoValueTicker
+//add child.ConsolePr25 : ConsolePrinter
+//add AsyncBroa936 : AsyncBroadcast
+//add sync : WSGroup
+//set sync.port/child = "9002"
+//set sync.port/node0 = "9000"
+//bind child.ConsolePr25.input AsyncBroa936
+//bind child.TwoValueT187.tick AsyncBroa936
+//attach child sync
+//attach node0 sync
 
-add node0.child1 : JavaNode
-add child1.TwoValueT187 : TwoValueTicker
-add child1.ConsolePr25 : ConsolePrinter
-add AsyncBroa936 : AsyncBroadcast
-bind child1.ConsolePr25.input AsyncBroa936
-bind child1.TwoValueT187.tick AsyncBroa936
-set sync.port/child1 = "9004"
+//add node0.child1 : JavaNode
+//add child1.TwoValueT187 : TwoValueTicker
+//add child1.ConsolePr25 : ConsolePrinter
+//add AsyncBroa936 : AsyncBroadcast
+//bind child1.ConsolePr25.input AsyncBroa936
+//bind child1.TwoValueT187.tick AsyncBroa936
+//set sync.port/child1 = "9004"
 
-add node0.child2 : JavaNode
-add child2.TwoValueT187 : TwoValueTicker
-add child2.ConsolePr25 : ConsolePrinter
-add AsyncBroa936 : AsyncBroadcast
-bind child2.ConsolePr25.input AsyncBroa936
-bind child2.TwoValueT187.tick AsyncBroa936
-set sync.port/child2 = "9006"
+//add node0.child2 : JavaNode
+//add child2.TwoValueT187 : TwoValueTicker
+//add child2.ConsolePr25 : ConsolePrinter
+//add AsyncBroa936 : AsyncBroadcast
+//bind child2.ConsolePr25.input AsyncBroa936
+//bind child2.TwoValueT187.tick AsyncBroa936
+//set sync.port/child2 = "9006"

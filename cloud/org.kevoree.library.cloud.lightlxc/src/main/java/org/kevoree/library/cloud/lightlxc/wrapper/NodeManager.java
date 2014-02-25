@@ -8,10 +8,6 @@ import java.util.*;
  */
 public class NodeManager {
 
-    public static void main(String args[]) throws SocketException {
-        System.out.println(getAddressForItf("wlan0"));
-    }
-
     static String getInterfaceInformation(NetworkInterface netint) throws SocketException {
         List<InetAddress> inetAddresses = Collections.list(netint.getInetAddresses());
         if (inetAddresses.size()>0){
@@ -31,7 +27,6 @@ public class NodeManager {
             }
         }
         return ip;
-
     }
 
 }

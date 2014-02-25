@@ -71,15 +71,4 @@ public class NetworkGenerator {
     }
 
     private static Random random = new Random();
-
-    public static void main(String[] args) {
-        NetworkGenerator ng = new NetworkGenerator("192.168.1.1","192.168.1.1", 1, 17);
-        System.out.println( ng.generateMAC(null));
-        System.out.println( ng.generateIP(null));
-        System.out.println( ng.generateGW(null));
-
-
-    }
-
-
 }

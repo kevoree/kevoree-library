@@ -14,7 +14,6 @@ import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
 @Library(name = "Cloud")
 public class LightLXCNode extends PlatformJavaNode {
 
-
     /**
      * Parameter to automatically create a route within the hosted platform between two network interfaces
      */
@@ -55,7 +54,6 @@ public class LightLXCNode extends PlatformJavaNode {
     @Param(defaultValue = "255.255.255.0")
     String networkMask;
 
-
     @Param(defaultValue = "98")
     Integer ipStep;
 
@@ -80,5 +78,4 @@ public class LightLXCNode extends PlatformJavaNode {
             fact.getWrap().freeze(freeze);
         }
     }
-
 }
