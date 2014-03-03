@@ -82,7 +82,7 @@ public class ComponentWrapper(val modelElement: ComponentInstance, override val 
                 isStarted = true
                 return true
             } catch(e: InvocationTargetException){
-                Log.error("Kevoree Component Instance Start Error for {} !", e.getCause(), modelElement.name)
+                Log.error("Kevoree Component Instance Start Error for {} !", e, modelElement.name)
                 isStarted = true //WE PUT COMPONENT IN START STATE TO ALLOW ROLLBACK TO UNSET VARIABLE
                 return false
             } catch(e: Exception) {
