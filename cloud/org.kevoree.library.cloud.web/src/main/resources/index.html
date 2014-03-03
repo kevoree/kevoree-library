@@ -24,6 +24,7 @@
         .controls > span {
             margin-left: 20px;
         }
+
         .mandatory {
             color: #F90
         }
@@ -44,7 +45,7 @@ $(function () {
     saver = new kevoreeJSModule.org.kevoree.serializer.JSONModelSerializer();
     factory = new kevoreeJSModule.org.kevoree.impl.DefaultKevoreeFactory();
     compare = new kevoreeJSModule.org.kevoree.compare.DefaultModelCompare();
-    cloner  = new kevoreeJSModule.org.kevoree.cloner.DefaultModelCloner();
+    cloner = new kevoreeJSModule.org.kevoree.cloner.DefaultModelCloner();
     /* Meta information set */
     var request = new XMLHttpRequest();
     request.open('GET', '/metadata/nodeName', false);  // `false` makes the request synchronous
@@ -123,7 +124,7 @@ $(function () {
         var typeDefinitions = model.typeDefinitions;
         for (var i = 0; i < typeDefinitions.$size; i++) {
             var typeDefinition = typeDefinitions.get(i);
-            if (typeDefinition.metaClassName() == "org.kevoree.NodeType") {
+            if (typeDefinition.metaClassName() == "org.kevoree.NodeType" && !typeDefinition.abstract) {
                 addNodeTypeOption(typeDefinition.path());
             }
         }
@@ -248,10 +249,14 @@ $(function () {
         var typeDefinition = model.findByPath(value);
 
         if (typeDefinition != null && typeDefinition != undefined) {
-            insertAttributeOnForm("name", true, form);
-            for (var i = 0, ii = typeDefinition.dictionaryType.attributes.size(); i < ii; i++) {
-                var attribute = typeDefinition.dictionaryType.attributes.get(i);
-                insertAttributeOnForm(attribute.name, !attribute.optional, form);
+            if (!typeDefinition.abstract) {
+                insertAttributeOnForm("name", true, form);
+                if (typeDefinition.dictionaryType != undefined && typeDefinition.dictionaryType != null) {
+                    for (var i = 0, ii = typeDefinition.dictionaryType.attributes.size(); i < ii; i++) {
+                        var attribute = typeDefinition.dictionaryType.attributes.get(i);
+                        insertAttributeOnForm(attribute.name, !attribute.optional, form);
+                    }
+                }
             }
         }
     }

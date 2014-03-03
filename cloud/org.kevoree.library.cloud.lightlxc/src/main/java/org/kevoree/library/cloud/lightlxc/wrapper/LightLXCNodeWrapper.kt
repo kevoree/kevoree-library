@@ -67,7 +67,7 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
                     Log.error("Can't download Kevoree platform, abording starting node "  + modelElement.name!! + " " + factory.getVersion())
                     return false
                 }
-                Log.info("Fork platform using {}", platformJar!!.getAbsolutePath())
+                Log.debug("Fork platform using {}", platformJar!!.getAbsolutePath())
 
                 var rootUserDirs = Files.createTempDirectory("rootfs").toFile();
                 //Log.error("go there")

@@ -62,11 +62,17 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
     var readerERRthread: Thread? = null
     private val modelSaver = JSONModelSerializer()
 
+    private var tempFile: File? = null
+
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
         if (!isStarted) {
             var urls = HashSet<String>()
             urls.add("http://repo1.maven.org/maven2")
-            var platformJar = bs.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + DefaultKevoreeFactory().getVersion(), urls);
+            val version = DefaultKevoreeFactory().getVersion()
+            if (version.toString().contains("SNAPSHOT")) {
+                urls.add("http://oss.sonatype.org/content/groups/public/")
+            }
+            var platformJar = bs.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + version, urls);
             if (platformJar == null) {
                 Log.error("Can't download Kevoree platform, abording starting node")
                 return false
@@ -78,29 +84,32 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
                     jvmArgs = jvmArgsAttribute.toString()
                 }
             }
-            Log.info("Fork platform using {}", platformJar!!.getAbsolutePath())
-            val tempFile = File.createTempFile("bootModel" + modelElement.name, ".json")
-            var tempIO = FileOutputStream(tempFile)
+            Log.debug("Fork platform using {}", platformJar!!.getAbsolutePath())
+            tempFile = File.createTempFile("bootModel" + modelElement.name, ".json")
+            var tempIO = FileOutputStream(tempFile!!)
             modelSaver.serializeToStream(tmodel, tempIO)
             tempIO.close()
             tempIO.flush()
-            var execArray = array(getJava(), "-Dnode.bootstrap=" + tempFile.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath())
+            var execArray = array(getJava(), "-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath())
             if (jvmArgs != null) {
-                execArray = array(getJava(), jvmArgs!!, "-Dnode.bootstrap=" + tempFile.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath())
+                execArray = array(getJava(), jvmArgs!!, "-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath())
             }
             process = Runtime.getRuntime().exec(execArray)
             readerOUTthread = Thread(Reader(process!!.getInputStream()!!, modelElement.name!!, false))
             readerERRthread = Thread(Reader(process!!.getErrorStream()!!, modelElement.name!!, true))
             readerOUTthread!!.start()
             readerERRthread!!.start()
+            isStarted = true
         }
         return true
     }
     override fun kInstanceStop(tmodel: ContainerRoot): Boolean {
         if (isStarted) {
             process?.destroy()
+            process?.waitFor()
             readerOUTthread?.stop()
             readerERRthread?.stop()
+            tempFile?.delete()
             isStarted = false
         }
         return true

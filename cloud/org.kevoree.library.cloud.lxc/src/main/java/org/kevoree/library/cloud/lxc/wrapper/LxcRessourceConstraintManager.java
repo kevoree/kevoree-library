@@ -21,9 +21,9 @@ public class LxcRessourceConstraintManager extends ResourceConstraintManager {
     protected boolean defineRAM(String nodeName, String value) {
         Log.debug("Defining constraints about RAM on {}", nodeName);
         try {
-            File standardOutput = File.createTempFile(nodeName, ".log");
+            File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + nodeName + ".log");
             Process lxcConstraintsProcess = new ProcessBuilder(cmd + nodeName + " memory.limit_in_bytes=" + getRAM(value)).redirectErrorStream(true).start();
-            new Thread(new ProcessStreamFileLogger(lxcConstraintsProcess.getInputStream(), standardOutput)).start();
+            new Thread(new ProcessStreamFileLogger(lxcConstraintsProcess.getInputStream(), standardOutput, true)).start();
             if (lxcConstraintsProcess.waitFor() == 0) {
                 standardOutput.delete();
                 return true;
@@ -40,9 +40,9 @@ public class LxcRessourceConstraintManager extends ResourceConstraintManager {
     protected boolean defineCPUSet(String nodeName, String value) {
         Log.debug("Defining constraints about CPU core affinity on {}", nodeName);
         try {
-            File standardOutput = File.createTempFile(nodeName, ".log");
+            File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + nodeName + ".log");
             Process lxcConstraintsProcess = new ProcessBuilder(cmd + nodeName + " cpuset.cpus=" + value).redirectErrorStream(true).start();
-            new Thread(new ProcessStreamFileLogger(lxcConstraintsProcess.getInputStream(), standardOutput)).start();
+            new Thread(new ProcessStreamFileLogger(lxcConstraintsProcess.getInputStream(), standardOutput, true)).start();
             if (lxcConstraintsProcess.waitFor() == 0) {
                 standardOutput.delete();
                 return true;
@@ -59,9 +59,9 @@ public class LxcRessourceConstraintManager extends ResourceConstraintManager {
     protected boolean defineCPUShares(String nodeName, String value) {
         Log.debug("Defining constraints about CPU shares on {}", nodeName);
         try {
-            File standardOutput = File.createTempFile(nodeName, ".log");
+            File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + nodeName + ".log");
             Process lxcConstraintsProcess = new ProcessBuilder(cmd + nodeName + " cpu.shares=" + value).redirectErrorStream(true).start();
-            new Thread(new ProcessStreamFileLogger(lxcConstraintsProcess.getInputStream(), standardOutput)).start();
+            new Thread(new ProcessStreamFileLogger(lxcConstraintsProcess.getInputStream(), standardOutput, true)).start();
             if (lxcConstraintsProcess.waitFor() == 0) {
                 standardOutput.delete();
                 return true;

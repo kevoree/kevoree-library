@@ -87,6 +87,11 @@ public class HAProxy implements ModelListener {
     public void stop() {
         this.modelService.unregisterModelListener(this);
         process.destroy();
+        try {
+            process.waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         readerOUTthread.stop();
         readerERRthread.stop();
     }
@@ -157,6 +162,7 @@ public class HAProxy implements ModelListener {
             generateConfig(configFile, proposedModel);
 
             process.destroy();
+            process.waitFor();
             readerOUTthread.stop();
             readerERRthread.stop();
             String[] params = {executable.getAbsolutePath(), "-f", configFile.getAbsolutePath()};
@@ -167,6 +173,8 @@ public class HAProxy implements ModelListener {
             readerERRthread.start();
 
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return true;
