@@ -62,13 +62,17 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
     var readerERRthread: Thread? = null
     private val modelSaver = JSONModelSerializer()
 
-    private var tempFile : File? = null
+    private var tempFile: File? = null
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
         if (!isStarted) {
             var urls = HashSet<String>()
             urls.add("http://repo1.maven.org/maven2")
-            var platformJar = bs.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + DefaultKevoreeFactory().getVersion(), urls);
+            val version = DefaultKevoreeFactory().getVersion()
+            if (version.toString().contains("SNAPSHOT")) {
+                urls.add("http://oss.sonatype.org/content/groups/public/")
+            }
+            var platformJar = bs.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + version, urls);
             if (platformJar == null) {
                 Log.error("Can't download Kevoree platform, abording starting node")
                 return false
