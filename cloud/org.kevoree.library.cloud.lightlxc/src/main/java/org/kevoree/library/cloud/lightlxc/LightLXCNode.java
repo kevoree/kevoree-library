@@ -1,10 +1,12 @@
 package org.kevoree.library.cloud.lightlxc;
 
-import org.kevoree.annotation.Library;
-import org.kevoree.annotation.NodeType;
-import org.kevoree.annotation.Param;
+import org.kevoree.annotation.*;
+import org.kevoree.api.Context;
+import org.kevoree.api.ModelService;
 import org.kevoree.library.cloud.api.PlatformJavaNode;
 import org.kevoree.library.cloud.docker.wrapper.LightLXCWrapperFactory;
+import org.kevoree.library.cloud.lightlxc.wrapper.IpModelUpdater;
+import org.kevoree.library.cloud.lightlxc.wrapper.NetworkGenerator;
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
 
 /**
@@ -66,16 +68,75 @@ public class LightLXCNode extends PlatformJavaNode {
 
     LightLXCWrapperFactory fact = null;
 
+    @KevoreeInject
+    ModelService modelsService;
+
+    @KevoreeInject
+    Context context;
+
     @Override
     protected WrapperFactory createWrapperFactory(String nodeName) {
-        fact = new LightLXCWrapperFactory(nodeName, routeditfname, hostitfname, hostitfip, containeripbaseaddress, createBridge, bridgeName,ipStep,ipStart,networkMask,sshdStart);
+        //nodeName: String,   val hostitfname: String,
+       // val hostitfip: String, val containeripbaseaddress: String,
+        //        val bridgeName : String,val sshdStart : Boolean, val ip:String,
+         //       val gw:String,val netmask:String, val mac:String
+        System.err.println("pass par la1");
+
+        NetworkGenerator ng  = new NetworkGenerator(this.hostitfip,this.containeripbaseaddress,ipStep,ipStart);
+        String gw = ng.generateGW(nodeName);
+        String ip = ng.generateIP(nodeName);
+        String mac = ng.generateMAC(nodeName);
+
+
+        if (updater ==null){
+            bservice =  new BridgeService(createBridge,hostitfname,context.getNodeName(),bridgeName,networkMask,routeditfname,containeripbaseaddress);
+            bservice.start();
+            updater = new IpModelUpdater(modelsService);
+            modelsService.registerModelListener(updater);
+        }
+
+        updater.addIpName(ip, nodeName);
+
+
+        fact = new LightLXCWrapperFactory(nodeName, hostitfname, hostitfip, containeripbaseaddress, bridgeName,sshdStart,ip,gw,networkMask,mac);
         return fact;
     }
 
     @org.kevoree.annotation.Update
     public void updateNode() {
+        modelsService.registerModelListener(updater);
+
         if (fact != null && fact.getWrap() != null) {
             fact.getWrap().freeze(freeze);
         }
+    }
+
+    BridgeService bservice=null;
+
+
+    IpModelUpdater updater ;
+
+    @Start
+    @Override
+    public void startNode(){
+        //System.err.println("pass par la");
+
+        if (updater ==null){
+            bservice =  new BridgeService(createBridge,hostitfname,context.getNodeName(),bridgeName,networkMask,routeditfname,containeripbaseaddress);
+            bservice.start();
+            updater = new IpModelUpdater(modelsService);
+            modelsService.registerModelListener(updater);
+        }
+        super.startNode();
+
+    }
+
+    @Stop
+    @Override
+    public void stopNode(){
+        bservice .stop();
+        modelsService.unregisterModelListener(updater);
+        super.stopNode();
+
     }
 }

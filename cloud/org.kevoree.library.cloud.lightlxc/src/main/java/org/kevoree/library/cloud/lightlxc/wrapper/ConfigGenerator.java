@@ -29,34 +29,34 @@ public class ConfigGenerator {
                 "lxc.network.ipv4 = ${ip}/24\n" +
                 "lxc.network.ipv4.gateway = ${ip.gw}\n" +
                 "lxc.rootfs = ${baseRootDirs}/${nodename}_rootfs\n" +
-                 "# Allow any mknod (but not using the node)"+
-                "lxc.cgroup.devices.allow = c *:* m"+
-                "lxc.cgroup.devices.allow = b *:* m"+
-                "# /dev/null and zero"+
-                "lxc.cgroup.devices.allow = c 1:3 rwm"+
-                "lxc.cgroup.devices.allow = c 1:5 rwm"+
-                "# consoles"+
-                "lxc.cgroup.devices.allow = c 5:1 rwm"+
-                "lxc.cgroup.devices.allow = c 5:0 rwm"+
-                "#lxc.cgroup.devices.allow = c 4:0 rwm"+
-                "#lxc.cgroup.devices.allow = c 4:1 rwm"+
-                "# /dev/{,u}random"+
-                "lxc.cgroup.devices.allow = c 1:9 rwm"+
-                "lxc.cgroup.devices.allow = c 1:8 rwm"+
-                "lxc.cgroup.devices.allow = c 136:* rwm"+
-                "lxc.cgroup.devices.allow = c 5:2 rwm"+
-                "# rtc"+
-                "lxc.cgroup.devices.allow = c 254:0 rwm"+
-                "#fuse"+
-                "lxc.cgroup.devices.allow = c 10:229 rwm"+
-                "#tun"+
-                "lxc.cgroup.devices.allow = c 10:200 rwm"+
-                "#full"+
-                "lxc.cgroup.devices.allow = c 1:7 rwm"+
-                "#hpet"+
-                "lxc.cgroup.devices.allow = c 10:228 rwm"+
-                "#kvm"+
-                "lxc.cgroup.devices.allow = c 10:232 rwm"+
+                 "# Allow any mknod (but not using the node)\n"+
+                "lxc.cgroup.devices.allow = c *:* m\n"+
+                "lxc.cgroup.devices.allow = b *:* m\n"+
+                "# /dev/null and zero\n"+
+                "lxc.cgroup.devices.allow = c 1:3 rwm\n"+
+                "lxc.cgroup.devices.allow = c 1:5 rwm\n"+
+                "# consoles\n"+
+                "lxc.cgroup.devices.allow = c 5:1 rwm\n"+
+                "lxc.cgroup.devices.allow = c 5:0 rwm\n"+
+                "#lxc.cgroup.devices.allow = c 4:0 rwm\n"+
+                "#lxc.cgroup.devices.allow = c 4:1 rwm\n"+
+                "# /dev/{,u}random\n"+
+                "lxc.cgroup.devices.allow = c 1:9 rwm\n"+
+                "lxc.cgroup.devices.allow = c 1:8 rwm\n"+
+                "lxc.cgroup.devices.allow = c 136:* rwm\n"+
+                "lxc.cgroup.devices.allow = c 5:2 rwm\n"+
+                "# rtc\n"+
+                "lxc.cgroup.devices.allow = c 254:0 rwm\n"+
+                "#fuse\n"+
+                "lxc.cgroup.devices.allow = c 10:229 rwm\n"+
+                "#tun\n"+
+                "lxc.cgroup.devices.allow = c 10:200 rwm\n"+
+                "#full\n"+
+                "lxc.cgroup.devices.allow = c 1:7 rwm\n"+
+                "#hpet\n"+
+                "lxc.cgroup.devices.allow = c 10:228 rwm\n"+
+                "#kvm\n"+
+                "lxc.cgroup.devices.allow = c 10:232 rwm\n"+
                 "lxc.mount.entry=/usr ${baseRootDirs}/${nodename}_rootfs/usr none ro,bind 0 0\n" +
                 "lxc.mount.entry=/lib ${baseRootDirs}/${nodename}_rootfs/lib none ro,bind 0 0\n" +
                 "lxc.mount.entry=/etc ${baseRootDirs}/${nodename}_rootfs/etc none ro,bind 0 0\n" +
@@ -88,7 +88,7 @@ public class ConfigGenerator {
                 .replace("${baseRootDirs}", baseRootDirs);
     }
 
-    public File generateUserDir(File baseRootDirs, ContainerNode element, File platformJar,String bridgeName, NetworkGenerator ng, String intfName, Boolean sshdStart) throws IOException {
+    public File generateUserDir(File baseRootDirs, ContainerNode element, File platformJar,String bridgeName, String ip, String netmask, String gw, String intfName, String mac,Boolean sshdStart) throws IOException {
         //System.err.println(baseRootDirs.getAbsolutePath());
         if (!baseRootDirs.exists()) {
             baseRootDirs.mkdirs();
@@ -125,7 +125,7 @@ public class ConfigGenerator {
         //generate the lxc config file
         File configLXC = new File(newUserDir, "config");
         FileWriter configLXCprinter = new FileWriter(configLXC);
-        configLXCprinter.write(generate(element.getName(), ng.generateIP(element), ng.generateGW(element),ng.generateMAC(element),bridgeName,baseRootDirs.getAbsolutePath(), intfName));
+        configLXCprinter.write(generate(element.getName(), ip, gw,mac,bridgeName,baseRootDirs.getAbsolutePath(), intfName));
         configLXCprinter.flush();
         configLXCprinter.close();
 

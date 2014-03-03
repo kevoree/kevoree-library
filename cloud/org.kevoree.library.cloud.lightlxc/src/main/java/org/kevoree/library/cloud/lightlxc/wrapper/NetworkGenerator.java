@@ -33,7 +33,7 @@ public class NetworkGenerator {
      this.ipStart = ipStart;
     }
 
-    public String generateIP(ContainerNode element) {
+    public String generateIP(String  elementName) {
         Random rand = new Random();
         Integer ip = ipStart+rand.nextInt(ipStep);
         int i = 0;
@@ -49,11 +49,11 @@ public class NetworkGenerator {
             return baseIP + ip;
     }
 
-    public String generateGW(ContainerNode element) {
+    public String generateGW(String elementName) {
         return gateway;
     }
 
-    public String generateMAC(ContainerNode element) {
+    public String generateMAC(String elementName) {
         byte[] b = new byte[6];
         random.nextBytes(b);
         StringBuilder buffer = new StringBuilder();

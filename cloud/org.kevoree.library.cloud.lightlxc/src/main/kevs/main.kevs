@@ -1,18 +1,18 @@
 repo "http://oss.sonatype.org/content/groups/public/"
-include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.web:latest
-include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:3.4.2-SNAPSHOT
+//include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.4.2-SNAPSHOT
+//include mvn:org.kevoree.library.java:org.kevoree.library.java.web:latest
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.4.2-SNAPSHOT
+//include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
+//include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
 
 add node0 : LightLXCNode
 
 //Here it will create a network with a bridge connected to eth1 and routed to wlan0 with ip 19.168.1.1 for eth1 (container) and 192.168.1XX for the container
 set node0.containeripbaseaddress = "192.168.1.1"
 set node0.hostitfip = "192.168.1.1"
-set node0.hostitfname = "eth0"
+set node0.hostitfname = "ethO"
 //set node0.routeditfname = ""
 //Create automatically the bridge
 set node0.createBridge = "false"
@@ -25,13 +25,13 @@ add node0.child : JavaNode
 //add child.TwoValueT187 : TwoValueTicker
 //add child.ConsolePr25 : ConsolePrinter
 //add AsyncBroa936 : AsyncBroadcast
-//add sync : WSGroup
-//set sync.port/child = "9002"
-//set sync.port/node0 = "9000"
+add sync : WSGroup
+set sync.port/child = "9002"
+set sync.port/node0 = "9000"
 //bind child.ConsolePr25.input AsyncBroa936
 //bind child.TwoValueT187.tick AsyncBroa936
-//attach child sync
-//attach node0 sync
+attach child sync
+attach node0 sync
 
 //add node0.child1 : JavaNode
 //add child1.TwoValueT187 : TwoValueTicker

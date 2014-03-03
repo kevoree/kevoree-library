@@ -20,6 +20,7 @@ import org.kevoree.library.cloud.lightlxc.wrapper.NetworkGenerator
 import org.kevoree.library.cloud.lightlxc.wrapper.NodeManager
 import org.kevoree.library.cloud.lightlxc.wrapper.MkNodeCommandExecutor
 import org.kevoree.library.cloud.lightlxc.wrapper.Reader
+import org.kevoree.api.ModelService
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,9 +29,10 @@ import org.kevoree.library.cloud.lightlxc.wrapper.Reader
  * Time: 09:22
  */
 
-class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService, val routeditfname: String, val hostitfname: String,
+class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService,  val hostitfname: String,
                           val hostitfip: String, val containeripbaseaddress: String,
-                          val createBrdge: Boolean, val bridgeName : String,val ipStep : Int , val ipStart : Int,val networkMask:String,val sshdStart : Boolean) : KInstanceWrapper {
+                           val bridgeName : String,val sshdStart : Boolean, val ip:String,
+                           val gw:String,val netmask:String, val mac:String) : KInstanceWrapper {
 
 
 
@@ -47,6 +49,7 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
         //Log.info("go there 1" + isStarted)
         if (!isStarted) {
+
 
             if (process != null) {
                 freeze(true)
@@ -69,56 +72,15 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
                 var rootUserDirs = Files.createTempDirectory("rootfs").toFile();
                 //Log.error("go there")
                 Log.info("file" + rootUserDirs?.getAbsolutePath())
-                val ng = NetworkGenerator(this.containeripbaseaddress, this.hostitfip,ipStep ,ipStart )
 
                 var cg = ConfigGenerator();
+                var newUserDir = cg.generateUserDir(rootUserDirs, modelElement, platformJar, bridgeName, ip,netmask,gw, hostitfname,mac,sshdStart)
 
-                val ethname = this.hostitfname
-                var newUserDir = cg.generateUserDir(rootUserDirs, modelElement, platformJar, bridgeName, ng, routeditfname,sshdStart)
-
-                if (createBrdge) {
-                    // TODO check and fix according to kevoree properties
-                    // netmask should be properties
-                    val command0 = array("/sbin/ifdown", ethname)
-                    MkNodeCommandExecutor.execute(modelElement.name!!,command0)
-
-                    val command1 = array("/sbin/brctl", "addbr", bridgeName)
-                    MkNodeCommandExecutor.execute(modelElement.name!!,command1)
-
-                    val command2 = array("/sbin/brctl", "addif", bridgeName, ethname)
-                    MkNodeCommandExecutor.execute(modelElement.name!!,command2)
-
-                    val command3 = array("/sbin/ifconfig", ethname, "0.0.0.0")
-                    MkNodeCommandExecutor.execute(modelElement.name!!,command3)
-
-
-                    val ip = ng.generateGW(null)!!
-                    val command4 = array("/sbin/ifconfig", bridgeName, ip, "netmask", networkMask, "up")
-                    MkNodeCommandExecutor.execute(modelElement.name!!,command4)
-
-
-                    //                val command5 = array("/sbin/ifconfig", "eth1","promisc", "up")
-                    val command5 = array("/sbin/ifconfig", ethname, ip, "netmask", networkMask, "promisc", "up")
-                    MkNodeCommandExecutor.execute(modelElement.name!!,command5)
-
-                    val file = File(rootUserDirs.toString() + "/" + modelElement.name!! + "_rootfs/kevrun")
-                    if (file.exists()) {
-                        val bval = file.setExecutable(true);
-                    }
-
-
-                    if (!"".equals(routeditfname)) {
-                        //echo 1 > /proc/sys/net/ipv4/ip_forward
-                        val command6 = array("/bin/echo", ">", "1", "/proc/sys/net/ipv4/ip_forward")
-                        MkNodeCommandExecutor.execute(modelElement.name!!,command6)
-
-
-                        //iptables -t nat -A POSTROUTING -o wlan0 -j SNAT --to-source 10.20.41.39
-                        val command7 = array("/sbin/iptables", "-t", "nat", "-A", "POSTROUTING", "-o", "wlan0", "-j", "SNAT", "--to-source", NodeManager.getAddressForItf(routeditfname)!!)
-                        MkNodeCommandExecutor.execute(modelElement.name!!,command7)
-                    }
-
+                val file = File(rootUserDirs.toString() + "/" + modelElement.name!! + "_rootfs/kevrun")
+                if (file.exists()) {
+                    val bval = file.setExecutable(true);
                 }
+
                 val runnerargs = array("lxc-execute", "-n", modelElement.name!!, "-f", rootUserDirs.toString() + "/" + modelElement.name!! + "_rootfs/config", "/kevrun")
                 process = Runtime.getRuntime().exec(runnerargs)
 
@@ -155,24 +117,6 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
 
     override fun destroy() {
 
-        if (createBrdge) {
-            val command1 = array("/sbin/ifconfig", this.hostitfname, "down")
-            MkNodeCommandExecutor.execute(modelElement.name!!,command1)
-
-            val command2 = array("/sbin/ifconfig", bridgeName, "down")
-            MkNodeCommandExecutor.execute(modelElement.name!!,command2)
-
-            val command3 = array("/sbin/brctl", "delif", this.hostitfname)
-            MkNodeCommandExecutor.execute(modelElement.name!!,command3)
-
-            val command4 = array("/sbin/brctl", "delbr", bridgeName)
-            MkNodeCommandExecutor.execute(modelElement.name!!,command4)
-
-
-            val command0 = array("/sbin/ifup", hostitfname)
-            MkNodeCommandExecutor.execute(modelElement.name!!,command0)
-
-        }
 
         process?.destroy()
 
