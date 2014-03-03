@@ -84,7 +84,7 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
                     jvmArgs = jvmArgsAttribute.toString()
                 }
             }
-            Log.info("Fork platform using {}", platformJar!!.getAbsolutePath())
+            Log.debug("Fork platform using {}", platformJar!!.getAbsolutePath())
             tempFile = File.createTempFile("bootModel" + modelElement.name, ".json")
             var tempIO = FileOutputStream(tempFile!!)
             modelSaver.serializeToStream(tmodel, tempIO)
