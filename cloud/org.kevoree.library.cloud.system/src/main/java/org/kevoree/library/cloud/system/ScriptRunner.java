@@ -2,7 +2,13 @@ package org.kevoree.library.cloud.system;
 
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
+import org.kevoree.library.cloud.api.helper.ProcessStreamFileLogger;
 import org.kevoree.log.Log;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * User: Erwan Daubert - erwan.daubert@gmail.com
@@ -13,7 +19,7 @@ import org.kevoree.log.Log;
  * @version 1.0
  */
 @ComponentType
-public abstract class ScriptRunner {
+public class ScriptRunner {
     @Param(optional = false)
     protected String startScript;
     @Param(optional = false)
@@ -34,5 +40,52 @@ public abstract class ScriptRunner {
         Log.info("{} is stopped stopScript executed: {}", context.getInstanceName(), runScript(stopScript));
     }
 
-    abstract boolean runScript(String script) throws Exception;
+    protected boolean runScript(String script) throws Exception {
+        if (script != null && !"".equals(script)) {
+            File scriptFile = new File(System.getProperty("java.io.tmpdir") + File.separator + context.getInstanceName());
+            if (!scriptFile.exists()) {
+                scriptFile.createNewFile();
+            }
+            scriptFile.setExecutable(true);
+            if (writeScriptOnFile(script, scriptFile)) {
+                File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + context.getInstanceName() + ".log");
+                java.lang.Process p = new ProcessBuilder(scriptFile.getAbsolutePath()).redirectErrorStream(true).start();
+                new Thread(new ProcessStreamFileLogger(p.getInputStream(), standardOutput, true)).start();
+                if (p.waitFor() != 0) {
+                    Log.warn("Unable to execute command: {}. Please look at the log file: {}", script, standardOutput.getAbsolutePath());
+                    return false;
+                }
+                scriptFile.delete();
+                standardOutput.delete();
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    private boolean writeScriptOnFile(String script, File scriptFile) {
+        FileOutputStream stream = null;
+        try {
+            stream = new FileOutputStream(scriptFile);
+            stream.write(script.getBytes());
+            stream.flush();
+        } catch (FileNotFoundException e) {
+            Log.error("{} doesn't exist.", e, scriptFile);
+            return false;
+        } catch (IOException e) {
+            Log.error("Unable to write on {}", e, scriptFile);
+            return false;
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException ignored) {
+                }
+            }
+        }
+        return true;
+    }
 }
