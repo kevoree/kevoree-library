@@ -44,6 +44,26 @@ public class LxcManager {
                 Process processcreate = new ProcessBuilder(LxcContants.lxcclone, "-o", clone_id, "-n", node.getName()).redirectErrorStream(true).start();
                 new Thread(new ProcessStreamFileLogger(processcreate.getInputStream(), standardOutput, true)).start();
                 if (processcreate.waitFor() == 0) {
+                    // fix /etc/hosts configuration for localhost
+                    // FIXME this can't be run if the lxc is not started
+                    /*Process lxcConsole = new ProcessBuilder(LxcContants.lxcattach, "-n", node.getName(), "--").redirectErrorStream(true).start();
+                    new Thread(new ProcessStreamFileLogger(lxcConsole.getInputStream(), standardOutput, true)).start();
+
+                    String commands = "cat /etc/hosts | sed 's/" + clone_id + "/" + node.getName() + "/g' > /tmp/hosts\ncp /tmp/hosts /etc/hosts\nrm -rf /tmp/hosts";
+                    try {
+                        OutputStream stream = lxcConsole.getOutputStream();
+                        stream.write(commands.getBytes());
+                        stream.flush();
+                    } catch (IOException e) {
+                        lxcConsole.destroy();
+                    } finally {
+                        int result = lxcConsole.waitFor();
+                        if (result == 0) {
+                            standardOutput.delete();
+                        } else {
+                            Log.warn("Unable to fix the /etc/hosts configuration file.. Please look at {} for further information.", standardOutput.getAbsolutePath());
+                        }
+                    }*/
                     standardOutput.delete();
                     return true;
                 } else {
@@ -213,10 +233,6 @@ public class LxcManager {
 
                 new Thread(new ProcessStreamFileLogger(process.getInputStream(), standardOutput, true)).start();
                 done = process.waitFor() == 0;
-
-                if (done) {
-                    standardOutput.delete();
-                }
             } else {
                 done = true;
             }
@@ -237,6 +253,7 @@ public class LxcManager {
                         return false;
                     }
                 } else {
+                    standardOutput.delete();
                     return true;
                 }
             } else {
