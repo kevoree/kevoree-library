@@ -22,88 +22,20 @@ set node0.hostitfname = "ethO"
 //set node0.routeditfname = ""
 //Create automatically the bridge
 set node0.createBridge = "false"
-set node0.sshdStart = "true"
+set node0.sshdStart = "false"
 set node0.bridgeName = "br0"
 set node0.log = "INFO"
 set node0.started = "true"
 set node0.freeze = "false"
-//add child.TwoValueT187 : TwoValueTicker
-//add child.ConsolePr25 : ConsolePrinter
-//add AsyncBroa936 : AsyncBroadcast
-
 add node0.child : JavaNode
-add node0.child1 : JavaNode
-add node0.child2 : JavaNode
-add node0.child3 : JavaNode
 
 add sync : WSGroup
+
 set sync.port/child = "9002"
-set sync.port/child1 = "9002"
-set sync.port/child2 = "9002"
-set sync.port/child3 = "9002"
 set sync.port/node0 = "9000"
 
 
-//bind child.ConsolePr25.input AsyncBroa936
-//bind child.TwoValueT187.tick AsyncBroa936
-attach child sync
 attach node0 sync
-attach child1 sync
-attach child2 sync
-attach child3 sync
-
-//add node0.child1 : JavaNode
-//add child1.TwoValueT187 : TwoValueTicker
-//add child1.ConsolePr25 : ConsolePrinter
-//add AsyncBroa936 : AsyncBroadcast
-//bind child1.ConsolePr25.input AsyncBroa936
-//bind child1.TwoValueT187.tick AsyncBroa936
-//set sync.port/child1 = "9004"
-
-//add node0.child2 : JavaNode
-//add child2.TwoValueT187 : TwoValueTicker
-//add child2.ConsolePr25 : ConsolePrinter
-//add AsyncBroa936 : AsyncBroadcast
-//bind child2.ConsolePr25.input AsyncBroa936
-//bind child2.TwoValueT187.tick AsyncBroa936
-//set sync.port/child2 = "9006"
+attach child sync
 
 
-
-
-add node0.nginx : NginxLoadBalancerComponent
-network node0.ip.lan 192.168.1.118
-
-add child.sosie1 : SosieRunner
-set child.sosie1.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
-set child.sosie1.port = '8282'
-set child.sosie1.redisServer = '192.168.1.118'
-
-
-
-add child1.sosie2 : SosieRunner
-set child1.sosie2.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
-set child1.sosie2.port = '8282'
-set child1.sosie2.redisServer = '192.168.1.118'
-
-add child2.sosie3 : SosieRunner
-set child2.sosie3.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
-set child2.sosie3.port = '8282'
-set child2.sosie3.redisServer = '192.168.1.118'
-
-add child3.sosie4 : SosieRunner
-set child3.sosie4.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
-set child3.sosie4.port = '8282'
-set child3.sosie4.redisServer = '192.168.1.118'
-
-
-add node0.monitor : KevoreeSimpleLBMonitor
-//set node0.monitor.serverName = '127.0.0.1'
-
-
-add channel : UselessChannel
-bind child.sosie1.useless channel
-bind child1.sosie2.useless channel
-bind child2.sosie3.useless channel
-bind child3.sosie4.useless channel
-bind node0.nginx.outputPort channel
