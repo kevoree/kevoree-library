@@ -79,21 +79,12 @@ public class LightLXCNode extends PlatformJavaNode {
        // val hostitfip: String, val containeripbaseaddress: String,
         //        val bridgeName : String,val sshdStart : Boolean, val ip:String,
          //       val gw:String,val netmask:String, val mac:String
-        System.err.println("pass par la1" + nodeName);
-
-
-
-
         if (updater ==null){
             bservice =  new BridgeService(createBridge,hostitfname,context.getNodeName(),bridgeName,networkMask,routeditfname,containeripbaseaddress);
             bservice.start();
             updater = new IpModelUpdater(modelsService);
             modelsService.registerModelListener(updater);
         }
-
-
-
-
         fact = new LightLXCWrapperFactory(nodeName, hostitfname, hostitfip, containeripbaseaddress, bridgeName,sshdStart,ipStep,ipStart,networkMask,updater);
         return fact;
     }

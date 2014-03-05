@@ -23,16 +23,12 @@ public class IpModelUpdater extends ModelListenerAdapter {
 
     @Override
     public synchronized void modelUpdated() {
-        System.out.println("pass par là3");
-
         StringBuffer buf = new StringBuffer();
         for (String ip  :ipName.keySet()){
             buf.append("network "+ipName.get(ip)+".ip.lan " + ip +"\n");
 
 
         }
-        System.out.println("pass par là  "+buf);
-
         if (buf.length() > 0){
         modelservice.unregisterModelListener(this);
         modelservice.submitScript(buf.toString(), new UpdateCallback() {
