@@ -6,7 +6,6 @@ import org.kevoree.api.ModelService;
 import org.kevoree.library.cloud.api.PlatformJavaNode;
 import org.kevoree.library.cloud.docker.wrapper.LightLXCWrapperFactory;
 import org.kevoree.library.cloud.lightlxc.wrapper.IpModelUpdater;
-import org.kevoree.library.cloud.lightlxc.wrapper.NetworkGenerator;
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
 
 /**
@@ -80,12 +79,9 @@ public class LightLXCNode extends PlatformJavaNode {
        // val hostitfip: String, val containeripbaseaddress: String,
         //        val bridgeName : String,val sshdStart : Boolean, val ip:String,
          //       val gw:String,val netmask:String, val mac:String
-        System.err.println("pass par la1");
+        System.err.println("pass par la1" + nodeName);
 
-        NetworkGenerator ng  = new NetworkGenerator(this.hostitfip,this.containeripbaseaddress,ipStep,ipStart);
-        String gw = ng.generateGW(nodeName);
-        String ip = ng.generateIP(nodeName);
-        String mac = ng.generateMAC(nodeName);
+
 
 
         if (updater ==null){
@@ -95,10 +91,10 @@ public class LightLXCNode extends PlatformJavaNode {
             modelsService.registerModelListener(updater);
         }
 
-        updater.addIpName(ip, nodeName);
 
 
-        fact = new LightLXCWrapperFactory(nodeName, hostitfname, hostitfip, containeripbaseaddress, bridgeName,sshdStart,ip,gw,networkMask,mac);
+
+        fact = new LightLXCWrapperFactory(nodeName, hostitfname, hostitfip, containeripbaseaddress, bridgeName,sshdStart,ipStep,ipStart,networkMask,updater);
         return fact;
     }
 

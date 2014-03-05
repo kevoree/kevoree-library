@@ -1,15 +1,10 @@
 package org.kevoree.library.cloud.lightlxc.wrapper;
 
-import jet.runtime.typeinfo.JetValueParameter;
-import org.jetbrains.annotations.NotNull;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListenerAdapter;
 import org.kevoree.api.handler.UpdateCallback;
-import org.kevoree.modeling.api.events.ModelElementListener;
-import org.kevoree.modeling.api.events.ModelEvent;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,12 +23,16 @@ public class IpModelUpdater extends ModelListenerAdapter {
 
     @Override
     public synchronized void modelUpdated() {
+        System.out.println("pass par là3");
+
         StringBuffer buf = new StringBuffer();
         for (String ip  :ipName.keySet()){
             buf.append("network "+ipName.get(ip)+".ip.lan " + ip +"\n");
 
 
         }
+        System.out.println("pass par là  "+buf);
+
         if (buf.length() > 0){
         modelservice.unregisterModelListener(this);
         modelservice.submitScript(buf.toString(), new UpdateCallback() {
