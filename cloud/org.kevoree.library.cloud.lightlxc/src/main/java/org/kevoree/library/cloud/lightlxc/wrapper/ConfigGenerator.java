@@ -66,7 +66,7 @@ public class ConfigGenerator {
                 "lxc.mount.entry=/var ${baseRootDirs}/${nodename}_rootfs/var none ro,bind 0 0 \n" +
                 "lxc.mount.entry = /dev/pts ${baseRootDirs}/${nodename}_rootfs/dev/pts devpts nosuid,noexec,mode=0620,ptmxmode=000,newinstance 0 0\n" +
                 "lxc.mount.entry = /dev/shm ${baseRootDirs}/${nodename}_rootfs/dev/shm tmpfs nosuid,nodev,mode=1777 0 0\n" +
-                "lxc.mount.entry = /tmp ${baseRootDirs}/${nodename}_rootfs/tmp tmpfs nosuid,nodev,noexec,mode=1777,size=1g 0 0\n";
+                "lxc.mount.entry = /tmp ${baseRootDirs}/${nodename}_rootfs/tmp tmpfs nosuid,nodev,mode=1777,size=1g 0 0\n";
             if (new File("/lib32").exists())
                 base = base +  "lxc.mount.entry=/lib32 ${baseRootDirs}/${nodename}_rootfs/lib32 none ro,bind 0 0\n";
             if (new File("/run").exists())
