@@ -7,6 +7,7 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.4.2-SNAPSHOT
 include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.4.2-SNAPSHOT
 //include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
 //include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.hazelcast:3.4.2-SNAPSHOT
 
 include mvn:org.diversify.demo:nginxconf-generator:1.0-SNAPSHOT
 include mvn:org.diversify.demo:kevoree-utils-xtend:1.0-SNAPSHOT
@@ -126,27 +127,29 @@ add node5.child11 : JavaNode
 
 
 
-add sync : WSGroup
-set sync.port/child = "9002"
-set sync.port/child1 = "9002"
-set sync.port/child2 = "9002"
-set sync.port/child3 = "9002"
-set sync.port/child4 = "9002"
-set sync.port/child5 = "9002"
-set sync.port/child6 = "9002"
-set sync.port/child7 = "9002"
-set sync.port/child8 = "9002"
-set sync.port/child9 = "9002"
-set sync.port/child10 = "9002"
-set sync.port/child11 = "9002"
+add sync1 : WSGroup
+add sync : BroadcastGroup
+//set sync.port/child = "9002"
+//set sync.port/child1 = "9002"
+//set sync.port/child2 = "9002"
+//set sync.port/child3 = "9002"
+//set sync.port/child4 = "9002"
+//set sync.port/child5 = "9002"
+//set sync.port/child6 = "9002"
+//set sync.port/child7 = "9002"
+//set sync.port/child8 = "9002"
+//set sync.port/child9 = "9002"
+//set sync.port/child10 = "9002"
+//set sync.port/child11 = "9002"
 
-set sync.port/node0 = "9000"
-set sync.port/node1 = "9000"
-set sync.port/node2 = "9000"
-set sync.port/node3 = "9000"
-set sync.port/node4 = "9000"
-set sync.port/node5 = "9000"
+set sync1.port/node0 = "9000"
+//set sync.port/node1 = "9000"
+//set sync.port/node2 = "9000"
+//set sync.port/node3 = "9000"
+//set sync.port/node4 = "9000"
+//set sync.port/node5 = "9000"
 
+attach node0 sync1
 attach node0 sync
 attach node1 sync
 attach node2 sync
