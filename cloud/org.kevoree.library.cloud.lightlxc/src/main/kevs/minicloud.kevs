@@ -1,0 +1,239 @@
+repo "http://oss.sonatype.org/content/groups/public/"
+repo "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/"
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:3.4.2-SNAPSHOT
+//include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.4.2-SNAPSHOT
+//include mvn:org.kevoree.library.java:org.kevoree.library.java.web:latest
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.4.2-SNAPSHOT
+//include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
+//include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
+
+include mvn:org.diversify.demo:nginxconf-generator:1.0-SNAPSHOT
+include mvn:org.diversify.demo:kevoree-utils-xtend:1.0-SNAPSHOT
+include mvn:org.diversify:org.diversify.kevoree.sosie:latest
+include mvn:org.diversify:org.diversify.kevoree.loadBalancer:1.0.0-SNAPSHOT
+
+add node0 : LightLXCNode
+add node1 : LightLXCNode
+add node2 : LightLXCNode
+add node3 : LightLXCNode
+add node4 : LightLXCNode
+add node5 : LightLXCNode
+
+//Here it will create a network with a bridge connected to eth1 and routed to wlan0 with ip 19.168.1.1 for eth1 (container) and 192.168.1XX for the container
+set node0.containeripbaseaddress = "192.168.1.1"
+set node0.hostitfip = "192.168.1.1"
+set node0.hostitfname = "ethO"
+//set node0.routeditfname = ""
+//Create automatically the bridge
+set node0.createBridge = "false"
+set node0.sshdStart = "true"
+set node0.bridgeName = "br0"
+set node0.log = "INFO"
+set node0.started = "true"
+set node0.freeze = "false"
+
+set node1.containeripbaseaddress = "192.168.1.1"
+set node1.hostitfip = "192.168.1.1"
+set node1.hostitfname = "ethO"
+//set node0.routeditfname = ""
+//Create automatically the bridge
+set node1.createBridge = "false"
+set node1.sshdStart = "true"
+set node1.bridgeName = "br0"
+set node1.log = "INFO"
+set node1.started = "true"
+set node1.freeze = "false"
+
+set node2.containeripbaseaddress = "192.168.1.1"
+set node2.hostitfip = "192.168.1.1"
+set node2.hostitfname = "ethO"
+//set node2.routeditfname = ""
+//Create automatically the bridge
+set node2.createBridge = "false"
+set node2.sshdStart = "true"
+set node2.bridgeName = "br0"
+set node2.log = "INFO"
+set node2.started = "true"
+set node2.freeze = "false"
+
+set node3.containeripbaseaddress = "192.168.1.1"
+set node3.hostitfip = "192.168.1.1"
+set node3.hostitfname = "ethO"
+//set node3.routeditfname = ""
+//Create automatically the bridge
+set node3.createBridge = "false"
+set node3.sshdStart = "true"
+set node3.bridgeName = "br0"
+set node3.log = "INFO"
+set node3.started = "true"
+set node3.freeze = "false"
+
+set node4.containeripbaseaddress = "192.168.1.1"
+set node4.hostitfip = "192.168.1.1"
+set node4.hostitfname = "ethO"
+//set node4.routeditfname = ""
+//Create automatically the bridge
+set node4.createBridge = "false"
+set node4.sshdStart = "true"
+set node4.bridgeName = "br0"
+set node4.log = "INFO"
+set node4.started = "true"
+set node4.freeze = "false"
+
+set node5.containeripbaseaddress = "192.168.1.1"
+set node5.hostitfip = "192.168.1.1"
+set node5.hostitfname = "ethO"
+//set node5.routeditfname = ""
+//Create automatically the bridge
+set node5.createBridge = "false"
+set node5.sshdStart = "true"
+set node5.bridgeName = "br0"
+set node5.log = "INFO"
+set node5.started = "true"
+set node5.freeze = "false"
+
+
+
+add node0.child : JavaNode
+add node0.child1 : JavaNode
+add node1.child2 : JavaNode
+add node1.child3 : JavaNode
+
+add node2.child4 : JavaNode
+add node2.child5 : JavaNode
+add node3.child6 : JavaNode
+add node3.child7 : JavaNode
+
+add node4.child8 : JavaNode
+add node4.child9 : JavaNode
+add node5.child10 : JavaNode
+add node5.child11 : JavaNode
+
+
+
+add sync : WSGroup
+set sync.port/child = "9002"
+set sync.port/child1 = "9002"
+set sync.port/child2 = "9002"
+set sync.port/child3 = "9002"
+set sync.port/child4 = "9002"
+set sync.port/child5 = "9002"
+set sync.port/child6 = "9002"
+set sync.port/child7 = "9002"
+set sync.port/child8 = "9002"
+set sync.port/child9 = "9002"
+set sync.port/child10 = "9002"
+set sync.port/child11 = "9002"
+
+set sync.port/node0 = "9000"
+set sync.port/node1 = "9000"
+set sync.port/node2 = "9000"
+set sync.port/node3 = "9000"
+set sync.port/node4 = "9000"
+set sync.port/node5 = "9000"
+
+attach node0 sync
+attach node1 sync
+attach node2 sync
+attach node3 sync
+attach node4 sync
+attach node5 sync
+attach child sync
+attach child1 sync
+attach child2 sync
+attach child3 sync
+attach child4 sync
+attach child5 sync
+attach child6 sync
+attach child7 sync
+attach child8 sync
+attach child9 sync
+attach child10 sync
+attach child11 sync
+
+
+
+add node0.nginx : NginxLoadBalancerComponent
+network node0.ip.lan 192.168.1.7
+
+add child.sosie1 : SosieRunner
+set child.sosie1.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set child.sosie1.port = '8282'
+set child.sosie1.redisServer = '192.168.1.7'
+
+add child1.sosie2 : SosieRunner
+set child1.sosie2.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set child1.sosie2.port = '8282'
+set child1.sosie2.redisServer = '192.168.1.7'
+
+add child2.sosie3 : SosieRunner
+set child2.sosie3.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set child2.sosie3.port = '8282'
+set child2.sosie3.redisServer = '192.168.1.7'
+
+add child3.sosie4 : SosieRunner
+set child3.sosie4.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set child3.sosie4.port = '8282'
+set child3.sosie4.redisServer = '192.168.1.7'
+
+add child4.sosie1 : SosieRunner
+set child4.sosie1.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set child4.sosie1.port = '8282'
+set child4.sosie1.redisServer = '192.168.1.7'
+
+add child5.sosie2 : SosieRunner
+set child5.sosie2.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set child5.sosie2.port = '8282'
+set child5.sosie2.redisServer = '192.168.1.7'
+
+add child6.sosie3 : SosieRunner
+set child6.sosie3.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set child6.sosie3.port = '8282'
+set child6.sosie3.redisServer = '192.168.1.7'
+
+add child7.sosie4 : SosieRunner
+set child7.sosie4.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set child7.sosie4.port = '8282'
+set child7.sosie4.redisServer = '192.168.1.7'
+
+add child8.sosie1 : SosieRunner
+set child8.sosie1.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set child8.sosie1.port = '8282'
+set child8.sosie1.redisServer = '192.168.1.7'
+
+add child9.sosie2 : SosieRunner
+set child9.sosie2.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set child9.sosie2.port = '8282'
+set child9.sosie2.redisServer = '192.168.1.7'
+
+add child10.sosie3 : SosieRunner
+set child10.sosie3.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set child10.sosie3.port = '8282'
+set child10.sosie3.redisServer = '192.168.1.7'
+
+add child11.sosie4 : SosieRunner
+set child11.sosie4.sosieUrl = "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/org/diversify/composed-sosie/1-indirection_on_Streamrhino8/composed-sosie-1-indirection_on_Streamrhino8.zip"
+set child11.sosie4.port = '8282'
+set child11.sosie4.redisServer = '192.168.1.7'
+
+
+add node0.monitor : KevoreeSimpleLBMonitor
+set node0.monitor.serverName = '192.168.1.7'
+
+add channel : UselessChannel
+bind child.sosie1.useless channel
+bind child1.sosie2.useless channel
+bind child2.sosie3.useless channel
+bind child3.sosie4.useless channel
+bind child4.sosie1.useless channel
+bind child5.sosie2.useless channel
+bind child6.sosie3.useless channel
+bind child7.sosie4.useless channel
+bind child8.sosie1.useless channel
+bind child9.sosie2.useless channel
+bind child10.sosie3.useless channel
+bind child11.sosie4.useless channel
+
+bind node0.nginx.outputPort channel
+
