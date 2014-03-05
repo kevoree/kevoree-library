@@ -1,0 +1,10 @@
+cat /etc/hosts | sed 's/${clone_id}/${nodeName}/g' > /tmp/hosts
+cp /tmp/hosts /etc/hosts
+rm -rf /tmp/hosts
+cat /etc/kevoree/config | sed 's/${clone_id}/${nodeName}/g' > /tmp/config
+cp /tmp/config /etc/kevoree/config
+rm -rf /tmp/config
+cat /etc/kevoree/boot.kevs | sed 's/${clone_id}/${nodeName}/g' > /tmp/boot.kevs
+cp /tmp/boot.kevs /etc/kevoree/boot.kevs
+rm -rf /tmp/boot.kevs
+exit
