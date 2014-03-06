@@ -44,28 +44,7 @@ public class LxcManager {
                 Process processcreate = new ProcessBuilder(LxcContants.lxcclone, "-o", clone_id, "-n", node.getName()).redirectErrorStream(true).start();
                 new Thread(new ProcessStreamFileLogger(processcreate.getInputStream(), standardOutput, true)).start();
                 if (processcreate.waitFor() == 0) {
-                    // fix /etc/hosts configuration for localhost
-                    // FIXME this can't be run if the lxc is not started
-                    /*Process lxcConsole = new ProcessBuilder(LxcContants.lxcattach, "-n", node.getName(), "--").redirectErrorStream(true).start();
-                    new Thread(new ProcessStreamFileLogger(lxcConsole.getInputStream(), standardOutput, true)).start();
-
-                    String commands = "cat /etc/hosts | sed 's/" + clone_id + "/" + node.getName() + "/g' > /tmp/hosts\ncp /tmp/hosts /etc/hosts\nrm -rf /tmp/hosts";
-                    try {
-                        OutputStream stream = lxcConsole.getOutputStream();
-                        stream.write(commands.getBytes());
-                        stream.flush();
-                    } catch (IOException e) {
-                        lxcConsole.destroy();
-                    } finally {
-                        int result = lxcConsole.waitFor();
-                        if (result == 0) {
-                            standardOutput.delete();
-                        } else {
-                            Log.warn("Unable to fix the /etc/hosts configuration file.. Please look at {} for further information.", standardOutput.getAbsolutePath());
-                        }
-                    }*/
-                    standardOutput.delete();
-                    return true;
+                    return fixLxcNode(node, standardOutput);
                 } else {
                     Log.error("Unable to create container {} using clone {}. Please look at {} for further information.", node.getName(), clone_id, standardOutput.getAbsolutePath());
                     return false;
@@ -78,6 +57,46 @@ public class LxcManager {
             Log.error("Unable to create container {} using clone {}", e, node.getName(), clone_id);
             return false;
         }
+    }
+
+    private boolean fixLxcNode(ContainerNode node, File standardOutput) throws IOException, InterruptedException {
+        Log.debug("Starting {} for configuring kevoree", node.getName());
+        Process lxcstartprocess = new ProcessBuilder(LxcContants.lxcstart, "-n", node.getName(), "-d").redirectErrorStream(true).start();
+        new Thread(new ProcessStreamFileLogger(lxcstartprocess.getInputStream(), standardOutput, true)).start();
+        if (lxcstartprocess.waitFor() == 0) {
+            Log.debug("Configuring {}", node.getName());
+            // fix /etc/hosts configuration for localhost
+            // fix /etc/kevore/config with nodeName
+            // fix /etc/kevore/boot.kevs with nodeName
+            Process lxcConsole = new ProcessBuilder(LxcContants.lxcattach, "-n", node.getName(), "--").redirectErrorStream(true).start();
+            new Thread(new ProcessStreamFileLogger(lxcConsole.getInputStream(), standardOutput, true)).start();
+
+            String commands = new String(FileManager.load(LxcManager.class.getClassLoader().getResourceAsStream("kevoree-node-specific"))).replace("${clone_id}", clone_id).replace("${nodeName}", node.getName());
+            try {
+                OutputStream stream = lxcConsole.getOutputStream();
+                stream.write(commands.getBytes());
+                stream.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+                lxcConsole.destroy();
+            } finally {
+                int result = lxcConsole.waitFor();
+                if (result == 0) {
+                    standardOutput.delete();
+                } else {
+                    Log.warn("Unable to fix the /etc/hosts configuration file.. Please look at {} for further information.", standardOutput.getAbsolutePath());
+                }
+            }
+            Log.debug("Configuration done for {}", node.getName());
+            Log.debug("Stopping {} after configuring kevoree", node.getName());
+            Process lxcstopprocess = new ProcessBuilder(LxcContants.lxcstop, "-n", clone_id).redirectErrorStream(true).start();
+            new Thread(new ProcessStreamFileLogger(lxcstopprocess.getInputStream(), new File("/dev/null"), false)).start();
+            lxcstopprocess.waitFor();
+        } else {
+            Log.warn("Unable to configure {}", node.getName());
+        }
+        standardOutput.delete();
+        return true;
     }
 
     public boolean startContainer(ContainerNode node) {
