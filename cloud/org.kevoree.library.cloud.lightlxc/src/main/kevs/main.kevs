@@ -1,5 +1,4 @@
 repo "http://oss.sonatype.org/content/groups/public/"
-repo "http://sd-35000.dedibox.fr:8080/archiva/repository/internal/"
 include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:3.4.2-SNAPSHOT
 //include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:3.4.2-SNAPSHOT
@@ -8,10 +7,6 @@ include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lightlxc:3.4.2-S
 //include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
 //include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
 
-include mvn:org.diversify.demo:nginxconf-generator:1.0-SNAPSHOT
-include mvn:org.diversify.demo:kevoree-utils-xtend:1.0-SNAPSHOT
-include mvn:org.diversify:org.diversify.kevoree.sosie:latest
-include mvn:org.diversify:org.diversify.kevoree.loadBalancer:1.0.0-SNAPSHOT
 
 add node0 : LightLXCNode
 
