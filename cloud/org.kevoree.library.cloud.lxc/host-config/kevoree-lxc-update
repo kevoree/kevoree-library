@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# erwan.daubert@gmail.com
+#
+# script install and configure lxc for ubuntu
+# Tested with Ubuntu Server 13.10 kernel 3.11.0-15-generic
+
+service kevoree stop
+lxc-stop -n baseclonekevoree
+lxc-destroy -n baseclonekevoree
+service kevoree start
