@@ -92,26 +92,12 @@ $(function () {
 
                 var childName = this.id.substring("remove".length);
 
-                bootbox.confirm("Are you sure to wants to destroy " + childName + " ?", function (result) {
+                bootbox.confirm("Are you sure you want destroy " + childName + " ?", function (result) {
                     if (result == true) {
                         var currentModel = cloner.clone(model, true);
                         var currentNode = model.findNodesByID(nodeName);
                         var currentChildNode = currentNode.findHostsByID(childName);
-                        currentNode.removeHosts(currentChildNode);
-                        model.removeNodes(currentChildNode);
-
-                        // NodeNetwork must be removed
-                        var nodeNetworkToRemove = [];
-                        var nodeNetworks = model.nodeNetworks;
-                        for (var i = 0; i < nodeNetworks.$size; i++) {
-                            var nodeNetwork = nodeNetworks.get(i);
-                            if (nodeNetwork.target.name === childName || nodeNetwork.initBy.name === childName) {
-                                nodeNetworkToRemove.push(nodeNetwork)
-                            }
-                        }
-                        for (var i = 0; i < nodeNetworkToRemove.length; i++) {
-                            model.removeNodeNetworks(nodeNetworkToRemove[i]);
-                        }
+                        currentChildNode.delete();
                         sendDiff(currentModel);
                     }
                 });
@@ -134,14 +120,16 @@ $(function () {
     function lookingForIPs(nodePath) {
         var ips = "";
         var node = model.findByPath(nodePath);
-        for (var i = 0; i < node.networkInformation.$size; i++) {
-            var networkInfo = node.networkInformation.get(i);
-            for (var j = 0; j < networkInfo.values.$size; j++) {
-                var networkProperty = networkInfo.values.get(j);
-                if (ips === "") {
-                    ips = networkProperty.value;
-                } else {
-                    ips = ", " + networkProperty.value;
+        if (node.started) {
+            for (var i = 0; i < node.networkInformation.$size; i++) {
+                var networkInfo = node.networkInformation.get(i);
+                for (var j = 0; j < networkInfo.values.$size; j++) {
+                    var networkProperty = networkInfo.values.get(j);
+                    if (ips === "") {
+                        ips = networkProperty.value;
+                    } else {
+                        ips = ", " + networkProperty.value;
+                    }
                 }
             }
         }
