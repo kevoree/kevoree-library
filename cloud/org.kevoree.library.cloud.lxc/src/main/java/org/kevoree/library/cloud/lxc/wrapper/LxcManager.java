@@ -37,65 +37,64 @@ public class LxcManager {
     }
 
     public boolean createContainer(ContainerNode node) {
-        try {
-            if (!getContainers().contains(node.getName())) {
-                File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + node.getName() + ".log");
+        if (!getContainers().contains(node.getName())) {
+            File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + node.getName() + ".log");
+            try {
                 Log.debug("Creating container {} using {} as clone", node.getName(), clone_id);
                 Process processcreate = new ProcessBuilder(LxcContants.lxcclone, "-o", clone_id, "-n", node.getName()).redirectErrorStream(true).start();
                 new Thread(new ProcessStreamFileLogger(processcreate.getInputStream(), standardOutput, true)).start();
                 if (processcreate.waitFor() == 0) {
-                    return fixLxcNode(node, standardOutput);
+//                    return fixLxcNode(node, standardOutput);
+                    return true;
                 } else {
-                    Log.error("Unable to create container {} using clone {}. Please look at {} for further information.", node.getName(), clone_id, standardOutput.getAbsolutePath());
+                    if (standardOutput.renameTo(new File(standardOutput.getAbsolutePath() + ".create"))) {
+                        Log.error("Unable to create container {} using clone {}. Please look at {} for further information.", node.getName(), clone_id, standardOutput.getAbsolutePath() + ".create");
+                    } else {
+                        Log.error("Unable to create container {} using clone {}. Please look at {} for further information.", node.getName(), clone_id, standardOutput.getAbsolutePath());
+                    }
                     return false;
                 }
-            } else {
-                Log.debug("Container {} already exists so it is not created", node.getName());
-                return true;
+            } catch (Exception e) {
+                if (standardOutput.renameTo(new File(standardOutput.getAbsolutePath() + ".create"))) {
+                    Log.error("Unable to create container {} using clone {}. Please look at {} for further information.", node.getName(), clone_id, standardOutput.getAbsolutePath() + ".create");
+                } else {
+                    Log.error("Unable to create container {} using clone {}. Please look at {} for further information.", node.getName(), clone_id, standardOutput.getAbsolutePath());
+                }
+                return false;
             }
-        } catch (Exception e) {
-            Log.error("Unable to create container {} using clone {}", e, node.getName(), clone_id);
-            return false;
+        } else {
+            Log.debug("Container {} already exists so it is not created", node.getName());
+            return true;
         }
+
     }
 
     private boolean fixLxcNode(ContainerNode node, File standardOutput) throws IOException, InterruptedException {
-        Log.debug("Starting {} for configuring kevoree", node.getName());
-        Process lxcstartprocess = new ProcessBuilder(LxcContants.lxcstart, "-n", node.getName(), "-d").redirectErrorStream(true).start();
-        new Thread(new ProcessStreamFileLogger(lxcstartprocess.getInputStream(), standardOutput, true)).start();
-        if (lxcstartprocess.waitFor() == 0) {
-            Log.debug("Configuring {}", node.getName());
-            // fix /etc/hosts configuration for localhost
-            // fix /etc/kevore/config with nodeName
-            // fix /etc/kevore/boot.kevs with nodeName
-            Process lxcConsole = new ProcessBuilder(LxcContants.lxcattach, "-n", node.getName(), "--").redirectErrorStream(true).start();
-            new Thread(new ProcessStreamFileLogger(lxcConsole.getInputStream(), standardOutput, true)).start();
+        Log.debug("Configuring {}", node.getName());
+        // fix /etc/hosts configuration for localhost
+        // fix /etc/kevore/config with nodeName
+        // fix /etc/kevore/boot.kevs with nodeName
+        Process lxcConsole = new ProcessBuilder(LxcContants.lxcattach, "-n", node.getName(), "--").redirectErrorStream(true).start();
+        new Thread(new ProcessStreamFileLogger(lxcConsole.getInputStream(), standardOutput, true)).start();
 
-            String commands = new String(FileManager.load(LxcManager.class.getClassLoader().getResourceAsStream("kevoree-node-specific"))).replace("${clone_id}", clone_id).replace("${nodeName}", node.getName());
-            try {
-                OutputStream stream = lxcConsole.getOutputStream();
-                stream.write(commands.getBytes());
-                stream.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-                lxcConsole.destroy();
-            } finally {
-                int result = lxcConsole.waitFor();
-                if (result == 0) {
-                    standardOutput.delete();
-                } else {
-                    Log.warn("Unable to fix the /etc/hosts configuration file.. Please look at {} for further information.", standardOutput.getAbsolutePath());
-                }
+        String commands = new String(FileManager.load(LxcManager.class.getClassLoader().getResourceAsStream("kevoree-node-specific"))).replace("${clone_id}", clone_id).replace("${nodeName}", node.getName()).replace("${kevoree.version}", defaultKevoreeFactory.getVersion());
+        try {
+            OutputStream stream = lxcConsole.getOutputStream();
+            stream.write(commands.getBytes());
+            stream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            lxcConsole.destroy();
+            return false;
+        } finally {
+            int result = lxcConsole.waitFor();
+            if (result == 0) {
+                standardOutput.delete();
+            } else {
+                Log.warn("Unable to fix the /etc/hosts configuration file.. Please look at {} for further information.", standardOutput.getAbsolutePath());
             }
-            Log.debug("Configuration done for {}", node.getName());
-            Log.debug("Stopping {} after configuring kevoree", node.getName());
-            Process lxcstopprocess = new ProcessBuilder(LxcContants.lxcstop, "-n", clone_id).redirectErrorStream(true).start();
-            new Thread(new ProcessStreamFileLogger(lxcstopprocess.getInputStream(), new File("/dev/null"), false)).start();
-            lxcstopprocess.waitFor();
-        } else {
-            Log.warn("Unable to configure {}", node.getName());
         }
-        standardOutput.delete();
+        Log.debug("Configuration done for {}", node.getName());
         return true;
     }
 
@@ -107,21 +106,29 @@ public class LxcManager {
                 cmd = new String[]{LxcContants.lxcstart, "-n", node.getName(), "-d", "-s", "lxc.arch=" + dictionaryValue.getValue()};
             }
         }
+        File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + node.getName() + ".log");
         try {
-            File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + node.getName() + ".log");
             Log.debug("Starting container {}", node.getName());
             Process lxcstartprocess = new ProcessBuilder(cmd).start();
             new Thread(new ProcessStreamFileLogger(lxcstartprocess.getInputStream(), standardOutput, true)).start();
-            if (lxcstartprocess.waitFor() == 0) {
+            if (lxcstartprocess.waitFor() == 0 && fixLxcNode(node, standardOutput)) {
                 standardOutput.delete();
                 constraintManager.defineConstraints(node);
                 return true;
             } else {
-                Log.error("Unable to start the container {}. Please look at {} for further information.", node.getName(), standardOutput.getAbsolutePath());
+                if (standardOutput.renameTo(new File(standardOutput.getAbsolutePath() + ".start"))) {
+                    Log.error("Unable to start the container {}. Please look at {} for further information.", node.getName(), standardOutput.getAbsolutePath() + ".start");
+                } else {
+                    Log.error("Unable to start the container {}. Please look at {} for further information.", node.getName(), standardOutput.getAbsolutePath());
+                }
                 return false;
             }
         } catch (Exception e) {
-            Log.error("Unable to start the container {}", e, node.getName());
+            if (standardOutput.renameTo(new File(standardOutput.getAbsolutePath() + ".start"))) {
+                Log.error("Unable to start the container {}. Please look at {} for further information.", node.getName(), standardOutput.getAbsolutePath() + ".start");
+            } else {
+                Log.error("Unable to start the container {}. Please look at {} for further information.", node.getName(), standardOutput.getAbsolutePath());
+            }
             return false;
         }
     }
@@ -243,9 +250,9 @@ public class LxcManager {
         } else {
             Log.info("Destroying container " + id);
         }
+        File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + id + ".log");
         try {
             boolean done;
-            File standardOutput = new File(System.getProperty("java.io.tmpdir") + File.separator + id + ".log");
             Process process;
             if (isRunning(id)) {
                 process = new ProcessBuilder(LxcContants.lxcstop, "-n", id).redirectErrorStream(true).start();
@@ -264,11 +271,19 @@ public class LxcManager {
                             standardOutput.delete();
                             return true;
                         } else {
-                            Log.warn("Unable to destroy container {}. Please look at {} for further information.", id, standardOutput.getAbsolutePath());
+                            if (standardOutput.renameTo(new File(standardOutput.getAbsolutePath() + ".destroy"))) {
+                                Log.warn("Unable to destroy container {}. Please look at {} for further information.", id, standardOutput.getAbsolutePath() + ".destroy");
+                            } else {
+                                Log.warn("Unable to destroy container {}. Please look at {} for further information.", id, standardOutput.getAbsolutePath());
+                            }
                             return false;
                         }
                     } catch (Exception e) {
-                        Log.error("Unable to destroy the container {}", e, id);
+                        if (standardOutput.renameTo(new File(standardOutput.getAbsolutePath() + ".destroy"))) {
+                            Log.warn("Unable to destroy container {}. Please look at {} for further information.", id, standardOutput.getAbsolutePath() + ".destroy");
+                        } else {
+                            Log.warn("Unable to destroy container {}. Please look at {} for further information.", id, standardOutput.getAbsolutePath());
+                        }
                         return false;
                     }
                 } else {
@@ -276,11 +291,19 @@ public class LxcManager {
                     return true;
                 }
             } else {
-                Log.warn("Unable to stop container {}. Please look at {} for further information.", id, standardOutput.getAbsolutePath());
+                if (standardOutput.renameTo(new File(standardOutput.getAbsolutePath() + ".stop"))) {
+                Log.warn("Unable to stop container {}. Please look at {} for further information.", id, standardOutput.getAbsolutePath() + ".stop");
+                } else {
+                    Log.warn("Unable to stop container {}. Please look at {} for further information.", id, standardOutput.getAbsolutePath());
+                }
                 return false;
             }
         } catch (Exception e) {
-            Log.error("Unable to stop the container {}", e, id);
+            if (standardOutput.renameTo(new File(standardOutput.getAbsolutePath() + ".stop"))) {
+                Log.warn("Unable to stopNDestroy container {}. Please look at {} for further information.", id, standardOutput.getAbsolutePath() + ".stop");
+            } else {
+                Log.warn("Unable to stop container {}. Please look at {} for further information.", id, standardOutput.getAbsolutePath());
+            }
             return false;
         }
     }

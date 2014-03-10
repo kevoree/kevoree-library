@@ -26,29 +26,11 @@ apt-get clean
 echo "Configure kevoree watchdog"
 cat > "/etc/kevoree/config" << EOF
 KEVOREE_VERSION=RELEASE
-NODE_NAME=$(hostname)
+NODE_NAME=\$(hostname)
 PING_PORT=9999
 PING_TIMEOUT=3000
+BOOTMODEL=/etc/kevoree/boot.kevs
 EOF
-
-echo "Configure kevoree bootstrap model"
-touch /etc/kevoree/boot.kevs
-cat > "/etc/kevoree/boot.kevs" << EOF
-repo "https://repo1.maven.org/maven2"
-repo "https://oss.sonatype.org/content/groups/public/"
-
-include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
-include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:latest
-
-add $(hostname) : JavaNode
-
-add sync : WSGroup
-set sync.port/$(hostname) = "9000"
-attach $(hostname) sync
-
-EOF
-
-update-rc.d kevoree defaults
 
 # Not working as expected
 #echo "Configure File descriptor limitation"
