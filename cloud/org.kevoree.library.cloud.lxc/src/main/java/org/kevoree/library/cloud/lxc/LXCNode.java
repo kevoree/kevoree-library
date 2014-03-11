@@ -22,48 +22,38 @@ public class LXCNode extends PlatformJavaNode {
     @KevoreeInject
     protected Context context;
 
-    @Param(defaultValue = "180000")
-    long CREATE_CLONE_TIMEOUT;
-    @Param(defaultValue = "10000")
-    long SUPERVISION_TIMEOUT;
-
-    public long getCREATE_CLONE_TIMEOUT() {
-        return CREATE_CLONE_TIMEOUT;
-    }
-
-    public long getSUPERVISION_TIMEOUT() {
-        return SUPERVISION_TIMEOUT;
-    }
-
     private LxcManager lxcManager;
     private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
     private CleanerContainerBackups cleaner;
-    private CreateBaseContainer createBaseContainer;
     private LxcSupervision supervision;
 
     @Param(optional = true, defaultValue = "ubuntu")
     private String initialTemplate;
 
     @Start
-    public void startNode() {
+    public void startLXCNode() throws Exception {
         // TODO check if the node is run on top of a linux OS and maybe also check if LXC is well configured (?)
 
         lxcManager = new LxcManager(initialTemplate, new LxcRessourceConstraintManager());
         super.startNode();
         cleaner = new CleanerContainerBackups(this, lxcManager);    // in charge of remove the backup models
-        createBaseContainer = new CreateBaseContainer(this, lxcManager);     // in charge of create the base container
-        supervision = new LxcSupervision(this, lxcManager); // in charge of checking that the model is applied
-
+        supervision = new LxcSupervision(this, lxcManager);         // in charge of checking that the model is applied
+        try {
+            lxcManager.install();
+            lxcManager.createClone();
+        } catch (Exception e) {
+            throw new Exception("Unable to configure current system to manage LXC containers", e);
+        }
         // schedule the tasks
-        executor.schedule(createBaseContainer, 10, TimeUnit.SECONDS);
         executor.scheduleAtFixedRate(cleaner, 1, 1, TimeUnit.DAYS);
-        executor.scheduleAtFixedRate(supervision, 20, 30, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(supervision, 10, 10, TimeUnit.SECONDS);
     }
 
     @Stop
-    public void stopNode() {
+    public void stopLXCNode() {
         executor.shutdown();
+        super.stopNode();
     }
 
     @Override

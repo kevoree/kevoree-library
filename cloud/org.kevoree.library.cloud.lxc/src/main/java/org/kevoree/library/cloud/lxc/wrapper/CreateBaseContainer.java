@@ -1,3 +1,4 @@
+/*
 package org.kevoree.library.cloud.lxc.wrapper;
 
 import org.kevoree.api.handler.LockCallBack;
@@ -6,13 +7,15 @@ import org.kevoree.log.Log;
 
 import java.util.UUID;
 
+*/
 /**
  * Created with IntelliJ IDEA.
  * User: jed
  * Date: 08/07/13
  * Time: 16:00
  * To change this template use File | Settings | File Templates.
- */
+ *//*
+
 public class CreateBaseContainer implements Runnable {
 
     private LXCNode lxcHostNode;
@@ -49,3 +52,4 @@ public class CreateBaseContainer implements Runnable {
 
     }
 }
+*/

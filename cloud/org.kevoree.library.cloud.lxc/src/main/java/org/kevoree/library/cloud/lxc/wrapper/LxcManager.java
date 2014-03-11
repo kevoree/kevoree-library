@@ -1,10 +1,8 @@
 package org.kevoree.library.cloud.lxc.wrapper;
 
 import org.kevoree.ContainerNode;
-import org.kevoree.ContainerRoot;
 import org.kevoree.DictionaryValue;
 import org.kevoree.impl.DefaultKevoreeFactory;
-import org.kevoree.kevscript.KevScriptEngine;
 import org.kevoree.library.cloud.api.helper.ProcessStreamFileLogger;
 import org.kevoree.library.cloud.api.helper.ResourceConstraintManager;
 import org.kevoree.library.cloud.lxc.wrapper.utils.FileManager;
@@ -177,15 +175,10 @@ public class LxcManager {
      * Generate the model of the system
      *
      * @param nodeName
-     * @param root
      * @return
      */
-    public boolean createModelFromSystem(String nodeName, ContainerRoot root) {
-
-        KevScriptEngine engine = new KevScriptEngine();
+    public String createModelFromSystem(String nodeName) {
         StringBuilder script = new StringBuilder();
-
-        boolean updateIsNeeded = false;
         if (getContainers().size() > 0) {
             for (String node_child_id : getContainers()) {
                 if (!node_child_id.equals(clone_id)) {
@@ -195,20 +188,13 @@ public class LxcManager {
                     } else {
                         script.append("set ").append(nodeName).append(".started = 'false'\n");
                     }
-                    updateIsNeeded = true;
                 }
             }
         }
-        if (updateIsNeeded) {
-            try {
-                engine.execute(script.toString(), root);
-                return true;
-            } catch (Exception e) {
-                Log.debug("Unable to apply the kevScript:\n{}", e, script.toString());
-                return false;
-            }
+        if (script.length() > 0) {
+            return script.toString();
         } else {
-            return false;
+            return null;
         }
     }
 
