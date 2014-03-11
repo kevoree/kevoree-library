@@ -104,7 +104,6 @@ public class LightLXCNode extends PlatformJavaNode {
     IpModelUpdater updater ;
 
     @Start
-    @Override
     public void startNode(){
         //System.err.println("pass par la");
 
@@ -119,7 +118,6 @@ public class LightLXCNode extends PlatformJavaNode {
     }
 
     @Stop
-    @Override
     public void stopNode(){
         bservice .stop();
         modelsService.unregisterModelListener(updater);

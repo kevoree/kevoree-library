@@ -1,8 +1,6 @@
 package org.kevoree.library.cloud.lxc;
 
-import org.kevoree.annotation.KevoreeInject;
-import org.kevoree.annotation.NodeType;
-import org.kevoree.annotation.Param;
+import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.library.cloud.api.PlatformJavaNode;
 import org.kevoree.library.cloud.lxc.wrapper.*;
@@ -47,7 +45,7 @@ public class LXCNode extends PlatformJavaNode {
     @Param(optional = true, defaultValue = "ubuntu")
     private String initialTemplate;
 
-    @Override
+    @Start
     public void startNode() {
         // TODO check if the node is run on top of a linux OS and maybe also check if LXC is well configured (?)
 
@@ -63,7 +61,7 @@ public class LXCNode extends PlatformJavaNode {
         executor.scheduleAtFixedRate(supervision, 20, 30, TimeUnit.SECONDS);
     }
 
-    @Override
+    @Stop
     public void stopNode() {
         executor.shutdown();
     }

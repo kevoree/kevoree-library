@@ -67,7 +67,6 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     WrapperFactory wrapperFactory = null;
 
     @Start
-    @Override
     public void startNode() {
         Log.info("Starting node type of {}", modelService.getNodeName());
         preTime = System.currentTimeMillis();
@@ -82,7 +81,6 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     }
 
     @Stop
-    @Override
     public void stopNode() {
         Log.info("Stopping node type of {}", modelService.getNodeName());
         modelService.unregisterModelListener(this);
