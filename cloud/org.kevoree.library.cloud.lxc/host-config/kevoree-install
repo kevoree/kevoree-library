@@ -79,8 +79,6 @@ include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:$kevoreeLibr
 
 add $(hostname) : LXCNode
 
-set $(hostname).CREATE_CLONE_TIMEOUT = "300000"
-
 add sync : WSGroup
 set sync.port/$(hostname) = "9000"
 attach $(hostname) sync
