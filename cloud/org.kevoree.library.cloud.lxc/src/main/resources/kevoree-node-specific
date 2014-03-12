@@ -3,16 +3,6 @@ cp /tmp/hosts /etc/hosts
 rm -rf /tmp/hosts
 cat /etc/kevoree/config | sed 's/${clone_id}/${nodeName}/g' > /tmp/config
 
-cat > "/etc/kevoree/config" << EOF
-KEVOREE_USER=kevoree
-KEVOREE_GROUP=kevoree
-KEVOREE_VERSION=${kevoree.version}
-NODE_NAME=${nodeName}
-PING_PORT=9999
-PING_TIMEOUT=3000
-BOOTMODEL=/etc/kevoree/boot.kevs
-EOF
-
 echo "Configure kevoree bootstrap model"
 touch /etc/kevoree/boot.kevs
 cat > "/etc/kevoree/boot.kevs" << EOF
