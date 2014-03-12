@@ -171,33 +171,6 @@ public class LxcManager {
         return containers;
     }
 
-    /**
-     * Generate the model of the system
-     *
-     * @param nodeName
-     * @return
-     */
-    public String createModelFromSystem(String nodeName) {
-        StringBuilder script = new StringBuilder();
-        if (getContainers().size() > 0) {
-            for (String node_child_id : getContainers()) {
-                if (!node_child_id.equals(clone_id)) {
-                    script.append("add ").append(nodeName).append(".").append(node_child_id).append(" : LXCNode\n");
-                    if (isRunning(nodeName)) {
-                        script.append("set ").append(nodeName).append(".started = 'true'\n");
-                    } else {
-                        script.append("set ").append(nodeName).append(".started = 'false'\n");
-                    }
-                }
-            }
-        }
-        if (script.length() > 0) {
-            return script.toString();
-        } else {
-            return null;
-        }
-    }
-
     public synchronized static String getIP(String id) {
         String line;
         try {
@@ -213,7 +186,7 @@ public class LxcManager {
 
     }
 
-    public synchronized static boolean isRunning(String id) {
+    public synchronized boolean isRunning(String id) {
         String line;
         try {
             Process processcreate = new ProcessBuilder("lxc-info", "-n", id).redirectErrorStream(true).start();

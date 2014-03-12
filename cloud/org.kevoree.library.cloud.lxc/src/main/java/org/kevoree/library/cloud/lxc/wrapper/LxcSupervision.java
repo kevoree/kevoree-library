@@ -4,15 +4,11 @@ import org.kevoree.ContainerNode;
 import org.kevoree.ContainerRoot;
 import org.kevoree.NetworkInfo;
 import org.kevoree.NetworkProperty;
-import org.kevoree.api.handler.UpdateCallback;
-import org.kevoree.cloner.DefaultModelCloner;
 import org.kevoree.library.cloud.lxc.LXCNode;
 import org.kevoree.library.cloud.lxc.wrapper.utils.IPAddressValidator;
 import org.kevoree.log.Log;
-import org.kevoree.modeling.api.ModelCloner;
 
 import java.util.List;
-import java.util.UUID;
 
 
 /**
@@ -26,10 +22,6 @@ public class LxcSupervision implements Runnable {
     private LXCNode lxcHostNode;
     private LxcManager lxcManager;
     private IPAddressValidator ipvalidator = new IPAddressValidator();
-    //    private boolean starting = true;
-    ModelCloner cloner = new DefaultModelCloner();
-
-    private EmptyCallback callback = new EmptyCallback();
 
     public LxcSupervision(LXCNode lxcHostNode, LxcManager lxcManager) {
         this.lxcHostNode = lxcHostNode;
@@ -40,32 +32,43 @@ public class LxcSupervision implements Runnable {
     public void run() {
         ContainerRoot model;
         model = lxcHostNode.modelService.getCurrentModel().getModel();
-        ContainerNode nodeElement = model.findNodesByID(lxcHostNode.getNodeName());
 
         List<String> lxcNodes = lxcManager.getContainers();
-        boolean updateIsNeeded = false;
-        if (lxcNodes.size() - 1 > nodeElement.getHosts().size()) { // -1 correspond to the basekevoreecontainer which is use to clone
-            updateIsNeeded = true;
+        for (String nodeName : lxcNodes) {
+            if (model.findNodesByID(nodeName) != null) {
+
+                break;
+            }
         }
-        if (!updateIsNeeded) {
-            for (String nodeName : lxcNodes) {
-                if (model.findNodesByID(nodeName) != null) {
-                    updateIsNeeded = true;
-                    break;
+        String script = createModelFromSystem(model);
+        if (script != null) {
+            lxcHostNode.modelService.submitScript(script, null);
+        }
+        script = manageIPAddresses(model);
+        if (script != null) {
+            lxcHostNode.modelService.submitScript(script, null);
+        }
+    }
+
+    public String createModelFromSystem(ContainerRoot model) {
+        StringBuilder script = new StringBuilder();
+        if (lxcManager.getContainers().size() > 0) {
+            ContainerNode parentNode = model.findNodesByID(lxcHostNode.getNodeName());
+            for (String node_child_id : lxcManager.getContainers()) {
+                if (!node_child_id.equals(lxcManager.clone_id) && parentNode.findHostsByID(node_child_id) == null) {
+                    script.append("add ").append(parentNode.getName()).append(".").append(node_child_id).append(" : LXCNode\n");
+                    if (lxcManager.isRunning(node_child_id)) {
+                        script.append("set ").append(node_child_id).append(".started = 'true'\n");
+                    } else {
+                        script.append("set ").append(node_child_id).append(".started = 'false'\n");
+                    }
                 }
             }
         }
-        if (updateIsNeeded) {
-            String script = lxcManager.createModelFromSystem(lxcHostNode.getNodeName());
-            if (script != null) {
-                lxcHostNode.modelService.submitScript(script, null);
-            }
+        if (script.length() > 0) {
+            return script.toString();
         } else {
-            Log.trace("Update the model according to existing containers is not needed because there seems not to have unknown container");
-        }
-        String script = manageIPAddresses(model);
-        if (script != null) {
-            lxcHostNode.modelService.submitScript(script, null);
+            return null;
         }
     }
 
@@ -73,7 +76,7 @@ public class LxcSupervision implements Runnable {
         Log.debug("Trying to update ip addresses for already known containers");
         String script = "";
         for (ContainerNode containerNode : model.findNodesByID(lxcHostNode.getNodeName()).getHosts()) {
-            if (LxcManager.isRunning(containerNode.getName())) {
+            if (lxcManager.isRunning(containerNode.getName())) {
                 String ip = LxcManager.getIP(containerNode.getName());
                 if (ip != null) {
                     if (ipvalidator.validate(ip)) {
@@ -106,20 +109,5 @@ public class LxcSupervision implements Runnable {
             return script;
         }
         return null;
-    }
-
-    private class EmptyCallback implements UpdateCallback {
-
-        private UUID uuid;
-
-        private void initialize(UUID uuid) {
-            this.uuid = uuid;
-        }
-
-        @Override
-        public void run(Boolean aBoolean) {
-            Log.debug("Unlock model after managing supervision");
-            lxcHostNode.modelService.releaseLock(uuid);
-        }
     }
 }
