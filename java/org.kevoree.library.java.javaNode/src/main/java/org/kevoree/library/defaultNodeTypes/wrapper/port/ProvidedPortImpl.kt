@@ -20,6 +20,10 @@ import java.beans.MethodDescriptor
 
 class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, val componentWrapper: ComponentWrapper) : Port {
 
+    override fun getConnectedBindingsSize(): Int {
+        throw UnsupportedOperationException()
+    }
+
     override fun send(payload: Any?) {
         call(payload, null)
     }

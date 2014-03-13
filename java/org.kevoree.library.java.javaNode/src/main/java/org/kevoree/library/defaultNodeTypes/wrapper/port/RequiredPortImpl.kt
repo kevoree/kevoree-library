@@ -14,6 +14,10 @@ import java.util.ArrayList
  */
 
 class RequiredPortImpl(val portPath: String) : Port {
+
+    override fun getConnectedBindingsSize(): Int {
+        return delegate.size()
+    }
     override fun call(payload: Any?, callback: Callback<out Any?>?) {
         if (!delegate.empty) {
             for (wrapper in delegate) {
