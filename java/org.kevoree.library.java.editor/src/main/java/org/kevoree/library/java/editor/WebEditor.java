@@ -46,6 +46,8 @@ public class WebEditor {
 
     @Stop
     public void stop() throws Exception {
-        if (server != null) server.stop();
+        if (server != null){
+            server.stop();
+        }
     }
 }
