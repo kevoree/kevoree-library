@@ -29,12 +29,10 @@ public class JavaMergeService implements MergeService {
         JSONModelLoader loader = new JSONModelLoader();
         ContainerRoot model = factory.createContainerRoot();
         MavenResolver resolver = new MavenResolver();
-        Set<String> repositories = new HashSet<String>();
-        repositories.addAll(repos);
 
         for (Library lib : libraries) {
             for (String version : lib.getVersions()) {
-                File resolved = resolver.resolve(lib.getGroupId(), lib.getArtifactId(), version, "jar", repositories);
+                File resolved = resolver.resolve(lib.getGroupId(), lib.getArtifactId(), version, "jar", repos);
                 if (resolved != null && resolved.exists()) {
                     try {
                         JarFile jar = new JarFile(new File(resolved.getAbsolutePath()));

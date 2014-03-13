@@ -54,14 +54,19 @@
             <version>0.7.2</version>
         </dependency>
         <dependency>
-            <groupId>fr.braindead</groupId>
+            <groupId>org.kevoree.extra</groupId>
             <artifactId>npm-java</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree.extra</groupId>
+            <artifactId>npm-resolver</artifactId>
+            <version>1.2</version>
         </dependency>
         <dependency>
             <groupId>org.kevoree</groupId>
             <artifactId>org.kevoree.maven.resolver</artifactId>
-            <version>12</version>
+            <version>4</version>
         </dependency>
         <dependency>
             <groupId>org.kevoree.npm</groupId>

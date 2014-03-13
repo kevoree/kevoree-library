@@ -5,8 +5,6 @@ import fr.braindead.npmjava.command.NpmSearch;
 import fr.braindead.npmjava.command.NpmView;
 import org.kevoree.library.java.editor.model.Library;
 import org.kevoree.library.java.editor.service.ServiceCallback;
-import org.kevoree.library.java.editor.service.load.LoadService;
-import org.kevoree.library.java.editor.service.load.LoadService;
 
 import java.io.IOException;
 import java.util.HashMap;
