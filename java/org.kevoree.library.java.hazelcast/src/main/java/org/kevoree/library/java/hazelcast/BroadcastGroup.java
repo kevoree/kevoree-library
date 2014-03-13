@@ -36,18 +36,23 @@ public class BroadcastGroup implements MessageListener, ModelListener {
 
     @Start
     public void start() {
+        Log.info("Starting {}", context.getInstanceName());
         Config config = new Config();
+        config.setProperty("hazelcast.logging.type", "none");
         config.setClassLoader(DistributedBroadcast.class.getClassLoader());
         localHazelCast = Hazelcast.newHazelcastInstance(config);
         topic = localHazelCast.getTopic(context.getInstanceName());
         topic.addMessageListener(this);
         modelService.registerModelListener(this);
+        Log.info("{} started", context.getInstanceName());
     }
 
     @Stop
     public void stop() {
+        Log.info("Stopping {}", context.getInstanceName());
         modelService.unregisterModelListener(this);
         localHazelCast.shutdown();
+        Log.info("{} stopped", context.getInstanceName());
     }
 
     private ModelCloner cloner = new DefaultModelCloner();
@@ -55,19 +60,25 @@ public class BroadcastGroup implements MessageListener, ModelListener {
     @Override
     public void onMessage(Message message) {
         if (!message.getPublishingMember().localMember()) {
+            Log.info("{} on {} receive a message", context.getInstanceName(), context.getNodeName());
             try {
                 TraceSequence newtraceSeq = new DefaultTraceSequence();
                 newtraceSeq.populateFromString(message.getMessageObject().toString());
                 ContainerRoot clonedModel = cloner.clone(modelService.getCurrentModel().getModel());
                 newtraceSeq.applyOn(clonedModel);
-                modelService.update(clonedModel, new UpdateCallback() {
+                modelService.unregisterModelListener(this);
+                modelService.submitSequence(newtraceSeq, new UpdateCallback() {
                     @Override
                     public void run(Boolean applied) {
-                        Log.info("Model update result : " + applied);
+                        if (applied) {
+                            Log.info("{} Model update: {}", context.getInstanceName(), applied);
+                        }
                     }
                 });
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                modelService.registerModelListener(this);
             }
         }
     }
@@ -87,6 +98,7 @@ public class BroadcastGroup implements MessageListener, ModelListener {
     public boolean afterLocalUpdate(ContainerRoot currentModel, ContainerRoot proposedModel) {
         TraceSequence seq = compare.merge(currentModel, proposedModel);
         if (!seq.getTraces().isEmpty()) {
+            Log.info("{} broadcast from {}", context.getInstanceName(), context.getNodeName());
             topic.publish(seq.exportToString());
         }
         return true;

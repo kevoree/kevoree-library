@@ -7,12 +7,10 @@ import org.kevoree.annotation.*;
 import org.kevoree.api.*;
 import org.kevoree.library.java.hazelcast.message.Request;
 import org.kevoree.library.java.hazelcast.message.Response;
-import org.kevoree.log.Log;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -36,6 +34,7 @@ public class DistributedBroadcast implements MessageListener, ChannelDispatch {
     @Start
     public void start() {
         Config config = new Config();
+        config.setProperty("hazelcast.logging.type", "none");
         config.setClassLoader(DistributedBroadcast.class.getClassLoader());
         localHazelCast = Hazelcast.newHazelcastInstance(config);
         topic = localHazelCast.getTopic(context.getInstanceName());
