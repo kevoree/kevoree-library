@@ -4,6 +4,7 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.kevoree.annotation.*;
+import org.kevoree.api.BootstrapService;
 import org.kevoree.api.ModelService;
 import org.kevoree.library.java.editor.handler.ClasspathResourceHandler;
 import org.kevoree.library.java.editor.handler.LoadHandler;
@@ -28,14 +29,18 @@ public class WebEditor {
     
     private Server server;
 
+    @KevoreeInject
+    BootstrapService bootstrapService;
+
     @Start
     public void start() throws Exception {
+
         Log.debug("WebEditor START");
         server = new Server(port);
 
         Handler resourceHandler = new ClasspathResourceHandler();
         Handler loadHandler = new LoadHandler();
-        Handler mergeHandler = new MergeHandler();
+        Handler mergeHandler = new MergeHandler(bootstrapService);
 
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[] { resourceHandler, loadHandler, mergeHandler });

@@ -6,6 +6,7 @@ import com.google.gson.JsonPrimitive;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.kevoree.ContainerRoot;
+import org.kevoree.api.BootstrapService;
 import org.kevoree.compare.DefaultModelCompare;
 import org.kevoree.impl.DefaultKevoreeFactory;
 import org.kevoree.library.java.editor.model.Library;
@@ -29,15 +30,24 @@ import java.util.*;
  */
 public class MergeHandler extends AbstractHandler {
 
+    private BootstrapService bootstrapService;
+
+    public MergeHandler(BootstrapService bootstrapService) {
+        this.bootstrapService = bootstrapService;
+    }
+
     @Override
     public void handle(String s, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
         if (s.equals("/merge")) {
             final String callback = request.getParameter("callback");
             String[] rawRepos = request.getParameterValues("repos");
-            List<String> repos;
-            if (rawRepos != null) repos = Arrays.asList(rawRepos);
-            else repos = new ArrayList<String>();
-
+            Set<String> repos;
+            if (rawRepos != null) {
+                repos = new HashSet<String>();
+                repos.addAll(Arrays.asList(rawRepos));
+            } else {
+                repos = new HashSet<String>();
+            }
             HTTPMergeRequestParser requestParser = new HTTPMergeRequestParser();
             final Map<String, Collection<Library>> libz = requestParser.parse(request.getParameterMap().entrySet());
 
@@ -45,12 +55,11 @@ public class MergeHandler extends AbstractHandler {
             ContainerRoot model = factory.createContainerRoot();
             DefaultModelCompare compare = new DefaultModelCompare();
 
-            JavaMergeService javaMerge = new JavaMergeService();
+            JavaMergeService javaMerge = new JavaMergeService(bootstrapService);
             NpmMergeService npmMerge = new NpmMergeService();
             for (Map.Entry<String, Collection<Library>> entry : libz.entrySet()) {
                 if (entry.getKey().equals("java")) {
                     compare.merge(model, javaMerge.process(entry.getValue(), repos)).applyOn(model);
-
                 } else if (entry.getKey().equals("javascript")) {
                     compare.merge(model, npmMerge.process(entry.getValue(), repos)).applyOn(model);
                 }

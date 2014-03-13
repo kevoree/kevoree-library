@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by leiko on 23/01/14.
@@ -22,7 +23,7 @@ import java.util.List;
 public class NpmMergeService implements MergeService {
 
     @Override
-    public ContainerRoot process(Collection<Library> libraries, List<String> repos) {
+    public ContainerRoot process(Collection<Library> libraries, Set<String> repos) {
         DefaultKevoreeFactory factory = new DefaultKevoreeFactory();
         ContainerRoot model = factory.createContainerRoot();
         DefaultModelCompare compare = new DefaultModelCompare();

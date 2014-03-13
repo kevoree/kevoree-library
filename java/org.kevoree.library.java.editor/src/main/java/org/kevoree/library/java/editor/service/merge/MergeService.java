@@ -6,15 +6,15 @@ import org.kevoree.library.java.editor.service.ServiceCallback;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
  * User: leiko
  * Date: 22/01/14
  * Time: 18:52
- * To change this template use File | Settings | File Templates.
  */
 public interface MergeService {
     
-    ContainerRoot process(Collection<Library> libraries, List<String> repos);
+    ContainerRoot process(Collection<Library> libraries, Set<String> repos);
 }
