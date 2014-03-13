@@ -5,6 +5,7 @@ import org.kevoree.library.java.editor.model.Library;
 import org.kevoree.library.java.editor.service.ServiceCallback;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,5 +16,5 @@ import java.util.Collection;
  */
 public interface MergeService {
     
-    ContainerRoot process(Collection<Library> libraries);
+    ContainerRoot process(Collection<Library> libraries, List<String> repos);
 }

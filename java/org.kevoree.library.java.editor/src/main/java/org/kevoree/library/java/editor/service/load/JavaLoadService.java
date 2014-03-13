@@ -26,10 +26,20 @@ import java.util.Collection;
  */
 public class JavaLoadService implements LoadService {
 
+    private String platform;
+
+    public JavaLoadService(String platform) {
+        if (platform != null && platform.length() > 0) {
+            this.platform = platform;
+        } else {
+            this.platform = "java";
+        }
+    }
+
     @Override
     public void process(ServiceCallback cb) {
         try {
-            URL url = new URL("http://oss.sonatype.org/service/local/data_index?g=org.kevoree.library.java");
+            URL url = new URL("http://oss.sonatype.org/service/local/data_index?g=org.kevoree.library."+this.platform);
             URLConnection conn = url.openConnection();
             InputStream is = conn.getInputStream();
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();

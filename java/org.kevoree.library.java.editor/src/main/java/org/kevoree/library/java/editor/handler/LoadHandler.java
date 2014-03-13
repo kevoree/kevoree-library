@@ -49,8 +49,8 @@ public class LoadHandler extends AbstractHandler {
                 }
             };
 
-            if (platform.equals("java")) {
-                JavaLoadService javaLoadService = new JavaLoadService();
+            if (platform.equals("java") || platform.equals("cloud")) {
+                JavaLoadService javaLoadService = new JavaLoadService(platform);
                 javaLoadService.process(serviceCallback);
                 
             } else if (platform.equals("javascript")) {

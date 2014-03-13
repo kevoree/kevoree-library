@@ -19,8 +19,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,6 +33,11 @@ public class MergeHandler extends AbstractHandler {
     public void handle(String s, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
         if (s.equals("/merge")) {
             final String callback = request.getParameter("callback");
+            String[] rawRepos = request.getParameterValues("repos");
+            List<String> repos;
+            if (rawRepos != null) repos = Arrays.asList(rawRepos);
+            else repos = new ArrayList<String>();
+
             HTTPMergeRequestParser requestParser = new HTTPMergeRequestParser();
             final Map<String, Collection<Library>> libz = requestParser.parse(request.getParameterMap().entrySet());
 
@@ -45,10 +49,10 @@ public class MergeHandler extends AbstractHandler {
             NpmMergeService npmMerge = new NpmMergeService();
             for (Map.Entry<String, Collection<Library>> entry : libz.entrySet()) {
                 if (entry.getKey().equals("java")) {
-                    compare.merge(model, javaMerge.process(entry.getValue())).applyOn(model);
+                    compare.merge(model, javaMerge.process(entry.getValue(), repos)).applyOn(model);
 
                 } else if (entry.getKey().equals("javascript")) {
-                    compare.merge(model, npmMerge.process(entry.getValue())).applyOn(model);
+                    compare.merge(model, npmMerge.process(entry.getValue(), repos)).applyOn(model);
                 }
             }
 

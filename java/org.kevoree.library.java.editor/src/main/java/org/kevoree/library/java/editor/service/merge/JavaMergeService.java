@@ -23,18 +23,18 @@ import java.util.jar.JarFile;
 public class JavaMergeService implements MergeService {
 
     @Override
-    public ContainerRoot process(Collection<Library> libraries) {
+    public ContainerRoot process(Collection<Library> libraries, List<String> repos) {
         DefaultKevoreeFactory factory = new DefaultKevoreeFactory();
         DefaultModelCompare compare = new DefaultModelCompare();
         JSONModelLoader loader = new JSONModelLoader();
         ContainerRoot model = factory.createContainerRoot();
         MavenResolver resolver = new MavenResolver();
-        Set<String> repos = new HashSet<String>();
-        repos.add("http://oss.sonatype.org/content/groups/public");
+        Set<String> repositories = new HashSet<String>();
+        repositories.addAll(repos);
 
         for (Library lib : libraries) {
             for (String version : lib.getVersions()) {
-                File resolved = resolver.resolve(lib.getGroupId(), lib.getArtifactId(), version, "jar", repos);
+                File resolved = resolver.resolve(lib.getGroupId(), lib.getArtifactId(), version, "jar", repositories);
                 if (resolved != null && resolved.exists()) {
                     try {
                         JarFile jar = new JarFile(new File(resolved.getAbsolutePath()));

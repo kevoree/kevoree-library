@@ -3,16 +3,17 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.java.editor</artifactId>
     <name>Kevoree :: Library :: Java :: Editor</name>
-    <version>3.1.5-SNAPSHOT</version>
+    <version>3.5.1-SNAPSHOT</version>
     
     <properties>
         <jetty-version>9.1.0.v20131115</jetty-version>
+        <kwe-version>0.1.0-SNAPSHOT</kwe-version>
     </properties>
 
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
         <groupId>org.kevoree.library.java</groupId>
-        <version>3.1.6-SNAPSHOT</version>
+        <version>3.5.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -92,7 +93,7 @@
                                 <artifactItem>
                                     <groupId>org.kevoree</groupId>
                                     <artifactId>org.kevoree.webeditor</artifactId>
-                                    <version>0.0.11-SNAPSHOT</version>
+                                    <version>${kwe-version}</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.outputDirectory}/webapp</outputDirectory>

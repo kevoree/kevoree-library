@@ -25,7 +25,7 @@ public class ClasspathResourceHandler extends AbstractHandler {
     public void handle(String s, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
         String requestURI = s;
         if(requestURI.equals("/")||requestURI.equals("")||requestURI.equals("/index.html")){
-           requestURI = "/editor.html";
+           requestURI = "/index.html";
         }
         InputStream res = this.getClass().getResourceAsStream("/webapp"+requestURI);
         if (res != null) {
