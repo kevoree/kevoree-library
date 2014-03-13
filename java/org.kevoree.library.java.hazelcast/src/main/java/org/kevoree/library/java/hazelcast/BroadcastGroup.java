@@ -66,7 +66,6 @@ public class BroadcastGroup implements MessageListener, ModelListener {
                 newtraceSeq.populateFromString(message.getMessageObject().toString());
                 ContainerRoot clonedModel = cloner.clone(modelService.getCurrentModel().getModel());
                 newtraceSeq.applyOn(clonedModel);
-                modelService.unregisterModelListener(this);
                 modelService.submitSequence(newtraceSeq, new UpdateCallback() {
                     @Override
                     public void run(Boolean applied) {
@@ -77,8 +76,6 @@ public class BroadcastGroup implements MessageListener, ModelListener {
                 });
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                modelService.registerModelListener(this);
             }
         }
     }
