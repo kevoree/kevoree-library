@@ -50,7 +50,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
             for (n in targetNode!!.hosts) {
                 val previousNode = currentModel.findByPath(n.path()!!)
                 if (previousNode != null) {
-                    traces!!.populate(previousNode.createTraces(n,false,false,false,true))
+                    traces!!.populate(previousNode.createTraces(n, false, false, false, true))
                     //traces!!.append(modelCompare.diff(previousNode, n))
                 } else {
                     traces!!.populate(n.toTraces(true, true))
@@ -217,20 +217,28 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                         }
                     }
                     "value" -> {
+
                         if (modelElement is org.kevoree.DictionaryValue) {
+
                             val parentInstance = modelElement.eContainer()?.eContainer() as? Instance
                             if (parentInstance != null && parentInstance is ContainerNode && parentInstance.name == nodeName && currentNode == null) {
                                 //noop
                             } else {
-                                if (!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))) {
-                                    var values = array<Any?>(modelElement.eContainer()?.eContainer(), modelElement)
-                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateDictionaryInstance, values, targetModel))
-                                    elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))
-                                }
-                                if (parentInstance != null) {
-                                    if (!elementAlreadyProcessed.contains(TupleObjPrim(parentInstance, JavaPrimitive.UpdateCallMethod))) {
-                                        adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateCallMethod, parentInstance, targetModel))
-                                        elementAlreadyProcessed.add(TupleObjPrim(parentInstance, JavaPrimitive.UpdateCallMethod))
+
+                                val dictionaryParent = modelElement.eContainer()
+                                if (dictionaryParent != null && dictionaryParent is FragmentDictionary && dictionaryParent.name != nodeName) {
+
+                                } else {
+                                    if (!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))) {
+                                        var values = array<Any?>(modelElement.eContainer()?.eContainer(), modelElement)
+                                        adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateDictionaryInstance, values, targetModel))
+                                        elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))
+                                    }
+                                    if (parentInstance != null) {
+                                        if (!elementAlreadyProcessed.contains(TupleObjPrim(parentInstance, JavaPrimitive.UpdateCallMethod))) {
+                                            adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateCallMethod, parentInstance, targetModel))
+                                            elementAlreadyProcessed.add(TupleObjPrim(parentInstance, JavaPrimitive.UpdateCallMethod))
+                                        }
                                     }
                                 }
                             }

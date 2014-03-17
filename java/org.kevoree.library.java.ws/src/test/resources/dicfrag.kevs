@@ -1,0 +1,12 @@
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
+
+add node0 : JavaNode
+add sync : WSGroup
+set sync.port/node0 = "9000"
+attach node0 sync
+
+
+add node0.node1 : JavaNode
+set sync.port/node1 = "9001"
+attach node1 sync
