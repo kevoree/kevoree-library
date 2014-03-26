@@ -60,7 +60,6 @@ public class WSGroup extends WebSocketServer {
         startWSGroup();
     }
 
-
     @Override
     public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake) {
     }

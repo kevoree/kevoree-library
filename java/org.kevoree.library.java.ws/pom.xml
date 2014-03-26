@@ -31,4 +31,27 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.kevoree.tools</groupId>
+                <artifactId>org.kevoree.tools.mavenplugin</artifactId>
+                <version>${kevoree.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>run</id>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <nodename>node0</nodename>
+                    <model>${project.basedir}/src/main/kevs/centralized.kevs</model>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
