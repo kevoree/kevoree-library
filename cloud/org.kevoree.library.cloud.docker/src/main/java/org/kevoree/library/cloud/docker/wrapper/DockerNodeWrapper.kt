@@ -49,7 +49,7 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
         containerConfig.setImage("busybox");
         containerConfig.setCmd(array("touch", "/test"));
         containerConfig.setHostName(modelElement.name);
-        containerID = dockerClient.createContainer(containerConfig)?.id
+        containerID = dockerClient.createContainer(containerConfig)?.getId()
     }
 
     override fun destroy() {

@@ -32,9 +32,6 @@
             <version>${kotlin.version}</version>
         </dependency>
     </dependencies>
-    <properties>
-        <kotlin.version>0.6.1673</kotlin.version>
-    </properties>
 
     <build>
         <plugins>

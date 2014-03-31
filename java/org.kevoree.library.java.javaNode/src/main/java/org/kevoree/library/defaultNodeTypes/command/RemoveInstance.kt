@@ -49,7 +49,7 @@ class RemoveInstance(val wrapperFactory: WrapperFactory, val c: Instance, val no
         }
     }
 
-    fun toString(): String {
+    override fun toString(): String {
         return "RemoveInstance ${c.name}"
     }
 

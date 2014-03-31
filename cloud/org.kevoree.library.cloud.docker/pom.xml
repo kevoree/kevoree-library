@@ -10,10 +10,6 @@
     <artifactId>org.kevoree.library.cloud.docker</artifactId>
     <name>Kevoree :: Library :: Cloud :: Docker</name>
 
-    <properties>
-        <kotlin.version>0.7.271</kotlin.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.kpelykh</groupId>

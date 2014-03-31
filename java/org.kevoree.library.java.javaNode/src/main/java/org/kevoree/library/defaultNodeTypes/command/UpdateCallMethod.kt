@@ -68,7 +68,7 @@ class UpdateCallMethod(val c: Instance, val nodeName: String, val registry: Mode
         Log.error("hum, hum this is ambarrasing .....")
     }
 
-    fun toString(): String {
+    override fun toString(): String {
         return "UpdateDictionary ${c.name}"
     }
 

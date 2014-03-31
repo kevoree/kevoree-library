@@ -97,7 +97,7 @@ class UpdateDictionary(val c: Instance, val dicValue: DictionaryValue, val nodeN
         }
     }
 
-    fun toString(): String {
+    override fun toString(): String {
         return "UpdateDictionary ${c.name}"
     }
 

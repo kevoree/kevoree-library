@@ -55,18 +55,23 @@ $(function () {
 
     /* WS connection set */
     function refreshModel(text) {
-        model = loader.loadModelFromString(text).get(0);
+        model = loader.loadModelFromString(text).array[0];
+
         var nodeListElement = $('#nodeList');
         nodeListElement.empty(); //clear nodeList
         var nodes = model.findNodesByID(nodeName).hosts;
-        for (var i = 0; i < nodes.$size; i++) {
-            var childName = nodes.get(i).name;
-            var childPath = nodes.get(i).path();
+
+        for (var i = 0; i < nodes.array.length; i++) {
+
+
+
+            var childName = nodes.array[i].name;
+            var childPath = nodes.array[i].path();
 
             var newStartNStopBt = $('<a></a>');
             newStartNStopBt.addClass("btn");
             newStartNStopBt.get(0).id = 'startnstop' + childName;
-            if (nodes.get(i).started) {
+            if (nodes.array[i].started) {
                 newStartNStopBt.addClass("btn-warning");
                 newStartNStopBt.append("Stop child");
             } else {
@@ -108,8 +113,8 @@ $(function () {
 
         cleanOption();
         var typeDefinitions = model.typeDefinitions;
-        for (var i = 0; i < typeDefinitions.$size; i++) {
-            var typeDefinition = typeDefinitions.get(i);
+        for (var i = 0; i < typeDefinitions.array.length; i++) {
+            var typeDefinition = typeDefinitions.array[i];
             if (typeDefinition.metaClassName() == "org.kevoree.NodeType" && !typeDefinition.abstract) {
                 addNodeTypeOption(typeDefinition.path());
             }
@@ -121,10 +126,10 @@ $(function () {
         var ips = "";
         var node = model.findByPath(nodePath);
         if (node.started) {
-            for (var i = 0; i < node.networkInformation.$size; i++) {
-                var networkInfo = node.networkInformation.get(i);
-                for (var j = 0; j < networkInfo.values.$size; j++) {
-                    var networkProperty = networkInfo.values.get(j);
+            for (var i = 0; i < node.networkInformation.array.length; i++) {
+                var networkInfo = node.networkInformation.array[i];
+                for (var j = 0; j < networkInfo.values.array.length; j++) {
+                    var networkProperty = networkInfo.values.array[j];
                     if (ips === "") {
                         ips = networkProperty.value;
                     } else {
@@ -235,13 +240,12 @@ $(function () {
     function buildForm(value) {
         var form = jQuery("#form-addChild");
         var typeDefinition = model.findByPath(value);
-
         if (typeDefinition != null && typeDefinition != undefined) {
             if (!typeDefinition.abstract) {
                 insertAttributeOnForm("name", true, form);
                 if (typeDefinition.dictionaryType != undefined && typeDefinition.dictionaryType != null) {
                     for (var i = 0, ii = typeDefinition.dictionaryType.attributes.size(); i < ii; i++) {
-                        var attribute = typeDefinition.dictionaryType.attributes.get(i);
+                        var attribute = typeDefinition.dictionaryType.attributes.array[i];
                         insertAttributeOnForm(attribute.name, !attribute.optional, form);
                     }
                 }
@@ -426,7 +430,7 @@ $(function () {
                     // looking for the dictionaryAttribute into the dictionaryType that correspond to this current attribute
                     var dictionaryAttribute;
                     for (var i = 0; i < dictionaryTypeAttributes.size(); i++) {
-                        dictionaryAttribute = dictionaryTypeAttributes.get(i);
+                        dictionaryAttribute = dictionaryTypeAttributes.array[i];
                         if (dictionaryAttribute.name === id) {
                             break;
                         }

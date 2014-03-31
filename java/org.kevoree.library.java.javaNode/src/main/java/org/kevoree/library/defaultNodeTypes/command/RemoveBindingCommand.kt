@@ -59,7 +59,7 @@ class RemoveBindingCommand(val c: MBinding, val nodeName: String, val registry: 
         }
     }
 
-    fun toString(): String {
+    override fun toString(): String {
         return "RemoveBindingCommand " + c.hub?.name + "<->" + (c.port?.eContainer() as? ComponentInstance)?.name
     }
 

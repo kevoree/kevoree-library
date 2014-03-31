@@ -86,7 +86,7 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
     }
 
 
-    public override fun toString(): String? {
+    public override fun toString(): String {
         return "AddInstance " + c.name
     }
 }

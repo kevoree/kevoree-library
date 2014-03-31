@@ -42,7 +42,7 @@ class AddBindingCommand(val c: MBinding, val nodeName: String, val registry: Mod
         }
     }
 
-    fun toString(): String {
+    override fun toString(): String {
         return "AddBindingCommand ${c.hub?.name} <-> ${(c.port?.eContainer() as? ComponentInstance)?.name}"
     }
 }

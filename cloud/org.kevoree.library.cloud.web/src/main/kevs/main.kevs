@@ -3,7 +3,6 @@ repo "http://oss.sonatype.org/content/repositories/releases/"
 
 include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
 include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.web:latest
-include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.lxc:latest
 
 add node0 : JavaNode
 add node0.web : WebFrontend

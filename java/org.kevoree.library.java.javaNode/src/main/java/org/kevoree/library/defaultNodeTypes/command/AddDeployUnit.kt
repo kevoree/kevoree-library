@@ -53,7 +53,7 @@ class AddDeployUnit(val du: DeployUnit, val bs: org.kevoree.api.BootstrapService
         }
     }
 
-    fun toString(): String {
+    override fun toString(): String {
         return "AddDeployUnit " + du.groupName + "/" + du.name + "/" + du.version + "/" + du.hashcode
     }
 
