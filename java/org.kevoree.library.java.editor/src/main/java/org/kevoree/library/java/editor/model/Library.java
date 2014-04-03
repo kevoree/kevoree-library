@@ -44,7 +44,10 @@ public class Library {
     }
 
     public void addVersion(String version) {
-        this.versions.add(version);
+        if (!this.versions.contains(version)) {
+            // do not duplicate versions
+            this.versions.add(version);
+        }
     }
 
     public List<String> getVersions() {
@@ -75,9 +78,13 @@ public class Library {
     private String getLatest() {
         String latest = this.versions.get(0);
         for (int i=1; i < this.versions.size(); i++) {
-            Version v1 = Version.valueOf(latest);
-            Version v2 = Version.valueOf(this.versions.get(i));
-            if (v2.greaterThan(v1)) latest = this.versions.get(i);
+            if (!this.versions.get(i).contains("SNAPSHOT")) {
+                Version v1 = Version.valueOf(latest);
+                Version v2 = Version.valueOf(this.versions.get(i));
+                if (v2.greaterThan(v1)) {
+                    latest = this.versions.get(i);
+                }
+            }
         }
         
         return latest;

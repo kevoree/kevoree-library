@@ -39,7 +39,7 @@ public class JavaLoadService implements LoadService {
     @Override
     public void process(ServiceCallback cb) {
         try {
-            URL url = new URL("http://oss.sonatype.org/service/local/data_index?g=org.kevoree.library."+this.platform);
+            URL url = new URL("https://oss.sonatype.org/service/local/data_index?g=org.kevoree.library."+this.platform);
             URLConnection conn = url.openConnection();
             InputStream is = conn.getInputStream();
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
