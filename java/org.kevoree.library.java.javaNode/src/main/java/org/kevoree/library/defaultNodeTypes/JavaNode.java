@@ -12,7 +12,6 @@ import org.kevoree.library.defaultNodeTypes.planning.JavaPrimitive;
 import org.kevoree.library.defaultNodeTypes.planning.KevoreeKompareBean;
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
 import org.kevoree.log.Log;
-import org.kevoree.modeling.api.KMFContainer;
 import org.kevoreeadaptation.AdaptationModel;
 import org.kevoreeadaptation.AdaptationPrimitive;
 
@@ -64,7 +63,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Param(optional = true)
     public String jvmArgs;
 
-    WrapperFactory wrapperFactory = null;
+    protected WrapperFactory wrapperFactory = null;
 
     @Start
     public void startNode() {
