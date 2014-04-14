@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public class NpmLoadService implements LoadService {
     
-    private static final String KEVOREE_PATTERN = "(^kevoree-chan-|^kevoree-node-|^kevoree-group-|^kevoree-comp-).*";
+    private static final String KEVOREE_PATTERN = "^(kevoree-chan-|kevoree-node-|kevoree-group-|kevoree-comp-)[\\w-]+";
     
     @Override
     public void process(final ServiceCallback cb) {
@@ -28,29 +28,41 @@ public class NpmLoadService implements LoadService {
             public void onSuccess(JsonArray searchRes) {
                 Map<String, Library> libMap = new HashMap<String, Library>();
                 NpmView npmView = new NpmView();
-                
+
                 for (int i=0; i < searchRes.size(); i++) {
                     JsonObject jsonLib = (JsonObject) searchRes.get(i);
-                    String artId = jsonLib.get("name").getAsString();
-                    try {
-                        JsonObject libView = npmView.execute(artId);
-                        Library lib = libMap.get(artId);
-                        if (lib == null) {
-                            lib = new Library();
-                            lib.setGroupId("");
-                            lib.setArtifactId(artId);
-                            String[] splittedArtId = artId.split("-", 3);
-                            lib.setSimpleName(splittedArtId[splittedArtId.length-1]);
-                            lib.setType(splittedArtId[1]);
-                            libMap.put(artId, lib);
-                            JsonArray versions = libView.getAsJsonArray("versions");
-                            for (JsonElement vers : versions) {
-                                lib.addVersion(vers.getAsString());
+                    if (jsonLib.get("versions") != null) {
+                        JsonArray keywords = jsonLib.getAsJsonArray("keywords");
+                        boolean isStdLib = false;
+                        for (int j=0; j < keywords.size(); j++) {
+                            if (keywords.get(j).getAsString().equals("kevoree-std-lib")) {
+                                isStdLib = true;
+                                break;
                             }
                         }
-                        
-                    } catch (Exception e) {
-                        cb.onError(e);
+                        if (isStdLib) {
+                            String artId = jsonLib.get("name").getAsString();
+                            try {
+                                JsonObject libView = npmView.execute(artId);
+                                Library lib = libMap.get(artId);
+                                if (lib == null) {
+                                    lib = new Library();
+                                    lib.setGroupId("");
+                                    lib.setArtifactId(artId);
+                                    String[] splittedArtId = artId.split("-", 3);
+                                    lib.setSimpleName(splittedArtId[splittedArtId.length-1]);
+                                    lib.setType(splittedArtId[1]);
+                                    libMap.put(artId, lib);
+                                    JsonArray versions = libView.getAsJsonArray("versions");
+                                    for (JsonElement vers : versions) {
+                                        lib.addVersion(vers.getAsString());
+                                    }
+                                }
+
+                            } catch (Exception e) {
+                                cb.onError(e);
+                            }
+                        }
                     }
                 }
                 
@@ -68,15 +80,5 @@ public class NpmLoadService implements LoadService {
                 cb.onError(e);
             }
         });
-    }
-    
-    public static void main(String[] args) throws IOException {
-        String test = "kevoree-node-javascript";
-        String test1 = "kevoree-chan-websocket-super-cool";
-        
-        String[] res = test1.split("-", 3);
-        for (String s : res) {
-            System.out.println(s);
-        }
     }
 }
