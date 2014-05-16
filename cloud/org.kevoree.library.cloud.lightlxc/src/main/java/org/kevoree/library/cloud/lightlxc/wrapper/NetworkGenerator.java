@@ -1,6 +1,7 @@
 package org.kevoree.library.cloud.lightlxc.wrapper;
 
 import org.kevoree.ContainerNode;
+import org.kevoree.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +28,10 @@ public class NetworkGenerator {
     Integer ipStart;
 
     public NetworkGenerator(String baseIP, String gateway,Integer ipStep , Integer ipStart ){
-     this.baseIP = baseIP;
-     this.gateway= gateway;
-     this.ipStep = ipStep;
-     this.ipStart = ipStart;
+        this.baseIP = baseIP;
+        this.gateway= gateway;
+        this.ipStep = ipStep;
+        this.ipStart = ipStart;
     }
 
     public String generateIP(String  elementName) {
@@ -38,15 +39,17 @@ public class NetworkGenerator {
         Integer ip = ipStart+rand.nextInt(ipStep);
         int i = 0;
 
-        while (ips.contains(ip) && i<200){
+        while (ips.contains(ip) && i<200) {
             ip = ipStart+rand.nextInt(ipStep);
             i++;
         }
-        if (i==200)
-            return null;
 
-            ips.add(ip);
-            return baseIP + ip;
+        if (i==200) {
+            return null;
+        }
+
+        ips.add(ip);
+        return baseIP + ip;
     }
 
     public String generateGW(String elementName) {

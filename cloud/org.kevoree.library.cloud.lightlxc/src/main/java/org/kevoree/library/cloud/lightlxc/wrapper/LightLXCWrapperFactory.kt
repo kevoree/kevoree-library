@@ -29,14 +29,14 @@ class LightLXCWrapperFactory(nodeName: String,   val hostitfname: String,
     override fun wrap(modelElement: KMFContainer, newBeanInstance: Any, tg: ThreadGroup, bs: BootstrapService,modelService: ModelService): KInstanceWrapper {
         when(modelElement) {
             is ContainerNode -> {
-                println("pass par là1 " + modelElement.name!!)
+                //println("pass par là " + modelElement.name!!)
                 val ng = NetworkGenerator(this.hostitfip, this.containeripbaseaddress, ipStep, ipStart)
                 val gw = ng.generateGW( modelElement.name)
                 val ip = ng.generateIP( modelElement.name)
                 val mac = ng.generateMAC( modelElement.name)
                 updater.addIpName(ip,  modelElement.name)
 
-                wrap =  LightLXCNodeWrapper(modelElement, newBeanInstance, tg, bs, hostitfname,hostitfip,containeripbaseaddress, bridgeName,sshdStart,ip!!,gw!!,netmask,mac!!)
+                wrap =  LightLXCNodeWrapper(modelElement, newBeanInstance, tg, bs, hostitfname, hostitfip, containeripbaseaddress, bridgeName, sshdStart, ip!!, gw!!, netmask, mac!!)
 
 
                 return wrap!!;

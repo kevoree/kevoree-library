@@ -89,10 +89,9 @@ public class LightLXCNode extends PlatformJavaNode {
         return fact;
     }
 
-    @org.kevoree.annotation.Update
+    @Update
     public void updateNode() {
         modelsService.registerModelListener(updater);
-
         if (fact != null && fact.getWrap() != null) {
             fact.getWrap().freeze(freeze);
         }
