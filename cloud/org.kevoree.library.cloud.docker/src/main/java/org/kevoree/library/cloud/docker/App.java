@@ -14,27 +14,21 @@ import java.util.List;
 public class App {
 
     public static void main(String[] args) throws DockerException {
-       System.out.println("Hello");
-
         DockerClient dockerClient = new DockerClient("http://localhost:4243");
+//        dockerClient.pull("kevoree/ubuntu");
 
         ContainerConfig containerConfig = new ContainerConfig();
-        containerConfig.setImage("busybox");
-        containerConfig.setAttachStdout(true);
-        containerConfig.setCmd(new String[] {"touch", "/test"});
-        ContainerCreateResponse container = dockerClient.createContainer(containerConfig,"hello");
+        containerConfig.setImage("kevoree/ubuntu");
+        containerConfig.setCmd(new String[] {"/bin/bash"});
 
-
-
+        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
         dockerClient.startContainer(container.getId());
-
         dockerClient.waitContainer(container.getId());
+        System.out.println("Container "+container.getId()+" started!");
+//        dockerClient.stopContainer(container.getId());
 
-        dockerClient.stopContainer(container.getId());
-
-        List<Container> containerList = dockerClient.listContainers(true);
-
-        System.out.println(containerList);
+//        List<Container> containerList = dockerClient.listContainers(true);
+//        System.out.println(containerList);
 
     }
 

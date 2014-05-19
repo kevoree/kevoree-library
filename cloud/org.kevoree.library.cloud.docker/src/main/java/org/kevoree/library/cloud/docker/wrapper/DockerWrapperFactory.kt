@@ -16,16 +16,16 @@ import org.kevoree.api.ModelService
 
 class DockerWrapperFactory(nodeName: String) : WrapperFactory(nodeName) {
 
-    override fun wrap(modelElement: KMFContainer, newBeanInstance: Any, tg: ThreadGroup, bs: BootstrapService,modelService: ModelService): KInstanceWrapper {
-        when(modelElement) {
+    override fun wrap(modelElement: KMFContainer, newBeanInstance: Any, tg: ThreadGroup, bs: BootstrapService, modelService: ModelService): KInstanceWrapper {
+        when (modelElement) {
             is ContainerNode -> {
+                println("CONTAINER NODE")
                 return DockerNodeWrapper(modelElement, newBeanInstance, tg, bs)
             }
             else -> {
-                return super.wrap(modelElement, newBeanInstance, tg, bs,modelService)
+                println("SUPER.WRAP")
+                return super.wrap(modelElement, newBeanInstance, tg, bs, modelService)
             }
         }
     }
-
-
 }

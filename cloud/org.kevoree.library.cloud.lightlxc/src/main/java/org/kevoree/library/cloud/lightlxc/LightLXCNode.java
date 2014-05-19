@@ -103,11 +103,11 @@ public class LightLXCNode extends PlatformJavaNode {
     IpModelUpdater updater ;
 
     @Start
-    public void startNode(){
+    public void startNode() {
         //System.err.println("pass par la");
 
         if (updater ==null){
-            bservice =  new BridgeService(createBridge,hostitfname,context.getNodeName(),bridgeName,networkMask,routeditfname,containeripbaseaddress);
+            bservice =  new BridgeService(createBridge, hostitfname, context.getNodeName(), bridgeName, networkMask, routeditfname, containeripbaseaddress);
             bservice.start();
             updater = new IpModelUpdater(modelsService);
             modelsService.registerModelListener(updater);
@@ -117,7 +117,7 @@ public class LightLXCNode extends PlatformJavaNode {
     }
 
     @Stop
-    public void stopNode(){
+    public void stopNode() {
         bservice .stop();
         modelsService.unregisterModelListener(updater);
         super.stopNode();

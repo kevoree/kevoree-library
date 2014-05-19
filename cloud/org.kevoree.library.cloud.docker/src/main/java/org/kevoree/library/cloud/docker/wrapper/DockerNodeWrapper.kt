@@ -7,6 +7,7 @@ import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.ContainerNode
 import com.kpelykh.docker.client.DockerClient
 import com.kpelykh.docker.client.model.ContainerConfig
+import com.kpelykh.docker.client.model.CommitConfig
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,27 +19,18 @@ import com.kpelykh.docker.client.model.ContainerConfig
 class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
 
     override var isStarted: Boolean = false
-    override val resolver: MethodAnnotationResolver
-    val dockerClient: DockerClient
-
-    {
-        dockerClient = DockerClient("http://localhost:4243")
-        resolver = MethodAnnotationResolver(targetObj.javaClass)
-    }
+    override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
+    val dockerClient: DockerClient = DockerClient("http://localhost:4243")
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
-
-        System.out.println("Start lxc node ....");
-
-        //TODO non blocking start Docker Child node here
+        System.out.println("Start docker node ....");
+        dockerClient.startContainer(containerID)
         return true
     }
+
     override fun kInstanceStop(tmodel: ContainerRoot): Boolean {
-
-        System.out.println("Stop lxc node ....");
-
-
-        //TODO non blocking stop Docker Child node here
+        System.out.println("Stop docker node ....");
+        dockerClient.stopContainer(containerID)
         return true
     }
 
@@ -46,15 +38,19 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
 
     override fun create() {
         val containerConfig = ContainerConfig();
-        containerConfig.setImage("busybox");
-        containerConfig.setCmd(array("touch", "/test"));
+        containerConfig.setImage("kevoree/ubuntu");
+
+
         containerConfig.setHostName(modelElement.name);
         containerID = dockerClient.createContainer(containerConfig)?.getId()
     }
 
     override fun destroy() {
         if (containerID != null) {
-            //TODO backup volume before
+            println("DESTROY DockerNodeWrapper")
+            val conf = CommitConfig(containerID)
+            conf.setTag("kevoree/ubuntu")
+            dockerClient.commit(conf)
             dockerClient.removeContainer(containerID, true)
         }
     }

@@ -64,7 +64,7 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
                 }
                 var platformJar = bs.resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:"+ factory.getVersion(), urls);
                 if (platformJar == null) {
-                    Log.error("Can't download Kevoree platform, abording starting node "  + modelElement.name!! + " " + factory.getVersion())
+                    Log.error("Can't download Kevoree platform, aborting starting node "  + modelElement.name!! + " " + factory.getVersion())
                     return false
                 }
                 Log.debug("Fork platform using {}", platformJar!!.getAbsolutePath())

@@ -1,5 +1,10 @@
 include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
 include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.docker:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
 
 add node0 : DockerNode
-//add node0.child : JavaNode
+add node0.container0 : JavaNode
+add sync : WSGroup
+
+set sync.port/node0 = "9000"
+attach node0 sync

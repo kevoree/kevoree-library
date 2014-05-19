@@ -24,27 +24,22 @@ public class IpModelUpdater extends ModelListenerAdapter {
     @Override
     public synchronized void modelUpdated() {
         StringBuffer buf = new StringBuffer();
-        for (String ip  :ipName.keySet()){
+        for (String ip  :ipName.keySet()) {
             buf.append("network "+ipName.get(ip)+".ip.lan " + ip +"\n");
-
-
         }
+
         if (buf.length() > 0){
-        modelservice.unregisterModelListener(this);
-        modelservice.submitScript(buf.toString(), new UpdateCallback() {
-            @Override
-            public void run(Boolean aBoolean) {
-                if (aBoolean) {
-                    ipName.clear();
-
+            modelservice.unregisterModelListener(this);
+            modelservice.submitScript(buf.toString(), new UpdateCallback() {
+                @Override
+                public void run(Boolean aBoolean) {
+                    if (aBoolean) {
+                        ipName.clear();
+                    }
+                    modelservice.registerModelListener(IpModelUpdater.this);
                 }
-                modelservice.registerModelListener(IpModelUpdater.this);
-
-            }
-        });
+            });
         }
-
-
     }
 
     public synchronized boolean addIpName(String ip,String name){
@@ -52,7 +47,5 @@ public class IpModelUpdater extends ModelListenerAdapter {
             return false;
         ipName.put(ip,name);
         return true;
-
-
     }
 }
