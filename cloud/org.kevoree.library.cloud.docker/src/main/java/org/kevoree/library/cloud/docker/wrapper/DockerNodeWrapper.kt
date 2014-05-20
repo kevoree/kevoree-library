@@ -81,7 +81,8 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
         if (containerID != null) {
             println("DESTROY DockerNodeWrapper")
             val conf = CommitConfig(containerID)
-            conf.setTag("kevoree/ubuntu")
+            var model : ContainerRoot = modelElement.eContainer() as ContainerRoot
+            conf.setTag("kevoree/java:"+model.generated_KMF_ID)
             docker.commit(conf)
             docker.removeContainer(containerID, true)
         }
