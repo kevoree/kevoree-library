@@ -12,6 +12,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.kevoree</groupId>
+            <artifactId>org.kevoree.api</artifactId>
+            <version>${kevoree.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.kpelykh</groupId>
             <artifactId>docker-java</artifactId>
             <version>0.8.1</version>

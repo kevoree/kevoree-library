@@ -1,5 +1,9 @@
 package org.kevoree.library.cloud.docker;
 
+import com.kpelykh.docker.client.DockerClient;
+import com.kpelykh.docker.client.DockerException;
+import com.kpelykh.docker.client.model.Info;
+import org.apache.commons.lang.UnhandledException;
 import org.kevoree.annotation.KevoreeInject;
 import org.kevoree.annotation.NodeType;
 import org.kevoree.annotation.Update;
@@ -7,6 +11,7 @@ import org.kevoree.api.ModelService;
 import org.kevoree.library.cloud.docker.wrapper.DockerWrapperFactory;
 import org.kevoree.library.defaultNodeTypes.JavaNode;
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
+import org.kevoree.log.Log;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,6 +35,13 @@ public class DockerNode extends JavaNode {
     public void startNode() {
         super.startNode();
         System.out.println("START NODE");
+        DockerClient docker = new DockerClient("http://localhost:4243");
+        try {
+            Info info = docker.info();
+            Log.debug(info.toString());
+        } catch (DockerException e) {
+            e.printStackTrace();
+        }
     }
 
     @Update
