@@ -73,5 +73,7 @@ class Dockerfile(model : ContainerRoot, rootPasswd : String) {
         writer = BufferedWriter(FileWriter(dockerFile))
         writer.write(content)
         writer.close()
+
+        return dfileFolder
     }
 }

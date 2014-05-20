@@ -54,7 +54,7 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
         var dockerfile : Dockerfile = Dockerfile(model, "password")
 
         // build Docker image using Dockerfile
-        var res = docker.build(dockerfile.getFile(), "kevoree/java:"+model.generated_KMF_ID)
+        docker.build(dockerfile.getFile(), "kevoree/java:"+model.generated_KMF_ID)
 
         // pull kevoree/java from Docker repository
         docker.pull("kevoree/java:"+model.generated_KMF_ID)
@@ -71,12 +71,10 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
                     "/root/kevoree.jar"
         ))
 
-        val container = docker.createContainer(conf)
-        docker.startContainer(container?.getId())
-        Log.info("Container "+container?.getId()+" started")
-
-        conf.setHostName(modelElement.name);
-        containerID = docker.createContainer(conf)?.getId()
+        val container = docker.createContainer(conf)!!
+        containerID = container.getId()
+        docker.startContainer(container.getId())
+        Log.info("Container "+container.getId()+" started")
     }
 
     override fun destroy() {
