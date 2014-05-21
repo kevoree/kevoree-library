@@ -14,7 +14,6 @@ import java.io.File
 import java.io.BufferedWriter
 import java.io.FileWriter
 import org.kevoree.log.Log
-import org.kevoree.library.cloud.docker.docker.Dockerfile
 import com.sun.jersey.api.client.ClientResponse
 import java.nio.file.Files
 import org.kevoree.impl.DefaultKevoreeFactory

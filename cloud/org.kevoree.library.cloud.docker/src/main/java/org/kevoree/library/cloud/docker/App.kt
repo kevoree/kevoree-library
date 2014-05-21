@@ -4,7 +4,6 @@ import com.kpelykh.docker.client.DockerClient
 import java.io.File
 import java.io.BufferedWriter
 import java.io.FileWriter
-import org.kevoree.library.cloud.docker.docker.Dockerfile
 import java.io.StringWriter
 import org.apache.commons.io.IOUtils
 import org.kevoree.log.Log
