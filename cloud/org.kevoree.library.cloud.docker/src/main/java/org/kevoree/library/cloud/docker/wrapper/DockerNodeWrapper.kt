@@ -13,12 +13,12 @@ import org.kevoree.log.Log
 import java.nio.file.Files
 import org.kevoree.impl.DefaultKevoreeFactory
 import java.util.HashMap
-import com.nirima.docker.client.DockerClient
-import com.nirima.docker.client.model.HostConfig
 import java.io.StringWriter
-import org.apache.commons.io.IOUtils
-import com.nirima.docker.client.model.ContainerConfig
-import com.nirima.docker.client.model.CommitConfig
+import org.kevoree.library.cloud.docker.client.DockerClient
+import org.kevoree.library.cloud.docker.model.HostConfig
+import org.kevoree.library.cloud.docker.client.DockerClientImpl
+import org.kevoree.library.cloud.docker.model.ContainerConfig
+import org.kevoree.library.cloud.docker.model.CommitConfig
 
 /**
  * Created with IntelliJ IDEA.
@@ -33,19 +33,19 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
 
     val IMAGE: String = "kevoree/java"
 
-    private var docker = DockerClient.builder()!!.withUrl("http://localhost:4243")!!.build()!!
+    private var docker = DockerClientImpl("http://localhost:4243")!!
     private var containerID: String? = null
     private var hostConf : HostConfig = HostConfig()
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
         Log.info("Starting docker container %s ...", containerID)
-        docker.containersApi()!!.startContainer(containerID, hostConf)
+        docker.start(containerID, hostConf)
         return true
     }
 
     override fun kInstanceStop(tmodel: ContainerRoot): Boolean {
         Log.info("Stoping docker container %s ...", containerID)
-        docker.containersApi()!!.stopContainer(containerID, 10) // timeToWait in seconds before timeout
+        docker.stop(containerID)
         return true
     }
 
@@ -53,11 +53,7 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
         var model : ContainerRoot = modelElement.eContainer() as ContainerRoot
 
         // pull kevoree/java if not already done
-        var res = docker.createPullCommand()!!.image(IMAGE)!!.execute()!!
-
-        var logWriter = StringWriter()
-        IOUtils.copy(res, logWriter, "UTF-8")
-        Log.debug("$IMAGE pulled")
+        docker.pull(IMAGE)
 
         // create and store serialized model in temp dir
         var dfileFolderPath = Files.createTempDirectory("docker_")
@@ -89,10 +85,10 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
                 "release"
         ))
 
-        val container = docker.containersApi()!!.createContainer(modelElement.name, conf)!!
+        val container = docker.createContainer(conf, modelElement.name)!!
         containerID = container.getId()
         hostConf.setBinds(array<String>("${dfileFolder.getAbsolutePath()}:${dfileFolder.getAbsolutePath()}:ro"))
-        docker.containersApi()!!.startContainer(container.getId(), hostConf)
+        docker.start(container.getId(), hostConf)
 
         Log.info("Container "+container.getId()+" started")
     }
@@ -100,9 +96,12 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
     override fun destroy() {
         if (containerID != null) {
             println("DESTROY DockerNodeWrapper")
-            val container = docker.container(containerID)!!
-            container.createCommitCommand()!!.repo(IMAGE)!!.tag(modelElement.name)!!.execute()
-            container.remove(true)
+            var conf = CommitConfig()
+            conf.setContainer(containerID)
+            conf.setRepo(IMAGE)
+            conf.setTag(modelElement.name)
+            docker.commit(conf)
+            docker.deleteContainer(containerID)
         }
     }
 }

@@ -9,22 +9,17 @@ import org.kevoree.impl.DefaultKevoreeFactory
 import org.kevoree.serializer.JSONModelSerializer
 import java.nio.file.Files
 import java.util.HashMap
-import com.nirima.docker.client.DockerClient
-import org.apache.commons.io.IOUtils
-import com.nirima.docker.client.model.ContainerConfig
-import com.nirima.docker.client.model.HostConfig
+import org.kevoree.library.cloud.docker.client.DockerClientImpl
+import org.kevoree.library.cloud.docker.model.ContainerConfig
+import org.kevoree.library.cloud.docker.model.HostConfig
 
 /**
  * Created by leiko on 20/05/14.
  */
 fun main(args: Array<String>) {
     val REPO = "kevoree/java"
-    var docker = DockerClient.builder()!!.withUrl("http://localhost:4243")!!.build()!!
-    var res = docker.createPullCommand()!!.image(REPO)!!.execute()!!
-
-    var logWriter = StringWriter()
-    IOUtils.copy(res, logWriter, "UTF-8")
-    println("$REPO pulled successfully!")
+    val docker = DockerClientImpl("http://localhost:4243")
+    docker.pull(REPO)
 
     // create and store serialized model in temp dir
     var dfileFolderPath = Files.createTempDirectory("docker_")
@@ -50,24 +45,24 @@ fun main(args: Array<String>) {
     // use newly created image
     val conf = ContainerConfig()
     conf.setImage(REPO)
-    var volumesMap = HashMap<String, Object>();
-    volumesMap.put(dfileFolder.getAbsolutePath(), HashMap<String, String>());
-//    var volumes = BoundHostVolumes()
-//    conf.setVolumes(volumesMap);
+    var volumes = HashMap<String, Object>();
+    volumes.put(dfileFolder.getAbsolutePath(), HashMap<String, String>());
+    conf.setVolumes(volumes);
     conf.setCmd(array<String>(
-        "java",
-            "-Dnode.name="+node.name,
-            "-Dnode.bootstrap="+modelFile.getAbsolutePath(),
-            "-jar",
-            "/root/kevboot.jar",
-            "release"
+          "cat",
+          "${modelFile.getAbsolutePath()}"
+//        "java",
+//            "-Dnode.name=${node.name}",
+//            "-Dnode.bootstrap=${modelFile.getAbsolutePath()}",
+//            "-jar",
+//            "/root/kevboot.jar",
+//            "release"
     ))
 
-    var container = docker.containersApi()!!.createContainer(node.name, conf)!!
-
+    var container = docker.createContainer(conf)!!
     var hostConf = HostConfig()
     hostConf.setBinds(array<String>("${dfileFolder.getAbsolutePath()}:${dfileFolder.getAbsolutePath()}:ro"))
-    docker.containersApi()!!.startContainer(container.getId(), hostConf)
+    docker.start(container.getId(), hostConf)
 
     System.out.println("Container " + container.getId() + " started!")
 }
