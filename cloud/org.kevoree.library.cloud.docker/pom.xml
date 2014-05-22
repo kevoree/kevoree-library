@@ -17,9 +17,9 @@
             <version>${kevoree.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.kpelykh</groupId>
-            <artifactId>docker-java</artifactId>
-            <version>0.8.1</version>
+            <groupId>com.nirima.jdocker</groupId>
+            <artifactId>jDocker</artifactId>
+            <version>0.2.5</version>
         </dependency>
         <dependency>
             <groupId>org.kevoree.library.java</groupId>

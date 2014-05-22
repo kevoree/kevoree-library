@@ -9,21 +9,18 @@ import org.kevoree.api.ModelService
 
 /**
  * Created with IntelliJ IDEA.
- * User: duke
- * Date: 03/12/2013
- * Time: 09:59
+ * User: leiko
+ * Date: 21/05/2014
+ * Time: 16:25
  */
-
 class DockerWrapperFactory(nodeName: String) : WrapperFactory(nodeName) {
 
     override fun wrap(modelElement: KMFContainer, newBeanInstance: Any, tg: ThreadGroup, bs: BootstrapService, modelService: ModelService): KInstanceWrapper {
         when (modelElement) {
             is ContainerNode -> {
-                println("CONTAINER NODE")
                 return DockerNodeWrapper(modelElement, newBeanInstance, tg, bs)
             }
             else -> {
-                println("SUPER.WRAP")
                 return super.wrap(modelElement, newBeanInstance, tg, bs, modelService)
             }
         }

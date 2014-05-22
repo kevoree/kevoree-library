@@ -1,28 +1,30 @@
 package org.kevoree.library.cloud.docker
 
-import com.kpelykh.docker.client.DockerClient
 import java.io.File
 import java.io.BufferedWriter
 import java.io.FileWriter
 import java.io.StringWriter
-import org.apache.commons.io.IOUtils
 import org.kevoree.log.Log
 import org.kevoree.impl.DefaultKevoreeFactory
 import org.kevoree.serializer.JSONModelSerializer
 import java.nio.file.Files
-import com.kpelykh.docker.client.model.ContainerConfig
-import com.kpelykh.docker.client.model.ContainerCreateResponse
-import com.kpelykh.docker.client.model.Container
 import java.util.HashMap
-import com.kpelykh.docker.client.model.HostConfig
+import com.nirima.docker.client.DockerClient
+import org.apache.commons.io.IOUtils
+import com.nirima.docker.client.model.ContainerConfig
+import com.nirima.docker.client.model.HostConfig
 
 /**
  * Created by leiko on 20/05/14.
  */
 fun main(args: Array<String>) {
     val REPO = "kevoree/java"
-    var docker = DockerClient("http://localhost:4243");
-    docker.pull(REPO)
+    var docker = DockerClient.builder()!!.withUrl("http://localhost:4243")!!.build()!!
+    var res = docker.createPullCommand()!!.image(REPO)!!.execute()!!
+
+    var logWriter = StringWriter()
+    IOUtils.copy(res, logWriter, "UTF-8")
+    println("$REPO pulled successfully!")
 
     // create and store serialized model in temp dir
     var dfileFolderPath = Files.createTempDirectory("docker_")
@@ -50,7 +52,8 @@ fun main(args: Array<String>) {
     conf.setImage(REPO)
     var volumesMap = HashMap<String, Object>();
     volumesMap.put(dfileFolder.getAbsolutePath(), HashMap<String, String>());
-    conf.setVolumes(volumesMap);
+//    var volumes = BoundHostVolumes()
+//    conf.setVolumes(volumesMap);
     conf.setCmd(array<String>(
         "java",
             "-Dnode.name="+node.name,
@@ -60,11 +63,11 @@ fun main(args: Array<String>) {
             "release"
     ))
 
-    val container = docker.createContainer(conf)!!
+    var container = docker.containersApi()!!.createContainer(node.name, conf)!!
 
     var hostConf = HostConfig()
-    hostConf.setBinds(array<String>(dfileFolder.getAbsolutePath()+":"+dfileFolder.getAbsolutePath()+":ro"))
-    docker.startContainer(container.getId(), hostConf)
+    hostConf.setBinds(array<String>("${dfileFolder.getAbsolutePath()}:${dfileFolder.getAbsolutePath()}:ro"))
+    docker.containersApi()!!.startContainer(container.getId(), hostConf)
 
     System.out.println("Container " + container.getId() + " started!")
 }

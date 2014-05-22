@@ -6,54 +6,58 @@ import org.kevoree.api.BootstrapService
 import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.ContainerNode
 import org.kevoree.serializer.JSONModelSerializer
-import com.kpelykh.docker.client.DockerClient
-import com.kpelykh.docker.client.model.ContainerConfig
-import com.kpelykh.docker.client.model.CommitConfig
-import com.kpelykh.docker.client.model.ContainerCreateResponse
 import java.io.File
 import java.io.BufferedWriter
 import java.io.FileWriter
 import org.kevoree.log.Log
-import com.sun.jersey.api.client.ClientResponse
 import java.nio.file.Files
 import org.kevoree.impl.DefaultKevoreeFactory
-import com.kpelykh.docker.client.model.HostConfig
 import java.util.HashMap
+import com.nirima.docker.client.DockerClient
+import com.nirima.docker.client.model.HostConfig
+import java.io.StringWriter
+import org.apache.commons.io.IOUtils
+import com.nirima.docker.client.model.ContainerConfig
+import com.nirima.docker.client.model.CommitConfig
 
 /**
  * Created with IntelliJ IDEA.
- * User: duke
- * Date: 03/12/2013
- * Time: 09:22
+ * User: leiko
+ * Date: 21/05/2014
+ * Time: 16:25
  */
-
 class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
 
     override var isStarted: Boolean = false
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
 
-    val docker: DockerClient = DockerClient("http://localhost:4243")
-    val REPOSITORY : String = "kevoree/java"
+    val IMAGE: String = "kevoree/java"
+
+    private var docker = DockerClient.builder()!!.withUrl("http://localhost:4243")!!.build()!!
+    private var containerID: String? = null
+    private var hostConf : HostConfig = HostConfig()
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
-        System.out.println("Start docker node ....")
-        docker.startContainer(containerID)
+        Log.info("Starting docker container %s ...", containerID)
+        docker.containersApi()!!.startContainer(containerID, hostConf)
         return true
     }
 
     override fun kInstanceStop(tmodel: ContainerRoot): Boolean {
-        System.out.println("Stop docker node ....");
-        docker.stopContainer(containerID, 5000)
+        Log.info("Stoping docker container %s ...", containerID)
+        docker.containersApi()!!.stopContainer(containerID, 10) // timeToWait in seconds before timeout
         return true
     }
-
-    private var containerID: String? = null;
 
     override fun create() {
         var model : ContainerRoot = modelElement.eContainer() as ContainerRoot
 
         // pull kevoree/java if not already done
-        docker.pull(REPOSITORY)
+        var res = docker.createPullCommand()!!.image(IMAGE)!!.execute()!!
+
+        var logWriter = StringWriter()
+        IOUtils.copy(res, logWriter, "UTF-8")
+        Log.debug("$IMAGE pulled")
 
         // create and store serialized model in temp dir
         var dfileFolderPath = Files.createTempDirectory("docker_")
@@ -72,35 +76,33 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
 
         // create Container configuration
         val conf = ContainerConfig();
-        conf.setImage(REPOSITORY)
+        conf.setImage(IMAGE)
         var volumes = HashMap<String, Any>();
         volumes.put(dfileFolder.getAbsolutePath(), HashMap<String, String>());
         conf.setVolumes(volumes);
         conf.setCmd(array<String>(
             "java",
-                "-Dnode.name="+modelElement.name,
-                "-Dnode.bootstrap="+modelFile.getAbsolutePath(),
+                "-Dnode.name=${modelElement.name}",
+                "-Dnode.bootstrap=${modelFile.getAbsolutePath()}",
                 "-jar",
                 "/root/kevboot.jar",
                 "release"
         ))
 
-        val container = docker.createContainer(conf)!!
+        val container = docker.containersApi()!!.createContainer(modelElement.name, conf)!!
         containerID = container.getId()
-        var hostConf = HostConfig()
-        hostConf.setBinds(array<String>(dfileFolder.getAbsolutePath()+":"+dfileFolder.getAbsolutePath()+":ro"))
-        docker.startContainer(container.getId(), hostConf)
+        hostConf.setBinds(array<String>("${dfileFolder.getAbsolutePath()}:${dfileFolder.getAbsolutePath()}:ro"))
+        docker.containersApi()!!.startContainer(container.getId(), hostConf)
+
         Log.info("Container "+container.getId()+" started")
     }
 
     override fun destroy() {
         if (containerID != null) {
             println("DESTROY DockerNodeWrapper")
-            val conf = CommitConfig(containerID)
-            conf.setRepo(REPOSITORY)
-            conf.setTag(modelElement.name)
-            docker.commit(conf)
-            docker.removeContainer(containerID, true)
+            val container = docker.container(containerID)!!
+            container.createCommitCommand()!!.repo(IMAGE)!!.tag(modelElement.name)!!.execute()
+            container.remove(true)
         }
     }
 }
