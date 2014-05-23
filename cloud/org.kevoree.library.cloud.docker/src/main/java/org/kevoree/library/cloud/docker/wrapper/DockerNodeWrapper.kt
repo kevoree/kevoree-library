@@ -19,6 +19,7 @@ import org.kevoree.library.cloud.docker.model.HostConfig
 import org.kevoree.library.cloud.docker.client.DockerClientImpl
 import org.kevoree.library.cloud.docker.model.ContainerConfig
 import org.kevoree.library.cloud.docker.model.CommitConfig
+import org.kevoree.library.cloud.docker.client.DockerException
 
 /**
  * Created with IntelliJ IDEA.
@@ -70,27 +71,43 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
         writer.write(modelJson)
         writer.close()
 
-        // create Container configuration
-        val conf = ContainerConfig();
-        conf.setImage(IMAGE)
-        var volumes = HashMap<String, Any>();
-        volumes.put(dfileFolder.getAbsolutePath(), HashMap<String, String>());
-        conf.setVolumes(volumes);
-        conf.setCmd(array<String>(
-            "java",
-                "-Dnode.name=${modelElement.name}",
-                "-Dnode.bootstrap=${modelFile.getAbsolutePath()}",
-                "-jar",
-                "/root/kevboot.jar",
-                "release"
-        ))
+        fun createContainer() {
+            // create Container configuration
+            val conf = ContainerConfig();
+            conf.setImage(IMAGE)
+            var volumes = HashMap<String, Any>();
+            volumes.put(dfileFolder.getAbsolutePath(), HashMap<String, String>());
+            conf.setVolumes(volumes);
+            conf.setCmd(array<String>(
+                    "java",
+                    "-Dnode.name=${modelElement.name}",
+                    "-Dnode.bootstrap=${modelFile.getAbsolutePath()}",
+                    "-jar",
+                    "/root/kevboot.jar",
+                    "release"
+            ))
 
-        val container = docker.createContainer(conf, modelElement.name)!!
-        containerID = container.getId()
-        hostConf.setBinds(array<String>("${dfileFolder.getAbsolutePath()}:${dfileFolder.getAbsolutePath()}:ro"))
-        docker.start(container.getId(), hostConf)
+            val container = docker.createContainer(conf, modelElement.name)!!
+            containerID = container.getId()
+        }
 
-        Log.info("Container "+container.getId()+" started")
+        fun startContainer() {
+            val container = docker.getContainer(modelElement.name)!!
+            hostConf.setBinds(array<String>("${dfileFolder.getAbsolutePath()}:${dfileFolder.getAbsolutePath()}:ro"))
+            docker.start(container.getId(), hostConf)
+
+            Log.info("Container "+container.getId()+" started")
+        }
+
+        try {
+            docker.getContainer(modelElement.name)
+            startContainer()
+
+        } catch (e: DockerException) {
+            // if getContainer() failed: then we need to create a new container
+            createContainer()
+            startContainer()
+        }
     }
 
     override fun destroy() {

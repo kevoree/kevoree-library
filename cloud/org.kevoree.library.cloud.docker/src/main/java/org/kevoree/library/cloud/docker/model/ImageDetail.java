@@ -39,4 +39,9 @@ public class ImageDetail {
     public void setProgressDetail(ProgressDetail progressDetail) {
         this.progressDetail = progressDetail;
     }
+
+    @Override
+    public String toString() {
+        return "ImageDetail { status = "+ status +", progress = "+ progress +", progressDetail = "+progressDetail+" }";
+    }
 }

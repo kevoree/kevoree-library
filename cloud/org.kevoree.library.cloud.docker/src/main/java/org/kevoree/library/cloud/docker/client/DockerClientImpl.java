@@ -7,8 +7,11 @@ import org.kevoree.log.Log;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by leiko on 22/05/14.
@@ -28,7 +31,7 @@ public class DockerClientImpl implements DockerClient {
 
     @Override
     public void start(String id) throws DockerException {
-        processResponse(buildResponse(String.format(DockerApi.START_CONTAINER, id)), "Start", id);
+        this.start(id, null);
     }
 
     @Override
@@ -39,6 +42,58 @@ public class DockerClientImpl implements DockerClient {
     @Override
     public void stop(String id) throws DockerException {
         processResponse(buildResponse(String.format(DockerApi.STOP_CONTAINER, id)), "Stop", id);
+    }
+
+    @Override
+    public List<Container> getContainers() throws DockerException {
+        Response response = this.client
+                .target(this.url)
+                .path(DockerApi.CONTAINERS_LIST)
+                .queryParam("all", true)
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .get();
+
+        switch (response.getStatus()) {
+            case 200:
+                Log.info("Container list succesfully retrieved");
+                break;
+            case 400:
+                Log.error("Bad request parameter");
+                throw new DockerException("Bad request parameter");
+            case 500:
+                Log.error("Docker Server Error");
+                throw new DockerException("Docker Server Error");
+            default:
+                throw new DockerException(String.format("Unknown Error: %s", response.getStatusInfo().getReasonPhrase()));
+        }
+
+        return response.readEntity(new GenericType<List<Container>>() {});
+    }
+
+    @Override
+    public ContainerDetail getContainer(String idOrName) throws DockerException {
+        Response response = this.client
+                .target(this.url)
+                .path(String.format(DockerApi.INSPECT_CONTAINER, idOrName))
+                .queryParam("all", true)
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .get();
+
+        switch (response.getStatus()) {
+            case 200:
+                Log.info(String.format("Container %s successfully inspected", idOrName));
+                break;
+            case 404:
+                Log.error(String.format("Cannot find %s - no such container", idOrName));
+                throw new DockerException(String.format("Cannot find %s - no such container", idOrName));
+            case 500:
+                Log.error("Docker Server Error");
+                throw new DockerException("Docker Server Error");
+            default:
+                throw new DockerException(String.format("Unknown Error: %s", response.getStatusInfo().getReasonPhrase()));
+        }
+
+        return response.readEntity(ContainerDetail.class);
     }
 
     @Override
