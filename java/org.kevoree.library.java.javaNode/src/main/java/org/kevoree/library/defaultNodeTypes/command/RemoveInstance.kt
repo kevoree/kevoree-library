@@ -26,11 +26,19 @@ class RemoveInstance(val wrapperFactory: WrapperFactory, val c: Instance, val no
 
     override fun undo() {
         try {
+
+            val kcl = registry.lookup(c.typeDefinition!!.deployUnit) as ClassLoader
+            Thread.currentThread().setContextClassLoader(kcl)
+            Thread.currentThread().setName("KevoreeRemoveInstance" + c.name!!)
+
             AddInstance(wrapperFactory, c, nodeName, registry, bs,modelService).execute()
             val newCreatedWrapper = registry.lookup(c)
             if(newCreatedWrapper is KInstanceWrapper){
                 bs.injectDictionary(c,newCreatedWrapper.targetObj,false)
             }
+
+            Thread.currentThread().setContextClassLoader(null)
+
         } catch(e: Exception) {
             Log.error("Error during rollback",e)
         }

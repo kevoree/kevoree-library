@@ -67,6 +67,11 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
 
     public override fun run() {
         try {
+
+            val kcl = registry.lookup(c.typeDefinition!!.deployUnit) as ClassLoader
+            Thread.currentThread().setContextClassLoader(kcl)
+            Thread.currentThread().setName("KevoreeAddInstance" + c.name!!)
+
             var newBeanKInstanceWrapper: KInstanceWrapper? = null
             if (c is ContainerNode) {
                 newBeanKInstanceWrapper: KInstanceWrapper? = wrapperFactory.wrap(c, this/* nodeInstance is useless because launched as external process */, tg!!, bs, modelService)
@@ -79,6 +84,9 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
             }
             newBeanKInstanceWrapper?.create()
             resultSub = true
+
+            Thread.currentThread().setContextClassLoader(null)
+
         } catch(e: Throwable){
             Log.error("Error while adding instance {}", e, c.name)
             resultSub = false
