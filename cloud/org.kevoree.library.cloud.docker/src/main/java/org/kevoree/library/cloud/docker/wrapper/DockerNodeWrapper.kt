@@ -20,6 +20,8 @@ import org.kevoree.library.cloud.docker.client.DockerClientImpl
 import org.kevoree.library.cloud.docker.model.ContainerConfig
 import org.kevoree.library.cloud.docker.model.CommitConfig
 import org.kevoree.library.cloud.docker.client.DockerException
+import org.kevoree.api.ModelService
+import org.kevoree.api.handler.UpdateCallback
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,14 +29,14 @@ import org.kevoree.library.cloud.docker.client.DockerException
  * Date: 21/05/2014
  * Time: 16:25
  */
-class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
+class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService, val modelService: ModelService) : KInstanceWrapper {
 
     override var isStarted: Boolean = false
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
 
     val IMAGE: String = "kevoree/java"
 
-    private var docker = DockerClientImpl("http://localhost:4243")!!
+    private var docker = DockerClientImpl("http://localhost:4243")
     private var containerID: String? = null
     private var hostConf : HostConfig = HostConfig()
 
@@ -44,7 +46,13 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
             Log.info("Starting docker container {} ...", id)
             docker.start(containerID, hostConf)
             val detail = docker.getContainer(containerID)!!
-            Log.info("Docker container {}{} started at {}", id, detail.getName(), detail.getNetworkSettings()!!.getIpAddress())
+            val ipAddress = detail.getNetworkSettings()!!.getIpAddress()
+
+            modelService.submitScript("network ${modelElement.name}.lan.ip $ipAddress", UpdateCallback {
+                fun run(b: Boolean) {}
+            });
+
+            Log.info("Docker container {}{} started at {}", id, detail.getName(), ipAddress)
         }
         return true
     }
