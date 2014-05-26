@@ -39,8 +39,13 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
     private var hostConf : HostConfig = HostConfig()
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
-        Log.info("Starting docker container {} ...", containerID)
-        docker.start(containerID, hostConf)
+        if (containerID != null) {
+            val id = containerID!!.substring(0, 12)
+            Log.info("Starting docker container {} ...", id)
+            docker.start(containerID, hostConf)
+            val detail = docker.getContainer(containerID)!!
+            Log.info("Docker container {}{} started at {}", id, detail.getName(), detail.getNetworkSettings()!!.getIpAddress())
+        }
         return true
     }
 
@@ -53,25 +58,30 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
     override fun create() {
         var model : ContainerRoot = modelElement.eContainer() as ContainerRoot
 
-        // pull kevoree/java if not already done
-        docker.pull(IMAGE)
+        try {
+            var container = docker.getContainer(modelElement.name)!!
+            containerID = container.getId()
 
-        // create and store serialized model in temp dir
-        var dfileFolderPath = Files.createTempDirectory("docker_")
-        var dfileFolder : File = File(dfileFolderPath.toString())
+        } catch (e: DockerException) {
+            // if getContainer() failed: then we need to create a new container
+            // pull kevoree/java if not already done
+            docker.pull(IMAGE)
 
-        // retrieve current model and serialize it to JSON
-        var serializer = JSONModelSerializer()
-        var modelJson = serializer.serialize(model)!!
+            // create and store serialized model in temp dir
+            var dfileFolderPath = Files.createTempDirectory("docker_")
+            var dfileFolder : File = File(dfileFolderPath.toString())
 
-        // create temp model
-        var modelFile : File = File(dfileFolder, "boot.json")
-        var writer : BufferedWriter
-        writer = BufferedWriter(FileWriter(modelFile))
-        writer.write(modelJson)
-        writer.close()
+            // retrieve current model and serialize it to JSON
+            var serializer = JSONModelSerializer()
+            var modelJson = serializer.serialize(model)!!
 
-        fun createContainer() {
+            // create temp model
+            var modelFile : File = File(dfileFolder, "boot.json")
+            var writer : BufferedWriter
+            writer = BufferedWriter(FileWriter(modelFile))
+            writer.write(modelJson)
+            writer.close()
+
             // create Container configuration
             val conf = ContainerConfig();
             conf.setImage(IMAGE)
@@ -89,24 +99,7 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
 
             val container = docker.createContainer(conf, modelElement.name)!!
             containerID = container.getId()
-        }
-
-        fun startContainer() {
-            val container = docker.getContainer(modelElement.name)!!
             hostConf.setBinds(array<String>("${dfileFolder.getAbsolutePath()}:${dfileFolder.getAbsolutePath()}:ro"))
-            docker.start(container.getId(), hostConf)
-
-            Log.info("Container {} started", container.getId())
-        }
-
-        try {
-            docker.getContainer(modelElement.name)
-            startContainer()
-
-        } catch (e: DockerException) {
-            // if getContainer() failed: then we need to create a new container
-            createContainer()
-            startContainer()
         }
     }
 

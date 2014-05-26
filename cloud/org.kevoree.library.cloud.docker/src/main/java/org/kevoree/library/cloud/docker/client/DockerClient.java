@@ -24,12 +24,11 @@ public interface DockerClient {
 
     ContainerDetail getContainer(String idOrName) throws DockerException, JSONException;
 
-    ImageDetail pull(String name) throws DockerException, JSONException;
-    ImageDetail pull(String name, String tag) throws DockerException, JSONException;
+    void pull(String name) throws DockerException, JSONException;
+    void pull(String name, String tag) throws DockerException, JSONException;
+    void createImage(ImageConfig conf) throws DockerException, JSONException;
 
     ContainerInfo commit(CommitConfig conf) throws DockerException, JSONException;
-
-    ImageDetail createImage(ImageConfig conf) throws DockerException, JSONException;
 
     ContainerInfo createContainer(ContainerConfig conf) throws DockerException, JSONException;
     ContainerInfo createContainer(ContainerConfig conf, String name) throws DockerException, JSONException;

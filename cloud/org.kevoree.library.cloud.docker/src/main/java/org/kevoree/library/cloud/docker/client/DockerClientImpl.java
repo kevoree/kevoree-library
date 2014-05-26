@@ -2,12 +2,14 @@ package org.kevoree.library.cloud.docker.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.inria.jfilter.QueryParser;
+import org.apache.commons.io.IOUtils;
 import org.kevoree.library.cloud.docker.model.*;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.util.List;
 
+import org.kevoree.log.Log;
 import us.monoid.json.JSONArray;
 import us.monoid.json.JSONException;
 import us.monoid.web.JSONResource;
@@ -63,7 +65,7 @@ public class DockerClientImpl implements DockerClient {
     @Override
     public void stop(String id, int timeout) throws DockerException {
         try {
-            this.resty.text(this.url + String.format(DockerApi.STOP_CONTAINER, id), form(String.format("?t=%d", timeout)));
+            this.resty.text(this.url + String.format(DockerApi.STOP_CONTAINER, id), form(String.format("t=%d", timeout)));
         } catch (IOException e) {
             throw new DockerException(e.getMessage());
         }
@@ -110,7 +112,7 @@ public class DockerClientImpl implements DockerClient {
         try {
             JSONResource res = this.resty.json(
                     this.url + DockerApi.COMMIT_IMAGE,
-                    form(String.format("?container=%s&m=%s&repo=%s&tag=%s&author=%s", conf.getContainer(), conf.getMessage(), conf.getRepo(), conf.getTag(), conf.getAuthor()))
+                    form(String.format("container=%s&m=%s&repo=%s&tag=%s&author=%s", conf.getContainer(), conf.getMessage(), conf.getRepo(), conf.getTag(), conf.getAuthor()))
             );
 
             ObjectMapper mapper = new ObjectMapper();
@@ -122,32 +124,33 @@ public class DockerClientImpl implements DockerClient {
     }
 
     @Override
-    public ImageDetail pull(String name) throws DockerException, JSONException {
-        return this.pull(name, "");
+    public void pull(String name) throws DockerException, JSONException {
+        this.pull(name, "");
     }
 
     @Override
-    public ImageDetail pull(String name, String tag) throws DockerException, JSONException {
+    public void pull(String name, String tag) throws DockerException, JSONException {
         if (tag == null) {
             tag = "";
         }
         try {
+            Log.info("Pulling {}...(this may take a while)", name);
             JSONResource res = this.resty.json(
                     this.url + DockerApi.CREATE_IMAGE,
-                    form(String.format("?fromImage=%s&tag=%s", name, tag))
+                    form(String.format("fromImage=%s&tag=%s", name, tag))
             );
 
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(res.toObject().toString(), ImageDetail.class);
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(res.getUrlConnection().getInputStream(), writer, "UTF-8");
+            Log.info("{} pulled successfully", name);
 
         } catch (IOException e) {
-            e.getCause().printStackTrace();
             throw new DockerException(e.getMessage());
         }
     }
 
     @Override
-    public ImageDetail createImage(ImageConfig conf) throws DockerException, JSONException {
+    public void createImage(ImageConfig conf) throws DockerException, JSONException {
         try {
             ObjectMapper mapper = new ObjectMapper();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -156,7 +159,8 @@ public class DockerClientImpl implements DockerClient {
 
             JSONResource res = this.resty.json(this.url + DockerApi.CREATE_IMAGE, content(baos.toByteArray()));
 
-            return mapper.readValue(res.toObject().toString(), ImageDetail.class);
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(res.getUrlConnection().getInputStream(), writer, "UTF-8");
 
         } catch (IOException e) {
             throw new DockerException(e.getMessage());
