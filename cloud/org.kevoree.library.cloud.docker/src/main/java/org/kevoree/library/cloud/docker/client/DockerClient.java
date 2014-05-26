@@ -1,7 +1,9 @@
 package org.kevoree.library.cloud.docker.client;
 
 import org.kevoree.library.cloud.docker.model.*;
+import us.monoid.json.JSONException;
 
+import java.io.IOException;
 import java.util.List;
 
 /***
@@ -10,24 +12,25 @@ import java.util.List;
  */
 public interface DockerClient {
 
-    void start(String id) throws DockerException;
-    void start(String id, HostConfig conf) throws DockerException;
+    void start(String id) throws DockerException, JSONException;
+    void start(String id, HostConfig conf) throws DockerException, JSONException;
 
     void stop(String id) throws DockerException;
+    void stop(String id, int timeout) throws DockerException;
 
-    void deleteContainer(String id) throws DockerException;
+    void deleteContainer(String id) throws DockerException, JSONException;
 
-    List<Container> getContainers() throws DockerException;
+    List<Container> getContainers() throws DockerException, JSONException;
 
-    ContainerDetail getContainer(String idOrName) throws DockerException;
+    ContainerDetail getContainer(String idOrName) throws DockerException, JSONException;
 
-    ImageDetail pull(String name) throws DockerException;
-    ImageDetail pull(String name, String tag) throws DockerException;
+    ImageDetail pull(String name) throws DockerException, JSONException;
+    ImageDetail pull(String name, String tag) throws DockerException, JSONException;
 
-    ContainerInfo commit(CommitConfig conf) throws DockerException;
+    ContainerInfo commit(CommitConfig conf) throws DockerException, JSONException;
 
-    ImageDetail createImage(ImageConfig conf) throws DockerException;
+    ImageDetail createImage(ImageConfig conf) throws DockerException, JSONException;
 
-    ContainerInfo createContainer(ContainerConfig conf) throws DockerException;
-    ContainerInfo createContainer(ContainerConfig conf, String name) throws DockerException;
+    ContainerInfo createContainer(ContainerConfig conf) throws DockerException, JSONException;
+    ContainerInfo createContainer(ContainerConfig conf, String name) throws DockerException, JSONException;
 }

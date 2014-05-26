@@ -31,7 +31,7 @@ public class ContainerDetail {
     @JsonProperty("MountLabel")      private String              mountLabel;
     @JsonProperty("ProcessLabel")    private String              processLabel;
     @JsonProperty("HostConfig")      private HostConfig          hostConfig;
-    
+
     public String getId() {
         return id;
     }
@@ -204,7 +204,7 @@ public class ContainerDetail {
     public String toString() {
         return "ContainerDetail{" + "id=" + id + ", created=" + created + ", path=" + path + ", args=" + args + ", config=" + config + ", state=" + state + ", image=" + image + ", networkSettings=" + networkSettings + ", sysInitPath=" + sysInitPath + ", resolvConfPath=" + resolvConfPath + ", volumes=" + volumes + ", volumesRW=" + volumesRW + ", domainName=" + domainName + ", hostnamePath=" + hostnamePath + ", hostsPath=" + hostsPath + ", name=" + name + ", drive=" + drive + ", execDriver="+execDriver+"}";
     }
-    
-    
-    
+
+
+
 }

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author expi
  */
 public class Container {
-    
+
     @JsonProperty("Id")
     private String id;
 
@@ -111,5 +111,5 @@ public class Container {
     public String toString() {
         return "Container{" + "id=" + id + ", command=" + command + ", image=" + image + ", created=" + created + ", status=" + status + ", ports=" + ports + ", size=" + size + ", sizeRootFs=" + sizeRootFs + ", names=" + names + '}';
     }
-    
+
 }

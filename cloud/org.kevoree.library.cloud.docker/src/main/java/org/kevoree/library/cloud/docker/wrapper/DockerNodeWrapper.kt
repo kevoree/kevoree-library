@@ -39,13 +39,13 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
     private var hostConf : HostConfig = HostConfig()
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
-        Log.info("Starting docker container %s ...", containerID)
+        Log.info("Starting docker container {} ...", containerID)
         docker.start(containerID, hostConf)
         return true
     }
 
     override fun kInstanceStop(tmodel: ContainerRoot): Boolean {
-        Log.info("Stoping docker container %s ...", containerID)
+        Log.info("Stoping docker container {} ...", containerID)
         docker.stop(containerID)
         return true
     }
@@ -96,7 +96,7 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
             hostConf.setBinds(array<String>("${dfileFolder.getAbsolutePath()}:${dfileFolder.getAbsolutePath()}:ro"))
             docker.start(container.getId(), hostConf)
 
-            Log.info("Container "+container.getId()+" started")
+            Log.info("Container {} started", container.getId())
         }
 
         try {
@@ -112,7 +112,6 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
 
     override fun destroy() {
         if (containerID != null) {
-            println("DESTROY DockerNodeWrapper")
             var conf = CommitConfig()
             conf.setContainer(containerID)
             conf.setRepo(IMAGE)

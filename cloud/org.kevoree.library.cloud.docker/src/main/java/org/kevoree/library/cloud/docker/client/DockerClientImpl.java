@@ -1,273 +1,191 @@
 package org.kevoree.library.cloud.docker.client;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.inria.jfilter.QueryParser;
 import org.kevoree.library.cloud.docker.model.*;
-import org.kevoree.log.Log;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.util.List;
+
+import us.monoid.json.JSONArray;
+import us.monoid.json.JSONException;
+import us.monoid.web.JSONResource;
+import us.monoid.web.Resty;
+
+import static us.monoid.web.Resty.*;
 
 /**
  * Created by leiko on 22/05/14.
  */
 public class DockerClientImpl implements DockerClient {
 
-    private Client client;
+    private static final int KILL_TIMEOUT = 15;
+
+    private Resty resty;
     private String url;
 
     public DockerClientImpl(String url) {
+        this.resty = new Resty();
+        if (url.endsWith("/")) {
+            url = url.substring(0, url.length()-2);
+        }
         this.url = url;
-        this.client = ClientBuilder
-                .newBuilder()
-                .register(JacksonJsonProvider.class)
-                .build();
     }
 
     @Override
-    public void start(String id) throws DockerException {
+    public void start(String id) throws DockerException, JSONException {
         this.start(id, null);
     }
 
     @Override
-    public void start(String id, HostConfig conf) throws DockerException {
-        processResponse(buildResponse(String.format(DockerApi.START_CONTAINER, id), conf), "Start", id);
+    public void start(String id, HostConfig conf) throws DockerException, JSONException {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            OutputStreamWriter osw = new OutputStreamWriter(baos);
+            mapper.writeValue(osw, conf);
+
+            this.resty.text(
+                    this.url + String.format(DockerApi.START_CONTAINER, id),
+                    content(baos.toByteArray())
+            );
+        } catch (IOException e) {
+            throw new DockerException(e.getMessage());
+        }
     }
 
     @Override
     public void stop(String id) throws DockerException {
-        processResponse(buildResponse(String.format(DockerApi.STOP_CONTAINER, id)), "Stop", id);
+        this.stop(id, KILL_TIMEOUT);
     }
 
     @Override
-    public List<Container> getContainers() throws DockerException {
-        Response response = this.client
-                .target(this.url)
-                .path(DockerApi.CONTAINERS_LIST)
-                .queryParam("all", true)
-                .request(MediaType.APPLICATION_JSON_TYPE)
-                .get();
-
-        switch (response.getStatus()) {
-            case 200:
-                Log.info("Container list succesfully retrieved");
-                break;
-            case 400:
-                Log.error("Bad request parameter");
-                throw new DockerException("Bad request parameter");
-            case 500:
-                Log.error("Docker Server Error");
-                throw new DockerException("Docker Server Error");
-            default:
-                throw new DockerException(String.format("Unknown Error: %s", response.getStatusInfo().getReasonPhrase()));
-        }
-
-        return response.readEntity(new GenericType<List<Container>>() {});
-    }
-
-    @Override
-    public ContainerDetail getContainer(String idOrName) throws DockerException {
-        Response response = this.client
-                .target(this.url)
-                .path(String.format(DockerApi.INSPECT_CONTAINER, idOrName))
-                .queryParam("all", true)
-                .request(MediaType.APPLICATION_JSON_TYPE)
-                .get();
-
-        switch (response.getStatus()) {
-            case 200:
-                Log.info(String.format("Container %s successfully inspected", idOrName));
-                break;
-            case 404:
-                Log.error(String.format("Cannot find %s - no such container", idOrName));
-                throw new DockerException(String.format("Cannot find %s - no such container", idOrName));
-            case 500:
-                Log.error("Docker Server Error");
-                throw new DockerException("Docker Server Error");
-            default:
-                throw new DockerException(String.format("Unknown Error: %s", response.getStatusInfo().getReasonPhrase()));
-        }
-
-        return response.readEntity(ContainerDetail.class);
-    }
-
-    @Override
-    public void deleteContainer(String id) throws DockerException {
-        Response response = this.client
-                .target(this.url)
-                .path(String.format(DockerApi.DELETE_CONTAINER, id))
-                .queryParam("v", "")
-                .queryParam("force", "")
-                .request(MediaType.APPLICATION_JSON_TYPE)
-                .delete();
-
-        switch (response.getStatus()) {
-            case 204:
-                Log.info(String.format("Container %s successfully deleted", id));
-                break;
-            case 400:
-                Log.error(String.format("Cannot delete %s - bad parameter", id));
-                throw new DockerException(String.format("Cannot delete %s - bad parameter", id));
-            case 404:
-                Log.error(String.format("Container %s not found", id));
-                throw new DockerException(String.format("No such container %s", id));
-            case 500:
-                Log.error("Docker Server Error");
-                throw new DockerException("Docker Server Error");
-            default:
-                throw new DockerException(String.format("Unknown Error: %s", response.getStatusInfo().getReasonPhrase()));
+    public void stop(String id, int timeout) throws DockerException {
+        try {
+            this.resty.text(this.url + String.format(DockerApi.STOP_CONTAINER, id), form(String.format("?t=%d", timeout)));
+        } catch (IOException e) {
+            throw new DockerException(e.getMessage());
         }
     }
 
     @Override
-    public ContainerInfo commit(CommitConfig conf) throws DockerException {
-        Response response = this.client
-                .target(this.url)
-                .path(DockerApi.COMMIT_IMAGE)
-                .queryParam("container", conf.getContainer())
-                .queryParam("m", conf.getMessage())
-                .queryParam("repo", conf.getRepo())
-                .queryParam("tag", conf.getTag())
-                .queryParam("author", conf.getAuthor())
-                .request(MediaType.APPLICATION_JSON_TYPE)
-                .post(null);
+    public List<Container> getContainers() throws DockerException, JSONException {
+        try {
+            JSONArray res = this.resty.json(this.url + DockerApi.CONTAINERS_LIST).array();
 
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(res.toString(), mapper.getTypeFactory().constructCollectionType(List.class, Container.class));
 
-        switch (response.getStatus()) {
-            case 201:
-                ContainerInfo res = response.readEntity(ContainerInfo.class);
-                Log.info(String.format("Commit container %s to %s: success", conf.getContainer(), res.getId()));
-                return res;
-            case 404:
-                Log.error(String.format("Commit container %s: failed (not found)", conf.getContainer()));
-                throw new DockerException(String.format("Commit failed - container %s not found", conf.getContainer()));
-            case 500:
-                Log.error("Docker Server Error");
-                throw new DockerException("Docker Server Error");
-            default:
-                Log.error(response.getStatusInfo().getReasonPhrase());
-                throw new DockerException(String.format("Unknown Error: %s", response.getStatusInfo().getReasonPhrase()));
+        } catch (IOException e) {
+            throw new DockerException(e.getMessage());
         }
     }
 
     @Override
-    public ImageDetail pull(String name) throws DockerException {
-        return this.pull(name, null);
-    }
+    public ContainerDetail getContainer(String idOrName) throws DockerException, JSONException {
+        try {
+            JSONResource res = this.resty.json(this.url + String.format(DockerApi.INSPECT_CONTAINER, idOrName));
 
-    @Override
-    public ImageDetail pull(String name, String tag) throws DockerException {
-        Response response = this.client
-                .target(this.url)
-                .path(DockerApi.CREATE_IMAGE)
-                .queryParam("fromImage", name)
-                .queryParam("tag", tag)
-                .request(MediaType.APPLICATION_JSON_TYPE)
-                .post(null);
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(res.toObject().toString(), ContainerDetail.class);
 
-        switch (response.getStatus()) {
-            case 200:
-                ImageDetail res = response.readEntity(ImageDetail.class);
-                Log.info(String.format("Image %s pulled successfully", (tag == null) ? name : String.format("%s:%s", name, tag)));
-                return res;
-            case 500:
-                Log.error("Docker Server Error");
-                throw new DockerException("Docker Server Error");
-            default:
-                throw new DockerException(String.format("Unknown Error: %s", response.getStatusInfo().getReasonPhrase()));
+        } catch (IOException e) {
+            throw new DockerException(e.getMessage());
         }
     }
 
     @Override
-    public ImageDetail createImage(ImageConfig conf) throws DockerException {
-        Response response = this.client
-                .target(this.url)
-                .path(DockerApi.CREATE_IMAGE)
-                .request(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.json(conf));
+    public void deleteContainer(String id) throws DockerException, JSONException {
+        try {
+            this.resty.json(this.url + String.format(DockerApi.DELETE_CONTAINER, id), delete());
 
-        switch (response.getStatus()) {
-            case 200:
-                Log.info("Image successfully created");
-                break;
-            case 500:
-                Log.error("Docker Server Error");
-                throw new DockerException("Docker Server Error");
-            default:
-                throw new DockerException(String.format("Unknown Error: %s", response.getStatusInfo().getReasonPhrase()));
+        } catch (IOException e) {
+            throw new DockerException(e.getMessage());
         }
-
-        return response.readEntity(ImageDetail.class);
     }
 
     @Override
-    public ContainerInfo createContainer(ContainerConfig conf) throws DockerException {
-        return this.createContainer(conf, null);
+    public ContainerInfo commit(CommitConfig conf) throws DockerException, JSONException {
+        try {
+            JSONResource res = this.resty.json(
+                    this.url + DockerApi.COMMIT_IMAGE,
+                    form(String.format("?container=%s&m=%s&repo=%s&tag=%s&author=%s", conf.getContainer(), conf.getMessage(), conf.getRepo(), conf.getTag(), conf.getAuthor()))
+            );
+
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(res.toObject().toString(), ContainerInfo.class);
+
+        } catch (IOException e) {
+            throw new DockerException(e.getMessage());
+        }
     }
 
     @Override
-    public ContainerInfo createContainer(ContainerConfig conf, String name) throws DockerException {
+    public ImageDetail pull(String name) throws DockerException, JSONException {
+        return this.pull(name, "");
+    }
+
+    @Override
+    public ImageDetail pull(String name, String tag) throws DockerException, JSONException {
+        if (tag == null) {
+            tag = "";
+        }
+        try {
+            JSONResource res = this.resty.json(
+                    this.url + DockerApi.CREATE_IMAGE,
+                    form(String.format("?fromImage=%s&tag=%s", name, tag))
+            );
+
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(res.toObject().toString(), ImageDetail.class);
+
+        } catch (IOException e) {
+            e.getCause().printStackTrace();
+            throw new DockerException(e.getMessage());
+        }
+    }
+
+    @Override
+    public ImageDetail createImage(ImageConfig conf) throws DockerException, JSONException {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            OutputStreamWriter osw = new OutputStreamWriter(baos);
+            mapper.writeValue(osw, conf);
+
+            JSONResource res = this.resty.json(this.url + DockerApi.CREATE_IMAGE, content(baos.toByteArray()));
+
+            return mapper.readValue(res.toObject().toString(), ImageDetail.class);
+
+        } catch (IOException e) {
+            throw new DockerException(e.getMessage());
+        }
+    }
+
+    @Override
+    public ContainerInfo createContainer(ContainerConfig conf) throws DockerException, JSONException {
+        return this.createContainer(conf, "");
+    }
+
+    @Override
+    public ContainerInfo createContainer(ContainerConfig conf, String name) throws DockerException, JSONException {
         if (name != null && name.length() > 0 && !name.matches("/?[a-zA-Z0-9_-]+")) {
             throw new DockerException(String.format("Container name must match /?[a-zA-Z0-9_-]+ but '%s' does not", name));
         }
 
-        Response response = this.client
-                .target(this.url)
-                .path(DockerApi.CREATE_CONTAINER)
-                .queryParam("name", name)
-                .request(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.json(conf));
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            OutputStreamWriter osw = new OutputStreamWriter(baos);
+            mapper.writeValue(osw, conf);
 
-        switch (response.getStatus()) {
-            case 201:
-                Log.info("Container successfully created");
-                break;
-            case 404:
-                Log.error("Container not found");
-                throw new DockerException("No such container");
-            case 406:
-                Log.error("Unable to attach to container, container not running");
-                throw new DockerException("Unable to attach to container");
-            case 500:
-                Log.error("Docker Server Error");
-                throw new DockerException("Docker Server Error");
-            default:
-                throw new DockerException(String.format("Unknown Error: %s", response.getStatusInfo().getReasonPhrase()));
-        }
+            JSONResource res = this.resty.json(this.url + DockerApi.CREATE_CONTAINER + String.format("?name=%s", name), content(baos.toByteArray()));
 
-        return response.readEntity(ContainerInfo.class);
-    }
+            return mapper.readValue(res.toObject().toString(), ContainerInfo.class);
 
-    private Response buildResponse(String path) {
-        return this.buildResponse(path, null);
-    }
-
-    private Response buildResponse(String path, Object obj) {
-        if (obj == null) {
-            return this.client.target(this.url).path(path).request(MediaType.APPLICATION_JSON_TYPE).post(null);
-        } else {
-            return this.client.target(this.url).path(path).request(MediaType.APPLICATION_JSON_TYPE).post(Entity.json(obj));
-        }
-    }
-
-    private void processResponse(Response response, String action, String id) throws DockerException {
-        switch (response.getStatus()) {
-            case 204:
-                Log.info(String.format("%s container %s: success", action, id));
-                break;
-            case 404:
-                Log.error(String.format("%s container %s: failed (not found)", action, id));
-                throw new DockerException(String.format("%s failed - container %s not found", action, id));
-            case 500:
-                Log.error("Docker Server Error");
-                throw new DockerException("Docker Server Error");
-            default:
-                throw new DockerException(String.format("Unknown Error: %s", response.getStatusInfo().getReasonPhrase()));
+        } catch (IOException e) {
+            throw new DockerException(e.getMessage());
         }
     }
 }

@@ -5,22 +5,24 @@ package org.kevoree.library.cloud.docker.model;
  */
 public class CommitConfig {
 
-    private String container;
+    private String container = "";
 
-    private String repo;
+    private String repo = "";
 
-    private String tag;
+    private String tag = "";
 
-    private String message;
+    private String message = "";
 
-    private String author;
+    private String author = "";
 
     public String getContainer() {
         return container;
     }
 
     public void setContainer(String container) {
-        this.container = container;
+        if (container != null) {
+            this.container = container;
+        }
     }
 
     public String getRepo() {
@@ -28,7 +30,9 @@ public class CommitConfig {
     }
 
     public void setRepo(String repo) {
-        this.repo = repo;
+        if (repo != null) {
+            this.repo = repo;
+        }
     }
 
     public String getTag() {
@@ -36,7 +40,9 @@ public class CommitConfig {
     }
 
     public void setTag(String tag) {
-        this.tag = tag;
+        if (tag != null) {
+            this.tag = tag;
+        }
     }
 
     public String getMessage() {
@@ -44,7 +50,9 @@ public class CommitConfig {
     }
 
     public void setMessage(String m) {
-        this.message = m;
+        if (m != null) {
+            this.message = m;
+        }
     }
 
     public String getAuthor() {
@@ -52,6 +60,8 @@ public class CommitConfig {
     }
 
     public void setAuthor(String author) {
-        this.author = author;
+        if (author != null) {
+            this.author = author;
+        }
     }
 }

@@ -36,8 +36,7 @@ fun main(args: Array<String>) {
         docker.start(container.getId())
 
     } catch (e: DockerException) {
-        var detail = docker.pull(REPO)
-        println(detail)
+        docker.pull(REPO)
 
         // create and store serialized model in temp dir
         var dfileFolderPath = Files.createTempDirectory("docker_")
