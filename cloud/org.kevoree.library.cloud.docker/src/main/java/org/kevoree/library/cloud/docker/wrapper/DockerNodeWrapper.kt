@@ -58,8 +58,10 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
     }
 
     override fun kInstanceStop(tmodel: ContainerRoot): Boolean {
-        Log.info("Stoping docker container {} ...", containerID)
-        docker.stop(containerID)
+        if (containerID != null) {
+            Log.info("Stoping docker container {} ...", containerID)
+            docker.stop(containerID)
+        }
         return true
     }
 

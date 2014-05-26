@@ -7,4 +7,6 @@ add node0.container0 : JavaNode
 add sync : WSGroup
 
 set sync.port/node0 = "9000"
-attach node0 sync
+set sync.port/container0 = "9001"
+
+attach node0, container0 sync
