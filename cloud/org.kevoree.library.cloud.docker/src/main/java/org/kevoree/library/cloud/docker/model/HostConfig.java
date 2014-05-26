@@ -17,7 +17,7 @@ public class HostConfig {
     @JsonProperty("Dns")             private Object     dns;
     @JsonProperty("DnsSearch")       private Object     dnsSearch;
     @JsonProperty("VolumesFrom")     private Object     volumesFrom;
-    @JsonProperty("NetworkMode")     private String     networkMode;
+    @JsonProperty("NetworkMode")     private String     networkMode = "";
 
     public String[] getBinds() {
         return binds;

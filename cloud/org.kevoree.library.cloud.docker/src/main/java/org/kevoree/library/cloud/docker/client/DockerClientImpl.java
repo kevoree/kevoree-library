@@ -12,6 +12,7 @@ import java.util.List;
 import org.kevoree.log.Log;
 import us.monoid.json.JSONArray;
 import us.monoid.json.JSONException;
+import us.monoid.web.Content;
 import us.monoid.web.JSONResource;
 import us.monoid.web.Resty;
 
@@ -48,9 +49,9 @@ public class DockerClientImpl implements DockerClient {
             OutputStreamWriter osw = new OutputStreamWriter(baos);
             mapper.writeValue(osw, conf);
 
-            this.resty.text(
+            this.resty.json(
                     this.url + String.format(DockerApi.START_CONTAINER, id),
-                    content(baos.toByteArray())
+                    new Content("application/json; charset=UTF-8", baos.toByteArray())
             );
         } catch (IOException e) {
             throw new DockerException(e.getMessage());

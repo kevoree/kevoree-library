@@ -58,6 +58,21 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
     override fun create() {
         var model : ContainerRoot = modelElement.eContainer() as ContainerRoot
 
+        // create and store serialized model in temp dir
+        var dfileFolderPath = Files.createTempDirectory("docker_")
+        var dfileFolder : File = File(dfileFolderPath.toString())
+
+        // retrieve current model and serialize it to JSON
+        var serializer = JSONModelSerializer()
+        var modelJson = serializer.serialize(model)!!
+
+        // create temp model
+        var modelFile : File = File(dfileFolder, "boot.json")
+        var writer : BufferedWriter
+        writer = BufferedWriter(FileWriter(modelFile))
+        writer.write(modelJson)
+        writer.close()
+
         try {
             var container = docker.getContainer(modelElement.name)!!
             containerID = container.getId()
@@ -66,21 +81,6 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
             // if getContainer() failed: then we need to create a new container
             // pull kevoree/java if not already done
             docker.pull(IMAGE)
-
-            // create and store serialized model in temp dir
-            var dfileFolderPath = Files.createTempDirectory("docker_")
-            var dfileFolder : File = File(dfileFolderPath.toString())
-
-            // retrieve current model and serialize it to JSON
-            var serializer = JSONModelSerializer()
-            var modelJson = serializer.serialize(model)!!
-
-            // create temp model
-            var modelFile : File = File(dfileFolder, "boot.json")
-            var writer : BufferedWriter
-            writer = BufferedWriter(FileWriter(modelFile))
-            writer.write(modelJson)
-            writer.close()
 
             // create Container configuration
             val conf = ContainerConfig();
@@ -99,6 +99,8 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
 
             val container = docker.createContainer(conf, modelElement.name)!!
             containerID = container.getId()
+
+        } finally {
             hostConf.setBinds(array<String>("${dfileFolder.getAbsolutePath()}:${dfileFolder.getAbsolutePath()}:ro"))
         }
     }
