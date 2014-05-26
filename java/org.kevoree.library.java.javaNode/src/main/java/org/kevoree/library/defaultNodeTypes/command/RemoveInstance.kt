@@ -27,8 +27,7 @@ class RemoveInstance(val wrapperFactory: WrapperFactory, val c: Instance, val no
     override fun undo() {
         try {
 
-            val kcl = registry.lookup(c.typeDefinition!!.deployUnit) as ClassLoader
-            Thread.currentThread().setContextClassLoader(kcl)
+            Thread.currentThread().setContextClassLoader(ClassLoaderHelper.getClassLoader(registry,c,nodeName))
             Thread.currentThread().setName("KevoreeRemoveInstance" + c.name!!)
 
             AddInstance(wrapperFactory, c, nodeName, registry, bs,modelService).execute()
