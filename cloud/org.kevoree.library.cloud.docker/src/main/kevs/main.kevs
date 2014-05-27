@@ -1,8 +1,10 @@
 include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:3.5.3-SNAPSHOT
 include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.docker:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
+include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.web:latest
 
 add node0 : DockerNode
+add node0.web : WebFrontend
 add node0.container0 : JavaNode
 add sync : WSGroup
 
