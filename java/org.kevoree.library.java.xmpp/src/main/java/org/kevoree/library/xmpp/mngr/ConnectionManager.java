@@ -97,7 +97,7 @@ public class ConnectionManager implements ConnectionListener {
 
 
     public void sendFile(File f, String description, String to) {
-        kernel.getChatsManager().sendFile(f,description,to);
+        //kernel.getChatsManager().sendFile(f,description,to);
     }
 
     public void connectionClosed() {

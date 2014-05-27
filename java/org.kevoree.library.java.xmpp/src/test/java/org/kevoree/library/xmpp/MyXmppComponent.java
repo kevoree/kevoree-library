@@ -1,14 +1,9 @@
 package org.kevoree.library.xmpp;
 
-import org.jivesoftware.smack.packet.Presence;
 import org.kevoree.library.xmpp.cmp.XmppComponent;
-
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Properties;
 
 /**
- *
  * @author ffouquet, gnain
  */
 public class MyXmppComponent extends XmppComponent {
@@ -23,13 +18,13 @@ public class MyXmppComponent extends XmppComponent {
         System.out.println("Beginning XMPP test");
         MyXmppComponent compo = new MyXmppComponent();
 
-       compo.login = "entimid@gmail.com";
+        compo.login = "entimid@gmail.com";
         compo.password = "entimidpass";
 
         compo.start();
 
         Properties msg = new Properties();
-        msg.put("to","gregory.nain@gmail.com");
+        msg.put("to", "gregory.nain@gmail.com");
         msg.put("content", "Yeepee");
 
         compo.send(msg);
