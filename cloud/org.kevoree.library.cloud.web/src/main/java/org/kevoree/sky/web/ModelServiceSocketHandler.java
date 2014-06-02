@@ -5,6 +5,7 @@ import org.kevoree.ContainerRoot;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateCallback;
+import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.log.Log;
 import org.kevoree.modeling.api.trace.TraceSequence;
 import org.kevoree.serializer.JSONModelSerializer;
@@ -94,17 +95,17 @@ public class ModelServiceSocketHandler extends BaseWebSocketHandler implements M
     }
 
     @Override
-    public boolean preUpdate(ContainerRoot containerRoot, ContainerRoot containerRoot2) {
+    public boolean preUpdate(UpdateContext context) {
         return true;
     }
 
     @Override
-    public boolean initUpdate(ContainerRoot containerRoot, ContainerRoot containerRoot2) {
+    public boolean initUpdate(UpdateContext context) {
         return true;
     }
 
     @Override
-    public boolean afterLocalUpdate(ContainerRoot containerRoot, ContainerRoot containerRoot2) {
+    public boolean afterLocalUpdate(UpdateContext context) {
         return true;
     }
 
@@ -114,11 +115,11 @@ public class ModelServiceSocketHandler extends BaseWebSocketHandler implements M
     }
 
     @Override
-    public void preRollback(ContainerRoot containerRoot, ContainerRoot containerRoot2) {
+    public void preRollback(UpdateContext context) {
     }
 
     @Override
-    public void postRollback(ContainerRoot containerRoot, ContainerRoot containerRoot2) {
+    public void postRollback(UpdateContext context) {
     }
 
 }
