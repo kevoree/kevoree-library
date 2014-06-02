@@ -2,12 +2,12 @@ package org.kevoree.library.java.hazelcast;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.core.*;
-import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateCallback;
+import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.compare.DefaultModelCompare;
 import org.kevoree.log.Log;
 import org.kevoree.modeling.api.compare.ModelCompare;
@@ -79,19 +79,19 @@ public class BroadcastGroup implements MessageListener, ModelListener {
     }
 
     @Override
-    public boolean preUpdate(ContainerRoot currentModel, ContainerRoot proposedModel) {
+    public boolean preUpdate(UpdateContext updateContext) {
         return true;
     }
 
     @Override
-    public boolean initUpdate(ContainerRoot currentModel, ContainerRoot proposedModel) {
+    public boolean initUpdate(UpdateContext updateContext) {
         return true;
     }
 
 
     @Override
-    public boolean afterLocalUpdate(ContainerRoot currentModel, ContainerRoot proposedModel) {
-        TraceSequence seq = compare.merge(currentModel, proposedModel);
+    public boolean afterLocalUpdate(UpdateContext updateContext) {
+        TraceSequence seq = compare.merge(updateContext.getCurrentModel(), updateContext.getProposedModel());
         if (!seq.getTraces().isEmpty()) {
             Log.info("{} broadcast from {}", context.getInstanceName(), context.getNodeName());
             topic.publish(seq.exportToString());
@@ -105,12 +105,12 @@ public class BroadcastGroup implements MessageListener, ModelListener {
     }
 
     @Override
-    public void preRollback(ContainerRoot currentModel, ContainerRoot proposedModel) {
+    public void preRollback(UpdateContext updateContext) {
 
     }
 
     @Override
-    public void postRollback(ContainerRoot currentModel, ContainerRoot proposedModel) {
+    public void postRollback(UpdateContext updateContext) {
 
     }
 }
