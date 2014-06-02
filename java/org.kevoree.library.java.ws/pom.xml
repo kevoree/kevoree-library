@@ -48,7 +48,7 @@
                 </executions>
                 <configuration>
                     <nodename>node0</nodename>
-                    <model>${project.basedir}/src/main/kevs/centralized.kevs</model>
+                    <model>${project.basedir}/src/main/kevs/main.kevs</model>
                 </configuration>
             </plugin>
         </plugins>

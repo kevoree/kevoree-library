@@ -141,7 +141,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Override
     public boolean preUpdate(UpdateContext context) {
         preTime = System.currentTimeMillis();
-        Log.info("JavaNode received a new Model to apply...");
+        Log.info("JavaNode received a new Model to apply from {}",context.getCallerPath());
         return true;
     }
 
