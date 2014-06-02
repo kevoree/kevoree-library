@@ -18,6 +18,8 @@ public class WSGroupTest extends KevoreeTestCase {
         //waitLog("node0", ".*WSGroup listen on 9001", 10000);
         //waitLog("node1", ".*WSGroup listen on 9001", 10000);
 
+
+
         Thread.sleep(5000);
 
     }

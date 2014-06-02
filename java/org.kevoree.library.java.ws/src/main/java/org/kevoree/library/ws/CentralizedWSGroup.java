@@ -6,8 +6,8 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.handshake.ServerHandshake;
 import org.java_websocket.server.WebSocketServer;
 import org.kevoree.*;
-import org.kevoree.annotation.*;
 import org.kevoree.annotation.GroupType;
+import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.UpdateCallback;
@@ -33,10 +33,10 @@ import java.util.Map;
 @Library(name = "Java :: Groups")
 public class CentralizedWSGroup {
 
-    private static final String REGISTER    = "register";
-    private static final String PUSH        = "push";
-    private static final String PULL        = "pull";
-    private static final String DIFF        = "diff";
+    private static final String REGISTER = "register";
+    private static final String PUSH = "push";
+    private static final String PULL = "pull";
+    private static final String DIFF = "diff";
 
     @KevoreeInject
     public ModelService modelService;
@@ -89,7 +89,7 @@ public class CentralizedWSGroup {
 
                 } else if (msg.startsWith(PUSH)) {
                     // push model to current node platform
-                    final String strModel = msg.substring(PUSH.length()+1);
+                    final String strModel = msg.substring(PUSH.length() + 1);
                     deployModelLocally(strModel);
 
                 } else if (msg.startsWith(PULL)) {
@@ -110,7 +110,7 @@ public class CentralizedWSGroup {
         };
 
         this.server.start();
-        Log.info("CentralizedWSGroup listening on "+this.port);
+        Log.info("CentralizedWSGroup listening on " + this.port);
     }
 
     private void startClient() {
@@ -131,10 +131,12 @@ public class CentralizedWSGroup {
             }
 
             @Override
-            public void onClose(int i, String s, boolean b) {}
+            public void onClose(int i, String s, boolean b) {
+            }
 
             @Override
-            public void onError(Exception e) {}
+            public void onError(Exception e) {
+            }
         });
     }
 
@@ -173,16 +175,15 @@ public class CentralizedWSGroup {
         }
 
         if (portDefined > 1) {
-            throw new MalformedKevoreeModelException(portDefined+" 'port' attributes defined in model for '"+context.getInstanceName()+"' group instance (must be only one)");
+            throw new MalformedKevoreeModelException(portDefined + " 'port' attributes defined in model for '" + context.getInstanceName() + "' group instance (must be only one)");
         } else if (portDefined == 0) {
-            throw new MalformedKevoreeModelException("No 'port' attribute defined in model for '"+context.getInstanceName()+"' group instance (must be only one)");
+            throw new MalformedKevoreeModelException("No 'port' attribute defined in model for '" + context.getInstanceName() + "' group instance (must be only one)");
         }
     }
 
     private List<String> getServerAddresses() {
         List<String> addresses = new ArrayList<String>();
         Integer port = null;
-
         Group grp = modelService.getPendingModel().findGroupsByID(context.getInstanceName());
         for (FragmentDictionary fDic : grp.getFragmentDictionary()) {
             DictionaryValue val = fDic.findValuesByID("port");
@@ -191,9 +192,8 @@ public class CentralizedWSGroup {
                 break;
             }
         }
-
         if (port != null) {
-            ContainerNode node =  modelService.getPendingModel().findNodesByID(modelService.getNodeName());
+            ContainerNode node = modelService.getPendingModel().findNodesByID(modelService.getNodeName());
             for (NetworkInfo net : node.getNetworkInformation()) {
                 for (NetworkProperty prop : net.getValues()) {
                     if (net.getName().toLowerCase().contains("ip") || prop.getName().toLowerCase().contains("ip")) {
@@ -202,7 +202,6 @@ public class CentralizedWSGroup {
                 }
             }
         }
-
         return addresses;
     }
 

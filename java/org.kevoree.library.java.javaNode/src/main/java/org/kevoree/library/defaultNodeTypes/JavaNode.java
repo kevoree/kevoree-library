@@ -7,6 +7,7 @@ import org.kevoree.api.BootstrapService;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
+import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.library.defaultNodeTypes.command.*;
 import org.kevoree.library.defaultNodeTypes.planning.JavaPrimitive;
 import org.kevoree.library.defaultNodeTypes.planning.KevoreeKompareBean;
@@ -138,19 +139,19 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     private Long preTime = 0l;
 
     @Override
-    public boolean preUpdate(ContainerRoot currentModel, ContainerRoot proposedModel) {
+    public boolean preUpdate(UpdateContext context) {
         preTime = System.currentTimeMillis();
         Log.info("JavaNode received a new Model to apply...");
         return true;
     }
 
     @Override
-    public boolean initUpdate(ContainerRoot currentModel, ContainerRoot proposedModel) {
+    public boolean initUpdate(UpdateContext context) {
         return true;
     }
 
     @Override
-    public boolean afterLocalUpdate(ContainerRoot currentModel, ContainerRoot proposedModel) {
+    public boolean afterLocalUpdate(UpdateContext context) {
         Log.info("JavaNode Update completed in {} ms", (System.currentTimeMillis() - preTime) + "");
         return true;
     }
@@ -160,12 +161,12 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     }
 
     @Override
-    public void preRollback(ContainerRoot containerRoot, ContainerRoot containerRoot1) {
+    public void preRollback(UpdateContext context) {
         Log.warn("JavaSENode is aborting last update...");
     }
 
     @Override
-    public void postRollback(ContainerRoot containerRoot, ContainerRoot containerRoot1) {
+    public void postRollback(UpdateContext context) {
         Log.warn("JavaSENode update aborted in {} ms", (System.currentTimeMillis() - preTime) + "");
     }
 }

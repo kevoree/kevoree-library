@@ -1,11 +1,18 @@
+repo "http://repo1.maven.org/maven2"
+
 include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
 
 add node0 : JavaNode
 add sync : WSGroup
-set sync.port/node0 = "9000"
 attach node0 sync
 
+
+add node0.sub0 : JavaNode
+attach sub0 sync
+set sync.port/node0 = "9000"
+set sync.port/sub0 = "9001"
+set sync.master = "node0"
 
 
 
