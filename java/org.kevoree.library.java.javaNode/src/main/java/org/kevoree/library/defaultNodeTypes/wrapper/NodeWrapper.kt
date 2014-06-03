@@ -90,10 +90,28 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
             modelSaver.serializeToStream(tmodel, tempIO)
             tempIO.close()
             tempIO.flush()
-            var execArray = array(getJava(), "-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath())
-            if (jvmArgs != null) {
-                execArray = array(getJava(), jvmArgs!!, "-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath())
+
+            var classPath = System.getProperty("java.class.path");
+            var newClassPath = StringBuilder()
+            var classPathList = classPath?.split(':')
+            newClassPath.append(platformJar!!.getAbsolutePath())
+            classPathList?.forEach { cpe ->
+               if(!cpe.contains("org.kevoree.platform.standalone-")){
+                   newClassPath.append(File.pathSeparator)
+                   newClassPath.append(cpe)
+               }
             }
+
+            var devOption = "";
+            if(System.getProperty("kevoree.kev")!=null){
+                devOption = "-Dkevoree.kev="+System.getProperty("kevoree.kev")!!
+            }
+
+            var execArray = array(getJava(),"-cp",classPath.toString(),devOption,"-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name,"org.kevoree.platform.standalone.App")
+            if (jvmArgs != null) {
+                execArray = array(getJava(), jvmArgs!!,"-cp",classPath.toString(),devOption,"-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name,"org.kevoree.platform.standalone.App")
+            }
+
             process = Runtime.getRuntime().exec(execArray)
             readerOUTthread = Thread(Reader(process!!.getInputStream()!!, modelElement.name!!, false))
             readerERRthread = Thread(Reader(process!!.getErrorStream()!!, modelElement.name!!, true))
