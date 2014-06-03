@@ -102,9 +102,9 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
                }
             }
 
-            var devOption = "";
-            if(System.getProperty("kevoree.kev")!=null){
-                devOption = "-Dkevoree.kev="+System.getProperty("kevoree.kev")!!
+            var devOption = "-Dkevoree.prod=true";
+            if(System.getProperty("kevoree.dev")!=null){
+                devOption = "-Dkevoree.dev="+System.getProperty("kevoree.dev")!!
             }
 
             var execArray = array(getJava(),"-cp",classPath.toString(),devOption,"-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name,"org.kevoree.platform.standalone.App")
