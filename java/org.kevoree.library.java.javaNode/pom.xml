@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.java.javaNode</artifactId>
     <name>Kevoree :: Library :: Java :: JavaNode</name>
-    <version>3.5.4-SNAPSHOT</version>
+    <version>3.6.0</version>
 
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
         <groupId>org.kevoree.library.java</groupId>
-        <version>3.5.4-SNAPSHOT</version>
+        <version>3.6.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
