@@ -24,6 +24,7 @@
         <module>org.kevoree.library.java.haproxy</module>
         <module>org.kevoree.library.java.web</module>
         <module>org.kevoree.library.java.editor</module>
+        <module>org.kevoree.library.java.mqtt</module>
     </modules>
 
     <dependencies>

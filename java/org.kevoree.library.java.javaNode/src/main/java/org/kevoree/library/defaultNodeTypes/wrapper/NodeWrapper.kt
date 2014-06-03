@@ -107,10 +107,12 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
                 devOption = "-Dkevoree.dev="+System.getProperty("kevoree.dev")!!
             }
 
-            var execArray = array(getJava(),"-cp",classPath.toString(),devOption,"-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name,"org.kevoree.platform.standalone.App")
+            var execArray = array(getJava(),"-cp",newClassPath.toString(),devOption,"-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name,"org.kevoree.platform.standalone.App")
             if (jvmArgs != null) {
-                execArray = array(getJava(), jvmArgs!!,"-cp",classPath.toString(),devOption,"-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name,"org.kevoree.platform.standalone.App")
+                execArray = array(getJava(), jvmArgs!!,"-cp",newClassPath.toString(),devOption,"-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name,"org.kevoree.platform.standalone.App")
             }
+
+            System.out.println(execArray.toArrayList())
 
             process = Runtime.getRuntime().exec(execArray)
             readerOUTthread = Thread(Reader(process!!.getInputStream()!!, modelElement.name!!, false))
