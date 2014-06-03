@@ -7,6 +7,7 @@ import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
+import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.library.java.haproxy.api.Backend;
 import org.kevoree.library.java.haproxy.api.Server;
 import org.kevoree.log.Log;
@@ -146,20 +147,20 @@ public class HAProxy implements ModelListener {
     }
 
     @Override
-    public boolean preUpdate(ContainerRoot currentModel, ContainerRoot proposedModel) {
+    public boolean preUpdate(UpdateContext context) {
         return true;
     }
 
     @Override
-    public boolean initUpdate(ContainerRoot currentModel, ContainerRoot proposedModel) {
+    public boolean initUpdate(UpdateContext context) {
         return true;
     }
 
     @Override
-    public boolean afterLocalUpdate(ContainerRoot currentModel, ContainerRoot proposedModel) {
+    public boolean afterLocalUpdate(UpdateContext context) {
         try {
             Log.info("Regenerate config " + configFile.getAbsolutePath());
-            generateConfig(configFile, proposedModel);
+            generateConfig(configFile, context.getProposedModel());
 
             process.destroy();
             process.waitFor();
@@ -185,10 +186,10 @@ public class HAProxy implements ModelListener {
     }
 
     @Override
-    public void preRollback(ContainerRoot currentModel, ContainerRoot proposedModel) {
+    public void preRollback(UpdateContext context) {
     }
 
     @Override
-    public void postRollback(ContainerRoot currentModel, ContainerRoot proposedModel) {
+    public void postRollback(UpdateContext context) {
     }
 }

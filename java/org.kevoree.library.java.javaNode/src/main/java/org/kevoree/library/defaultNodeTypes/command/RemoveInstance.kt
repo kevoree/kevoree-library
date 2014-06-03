@@ -30,10 +30,13 @@ class RemoveInstance(val wrapperFactory: WrapperFactory, val c: Instance, val no
             Thread.currentThread().setContextClassLoader(ClassLoaderHelper.getClassLoader(registry,c,nodeName))
             Thread.currentThread().setName("KevoreeRemoveInstance" + c.name!!)
 
-            AddInstance(wrapperFactory, c, nodeName, registry, bs,modelService).execute()
-            val newCreatedWrapper = registry.lookup(c)
-            if(newCreatedWrapper is KInstanceWrapper){
-                bs.injectDictionary(c,newCreatedWrapper.targetObj,false)
+            val previouslyCreatedWrapper = registry.lookup(c)
+            if(previouslyCreatedWrapper == null){
+                AddInstance(wrapperFactory, c, nodeName, registry, bs,modelService).execute()
+                val newCreatedWrapper = registry.lookup(c)
+                if(newCreatedWrapper is KInstanceWrapper){
+                    bs.injectDictionary(c,newCreatedWrapper.targetObj,false)
+                }
             }
 
             Thread.currentThread().setContextClassLoader(null)
