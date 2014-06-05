@@ -4,10 +4,8 @@ import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
 import org.kevoree.library.defaultNodeTypes.ModelRegistry
 import org.kevoree.Instance
 import org.kevoree.api.PrimitiveCommand
-import org.kevoree.ContainerRoot
 import org.kevoree.log.Log
 import java.lang.reflect.InvocationTargetException
-import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.DictionaryValue
 import org.kevoree.api.ModelService
 import org.kevoree.impl.DefaultKevoreeFactory
@@ -26,9 +24,24 @@ import org.kevoree.impl.DefaultKevoreeFactory
  * limitations under the License.
  */
 
-class UpdateDictionary(val c: Instance, val dicValue: DictionaryValue, val nodeName: String, val registry: ModelRegistry, val bs: org.kevoree.api.BootstrapService, val modelService : ModelService) : PrimitiveCommand {
+class UpdateDictionary(val c: Instance, val dicValue: DictionaryValue, val nodeName: String, val registry: ModelRegistry, val bs: org.kevoree.api.BootstrapService, val modelService: ModelService) : PrimitiveCommand {
 
     override fun execute(): Boolean {
+
+        //protection for default value injection
+        val previousValue = modelService.getCurrentModel()?.getModel()?.findByPath(dicValue.path()!!)
+        if (previousValue == null) {
+            val parentDictionary = dicValue.eContainer()?.eContainer() as? Instance
+            if (parentDictionary != null) {
+                val dt = parentDictionary.typeDefinition?.dictionaryType
+                val dicAtt = dt?.findAttributesByID(dicValue.name!!)
+                if (dicAtt?.defaultValue == dicValue.value) {
+                    Log.debug("Do not reinject default {}", dicValue.value)
+                    return true
+                }
+            }
+        }
+
         val reffound = registry.lookup(c)
         if (reffound != null) {
             if (reffound is KInstanceWrapper) {
@@ -44,7 +57,7 @@ class UpdateDictionary(val c: Instance, val dicValue: DictionaryValue, val nodeN
                     bs.injectDictionaryValue(dicValue, reffound)
                     Thread.currentThread().setContextClassLoader(previousCL)
                     return true
-                } catch(e: InvocationTargetException){
+                } catch(e: InvocationTargetException) {
                     Log.error("Kevoree NodeType Instance Update Error !", e.getCause())
                     return false
                 } catch(e: Exception) {
@@ -62,18 +75,18 @@ class UpdateDictionary(val c: Instance, val dicValue: DictionaryValue, val nodeN
     override fun undo() {
         try {
             //try to found old value
-            var valueToInject : String? = null
+            var valueToInject: String? = null
             val previousValue = modelService.getCurrentModel()?.getModel()?.findByPath(dicValue.path()!!)
-            if(previousValue != null && previousValue is DictionaryValue){
+            if (previousValue != null && previousValue is DictionaryValue) {
                 valueToInject = previousValue.value
             } else {
-                val instance : Instance = dicValue.eContainer()?.eContainer() as Instance
+                val instance: Instance = dicValue.eContainer()?.eContainer() as Instance
                 val dicAtt = instance.typeDefinition!!.dictionaryType!!.findAttributesByID(dicValue.name!!)!!
-                if(dicAtt.defaultValue != null && dicAtt.defaultValue != ""){
+                if (dicAtt.defaultValue != null && dicAtt.defaultValue != "") {
                     valueToInject = dicAtt.defaultValue
                 }
             }
-            if(valueToInject!= null){
+            if (valueToInject != null) {
                 val fakeDicoValue = DefaultKevoreeFactory().createDictionaryValue()
                 fakeDicoValue.value = valueToInject
                 fakeDicoValue.name = dicValue.name
@@ -92,8 +105,8 @@ class UpdateDictionary(val c: Instance, val dicValue: DictionaryValue, val nodeN
                     }
                 }
             }
-        } catch (e:Throwable){
-           Log.debug("Error during rollback ",e)
+        } catch (e: Throwable) {
+            Log.debug("Error during rollback ", e)
         }
     }
 
