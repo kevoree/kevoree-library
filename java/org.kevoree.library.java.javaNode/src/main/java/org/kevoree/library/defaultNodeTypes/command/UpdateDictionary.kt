@@ -71,7 +71,7 @@ class UpdateDictionary(val c: Instance, val dicValue: DictionaryValue, val nodeN
             }
             return true
         } else {
-            Log.error("Can update dictionary of " + c.name)
+            Log.error("Can't update dictionary of " + c.name)
             return false
         }
     }

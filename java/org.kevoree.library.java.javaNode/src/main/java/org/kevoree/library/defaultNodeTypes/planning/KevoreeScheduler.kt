@@ -34,6 +34,8 @@ trait KevoreeScheduler {
             currentStep = currentStep!!.nextStep
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.RemoveBinding.name()))
             currentStep = currentStep!!.nextStep
+            currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.UpgradeInstance.name()))
+            currentStep = currentStep!!.nextStep
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.RemoveInstance.name()))
             currentStep = currentStep!!.nextStep
             currentStep!!.nextStep = createStep(classedAdaptations.get(JavaPrimitive.AddBinding.name()))

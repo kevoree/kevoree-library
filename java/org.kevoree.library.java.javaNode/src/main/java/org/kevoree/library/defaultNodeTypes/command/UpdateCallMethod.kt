@@ -65,11 +65,11 @@ class UpdateCallMethod(val c: Instance, val nodeName: String, val registry: Mode
     }
 
     override fun undo() {
-        Log.error("hum, hum this is ambarrasing .....")
+        //Log.error("Rollback update dictionary not supported yet !!!")
     }
 
     override fun toString(): String {
-        return "UpdateDictionary ${c.name}"
+        return "UpdateCallMethod ${c.name}"
     }
 
 }

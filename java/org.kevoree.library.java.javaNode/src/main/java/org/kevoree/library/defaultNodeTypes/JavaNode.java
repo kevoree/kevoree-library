@@ -100,7 +100,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
         String nodeName = modelService.getNodeName();
         if (pTypeName.equals(JavaPrimitive.UpdateDictionaryInstance.name())) {
             Object[] values = (Object[]) adaptationPrimitive.getRef();
-            return new UpdateDictionary((Instance) values[0], (DictionaryValue) values[1], nodeName, modelRegistry, bootstrapService,modelService);
+            return new UpdateDictionary((Instance) values[0], (DictionaryValue) values[1], nodeName, modelRegistry, bootstrapService, modelService);
         }
         if (pTypeName.equals(JavaPrimitive.UpdateCallMethod.name())) {
             return new UpdateCallMethod((Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService);
@@ -133,6 +133,9 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
         if (pTypeName.equals(JavaPrimitive.RemoveInstance.name())) {
             return new RemoveInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService, modelService);
         }
+        if (pTypeName.equals(JavaPrimitive.UpgradeInstance.name())) {
+            return new UpgradeInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService, modelService);
+        }
         return null;
     }
 
@@ -141,7 +144,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Override
     public boolean preUpdate(UpdateContext context) {
         preTime = System.currentTimeMillis();
-        Log.info("JavaNode received a new Model to apply from {}",context.getCallerPath());
+        Log.info("JavaNode received a new Model to apply from {}", context.getCallerPath());
         return true;
     }
 

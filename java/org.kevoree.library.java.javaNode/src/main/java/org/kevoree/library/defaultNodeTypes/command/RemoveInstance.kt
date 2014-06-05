@@ -53,6 +53,7 @@ class RemoveInstance(val wrapperFactory: WrapperFactory, val c: Instance, val no
                 previousWrapper.destroy()
             }
             registry.drop(c)
+            Log.info("Remove instance {}",c.path())
             return true
         } catch(e: Exception){
             return false
