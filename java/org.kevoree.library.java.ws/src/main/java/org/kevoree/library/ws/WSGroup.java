@@ -177,9 +177,8 @@ public class WSGroup implements ModelListener, Runnable {
                 if (name != null) {
                     cache.remove(name);
                 }
+                rcache.remove(webSocket);
             }
-
-            rcache.remove(webSocket);
         }
     }
 

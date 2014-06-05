@@ -7,6 +7,8 @@ add node0 : JavaNode
 add sync : WSGroup
 attach node0 sync
 set sync.master = "node0"
+set sync.port/node0 = "9000"
+
 
 
 //add node0.child1 : JavaNode
