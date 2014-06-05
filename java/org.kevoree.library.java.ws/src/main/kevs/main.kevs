@@ -8,11 +8,11 @@ add sync : WSGroup
 attach node0 sync
 
 
-add node0.sub0 : JavaNode
-attach sub0 sync
-set sync.port/node0 = "9000"
-set sync.port/sub0 = "9001"
-set sync.master = "node0"
+//add node0.sub0 : JavaNode
+//attach sub0 sync
+//set sync.port/node0 = "9000"
+//set sync.port/sub0 = "9001"
+//set sync.master = "node0"
 
 
 
