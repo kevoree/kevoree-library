@@ -29,15 +29,19 @@ class UpdateDictionary(val c: Instance, val dicValue: DictionaryValue, val nodeN
     override fun execute(): Boolean {
 
         //protection for default value injection
-        val previousValue = modelService.getCurrentModel()?.getModel()?.findByPath(dicValue.path()!!)
+        val previousModel = modelService.getCurrentModel()?.getModel()
+        val previousValue = previousModel?.findByPath(dicValue.path()!!)
         if (previousValue == null) {
             val parentDictionary = dicValue.eContainer()?.eContainer() as? Instance
             if (parentDictionary != null) {
-                val dt = parentDictionary.typeDefinition?.dictionaryType
-                val dicAtt = dt?.findAttributesByID(dicValue.name!!)
-                if (dicAtt?.defaultValue == dicValue.value) {
-                    Log.debug("Do not reinject default {}", dicValue.value)
-                    return true
+                val previousInstance = previousModel?.findByPath(c.path()!!)
+                if(previousInstance != null){
+                    val dt = parentDictionary.typeDefinition?.dictionaryType
+                    val dicAtt = dt?.findAttributesByID(dicValue.name!!)
+                    if (dicAtt?.defaultValue == dicValue.value) {
+                        Log.debug("Do not reinject default {}", dicValue.value)
+                        return true
+                    }
                 }
             }
         }
