@@ -1,10 +1,12 @@
+repo "http://repo1.maven.org/maven2"
+
 include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
 include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.docker:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
 include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.web:latest
 
 add node0 : DockerNode
-//add node0.web : WebFrontend
+add node0.web : WebFrontend
 add node0.container0 : JavaNode
 add sync : WSGroup
 
@@ -13,5 +15,7 @@ set sync.port/container0 = "9001"
 
 set node0.cpuShares = "5"
 set node0.memory = "2048"
+
+set node0.web.port = "8081"
 
 attach node0, container0 sync
