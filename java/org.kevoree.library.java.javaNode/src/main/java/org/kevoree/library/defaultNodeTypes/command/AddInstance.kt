@@ -84,6 +84,8 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
 
             Thread.currentThread().setContextClassLoader(null)
 
+            Log.info("Add instance {}",c.path())
+
         } catch(e: Throwable){
             Log.error("Error while adding instance {}", e, c.name)
             resultSub = false
