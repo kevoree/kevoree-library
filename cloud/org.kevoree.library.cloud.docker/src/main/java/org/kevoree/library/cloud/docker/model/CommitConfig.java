@@ -6,13 +6,9 @@ package org.kevoree.library.cloud.docker.model;
 public class CommitConfig {
 
     private String container = "";
-
     private String repo = "";
-
     private String tag = "";
-
     private String message = "";
-
     private String author = "";
 
     public String getContainer() {

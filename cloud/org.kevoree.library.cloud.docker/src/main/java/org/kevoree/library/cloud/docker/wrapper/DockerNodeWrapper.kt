@@ -63,6 +63,7 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
         if (containerID != null) {
             Log.info("Stoping docker container {} ...", containerID)
             docker.stop(containerID)
+            Log.info("Docker container {} successfully stopped", containerID)
         }
         return true
     }
@@ -126,7 +127,9 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
             conf.setRepo(IMAGE)
             conf.setTag(modelElement.name)
             docker.commit(conf)
+            Log.info("Container {} commited into {}:{}", containerID, IMAGE, modelElement.name)
             docker.deleteContainer(containerID)
+            Log.info("Container {} deleted successfully", containerID, IMAGE, modelElement.name)
         }
     }
 }

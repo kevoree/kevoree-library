@@ -10,7 +10,7 @@ public interface DockerApi {
     static final String START_CONTAINER     = "/containers/%s/start";
     static final String STOP_CONTAINER      = "/containers/%s/stop";
     static final String KILL_CONTAINER      = "/containers/%s/kill";
-    static final String DELETE_CONTAINER    = "/containers/%s/delete";
+    static final String DELETE_CONTAINER    = "/containers/%s";
     static final String RESTART_CONTAINER   = "/containers/%s/restart";
     static final String COMMIT_IMAGE        = "/commit";
     static final String CREATE_IMAGE        = "/images/create";

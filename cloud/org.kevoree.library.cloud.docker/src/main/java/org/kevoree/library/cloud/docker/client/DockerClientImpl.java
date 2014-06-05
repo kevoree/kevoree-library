@@ -101,8 +101,7 @@ public class DockerClientImpl implements DockerClient {
     @Override
     public void deleteContainer(String id) throws DockerException, JSONException {
         try {
-            this.resty.json(this.url + String.format(DockerApi.DELETE_CONTAINER, id), delete());
-
+            this.resty.json(this.url + String.format(DockerApi.DELETE_CONTAINER, id) + String.format("?force=%s", true), delete());
         } catch (IOException e) {
             throw new DockerException(e.getMessage());
         }
