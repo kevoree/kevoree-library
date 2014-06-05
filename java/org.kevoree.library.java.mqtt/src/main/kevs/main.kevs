@@ -1,0 +1,27 @@
+//sample of KevScript configuration
+//repo "http://repo1.maven.org/maven2"
+repo "http://oss.sonatype.org/content/groups/public/"
+
+
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.mqtt:latest
+
+add node0 : JavaNode
+add sync : WSGroup
+attach node0 sync
+
+add ch : MQTTChannel
+
+add node0.ticker : Ticker
+set node0.ticker.period = "1000"
+
+bind node0.ticker.tick ch
+add node0.console : ConsolePrinter
+bind node0.console.input ch
+
+add node0.child0 : JavaNode
+add child0.console : ConsolePrinter
+bind child0.console.input ch

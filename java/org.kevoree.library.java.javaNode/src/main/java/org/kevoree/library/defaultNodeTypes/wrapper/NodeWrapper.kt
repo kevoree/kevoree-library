@@ -90,10 +90,28 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
             modelSaver.serializeToStream(tmodel, tempIO)
             tempIO.close()
             tempIO.flush()
-            var execArray = array(getJava(), "-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath())
-            if (jvmArgs != null) {
-                execArray = array(getJava(), jvmArgs!!, "-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "-jar", platformJar!!.getAbsolutePath())
+
+            var classPath = System.getProperty("java.class.path");
+            var newClassPath = StringBuilder()
+            var classPathList = classPath?.split(':')
+            newClassPath.append(platformJar!!.getAbsolutePath())
+            classPathList?.forEach { cpe ->
+               if(!cpe.contains("org.kevoree.platform.standalone-")){
+                   newClassPath.append(File.pathSeparator)
+                   newClassPath.append(cpe)
+               }
             }
+
+            var devOption = "-Dkevoree.prod=true";
+            if(System.getProperty("kevoree.dev")!=null){
+                devOption = "-Dkevoree.dev="+System.getProperty("kevoree.dev")!!
+            }
+
+            var execArray = array(getJava(),"-cp",newClassPath.toString(),devOption,"-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name,"org.kevoree.platform.standalone.App")
+            if (jvmArgs != null) {
+                execArray = array(getJava(), jvmArgs!!,"-cp",newClassPath.toString(),devOption,"-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name,"org.kevoree.platform.standalone.App")
+            }
+
             process = Runtime.getRuntime().exec(execArray)
             readerOUTthread = Thread(Reader(process!!.getInputStream()!!, modelElement.name!!, false))
             readerERRthread = Thread(Reader(process!!.getErrorStream()!!, modelElement.name!!, true))
