@@ -26,8 +26,9 @@ public class Protocol {
 
     public static class RegisterMessage implements Message {
 
-        public RegisterMessage(String nodeName) {
+        public RegisterMessage(String nodeName, String model) {
             this.nodeName = nodeName;
+            this.model = model;
         }
 
         public String getNodeName() {
@@ -35,6 +36,12 @@ public class Protocol {
         }
 
         private String nodeName;
+
+        public String getModel() {
+            return model;
+        }
+
+        private String model;
 
         @Override
         public int getType() {
@@ -47,6 +54,8 @@ public class Protocol {
             buffer.append(REGISTER);
             buffer.append(SEP);
             buffer.append(nodeName);
+            buffer.append(SEP);
+            buffer.append(model);
             return buffer.toString();
         }
     }
@@ -95,8 +104,25 @@ public class Protocol {
 
     public static Message parse(String msg) {
         if (msg.startsWith(REGISTER)) {
-            String nodeName = msg.substring(REGISTER.length() + SEP.length());
-            return new Protocol.RegisterMessage(nodeName);
+            String payload = msg.substring(REGISTER.length() + SEP.length());
+            int i = 0;
+            char ch = payload.charAt(i);
+            StringBuffer buffer = new StringBuffer();
+            while (i < payload.length() && ch != "/".charAt(0)) {
+                i++;
+                buffer.append(ch);
+                ch = payload.charAt(i);
+            }
+            if (ch != "/".charAt(0)) {
+                buffer.append(ch);
+            } else {
+                i++;
+            }
+            String model = null;
+            if (i < payload.length()) {
+                model = payload.substring(i, payload.length());
+            }
+            return new Protocol.RegisterMessage(buffer.toString(), model);
         }
         if (msg.startsWith(PUSH)) {
             String model = msg.substring(PUSH.length() + SEP.length());

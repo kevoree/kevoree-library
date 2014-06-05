@@ -13,8 +13,11 @@ import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
+import org.kevoree.compare.DefaultModelCompare;
 import org.kevoree.loader.JSONModelLoader;
 import org.kevoree.log.Log;
+import org.kevoree.modeling.api.compare.ModelCompare;
+import org.kevoree.modeling.api.trace.TraceSequence;
 import org.kevoree.serializer.JSONModelSerializer;
 
 import java.io.IOException;
@@ -28,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.kevoree.library.ws.Protocol.*;
 
@@ -42,6 +46,8 @@ import static org.kevoree.library.ws.Protocol.*;
 @Library(name = "Java :: Groups")
 public class WSGroup implements ModelListener, Runnable {
 
+    private AtomicBoolean diverge = new AtomicBoolean(false);
+
     @KevoreeInject
     public Context localContext;
 
@@ -50,6 +56,10 @@ public class WSGroup implements ModelListener, Runnable {
 
     @Param(optional = true, fragmentDependent = true, defaultValue = "9000")
     Integer port;
+
+    public void setMaster(String master) {
+        this.master = master;
+    }
 
     @Param(optional = true)
     String master;
@@ -68,6 +78,7 @@ public class WSGroup implements ModelListener, Runnable {
     private boolean running = false;
     private ScheduledExecutorService scheduledThreadPool;
     private WebSocketServer serverHandler;
+
 
     private class InternalWebSocketServer extends WebSocketServer {
 
@@ -100,9 +111,21 @@ public class WSGroup implements ModelListener, Runnable {
                         cache.put(rm.getNodeName(), webSocket);
                         rcache.put(webSocket, rm.getNodeName());
                         if (isMaster()) {
-                            String currentModel = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
-                            PushMessage pushMessage = new PushMessage(currentModel);
-                            webSocket.send(pushMessage.toRaw());
+                            if (rm.getModel() == null) {
+                                String currentModel = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
+                                PushMessage pushMessage = new PushMessage(currentModel);
+                                webSocket.send(pushMessage.toRaw());
+                            } else {
+                                //ok i've to merge locally
+                                ContainerRoot recModel = (ContainerRoot) jsonModelLoader.loadModelFromString(rm.getModel()).get(0);
+                                TraceSequence tseq = compare.merge(modelService.getCurrentModel().getModel(), recModel);
+                                modelService.submitSequence(tseq,new UpdateCallback() {
+                                    @Override
+                                    public void run(Boolean applied) {
+                                        Log.info("Master merged deploy {}",applied);
+                                    }
+                                });
+                            }
                         }
                         break;
                     case PULL_TYPE:
@@ -122,7 +145,16 @@ public class WSGroup implements ModelListener, Runnable {
                         } else {
                                 /* Editor case injection, push to master */
                             Log.info("Update received from external , forward to master {}", master);
-                            pushToMaster(model);
+                            if (!pushToMaster(model)) {
+                                Log.info("Master {}, not reachable, applied locally", master);
+                                diverge.set(true);
+                                modelService.update(model, new UpdateCallback() {
+                                    @Override
+                                    public void run(Boolean applied) {
+                                        Log.info("WSGroup update result : {}", applied);
+                                    }
+                                });
+                            }
                         }
                         break;
                     default:
@@ -188,6 +220,7 @@ public class WSGroup implements ModelListener, Runnable {
 
     private static JSONModelLoader jsonModelLoader = new JSONModelLoader();
     private static JSONModelSerializer jsonModelSaver = new JSONModelSerializer();
+    private static ModelCompare compare = new DefaultModelCompare();
 
     private boolean isMaster() {
         if (master == null) {
@@ -221,7 +254,8 @@ public class WSGroup implements ModelListener, Runnable {
             masterClients[0].send(pushMessage.toRaw());
             return true;
         } else {
-            Log.error("Could not join master node : {}, diverge locally", master);
+            diverge.set(true);
+            Log.warn("Could not join master node : {}, diverge locally", master);
             return false;
         }
     }
@@ -286,13 +320,13 @@ public class WSGroup implements ModelListener, Runnable {
                                 }
                             }
                             for (String ip : addresses) {
-                                masterClients[0] = createWSClient(ip, port, localContext.getNodeName(), modelService);
+                                masterClients[0] = createWSClient(ip, port, localContext.getNodeName(), modelService, diverge);
                                 if (masterClients[0] != null && masterClients[0].getConnection().isOpen()) {
                                     Log.info("Master connection opened on {}:{}", ip, port);
                                     return;
                                 }
                             }
-                            masterClients[0] = createWSClient(defaultIP, port, localContext.getNodeName(), modelService);
+                            masterClients[0] = createWSClient(defaultIP, port, localContext.getNodeName(), modelService, diverge);
                             if (masterClients[0] != null && masterClients[0].getConnection().isOpen()) {
                                 Log.info("Master connection opened on {}:{}", defaultIP, port);
                                 return;
@@ -306,7 +340,7 @@ public class WSGroup implements ModelListener, Runnable {
         }
     }
 
-    public static WebSocketClient createWSClient(String ip, String port, String currentNodeName, final ModelService modelService) {
+    public static WebSocketClient createWSClient(String ip, String port, String currentNodeName, final ModelService modelService, final AtomicBoolean diverge) {
         final WebSocketClient[] client = new WebSocketClient[1];
         URI uri = null;
         if (ip.contains(":")) {
@@ -328,6 +362,8 @@ public class WSGroup implements ModelListener, Runnable {
                 } else {
                     switch (parsedMsg.getType()) {
                         case PUSH_TYPE:
+                            //push from master
+                            diverge.set(false);
                             PushMessage pm = (PushMessage) parsedMsg;
                             ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
                             modelService.update(model, new UpdateCallback() {
@@ -355,7 +391,12 @@ public class WSGroup implements ModelListener, Runnable {
         try {
             boolean result = client[0].connectBlocking();
             if (result) {
-                client[0].send(new RegisterMessage(currentNodeName).toRaw());
+                String currentModel = null;
+                if (diverge.get()) {
+                    ContainerRoot model = modelService.getCurrentModel().getModel();
+                    currentModel = jsonModelSaver.serialize(model);
+                }
+                client[0].send(new RegisterMessage(currentNodeName, currentModel).toRaw());
                 return client[0];
             } else {
                 return null;
