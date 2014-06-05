@@ -13,12 +13,12 @@ import org.kevoree.api.ModelService
  * Date: 21/05/2014
  * Time: 16:25
  */
-class DockerWrapperFactory(nodeName: String, modelService: ModelService) : WrapperFactory(nodeName) {
+class DockerWrapperFactory(nodeName: String, modelService: ModelService, val memory: Int, val cpuShares: Int) : WrapperFactory(nodeName) {
 
     override fun wrap(modelElement: KMFContainer, newBeanInstance: Any, tg: ThreadGroup, bs: BootstrapService, modelService: ModelService): KInstanceWrapper {
         when (modelElement) {
             is ContainerNode -> {
-                return DockerNodeWrapper(modelElement, newBeanInstance, tg, bs, modelService)
+                return DockerNodeWrapper(modelElement, newBeanInstance, tg, bs, modelService, memory, cpuShares)
             }
             else -> {
                 return super.wrap(modelElement, newBeanInstance, tg, bs, modelService)

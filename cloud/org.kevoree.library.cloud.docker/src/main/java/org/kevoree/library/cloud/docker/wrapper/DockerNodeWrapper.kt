@@ -29,7 +29,9 @@ import org.kevoree.api.handler.UpdateCallback
  * Date: 21/05/2014
  * Time: 16:25
  */
-class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup, override val bs: BootstrapService, val modelService: ModelService) : KInstanceWrapper {
+class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup,
+                        override val bs: BootstrapService, val modelService: ModelService, val memory: Int,
+                        val cpuShares: Int) : KInstanceWrapper {
 
     override var isStarted: Boolean = false
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
@@ -95,6 +97,8 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
             // create Container configuration
             val conf = ContainerConfig();
             conf.setImage(IMAGE)
+            conf.setMemoryLimit(memory.toLong()*1024*1024) // compute attribute to set limit in MB
+            conf.setCpuShares(cpuShares)
             var volumes = HashMap<String, Any>();
             volumes.put(dfileFolder.getAbsolutePath(), HashMap<String, String>());
             conf.setVolumes(volumes);

@@ -2,6 +2,7 @@ package org.kevoree.library.cloud.docker;
 
 import org.kevoree.annotation.KevoreeInject;
 import org.kevoree.annotation.NodeType;
+import org.kevoree.annotation.Param;
 import org.kevoree.api.ModelService;
 import org.kevoree.library.cloud.docker.wrapper.DockerWrapperFactory;
 import org.kevoree.library.defaultNodeTypes.JavaNode;
@@ -16,11 +17,17 @@ import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
 @NodeType
 public class DockerNode extends JavaNode {
 
+    @Param(defaultValue = "0")
+    private Integer cpuShares;
+
+    @Param(defaultValue = "512")
+    private int memory;
+
     @KevoreeInject
     private ModelService modelService;
 
     @Override
     protected WrapperFactory createWrapperFactory(String nodeName) {
-        return new DockerWrapperFactory(nodeName, modelService);
+        return new DockerWrapperFactory(nodeName, modelService, memory, cpuShares);
     }
 }
