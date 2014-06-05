@@ -47,6 +47,7 @@ public class MergeHandler extends AbstractHandler {
                 repos.addAll(Arrays.asList(rawRepos));
             } else {
                 repos = new HashSet<String>();
+                repos.add("https://oss.sonatype.org/content/groups/public");
             }
             HTTPMergeRequestParser requestParser = new HTTPMergeRequestParser();
             final Map<String, Collection<Library>> libz = requestParser.parse(request.getParameterMap().entrySet());
@@ -58,7 +59,7 @@ public class MergeHandler extends AbstractHandler {
             JavaMergeService javaMerge = new JavaMergeService(bootstrapService);
             NpmMergeService npmMerge = new NpmMergeService();
             for (Map.Entry<String, Collection<Library>> entry : libz.entrySet()) {
-                if (entry.getKey().equals("java")) {
+                if (entry.getKey().equals("java") || entry.getKey().equals("cloud")) {
                     compare.merge(model, javaMerge.process(entry.getValue(), repos)).applyOn(model);
                 } else if (entry.getKey().equals("javascript")) {
                     compare.merge(model, npmMerge.process(entry.getValue(), repos)).applyOn(model);

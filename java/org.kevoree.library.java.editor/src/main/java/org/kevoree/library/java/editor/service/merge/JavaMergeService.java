@@ -26,6 +26,7 @@ public class JavaMergeService implements MergeService {
 
     public JavaMergeService(BootstrapService bootstrapService) {
         this.bootstrapService = bootstrapService;
+
     }
 
     @Override

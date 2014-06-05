@@ -6,7 +6,6 @@ import fr.braindead.npmjava.command.NpmView;
 import org.kevoree.library.java.editor.model.Library;
 import org.kevoree.library.java.editor.service.ServiceCallback;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +17,7 @@ import java.util.Map;
  */
 public class NpmLoadService implements LoadService {
     
-    private static final String KEVOREE_PATTERN = "^(kevoree-chan-|kevoree-node-|kevoree-group-|kevoree-comp-)[\\w-]+";
+    private static final String KEVOREE_PATTERN = "^kevoree-(chan|node|group|comp)-[\\w-]+";
     
     @Override
     public void process(final ServiceCallback cb) {
@@ -33,34 +32,36 @@ public class NpmLoadService implements LoadService {
                     JsonObject jsonLib = (JsonObject) searchRes.get(i);
                     if (jsonLib.get("versions") != null) {
                         JsonArray keywords = jsonLib.getAsJsonArray("keywords");
-                        boolean isStdLib = false;
-                        for (int j=0; j < keywords.size(); j++) {
-                            if (keywords.get(j).getAsString().equals("kevoree-std-lib")) {
-                                isStdLib = true;
-                                break;
-                            }
-                        }
-                        if (isStdLib) {
-                            String artId = jsonLib.get("name").getAsString();
-                            try {
-                                JsonObject libView = npmView.execute(artId);
-                                Library lib = libMap.get(artId);
-                                if (lib == null) {
-                                    lib = new Library();
-                                    lib.setGroupId("");
-                                    lib.setArtifactId(artId);
-                                    String[] splittedArtId = artId.split("-", 3);
-                                    lib.setSimpleName(splittedArtId[splittedArtId.length-1]);
-                                    lib.setType(splittedArtId[1]);
-                                    libMap.put(artId, lib);
-                                    JsonArray versions = libView.getAsJsonArray("versions");
-                                    for (JsonElement vers : versions) {
-                                        lib.addVersion(vers.getAsString());
-                                    }
+                        if (keywords != null && keywords.size() > 0) {
+                            boolean isStdLib = false;
+                            for (int j=0; j < keywords.size(); j++) {
+                                if (keywords.get(j).getAsString().equals("kevoree-std-lib")) {
+                                    isStdLib = true;
+                                    break;
                                 }
+                            }
+                            if (isStdLib) {
+                                String artId = jsonLib.get("name").getAsString();
+                                try {
+                                    JsonObject libView = npmView.execute(artId);
+                                    Library lib = libMap.get(artId);
+                                    if (lib == null) {
+                                        lib = new Library();
+                                        lib.setGroupId("");
+                                        lib.setArtifactId(artId);
+                                        String[] splittedArtId = artId.split("-", 3);
+                                        lib.setSimpleName(splittedArtId[splittedArtId.length-1]);
+                                        lib.setType(splittedArtId[1]);
+                                        libMap.put(artId, lib);
+                                        JsonArray versions = libView.getAsJsonArray("versions");
+                                        for (JsonElement vers : versions) {
+                                            lib.addVersion(vers.getAsString());
+                                        }
+                                    }
 
-                            } catch (Exception e) {
-                                cb.onError(e);
+                                } catch (Exception e) {
+                                    cb.onError(e);
+                                }
                             }
                         }
                     }
@@ -78,6 +79,24 @@ public class NpmLoadService implements LoadService {
             @Override
             public void onError(Exception e) {
                 cb.onError(e);
+            }
+        });
+    }
+
+    public static void main(String[] args) {
+        NpmLoadService service = new NpmLoadService();
+        service.process(new ServiceCallback() {
+            @Override
+            public void onSuccess(JsonObject jsonRes) {
+                System.out.println("LOADED");
+                System.out.println(jsonRes.toString());
+            }
+
+            @Override
+            public void onError(Exception e) {
+                System.out.println("BOUYAH");
+                System.out.println(e.getMessage());
+                e.printStackTrace();
             }
         });
     }
