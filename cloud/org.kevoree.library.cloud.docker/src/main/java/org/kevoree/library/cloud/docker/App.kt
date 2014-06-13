@@ -19,7 +19,7 @@ import org.kevoree.library.cloud.docker.client.DockerException
  */
 fun main(args: Array<String>) {
     val REPO = "kevoree/java"
-    val docker = DockerClientImpl("http://localhost:4243")
+    val docker = DockerClientImpl("http://localhost:2375")
 
     // retrieve current model and serialize it to JSON
     var serializer = JSONModelSerializer()

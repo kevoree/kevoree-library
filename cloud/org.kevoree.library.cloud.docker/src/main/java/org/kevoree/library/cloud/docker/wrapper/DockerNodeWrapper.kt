@@ -38,7 +38,7 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
 
     val IMAGE: String = "kevoree/java"
 
-    private var docker = DockerClientImpl("http://localhost:4243")
+    private var docker = DockerClientImpl("http://localhost:2375")
     private var containerID: String? = null
     private var hostConf : HostConfig = HostConfig()
 
