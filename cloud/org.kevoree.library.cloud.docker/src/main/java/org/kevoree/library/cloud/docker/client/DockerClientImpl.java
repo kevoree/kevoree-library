@@ -1,20 +1,21 @@
 package org.kevoree.library.cloud.docker.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.inria.jfilter.QueryParser;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.io.IOUtils;
 import org.kevoree.library.cloud.docker.model.*;
-
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.util.List;
-
 import org.kevoree.log.Log;
 import us.monoid.json.JSONArray;
 import us.monoid.json.JSONException;
 import us.monoid.web.Content;
 import us.monoid.web.JSONResource;
 import us.monoid.web.Resty;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.util.List;
 
 import static us.monoid.web.Resty.*;
 
@@ -31,7 +32,7 @@ public class DockerClientImpl implements DockerClient {
     public DockerClientImpl(String url) {
         this.resty = new Resty();
         if (url.endsWith("/")) {
-            url = url.substring(0, url.length()-2);
+            url = url.substring(0, url.length() - 2);
         }
         this.url = url;
     }
@@ -44,7 +45,7 @@ public class DockerClientImpl implements DockerClient {
     @Override
     public void start(String id, HostConfig conf) throws DockerException, JSONException {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = build();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             OutputStreamWriter osw = new OutputStreamWriter(baos);
             mapper.writeValue(osw, conf);
@@ -77,7 +78,7 @@ public class DockerClientImpl implements DockerClient {
         try {
             JSONArray res = this.resty.json(this.url + DockerApi.CONTAINERS_LIST).array();
 
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = build();
             return mapper.readValue(res.toString(), mapper.getTypeFactory().constructCollectionType(List.class, Container.class));
 
         } catch (IOException e) {
@@ -90,7 +91,7 @@ public class DockerClientImpl implements DockerClient {
         try {
             JSONResource res = this.resty.json(this.url + String.format(DockerApi.INSPECT_CONTAINER, idOrName));
 
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = build();
             return mapper.readValue(res.toObject().toString(), ContainerDetail.class);
 
         } catch (IOException e) {
@@ -115,7 +116,7 @@ public class DockerClientImpl implements DockerClient {
                     form(String.format("container=%s&m=%s&repo=%s&tag=%s&author=%s", conf.getContainer(), conf.getMessage(), conf.getRepo(), conf.getTag(), conf.getAuthor()))
             );
 
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = build();
             return mapper.readValue(res.toObject().toString(), ContainerInfo.class);
 
         } catch (IOException e) {
@@ -152,7 +153,7 @@ public class DockerClientImpl implements DockerClient {
     @Override
     public void createImage(ImageConfig conf) throws DockerException, JSONException {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = build();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             OutputStreamWriter osw = new OutputStreamWriter(baos);
             mapper.writeValue(osw, conf);
@@ -179,7 +180,7 @@ public class DockerClientImpl implements DockerClient {
         }
 
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = build();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             OutputStreamWriter osw = new OutputStreamWriter(baos);
             mapper.writeValue(osw, conf);
@@ -192,4 +193,11 @@ public class DockerClientImpl implements DockerClient {
             throw new DockerException(e.getMessage());
         }
     }
+
+    public ObjectMapper build() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true);
+        return mapper;
+    }
+
 }
