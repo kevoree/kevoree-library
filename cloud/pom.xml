@@ -5,12 +5,12 @@
     <artifactId>org.kevoree.library.cloud.root</artifactId>
     <packaging>pom</packaging>
     <name>Kevoree :: Library :: Cloud :: Root</name>
-    <version>3.6.5-SNAPSHOT</version>
+    <version>3.6.5</version>
 
     <parent>
         <artifactId>org.kevoree.library</artifactId>
         <groupId>org.kevoree.library</groupId>
-        <version>3.6.5-SNAPSHOT</version>
+        <version>3.6.5</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
