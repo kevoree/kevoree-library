@@ -20,6 +20,8 @@ public class Library {
     private String artifactId;
     private String simpleName;
     private String type;
+    private String latestRelease;
+    private String latestSnapshot;
 
     public void setType(String type) {
         this.type = type;
@@ -43,6 +45,14 @@ public class Library {
         this.simpleName = simpleName;
     }
 
+    public void setLatestRelease(String version) {
+        this.latestRelease = version;
+    }
+
+    public void setLatestSnapshot(String version) {
+        this.latestSnapshot = version;
+    }
+
     public void addVersion(String version) {
         if (!this.versions.contains(version)) {
             // do not duplicate versions
@@ -62,32 +72,31 @@ public class Library {
         return artifactId;
     }
 
+    public String getLatestRelease() {
+        return this.latestRelease;
+    }
+
+    public String getLatestSnapshot() {
+        return this.latestSnapshot;
+    }
+
     public JsonObject toJsonObject() {
         JsonObject obj = new JsonObject();
-        if (groupId != null) obj.add("groupID", new JsonPrimitive(groupId));
+        if (groupId != null) {
+            obj.add("groupID", new JsonPrimitive(groupId));
+        }
         obj.add("artifactID", new JsonPrimitive(artifactId));
         obj.add("simpleName", new JsonPrimitive(simpleName));
-        if (type != null) obj.add("type", new JsonPrimitive(type));
-        obj.add("latest", new JsonPrimitive(getLatest()));
+        if (type != null) {
+            obj.add("type", new JsonPrimitive(type));
+        }
+        obj.add("latest", new JsonPrimitive(latestRelease));
         JsonArray jsonVersions = new JsonArray();
-        for (String version : versions) jsonVersions.add(new JsonPrimitive(version));
+        for (String version : versions) {
+            jsonVersions.add(new JsonPrimitive(version));
+        }
         obj.add("versions", jsonVersions);
         return obj;
-    }
-    
-    private String getLatest() {
-        String latest = this.versions.get(0);
-        for (int i=1; i < this.versions.size(); i++) {
-            if (!this.versions.get(i).contains("SNAPSHOT")) {
-                Version v1 = Version.valueOf(latest);
-                Version v2 = Version.valueOf(this.versions.get(i));
-                if (v2.greaterThan(v1)) {
-                    latest = this.versions.get(i);
-                }
-            }
-        }
-        
-        return latest;
     }
 
     @Override

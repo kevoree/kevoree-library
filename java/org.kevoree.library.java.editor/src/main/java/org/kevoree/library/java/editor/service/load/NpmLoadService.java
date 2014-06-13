@@ -49,6 +49,7 @@ public class NpmLoadService implements LoadService {
                                         lib = new Library();
                                         lib.setGroupId("");
                                         lib.setArtifactId(artId);
+                                        lib.setLatestRelease(libView.get("version").getAsString());
                                         String[] splittedArtId = artId.split("-", 3);
                                         lib.setSimpleName(splittedArtId[splittedArtId.length-1]);
                                         lib.setType(splittedArtId[1]);

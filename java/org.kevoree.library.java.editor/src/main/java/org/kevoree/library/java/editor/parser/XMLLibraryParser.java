@@ -22,37 +22,41 @@ public class XMLLibraryParser {
         for (int i = 0; i < list.getLength(); i++) {
             Node node = list.item(i);
             NodeList childNode = node.getChildNodes();
-            String resourceURI = null;
             String groupId = null;
             String artifactId = null;
             String version = null;
+            String latestRelease = null;
+            String latestSnapshot = null;
             for (int j = 0; j < childNode.getLength(); j++) {
                 Node nodeChild = childNode.item(j);
-                if (nodeChild.getNodeName().endsWith("resourceURI")) {
-                    resourceURI = nodeChild.getTextContent();
-                }
-                if (nodeChild.getNodeName().endsWith("groupId")) {
+                if (nodeChild.getNodeName().equals("groupId")) {
                     groupId = nodeChild.getTextContent();
                 }
-                if (nodeChild.getNodeName().endsWith("artifactId")) {
+                if (nodeChild.getNodeName().equals("artifactId")) {
                     artifactId = nodeChild.getTextContent();
                 }
-                if (nodeChild.getNodeName().endsWith("version")) {
+                if (nodeChild.getNodeName().equals("version")) {
                     version = nodeChild.getTextContent();
                 }
-            }
-            if (resourceURI != null && !resourceURI.contains("-source")) {
-                Library lib = this.libMap.get(artifactId);
-                if (lib == null) {
-                    lib = new Library();
-                    lib.setGroupId(groupId);
-                    lib.setArtifactId(artifactId);
-                    String[] splittedArtId = artifactId.split("\\.");
-                    lib.setSimpleName(splittedArtId[splittedArtId.length-1]);
-                    this.libMap.put(artifactId, lib);
+                if (nodeChild.getNodeName().equals("latestRelease")) {
+                    latestRelease = nodeChild.getTextContent();
                 }
-                lib.addVersion(version);
+                if (nodeChild.getNodeName().equals("latestSnapshot")) {
+                    latestSnapshot = nodeChild.getTextContent();
+                }
             }
+            Library lib = this.libMap.get(artifactId);
+            if (lib == null) {
+                lib = new Library();
+                lib.setGroupId(groupId);
+                lib.setArtifactId(artifactId);
+                String[] splittedArtId = artifactId.split("\\.");
+                lib.setSimpleName(splittedArtId[splittedArtId.length-1]);
+                lib.setLatestRelease(latestRelease);
+                lib.setLatestSnapshot(latestSnapshot);
+                this.libMap.put(artifactId, lib);
+            }
+            lib.addVersion(version);
         }
     }
     
