@@ -26,6 +26,9 @@ public class ContainerState {
     @JsonProperty("Ghost")
     private boolean ghost;
 
+    @JsonProperty("Paused")
+    private boolean paused;
+
     public boolean isRunning() {
         return running;
     }
@@ -73,12 +76,18 @@ public class ContainerState {
     public void setGhost(boolean ghost) {
         this.ghost = ghost;
     }
-    
-    
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
+    }
 
     @Override
     public String toString() {
-        return "ContainerState{" + "running=" + running + ", pid=" + pid + ", exitCode=" + exitCode + ", startedAt=" + startedAt + ", finishedAt=" + finishedAt + ", ghost=" + ghost + '}';
+        return "ContainerState{" + "running=" + running + ", pid=" + pid + ", exitCode=" + exitCode + ", startedAt=" + startedAt + ", finishedAt=" + finishedAt + ", ghost=" + ghost + ", paused="+paused+"}";
     }
 
 }

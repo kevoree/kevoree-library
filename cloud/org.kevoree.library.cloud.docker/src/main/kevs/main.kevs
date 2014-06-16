@@ -16,7 +16,7 @@ set sync.master = "node0"
 set node0.cpuShares = "5"
 set node0.memory = "2048"
 
-set node0.web.port = "8081"
+set node0.web.port = "8082"
 
 attach node0, container0 sync
 

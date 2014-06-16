@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class ContainerDetail {
 
-    @JsonProperty("ID")              private String              id;
+    @JsonProperty("Id")              private String              id;
     @JsonProperty("Created")         private String              created;
     @JsonProperty("Path")            private String              path;
     @JsonProperty("Args")            private String[]            args;
