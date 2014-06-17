@@ -10,10 +10,10 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.mqtt:latest
 
 add node0 : JavaNode
-add sync : WSGroup
-attach node0 sync
 
 add ch : MQTTChannel
+set ch.broker = "tcp://localhost:1883"
+
 
 add node0.ticker : Ticker
 set node0.ticker.period = "1000"
