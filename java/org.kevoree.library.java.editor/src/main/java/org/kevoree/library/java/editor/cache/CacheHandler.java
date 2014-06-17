@@ -8,6 +8,7 @@ import org.kevoree.log.Log;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by leiko on 05/06/14.
@@ -17,10 +18,6 @@ public class CacheHandler {
     private JsonObject jsLibs, javaLibs, cloudLibs;
 
     public CacheHandler(final int cacheDuration) {
-        this.jsLibs = new JsonObject();
-        this.javaLibs = new JsonObject();
-        this.cloudLibs = new JsonObject();
-
         Thread reloadTask = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -49,11 +46,16 @@ public class CacheHandler {
 
         executor.shutdown();
 
-        while (!executor.isTerminated()) {}
+        try {
+            executor.awaitTermination(15, TimeUnit.MINUTES);
 
-        this.jsLibs = jsWorker.getLibraries();
-        this.javaLibs = javaWorker.getLibraries();
-        this.cloudLibs = cloudWorker.getLibraries();
+            this.jsLibs = jsWorker.getLibraries();
+            this.javaLibs = javaWorker.getLibraries();
+            this.cloudLibs = cloudWorker.getLibraries();
+
+        } catch (InterruptedException e) {
+            Log.error(e.getMessage());
+        }
     }
 
     public JsonObject getJSLibs() {

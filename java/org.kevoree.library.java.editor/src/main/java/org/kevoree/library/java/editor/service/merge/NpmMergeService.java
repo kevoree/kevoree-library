@@ -14,7 +14,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 /**

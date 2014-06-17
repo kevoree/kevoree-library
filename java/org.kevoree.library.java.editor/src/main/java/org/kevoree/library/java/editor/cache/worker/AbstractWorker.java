@@ -7,7 +7,7 @@ import com.google.gson.JsonObject;
  */
 public abstract class AbstractWorker implements Runnable {
 
-    protected JsonObject libraries;
+    protected JsonObject libraries = new JsonObject();
 
     public JsonObject getLibraries() {
         return this.libraries;

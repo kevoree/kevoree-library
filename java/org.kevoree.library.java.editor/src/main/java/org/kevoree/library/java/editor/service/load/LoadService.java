@@ -1,6 +1,6 @@
 package org.kevoree.library.java.editor.service.load;
 
-import org.kevoree.library.java.editor.service.ServiceCallback;
+import com.google.gson.JsonObject;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,5 +10,5 @@ import org.kevoree.library.java.editor.service.ServiceCallback;
  */
 public interface LoadService {
     
-    void process(ServiceCallback cb);
+    JsonObject process() throws Exception;
 }

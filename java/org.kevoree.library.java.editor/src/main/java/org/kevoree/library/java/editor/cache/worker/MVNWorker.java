@@ -20,21 +20,10 @@ public class MVNWorker extends AbstractWorker {
     public void run() {
         try {
             JavaLoadService service = new JavaLoadService(this.platform);
-            service.process(new ServiceCallback() {
-                @Override
-                public void onSuccess(JsonObject jsonRes) {
-                    libraries = jsonRes;
-                    Log.info("MVNWorker: "+platform+" libraries cached");
-                }
-
-                @Override
-                public void onError(Exception e) {
-                    Log.error(e.getMessage());
-                }
-            });
-
+            this.libraries = service.process();
+            Log.info("MVNWorker: "+this.platform+" libraries cached");
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e.getMessage());
         }
     }
 }

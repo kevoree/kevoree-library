@@ -54,14 +54,14 @@
             <version>0.7.2</version>
         </dependency>
         <dependency>
-            <groupId>org.kevoree.extra</groupId>
+            <groupId>fr.braindead</groupId>
             <artifactId>npm-java</artifactId>
-            <version>1.2</version>
+            <version>1.4</version>
         </dependency>
         <dependency>
-            <groupId>org.kevoree.extra</groupId>
+            <groupId>fr.braindead</groupId>
             <artifactId>npm-resolver</artifactId>
-            <version>1.2</version>
+            <version>1.4</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
