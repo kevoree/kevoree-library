@@ -24,7 +24,7 @@ public class CacheHandler {
                 try {
                     while (true) {
                         Thread.sleep(60 * 1000 * cacheDuration);
-                        loadAndWait();
+                        load();
                     }
                 } catch (InterruptedException e) {
                     Log.error(e.getMessage());
@@ -34,7 +34,7 @@ public class CacheHandler {
         reloadTask.start();
     }
 
-    public void loadAndWait() {
+    public void load() {
         AbstractWorker jsWorker = new JSWorker();
         AbstractWorker javaWorker = new MVNWorker("java");
         AbstractWorker cloudWorker = new MVNWorker("cloud");

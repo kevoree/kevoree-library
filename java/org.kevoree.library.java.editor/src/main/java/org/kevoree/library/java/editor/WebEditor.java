@@ -54,7 +54,7 @@ public class WebEditor {
         server.setHandler(handlers);
 
         Log.info("Kevoree standard libraries: preparing caches...(this may take a while)");
-        cacheHandler.loadAndWait();
+        cacheHandler.load();
         server.start();
         Log.info("Kevoree Web Editor Service: started on port {}", port);
     }

@@ -1,7 +1,5 @@
 package org.kevoree.library.java.editor.cache.worker;
 
-import com.google.gson.JsonObject;
-import org.kevoree.library.java.editor.service.ServiceCallback;
 import org.kevoree.library.java.editor.service.load.JavaLoadService;
 import org.kevoree.log.Log;
 

@@ -90,7 +90,11 @@ public class Library {
         if (type != null) {
             obj.add("type", new JsonPrimitive(type));
         }
-        obj.add("latest", new JsonPrimitive(latestRelease));
+        if (latestRelease == null) {
+            obj.add("latest", new JsonPrimitive(latestSnapshot));
+        } else {
+            obj.add("latest", new JsonPrimitive(latestRelease));
+        }
         JsonArray jsonVersions = new JsonArray();
         for (String version : versions) {
             jsonVersions.add(new JsonPrimitive(version));
