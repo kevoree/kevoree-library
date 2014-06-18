@@ -36,7 +36,7 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
     override var isStarted: Boolean = false
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
 
-    val IMAGE: String = "kevoree/java"
+    val IMAGE: String = "kevoree/watchdog"
 
     private var docker = DockerClientImpl("http://localhost:2375")
     private var containerID: String? = null
