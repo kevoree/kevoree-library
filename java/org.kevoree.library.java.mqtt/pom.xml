@@ -23,27 +23,12 @@
             <artifactId>org.kevoree.api</artifactId>
             <version>${kevoree.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.dna.mqtt</groupId>
-            <artifactId>moquette-broker</artifactId>
-            <version>0.5</version>
-        </dependency>
     </dependencies>
 
     <repositories>
         <repository>
             <id>Eclipse Paho Repo</id>
             <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
-        </repository>
-        <repository>
-            <id>bintray</id>
-            <url>http://dl.bintray.com/andsel/maven/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
         </repository>
     </repositories>
 

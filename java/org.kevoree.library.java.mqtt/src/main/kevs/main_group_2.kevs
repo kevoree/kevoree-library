@@ -1,0 +1,12 @@
+//sample of KevScript configuration
+repo "http://repo1.maven.org/maven2"
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:release
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:release
+include mvn:org.kevoree.library.java:org.kevoree.library.java.mqtt:latest
+
+add node1 : JavaNode
+add sync : MQTTGroup
+set sync.broker = "tcp://localhost:1883"
+attach node1 sync
+
+

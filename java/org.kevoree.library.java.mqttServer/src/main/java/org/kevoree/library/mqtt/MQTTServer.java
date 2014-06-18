@@ -1,9 +1,8 @@
 package org.kevoree.library.mqtt;
 
-import org.dna.mqtt.moquette.server.Server;
-import org.kevoree.annotation.ComponentType;
-import org.kevoree.annotation.Start;
-import org.kevoree.annotation.Stop;
+import org.kevoree.annotation.*;
+import org.kevoree.api.Context;
+import org.kevoree.library.mqtt.internal.ExServer;
 
 import java.io.IOException;
 
@@ -13,11 +12,17 @@ import java.io.IOException;
 @ComponentType
 public class MQTTServer {
 
-    Server server;
+    ExServer server;
+
+    @KevoreeInject
+    Context context;
+
+    @Param(defaultValue = "1883")
+    Integer port;
 
     @Start
     public void start() throws IOException {
-        server = new Server();
+        server = new ExServer(context.getNodeName(),context.getInstanceName(),port);
         server.startServer();
     }
 
