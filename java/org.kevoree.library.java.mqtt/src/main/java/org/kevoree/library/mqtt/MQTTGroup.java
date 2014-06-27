@@ -26,12 +26,12 @@ public class MQTTGroup implements ModelListener, MqttCallback {
     @KevoreeInject
     ModelService modelService;
 
-    @Param(defaultValue = "tcp://iot.eclipse.org:1883")
+    @Param(defaultValue = "tcp://mqtt.kevoree.org:81/")
     String broker;
 
     private MqttClient client;
 
-    private static final String KEVOREE_PREFIX = "kevoree/";
+    private static final String KEVOREE_PREFIX = "kev/";
 
     private String topicName;
 
@@ -39,8 +39,15 @@ public class MQTTGroup implements ModelListener, MqttCallback {
     public void start() throws MqttException {
         modelService.registerModelListener(this);
         MqttConnectOptions connOpts = new MqttConnectOptions();
+
         connOpts.setCleanSession(true);
-        client = new MqttClient(broker, KEVOREE_PREFIX + localContext.getNodeName() + "_" + localContext.getInstanceName());
+
+        String clientID = KEVOREE_PREFIX + localContext.getNodeName() + "_" + localContext.getInstanceName();
+        if (clientID.length() > 20) {
+            clientID = clientID.substring(0, 20);
+        }
+
+        client = new MqttClient(broker, clientID);
         client.setCallback(this);
         topicName = KEVOREE_PREFIX + localContext.getInstanceName();
         client.connect(connOpts);
@@ -116,28 +123,49 @@ public class MQTTGroup implements ModelListener, MqttCallback {
 
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
-        String payload = new String(message.getPayload());
-        int indexSep = payload.indexOf(sep);
-        String originName = payload.substring(0, indexSep);
-        if (!getFQN().equals(originName)) {
-            String modelPayload = payload.substring(indexSep + 1, payload.length());
-            final ContainerRoot model = (ContainerRoot) loader.loadModelFromString(modelPayload).get(0);
-            boolean broad = false;
-            if (model.findNodesByID(localContext.getNodeName()) == null) {
-                broad = true;
-                //Merge and update locally
-                compare.merge(model, modelService.getCurrentModel().getModel()).applyOn(model);
-            }
-            final boolean finalBroad = broad;
-            modelService.update(model, new UpdateCallback() {
-                @Override
-                public void run(Boolean applied) {
-                    if (finalBroad) {
-                        sendToServer(model);
-                    }
+
+        try {
+            Log.info("message " + message);
+            String payload = new String(message.getPayload());
+            if (payload.startsWith("pull")) {
+                //sendToServer(modelService.getCurrentModel().getModel());
+            } else {
+                int indexSep = payload.indexOf(sep);
+                String originName = null;
+                if (indexSep != -1) {
+                    originName = payload.substring(0, indexSep);
                 }
-            });
+                if (originName == null || !getFQN().equals(originName)) {
+
+                    String modelPayload;
+                    if (originName == null) {
+                        modelPayload = payload;
+                    } else {
+                        modelPayload = payload.substring(indexSep + 1, payload.length());
+                    }
+
+                    final ContainerRoot model = (ContainerRoot) loader.loadModelFromString(modelPayload).get(0);
+                    boolean broad = false;
+                    if (model.findNodesByID(localContext.getNodeName()) == null) {
+                        broad = true;
+                        //Merge and update locally
+                        compare.merge(model, modelService.getCurrentModel().getModel()).applyOn(model);
+                    }
+                    final boolean finalBroad = broad;
+                    modelService.update(model, new UpdateCallback() {
+                        @Override
+                        public void run(Boolean applied) {
+                            if (finalBroad) {
+                                sendToServer(model);
+                            }
+                        }
+                    });
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 
     public void sendToServer(ContainerRoot model) {
@@ -148,7 +176,7 @@ public class MQTTGroup implements ModelListener, MqttCallback {
             builder.append(sep);
             builder.append(saver.serialize(model));
             MqttMessage message = new MqttMessage(builder.toString().getBytes());
-            message.setQos(1);
+            message.setQos(0);
             client.publish(topicName, message);
         } catch (Exception e) {
             e.printStackTrace();

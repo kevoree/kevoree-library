@@ -18,7 +18,7 @@ public class MQTTChannel implements ChannelDispatch, MqttCallback {
     @KevoreeInject
     ChannelContext channelContext;
 
-    @Param(defaultValue = "tcp://iot.eclipse.org:1883")
+    @Param(defaultValue = "tcp://mqtt.kevoree.org:81/")
     String broker;
 
     @Update
@@ -29,7 +29,7 @@ public class MQTTChannel implements ChannelDispatch, MqttCallback {
 
     private MqttClient client;
 
-    private static final String KEVOREE_PREFIX = "kevoree/";
+    private static final String KEVOREE_PREFIX = "kev/";
 
     private String topicName;
 
@@ -37,7 +37,13 @@ public class MQTTChannel implements ChannelDispatch, MqttCallback {
     public void start() throws MqttException {
         MqttConnectOptions connOpts = new MqttConnectOptions();
         connOpts.setCleanSession(true);
-        client = new MqttClient(broker, KEVOREE_PREFIX + context.getNodeName() + "_" + context.getInstanceName());
+
+        String clientID = KEVOREE_PREFIX + context.getNodeName() + "_" + context.getInstanceName();
+        if(clientID.length() > 20){
+            clientID = clientID.substring(0,20);
+        }
+
+        client = new MqttClient(broker, clientID);
         client.setCallback(this);
         topicName = KEVOREE_PREFIX + context.getInstanceName();
         client.connect(connOpts);
