@@ -11,10 +11,11 @@ public class SubChildrenTest extends KevoreeTestCase {
     public void startupChildTest() throws Exception {
         bootstrap("node0", "oneChild.kevs");
         waitLog("node0", "node0/child1/* INFO: Bootstrap completed", 10000);
-        exec("node0", "set child1.started = \"false\"");
+
+        exec("node0", "stop child1");
         assert (getCurrentModel("node0").findNodesByID("child1").getStarted() == false);
         waitLog("node0", "node0/* INFO: Stopping nodes[child1]", 5000);
-        exec("node0", "set child1.started = \"true\"");
+        exec("node0", "start child1");
         assert (getCurrentModel("node0").findNodesByID("child1").getStarted() == true);
         waitLog("node0", "node0/child1/* INFO: Bootstrap completed", 10000);
     }
