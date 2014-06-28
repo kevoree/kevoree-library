@@ -1,6 +1,7 @@
 package org.kevoree.library.mqtt;
 
 import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.kevoree.annotation.*;
 import org.kevoree.api.*;
 import org.kevoree.log.Log;
@@ -18,7 +19,7 @@ public class MQTTChannel implements ChannelDispatch, MqttCallback {
     @KevoreeInject
     ChannelContext channelContext;
 
-    @Param(defaultValue = "tcp://mqtt.kevoree.org:81/")
+    @Param(defaultValue = "tcp://mqtt.kevoree.org:81")
     String broker;
 
     @Update
@@ -43,7 +44,7 @@ public class MQTTChannel implements ChannelDispatch, MqttCallback {
             clientID = clientID.substring(0,20);
         }
 
-        client = new MqttClient(broker, clientID);
+        client = new MqttClient(broker, clientID,new MemoryPersistence());
         client.setCallback(this);
         topicName = KEVOREE_PREFIX + context.getInstanceName();
         client.connect(connOpts);

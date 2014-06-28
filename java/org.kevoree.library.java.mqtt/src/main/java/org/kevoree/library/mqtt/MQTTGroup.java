@@ -1,6 +1,8 @@
 package org.kevoree.library.mqtt;
 
+import com.sun.scenario.Settings;
 import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
@@ -26,10 +28,10 @@ public class MQTTGroup implements ModelListener, MqttCallback {
     @KevoreeInject
     ModelService modelService;
 
-    @Param(defaultValue = "tcp://mqtt.kevoree.org:81/")
+    @Param(defaultValue = "tcp://mqtt.kevoree.org:81")
     String broker;
 
-    private MqttClient client;
+    private MqttAsyncClient client;
 
     private static final String KEVOREE_PREFIX = "kev/";
 
@@ -47,11 +49,28 @@ public class MQTTGroup implements ModelListener, MqttCallback {
             clientID = clientID.substring(0, 20);
         }
 
-        client = new MqttClient(broker, clientID);
+        client = new MqttAsyncClient(broker, clientID,new MemoryPersistence());
         client.setCallback(this);
         topicName = KEVOREE_PREFIX + localContext.getInstanceName();
-        client.connect(connOpts);
-        client.subscribe(topicName);
+
+
+
+        client.connect(connOpts, new IMqttActionListener() {
+            @Override
+            public void onSuccess(IMqttToken iMqttToken) {
+                try {
+                    Log.info("MQTT Group connected");
+                    client.subscribe(topicName, 0);
+                } catch (MqttException e) {
+                    Log.error("mqtt error",e);
+                }
+            }
+
+            @Override
+            public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
+                Log.error("mqtt error",throwable);
+            }
+        }).waitForCompletion();
     }
 
     @Stop
@@ -125,10 +144,9 @@ public class MQTTGroup implements ModelListener, MqttCallback {
     public void messageArrived(String topic, MqttMessage message) throws Exception {
 
         try {
-            Log.info("message " + message);
             String payload = new String(message.getPayload());
             if (payload.startsWith("pull")) {
-                //sendToServer(modelService.getCurrentModel().getModel());
+                sendToServer(modelService.getCurrentModel().getModel());
             } else {
                 int indexSep = payload.indexOf(sep);
                 String originName = null;
@@ -169,19 +187,19 @@ public class MQTTGroup implements ModelListener, MqttCallback {
     }
 
     public void sendToServer(ContainerRoot model) {
-        Log.info("Send to MQTT server ");
+        Log.info("Send Model to MQTT topic ");
         try {
             StringBuilder builder = new StringBuilder();
             builder.append(getFQN());
             builder.append(sep);
             builder.append(saver.serialize(model));
             MqttMessage message = new MqttMessage(builder.toString().getBytes());
+            message.setRetained(true);
             message.setQos(0);
             client.publish(topicName, message);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
