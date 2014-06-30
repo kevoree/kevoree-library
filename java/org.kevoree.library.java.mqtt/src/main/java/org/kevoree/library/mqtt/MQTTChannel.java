@@ -28,7 +28,7 @@ public class MQTTChannel implements ChannelDispatch, MqttCallback {
         start();
     }
 
-    private MqttClient client;
+    private MqttAsyncClient client;
 
     private static final String KEVOREE_PREFIX = "kev/";
 
@@ -40,15 +40,29 @@ public class MQTTChannel implements ChannelDispatch, MqttCallback {
         connOpts.setCleanSession(true);
 
         String clientID = KEVOREE_PREFIX + context.getNodeName() + "_" + context.getInstanceName();
-        if(clientID.length() > 20){
-            clientID = clientID.substring(0,20);
+        if (clientID.length() > 20) {
+            clientID = clientID.substring(0, 20);
         }
 
-        client = new MqttClient(broker, clientID,new MemoryPersistence());
+        client = new MqttAsyncClient(broker, clientID, new MemoryPersistence());
         client.setCallback(this);
         topicName = KEVOREE_PREFIX + context.getInstanceName();
-        client.connect(connOpts);
-        client.subscribe(topicName);
+        client.connect(connOpts, new IMqttActionListener() {
+            @Override
+            public void onSuccess(IMqttToken iMqttToken) {
+                try {
+                    Log.info("MQTT Channel connected");
+                    client.subscribe(topicName, 0);
+                } catch (MqttException e) {
+                    Log.error("mqtt error", e);
+                }
+            }
+
+            @Override
+            public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
+                Log.error("mqtt error", throwable);
+            }
+        }).waitForCompletion();
     }
 
     @Stop
@@ -86,13 +100,19 @@ public class MQTTChannel implements ChannelDispatch, MqttCallback {
         }
         if (!channelContext.getRemotePortPaths().isEmpty()) {
         */
+
+        try {
             MqttMessage message = new MqttMessage(payload.toString().getBytes());
-            message.setQos(1);
+            message.setQos(0);
+            message.setRetained(false);
             try {
                 client.publish(topicName, message);
             } catch (MqttException e) {
                 e.printStackTrace();
             }
-       // }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // }
     }
 }
