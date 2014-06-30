@@ -60,6 +60,7 @@ public class MQTTChannel implements ChannelDispatch, MqttCallback {
 
             @Override
             public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
+
                 Log.error("mqtt error", throwable);
             }
         }).waitForCompletion();
@@ -102,11 +103,14 @@ public class MQTTChannel implements ChannelDispatch, MqttCallback {
         */
 
         try {
-            MqttMessage message = new MqttMessage(payload.toString().getBytes());
-            message.setQos(0);
-            message.setRetained(false);
+            //MqttMessage message = new MqttMessage(payload.toString().getBytes());
+            //message.setQos(1);
+            //message.setRetained(false);
             try {
-                client.publish(topicName, message);
+                if (!client.isConnected()) {
+                    client.connect().waitForCompletion();
+                }
+                client.publish(topicName, payload.toString().getBytes(),1,false);
             } catch (MqttException e) {
                 e.printStackTrace();
             }
