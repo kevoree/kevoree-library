@@ -12,7 +12,7 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.mqtt:latest
 add node0 : JavaNode
 
 add ch : MQTTChannel
-set ch.broker = "tcp://localhost:1883"
+set ch.broker = "tcp://mqtt.kevoree.org:81"
 
 
 add node0.ticker : Ticker
@@ -25,3 +25,8 @@ bind node0.console.input ch
 add node0.child0 : JavaNode
 add child0.console : ConsolePrinter
 bind child0.console.input ch
+
+add sync_4 : MQTTGroup
+set sync_4.broker = "tcp://mqtt.kevoree.org:81"
+attach node0 sync_4
+attach child0 sync_4

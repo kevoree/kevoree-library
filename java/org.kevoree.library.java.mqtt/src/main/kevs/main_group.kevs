@@ -11,9 +11,9 @@ add node0 : JavaNode
 //add node0.ch0 : JavaNode
 //add node0.ch1 : JavaNode
 
-add sync_2 : MQTTGroup
-set sync_2.broker = "tcp://mqtt.kevoree.org:81"
-attach node0 sync_2
+add sync_3 : MQTTGroup
+set sync_3.broker = "tcp://mqtt.kevoree.org:81"
+attach node0 sync_3
 //attach ch0 sync
 //attach ch1 sync
 
