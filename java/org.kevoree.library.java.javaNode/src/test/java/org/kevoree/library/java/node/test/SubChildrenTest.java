@@ -7,7 +7,7 @@ import org.kevoree.tools.test.KevoreeTestCase;
  * Created by duke on 13/02/2014.
  */
 public class SubChildrenTest extends KevoreeTestCase {
-    @Test
+    //@Test
     public void startupChildTest() throws Exception {
         bootstrap("node0", "oneChild.kevs");
         waitLog("node0", "node0/child1/* INFO: Bootstrap completed", 10000);
