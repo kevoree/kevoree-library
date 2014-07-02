@@ -147,7 +147,7 @@ public class MQTTGroup implements ModelListener, Listener {
     private static final String sep = "#";
 
     public void sendToServer(ContainerRoot model) {
-        Log.info("Send Model to MQTT topic ");
+        Log.info("Send Model to MQTT topic , origin:{}",model.getGenerated_KMF_ID());
         try {
             final StringBuilder builder = new StringBuilder();
             builder.append(getFQN());
