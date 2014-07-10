@@ -1,6 +1,5 @@
 package org.kevoree.library.java.node.test;
 
-import org.junit.Test;
 import org.kevoree.tools.test.KevoreeTestCase;
 
 /**
