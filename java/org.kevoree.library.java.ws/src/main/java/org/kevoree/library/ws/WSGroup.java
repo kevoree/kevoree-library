@@ -13,12 +13,12 @@ import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
-import org.kevoree.compare.DefaultModelCompare;
-import org.kevoree.loader.JSONModelLoader;
+import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.log.Log;
 import org.kevoree.modeling.api.compare.ModelCompare;
+import org.kevoree.modeling.api.json.JSONModelLoader;
+import org.kevoree.modeling.api.json.JSONModelSerializer;
 import org.kevoree.modeling.api.trace.TraceSequence;
-import org.kevoree.serializer.JSONModelSerializer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -220,9 +220,9 @@ public class WSGroup implements ModelListener, Runnable {
 
     }
 
-    private static JSONModelLoader jsonModelLoader = new JSONModelLoader();
+    private static JSONModelLoader jsonModelLoader = new JSONModelLoader(new DefaultKevoreeFactory());
     private static JSONModelSerializer jsonModelSaver = new JSONModelSerializer();
-    private static ModelCompare compare = new DefaultModelCompare();
+    private static ModelCompare compare = new ModelCompare(new DefaultKevoreeFactory());
 
     private boolean isMaster() {
         if (master == null) {

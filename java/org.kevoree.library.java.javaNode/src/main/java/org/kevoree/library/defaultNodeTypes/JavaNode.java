@@ -6,6 +6,8 @@ import org.kevoree.annotation.NodeType;
 import org.kevoree.api.BootstrapService;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
+import org.kevoree.api.adaptation.AdaptationModel;
+import org.kevoree.api.adaptation.AdaptationPrimitive;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.library.defaultNodeTypes.command.*;
@@ -13,8 +15,6 @@ import org.kevoree.library.defaultNodeTypes.planning.JavaPrimitive;
 import org.kevoree.library.defaultNodeTypes.planning.KevoreeKompareBean;
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
 import org.kevoree.log.Log;
-import org.kevoreeadaptation.AdaptationModel;
-import org.kevoreeadaptation.AdaptationPrimitive;
 
 
 /**

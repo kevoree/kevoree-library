@@ -5,13 +5,11 @@ import org.kevoree.ContainerRoot
 import org.kevoree.api.BootstrapService
 import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.ContainerNode
-import org.kevoree.serializer.JSONModelSerializer
 import java.io.File
 import java.io.BufferedWriter
 import java.io.FileWriter
 import org.kevoree.log.Log
 import java.nio.file.Files
-import org.kevoree.impl.DefaultKevoreeFactory
 import java.util.HashMap
 import java.io.StringWriter
 import org.kevoree.library.cloud.docker.client.DockerClient
@@ -22,6 +20,7 @@ import org.kevoree.library.cloud.docker.model.CommitConfig
 import org.kevoree.library.cloud.docker.client.DockerException
 import org.kevoree.api.ModelService
 import org.kevoree.api.handler.UpdateCallback
+import org.kevoree.modeling.api.json.JSONModelSerializer
 
 /**
  * Created with IntelliJ IDEA.

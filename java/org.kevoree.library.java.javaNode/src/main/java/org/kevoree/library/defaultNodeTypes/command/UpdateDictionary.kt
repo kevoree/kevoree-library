@@ -8,7 +8,7 @@ import org.kevoree.log.Log
 import java.lang.reflect.InvocationTargetException
 import org.kevoree.DictionaryValue
 import org.kevoree.api.ModelService
-import org.kevoree.impl.DefaultKevoreeFactory
+import org.kevoree.factory.DefaultKevoreeFactory
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;

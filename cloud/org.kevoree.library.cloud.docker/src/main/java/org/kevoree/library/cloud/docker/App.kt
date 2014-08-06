@@ -5,14 +5,14 @@ import java.io.BufferedWriter
 import java.io.FileWriter
 import java.io.StringWriter
 import org.kevoree.log.Log
-import org.kevoree.impl.DefaultKevoreeFactory
-import org.kevoree.serializer.JSONModelSerializer
 import java.nio.file.Files
 import java.util.HashMap
 import org.kevoree.library.cloud.docker.client.DockerClientImpl
 import org.kevoree.library.cloud.docker.model.ContainerConfig
 import org.kevoree.library.cloud.docker.model.HostConfig
 import org.kevoree.library.cloud.docker.client.DockerException
+import org.kevoree.modeling.api.json.JSONModelSerializer
+import org.kevoree.factory.DefaultKevoreeFactory
 
 /**
  * Created by leiko on 20/05/14.

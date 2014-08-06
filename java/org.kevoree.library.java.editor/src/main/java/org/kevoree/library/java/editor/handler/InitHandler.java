@@ -3,7 +3,7 @@ package org.kevoree.library.java.editor.handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.kevoree.api.ModelService;
-import org.kevoree.serializer.JSONModelSerializer;
+import org.kevoree.modeling.api.json.JSONModelSerializer;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

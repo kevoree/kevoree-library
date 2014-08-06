@@ -9,8 +9,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.version>0.7.271</kotlin.version>
-        <kevoree.version>3.7.1</kevoree.version>
+        <kotlin.version>0.8.11</kotlin.version>
+        <kevoree.version>4.0.0</kevoree.version>
     </properties>
 
     <organization>

@@ -9,10 +9,8 @@ import java.io.InputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.IOException
-import org.kevoree.serializer.JSONModelSerializer
 import org.kevoree.log.Log
 import java.io.File
-import org.kevoree.impl.DefaultKevoreeFactory
 import org.kevoree.library.cloud.lightlxc.wrapper.ConfigGenerator
 import java.util.HashSet
 import java.nio.file.Files
@@ -21,6 +19,8 @@ import org.kevoree.library.cloud.lightlxc.wrapper.NodeManager
 import org.kevoree.library.cloud.lightlxc.wrapper.MkNodeCommandExecutor
 import org.kevoree.library.cloud.lightlxc.wrapper.Reader
 import org.kevoree.api.ModelService
+import org.kevoree.modeling.api.json.JSONModelSerializer
+import org.kevoree.factory.DefaultKevoreeFactory
 
 /**
  * Created with IntelliJ IDEA.

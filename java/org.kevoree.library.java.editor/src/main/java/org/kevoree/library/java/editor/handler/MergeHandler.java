@@ -7,13 +7,13 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.kevoree.ContainerRoot;
 import org.kevoree.api.BootstrapService;
-import org.kevoree.compare.DefaultModelCompare;
-import org.kevoree.impl.DefaultKevoreeFactory;
+import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.library.java.editor.model.Library;
 import org.kevoree.library.java.editor.parser.HTTPMergeRequestParser;
 import org.kevoree.library.java.editor.service.merge.JavaMergeService;
 import org.kevoree.library.java.editor.service.merge.NpmMergeService;
 import org.kevoree.log.Log;
+import org.kevoree.modeling.api.compare.ModelCompare;
 import org.kevoree.modeling.api.json.JSONModelSerializer;
 
 import javax.servlet.ServletException;
@@ -54,7 +54,7 @@ public class MergeHandler extends AbstractHandler {
 
             DefaultKevoreeFactory factory = new DefaultKevoreeFactory();
             ContainerRoot model = factory.createContainerRoot();
-            DefaultModelCompare compare = new DefaultModelCompare();
+            ModelCompare compare = new ModelCompare(factory);
 
             JavaMergeService javaMerge = new JavaMergeService(bootstrapService);
             NpmMergeService npmMerge = new NpmMergeService();

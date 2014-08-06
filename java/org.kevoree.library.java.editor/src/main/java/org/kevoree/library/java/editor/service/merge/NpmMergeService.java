@@ -3,11 +3,11 @@ package org.kevoree.library.java.editor.service.merge;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.kevoree.ContainerRoot;
-import org.kevoree.compare.DefaultModelCompare;
-import org.kevoree.impl.DefaultKevoreeFactory;
+import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.library.java.editor.model.Library;
-import org.kevoree.loader.JSONModelLoader;
 import org.kevoree.log.Log;
+import org.kevoree.modeling.api.compare.ModelCompare;
+import org.kevoree.modeling.api.json.JSONModelLoader;
 import org.kevoree.npm.resolver.NpmResolver;
 
 import java.io.ByteArrayInputStream;
@@ -25,8 +25,8 @@ public class NpmMergeService implements MergeService {
     public ContainerRoot process(Collection<Library> libraries, Set<String> repos) {
         DefaultKevoreeFactory factory = new DefaultKevoreeFactory();
         ContainerRoot model = factory.createContainerRoot();
-        DefaultModelCompare compare = new DefaultModelCompare();
-        JSONModelLoader loader = new JSONModelLoader();
+        ModelCompare compare = new ModelCompare(factory);
+        JSONModelLoader loader = new JSONModelLoader(factory);
         NpmResolver resolver = new NpmResolver();
 
         for (Library lib : libraries) {

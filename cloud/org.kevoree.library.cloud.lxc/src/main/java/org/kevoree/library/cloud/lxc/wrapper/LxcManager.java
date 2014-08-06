@@ -2,7 +2,7 @@ package org.kevoree.library.cloud.lxc.wrapper;
 
 import org.kevoree.ContainerNode;
 import org.kevoree.DictionaryValue;
-import org.kevoree.impl.DefaultKevoreeFactory;
+import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.library.cloud.api.helper.ProcessStreamFileLogger;
 import org.kevoree.library.cloud.api.helper.ResourceConstraintManager;
 import org.kevoree.library.cloud.lxc.wrapper.utils.FileManager;

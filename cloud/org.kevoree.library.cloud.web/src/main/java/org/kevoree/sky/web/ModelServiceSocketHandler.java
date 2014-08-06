@@ -1,15 +1,14 @@
 package org.kevoree.sky.web;
 
 
-import org.kevoree.ContainerRoot;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
+import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.log.Log;
+import org.kevoree.modeling.api.json.JSONModelSerializer;
 import org.kevoree.modeling.api.trace.TraceSequence;
-import org.kevoree.serializer.JSONModelSerializer;
-import org.kevoree.trace.DefaultTraceSequence;
 import org.webbitserver.BaseWebSocketHandler;
 import org.webbitserver.WebSocketConnection;
 
@@ -63,7 +62,7 @@ public class ModelServiceSocketHandler extends BaseWebSocketHandler implements M
             //JSONObject jsonReader = new JSONObject(message);
             //if (jsonReader.get("diff") != null) {
                 connection.send("event=update");
-                final TraceSequence sequence = new DefaultTraceSequence().populateFromString(message);
+                final TraceSequence sequence = new TraceSequence(new DefaultKevoreeFactory()).populateFromString(message);
                 modelService.submitSequence(sequence, new UpdateCallback() {
                     @Override
                     public void run(Boolean applied) {

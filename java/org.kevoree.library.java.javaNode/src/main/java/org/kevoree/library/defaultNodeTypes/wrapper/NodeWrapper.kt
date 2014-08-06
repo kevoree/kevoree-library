@@ -10,12 +10,12 @@ import java.io.IOException
 import org.kevoree.library.defaultNodeTypes.wrapper.NodeWrapper.Reader
 import java.io.FileOutputStream
 import org.kevoree.api.BootstrapService
-import org.kevoree.serializer.JSONModelSerializer
 import org.kevoree.ContainerRoot
 import org.kevoree.ContainerNode
-import org.kevoree.impl.DefaultKevoreeFactory
 import org.kevoree.log.Log
 import java.util.HashSet
+import org.kevoree.modeling.api.json.JSONModelSerializer
+import org.kevoree.factory.DefaultKevoreeFactory
 
 /**
  * Created with IntelliJ IDEA.

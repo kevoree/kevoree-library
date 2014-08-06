@@ -3,7 +3,7 @@ package org.kevoree.library.cloud.lightlxc.wrapper;
 import org.kevoree.ContainerNode;
 import org.kevoree.ContainerRoot;
 import org.kevoree.DictionaryValue;
-import org.kevoree.serializer.JSONModelSerializer;
+import org.kevoree.modeling.api.json.JSONModelSerializer;
 
 import java.io.*;
 import java.nio.channels.FileChannel;

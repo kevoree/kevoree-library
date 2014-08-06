@@ -10,11 +10,11 @@ import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
-import org.kevoree.compare.DefaultModelCompare;
-import org.kevoree.loader.JSONModelLoader;
+import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.log.Log;
 import org.kevoree.modeling.api.compare.ModelCompare;
-import org.kevoree.serializer.JSONModelSerializer;
+import org.kevoree.modeling.api.json.JSONModelLoader;
+import org.kevoree.modeling.api.json.JSONModelSerializer;
 
 import java.net.URISyntaxException;
 
@@ -134,11 +134,11 @@ public class MQTTGroup implements ModelListener, Listener {
 
     }
 
-    private JSONModelLoader loader = new JSONModelLoader();
+    private JSONModelLoader loader = new JSONModelLoader(new DefaultKevoreeFactory());
 
     private JSONModelSerializer saver = new JSONModelSerializer();
 
-    private ModelCompare compare = new DefaultModelCompare();
+    private ModelCompare compare = new ModelCompare(new DefaultKevoreeFactory());
 
     public String getFQN() {
         return localContext.getInstanceName() + "@" + localContext.getNodeName();
