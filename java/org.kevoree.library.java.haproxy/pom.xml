@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.java.haproxy</artifactId>
     <name>Kevoree :: Library :: Java :: HAProxy</name>
-    <version>4.0.0</version>
+    <version>4.0.1-SNAPSHOT</version>
 
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
         <groupId>org.kevoree.library.java</groupId>
-        <version>4.0.0</version>
+        <version>4.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
