@@ -23,11 +23,17 @@ public class DockerNode extends JavaNode {
     @Param(defaultValue = "512")
     private int memory;
 
+    @Param(defaultValue = "true")
+    private boolean startKevboot;
+
+    @Param(defaultValue = "kevoree/watchdog")
+    private String image;
+
     @KevoreeInject
     private ModelService modelService;
 
     @Override
     protected WrapperFactory createWrapperFactory(String nodeName) {
-        return new DockerWrapperFactory(nodeName, modelService, memory, cpuShares);
+        return new DockerWrapperFactory(nodeName, modelService);
     }
 }

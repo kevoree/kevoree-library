@@ -5,6 +5,8 @@ import org.kevoree.ContainerRoot
 import org.kevoree.api.BootstrapService
 import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.ContainerNode
+import org.kevoree.Dictionary
+import org.kevoree.DictionaryValue
 import org.kevoree.serializer.JSONModelSerializer
 import java.io.File
 import java.io.BufferedWriter
@@ -30,13 +32,39 @@ import org.kevoree.api.handler.UpdateCallback
  * Time: 16:25
  */
 class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup,
-                        override val bs: BootstrapService, val modelService: ModelService, val memory: Int,
-                        val cpuShares: Int) : KInstanceWrapper {
+                        override val bs: BootstrapService, val modelService: ModelService) : KInstanceWrapper {
+
+    private var image: String = "kevoree/watchdog";
+    private var cpuShares : Int = 0
+    private var memory : Long = 512
+    private var startKevboot : Boolean = true
+
+    {
+        val dic : Dictionary? = modelElement.dictionary
+        if (dic != null) {
+            val imgVal : DictionaryValue? = dic.findValuesByID("image")
+            if (imgVal != null) {
+                if (imgVal.value!!.length > 0) {
+                    image = imgVal.value!!
+                }
+            }
+            val cpuSharesVal : DictionaryValue? = dic.findValuesByID("cpuShares")
+            if (cpuSharesVal != null) {
+                cpuShares = cpuSharesVal.value!!.toInt()
+            }
+            val memoryVal : DictionaryValue? = dic.findValuesByID("memory")
+            if (memoryVal != null) {
+                memory = memoryVal.value!!.toLong()
+            }
+            val startKevbootVal : DictionaryValue? = dic.findValuesByID("startKevboot")
+            if (startKevbootVal != null) {
+                startKevboot = startKevbootVal.value!!.toBoolean()
+            }
+        }
+    }
 
     override var isStarted: Boolean = false
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
-
-    val IMAGE: String = "kevoree/watchdog"
 
     private var docker = DockerClientImpl("http://localhost:2375")
     private var containerID: String? = null
@@ -93,30 +121,34 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
         } catch (e: DockerException) {
             // if getContainer() failed: then we need to create a new container
             // pull kevoree/java if not already done
-            docker.pull(IMAGE)
+            docker.pull(image)
 
             // create Container configuration
             val conf = ContainerConfig();
-            conf.setImage(IMAGE)
-            conf.setMemoryLimit(memory.toLong()*1024*1024) // compute attribute to set limit in MB
+            conf.setImage(image)
+            conf.setMemoryLimit(memory*1024*1024) // compute attribute to set limit in MB
             conf.setCpuShares(cpuShares)
-            var volumes = HashMap<String, Any>();
-            volumes.put(dfileFolder.getAbsolutePath(), HashMap<String, String>());
-            conf.setVolumes(volumes);
-            conf.setCmd(array<String>(
-                    "java",
-                    "-Dnode.name=${modelElement.name}",
-                    "-Dnode.bootstrap=${modelFile.getAbsolutePath()}",
-                    "-jar",
-                    "/root/kevboot.jar",
-                    "release"
-            ))
+            if (startKevboot) {
+                var volumes = HashMap<String, Any>();
+                volumes.put(dfileFolder.getAbsolutePath(), HashMap<String, String>());
+                conf.setVolumes(volumes);
+                conf.setCmd(array<String>(
+                        "java",
+                        "-Dnode.name=${modelElement.name}",
+                        "-Dnode.bootstrap=${modelFile.getAbsolutePath()}",
+                        "-jar",
+                        "/root/kevboot.jar",
+                        "release"
+                ))
+            }
 
             val container = docker.createContainer(conf, modelElement.name)!!
             containerID = container.getId()
 
         } finally {
-            hostConf.setBinds(array<String>("${dfileFolder.getAbsolutePath()}:${dfileFolder.getAbsolutePath()}:ro"))
+            if (startKevboot) {
+                hostConf.setBinds(array<String>("${dfileFolder.getAbsolutePath()}:${dfileFolder.getAbsolutePath()}:ro"))
+            }
         }
     }
 
@@ -124,12 +156,12 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
         if (containerID != null) {
             var conf = CommitConfig()
             conf.setContainer(containerID)
-            conf.setRepo(IMAGE)
+            conf.setRepo(image)
             conf.setTag(modelElement.name)
             docker.commit(conf)
-            Log.info("Container {} commited into {}:{}", containerID, IMAGE, modelElement.name)
+            Log.info("Container {} commited into {}:{}", containerID, image, modelElement.name)
             docker.deleteContainer(containerID)
-            Log.info("Container {} deleted successfully", containerID, IMAGE, modelElement.name)
+            Log.info("Container {} deleted successfully", containerID, image, modelElement.name)
         }
     }
 }

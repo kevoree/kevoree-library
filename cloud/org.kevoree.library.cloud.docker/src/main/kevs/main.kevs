@@ -1,20 +1,22 @@
-repo "http://repo1.maven.org/maven2"
+repo "https://oss.sonatype.org/content/groups/public/"
 
 include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.docker:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:release
 include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.web:release
 
-add node0 : DockerNode
+add node0, node0.container0, node0.container1 : DockerNode
 add node0.web : WebFrontend
-add node0.container0 : DockerNode
 add sync : WSGroup
 
 set sync.port/node0 = "9000"
 set sync.port/container0 = "9000"
 set sync.master = "node0"
 
-set node0.cpuShares = "5"
-set node0.memory = "2048"
+set container0.cpuShares = "5"
+set container0.memory = "2048"
+
+set container1.image = "lgsd/diamond"
+set container1.startKevboot = "false"
 
 set node0.web.port = "8082"
 

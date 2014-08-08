@@ -70,11 +70,4 @@ public class NpmLoadService implements LoadService {
 
         return res;
     }
-
-    public static void main(String[] args) throws Exception {
-        NpmLoadService service = new NpmLoadService();
-        JsonObject obj = service.process();
-        System.out.println("LOADED");
-        System.out.println(obj.toString());
-    }
 }
