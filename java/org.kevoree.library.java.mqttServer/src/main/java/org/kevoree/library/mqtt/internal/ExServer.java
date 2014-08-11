@@ -1,6 +1,5 @@
 package org.kevoree.library.mqtt.internal;
 
-import org.dna.mqtt.commons.Constants;
 import org.dna.mqtt.moquette.messaging.spi.impl.SimpleMessaging;
 import org.dna.mqtt.moquette.server.ServerAcceptor;
 import org.dna.mqtt.moquette.server.netty.NettyAcceptor;

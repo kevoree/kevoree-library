@@ -9,6 +9,12 @@ import org.kevoree.log.Log
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory
 import org.kevoree.api.ModelService
 import org.kevoree.ContainerNode
+import org.kevoree.library.defaultNodeTypes.KevoreeThreadGroup
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingQueue
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -32,6 +38,7 @@ import org.kevoree.ContainerNode
  * Time: 17:53
  */
 
+
 class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeName: String, val registry: ModelRegistry, val bs: BootstrapService, val modelService: ModelService) : PrimitiveCommand, Runnable {
 
     var nodeTypeName: String? = null
@@ -42,7 +49,7 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
     override fun execute(): Boolean {
         var subThread: Thread? = null
         try {
-            tg = ThreadGroup("kev/" + c.path()!!)
+            tg = KevoreeThreadGroup("kev/" + c.path())
             subThread = Thread(tg, this)
             subThread!!.start()
             subThread!!.join()
@@ -81,11 +88,8 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
             }
             newBeanKInstanceWrapper?.create()
             resultSub = true
-
             Thread.currentThread().setContextClassLoader(null)
-
             Log.info("Add instance {}",c.path())
-
         } catch(e: Throwable){
             Log.error("Error while adding instance {}", e, c.name)
             resultSub = false

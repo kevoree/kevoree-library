@@ -6,9 +6,10 @@ import org.kevoree.Instance
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.log.Log
 import java.lang.reflect.InvocationTargetException
-import org.kevoree.DictionaryValue
+import org.kevoree.Value
 import org.kevoree.api.ModelService
 import org.kevoree.factory.DefaultKevoreeFactory
+import org.kevoree.Value
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -24,7 +25,7 @@ import org.kevoree.factory.DefaultKevoreeFactory
  * limitations under the License.
  */
 
-class UpdateDictionary(val c: Instance, val dicValue: DictionaryValue, val nodeName: String, val registry: ModelRegistry, val bs: org.kevoree.api.BootstrapService, val modelService: ModelService) : PrimitiveCommand {
+class UpdateDictionary(val c: Instance, val dicValue: Value, val nodeName: String, val registry: ModelRegistry, val bs: org.kevoree.api.BootstrapService, val modelService: ModelService) : PrimitiveCommand {
 
     override fun execute(): Boolean {
 
@@ -81,7 +82,7 @@ class UpdateDictionary(val c: Instance, val dicValue: DictionaryValue, val nodeN
             //try to found old value
             var valueToInject: String? = null
             val previousValue = modelService.getCurrentModel()?.getModel()?.findByPath(dicValue.path()!!)
-            if (previousValue != null && previousValue is DictionaryValue) {
+            if (previousValue != null && previousValue is Value) {
                 valueToInject = previousValue.value
             } else {
                 val instance: Instance = dicValue.eContainer()?.eContainer() as Instance
@@ -91,7 +92,7 @@ class UpdateDictionary(val c: Instance, val dicValue: DictionaryValue, val nodeN
                 }
             }
             if (valueToInject != null) {
-                val fakeDicoValue = DefaultKevoreeFactory().createDictionaryValue()
+                val fakeDicoValue = DefaultKevoreeFactory().createValue()
                 fakeDicoValue.value = valueToInject
                 fakeDicoValue.name = dicValue.name
                 val reffound = registry.lookup(c)

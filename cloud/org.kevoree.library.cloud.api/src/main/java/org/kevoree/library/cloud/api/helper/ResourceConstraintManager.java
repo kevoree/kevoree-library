@@ -1,7 +1,7 @@
 package org.kevoree.library.cloud.api.helper;
 
 import org.kevoree.ContainerNode;
-import org.kevoree.DictionaryValue;
+import org.kevoree.Value;
 
 /**
  * User: Erwan Daubert - erwan.daubert@gmail.com
@@ -16,7 +16,7 @@ public abstract class ResourceConstraintManager {
     public boolean defineConstraints(ContainerNode node) {
         boolean isDone = true;
         if (node.getDictionary() != null) {
-            DictionaryValue dictionaryValue = node.getDictionary().findValuesByID("RAM");
+            Value dictionaryValue = node.getDictionary().findValuesByID("RAM");
             if (dictionaryValue != null) {
                 isDone = isDone && defineRAM(node.getName(), dictionaryValue.getValue());
             }

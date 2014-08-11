@@ -23,14 +23,10 @@ import org.kevoree.modeling.api.trace.TraceSequence;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.kevoree.library.ws.Protocol.*;
@@ -80,9 +76,6 @@ public class WSGroup implements ModelListener, Runnable {
     private WebSocketServer serverHandler;
 
 
-
-
-
     private class InternalWebSocketServer extends WebSocketServer {
 
         public InternalWebSocketServer(InetSocketAddress address) {
@@ -122,10 +115,10 @@ public class WSGroup implements ModelListener, Runnable {
                                 //ok i've to merge locally
                                 ContainerRoot recModel = (ContainerRoot) jsonModelLoader.loadModelFromString(rm.getModel()).get(0);
                                 TraceSequence tseq = compare.merge(modelService.getCurrentModel().getModel(), recModel);
-                                modelService.submitSequence(tseq,new UpdateCallback() {
+                                modelService.submitSequence(tseq, new UpdateCallback() {
                                     @Override
                                     public void run(Boolean applied) {
-                                        Log.info("Master merged deploy {}",applied);
+                                        Log.info("Master merged deploy {}", applied);
                                     }
                                 });
                             }
@@ -186,7 +179,7 @@ public class WSGroup implements ModelListener, Runnable {
     }
 
     @Start
-    public void startWSGroup() throws UnknownHostException {
+    public void startWSGroup() throws Exception {
         serverHandler = new InternalWebSocketServer(new InetSocketAddress(port));
         modelService.registerModelListener(this);
         serverHandler.start();
@@ -303,12 +296,12 @@ public class WSGroup implements ModelListener, Runnable {
                     ContainerRoot lastModel = modelService.getCurrentModel().getModel();
                     Group selfGroup = (Group) lastModel.findByPath(localContext.getPath());
                     //localize master node
-                    if (selfGroup != null) {
+                    if (selfGroup != null && master != null) {
                         FragmentDictionary masterDico = selfGroup.findFragmentDictionaryByID(master);
                         String defaultIP = "127.0.0.1";
                         String port = "9000";
                         if (masterDico != null) {
-                            DictionaryValue val = masterDico.findValuesByID("port");
+                            Value val = masterDico.findValuesByID("port");
                             port = val.getValue();
                         }
                         List<String> addresses = new ArrayList<String>();
@@ -338,7 +331,7 @@ public class WSGroup implements ModelListener, Runnable {
                 }
             }
         } catch (Exception e) {
-            Log.error("", e);
+            Log.error("error while connecting to master", e);
         }
     }
 

@@ -305,7 +305,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                         }
                     }
                     "value" -> {
-                        if (modelElement is org.kevoree.DictionaryValue) {
+                        if (modelElement is org.kevoree.Value) {
                             val parentInstance = modelElement.eContainer()?.eContainer() as? Instance
                             if (parentInstance != null && parentInstance is ContainerNode && parentInstance.name == nodeName && currentNode == null) {
                                 //noop

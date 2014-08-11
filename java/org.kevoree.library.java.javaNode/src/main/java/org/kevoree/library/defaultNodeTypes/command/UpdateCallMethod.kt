@@ -8,7 +8,6 @@ import org.kevoree.ContainerRoot
 import org.kevoree.log.Log
 import java.lang.reflect.InvocationTargetException
 import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
-import org.kevoree.DictionaryValue
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;

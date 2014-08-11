@@ -2,7 +2,7 @@ package org.kevoree.library.cloud.lightlxc.wrapper;
 
 import org.kevoree.ContainerNode;
 import org.kevoree.ContainerRoot;
-import org.kevoree.DictionaryValue;
+import org.kevoree.Value;
 import org.kevoree.modeling.api.json.JSONModelSerializer;
 
 import java.io.*;
@@ -132,7 +132,7 @@ public class ConfigGenerator {
         //generate the runner.sh
         String jvmArgs = null;
         if (element.getDictionary() != null) {
-            DictionaryValue jvmArgsAttribute = element.getDictionary().findValuesByID("jvmArgs");
+            Value jvmArgsAttribute = element.getDictionary().findValuesByID("jvmArgs");
             if (jvmArgsAttribute != null) {
                 jvmArgs = jvmArgsAttribute.toString();
             }

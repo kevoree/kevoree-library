@@ -5,6 +5,7 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
 
 add node0 : JavaNode
 add sync : WSGroup
+//set sync.master = "node0"
 attach node0 sync
 
 
