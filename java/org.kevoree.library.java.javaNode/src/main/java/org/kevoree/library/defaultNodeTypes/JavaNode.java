@@ -117,13 +117,13 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
             return new RemoveBindingCommand((MBinding) adaptationPrimitive.getRef(), nodeName, modelRegistry);
         }
         if (pTypeName.equals(JavaPrimitive.AddDeployUnit.name())) {
-            return new AddDeployUnit((DeployUnit) adaptationPrimitive.getRef(), bootstrapService, modelRegistry);
+            return new AddDeployUnit((DeployUnit) adaptationPrimitive.getRef(), bootstrapService);
         }
         if (pTypeName.equals(JavaPrimitive.LinkDeployUnit.name())) {
             return new LinkDeployUnit((DeployUnit) adaptationPrimitive.getRef(), bootstrapService, modelRegistry);
         }
         if (pTypeName.equals(JavaPrimitive.RemoveDeployUnit.name())) {
-            RemoveDeployUnit res = new RemoveDeployUnit((DeployUnit) adaptationPrimitive.getRef(), bootstrapService, modelRegistry);
+            RemoveDeployUnit res = new RemoveDeployUnit((DeployUnit) adaptationPrimitive.getRef(), bootstrapService);
             return res;
         }
         if (pTypeName.equals(JavaPrimitive.AddInstance.name())) {

@@ -32,7 +32,7 @@ class StartStopInstance(val c: Instance, val nodeName: String, val start: Boolea
     public override fun run() {
         try {
             // FIXME when a deployUnit will have multiple DeployUnit, we need to find the right one...
-            Thread.currentThread().setContextClassLoader(ClassLoaderHelper.getClassLoader(registry,c,nodeName))
+            Thread.currentThread().setContextClassLoader(iact!!.kcl)
             if(start){
                 Thread.currentThread().setName("KevoreeStartInstance" + c.name!!)
                 resultAsync = iact!!.kInstanceStart(root!!)

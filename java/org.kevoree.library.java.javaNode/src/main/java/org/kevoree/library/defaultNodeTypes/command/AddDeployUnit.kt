@@ -1,6 +1,5 @@
 package org.kevoree.library.defaultNodeTypes.command
 
-import org.kevoree.library.defaultNodeTypes.ModelRegistry
 import org.kevoree.DeployUnit
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.log.Log
@@ -25,10 +24,10 @@ import org.kevoree.log.Log
  * Time: 16:35
  */
 
-class AddDeployUnit(val du: DeployUnit, val bs: org.kevoree.api.BootstrapService, val registry: ModelRegistry) : PrimitiveCommand {
+class AddDeployUnit(val du: DeployUnit, val bs: org.kevoree.api.BootstrapService) : PrimitiveCommand {
 
     override fun undo() {
-        RemoveDeployUnit(du, bs, registry).execute()
+        RemoveDeployUnit(du, bs).execute()
     }
 
     override fun execute(): Boolean {
@@ -37,15 +36,11 @@ class AddDeployUnit(val du: DeployUnit, val bs: org.kevoree.api.BootstrapService
             if (kclResolved == null) {
                 val new_kcl = bs.installDeployUnit(du)
                 if (new_kcl != null) {
-                    registry.register(du, new_kcl)
                     return true
                 } else {
                     return false
                 }
             } else {
-                if(registry.lookup(du) == null){
-                    registry.register(du, kclResolved)
-                }
                 return true
             }
         } catch(e: Exception) {

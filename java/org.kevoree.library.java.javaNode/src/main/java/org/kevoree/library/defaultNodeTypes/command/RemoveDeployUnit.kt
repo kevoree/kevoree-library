@@ -26,19 +26,18 @@ import org.kevoree.log.Log
  * Time: 16:35
  */
 
-class RemoveDeployUnit(val du: DeployUnit, val bootstrap: org.kevoree.api.BootstrapService, val registry: ModelRegistry) : PrimitiveCommand {
+class RemoveDeployUnit(val du: DeployUnit, val bootstrap: org.kevoree.api.BootstrapService) : PrimitiveCommand {
 
     var random = Random()
 
     override fun undo() {
-        AddDeployUnit(du, bootstrap, registry).execute()
+        AddDeployUnit(du, bootstrap).execute()
     }
 
     //LET THE UNINSTALL
     override fun execute(): Boolean {
         try {
             bootstrap.removeDeployUnit(du)
-            registry.drop(du)
             //TODO cleanup links
             return true
 

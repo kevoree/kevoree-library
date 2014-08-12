@@ -22,21 +22,22 @@ import org.kevoree.ContainerRoot
 import org.kevoree.log.Log
 import org.kevoree.Group
 
-public class GroupWrapper(val modelElement: Group,override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
+public class GroupWrapper(val modelElement: Group, override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
+    override var kcl: ClassLoader? = null
 
     override var isStarted: Boolean = false
     override val resolver = MethodAnnotationResolver(targetObj.javaClass);
     private val fieldResolver = FieldAnnotationResolver(targetObj.javaClass);
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
-        if (!isStarted){
+        if (!isStarted) {
             try {
                 //target.getModelService()!!.registerModelListener(target)
                 val met = resolver.resolve(javaClass<org.kevoree.annotation.Start>())
                 met?.invoke(targetObj)
                 isStarted = true
                 return true
-            }catch(e: InvocationTargetException){
+            } catch(e: InvocationTargetException) {
                 Log.error("Kevoree Group Instance Start Error !", e.getCause())
                 return false
             } catch(e: Exception) {
@@ -49,17 +50,17 @@ public class GroupWrapper(val modelElement: Group,override val targetObj: Any, v
     }
 
     override fun kInstanceStop(tmodel: ContainerRoot): Boolean {
-        if (isStarted){
+        if (isStarted) {
             try {
                 // target.getModelService()!!.unregisterModelListener(target)
                 val met = resolver.resolve(javaClass<org.kevoree.annotation.Stop>())
                 met?.invoke(targetObj)
                 isStarted = false
                 return true
-            } catch(e: InvocationTargetException){
+            } catch(e: InvocationTargetException) {
                 Log.error("Kevoree Group Instance Stop Error !", e.getCause())
                 return false
-            } catch (e: Exception){
+            } catch (e: Exception) {
                 Log.error("Kevoree Group Instance Stop Error !", e)
                 return false
             }
