@@ -80,6 +80,7 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
             } else {
                 val newBeanInstance = bs.createInstance(c, newKCL)
                 newBeanKInstanceWrapper: KInstanceWrapper? = wrapperFactory.wrap(c, newBeanInstance!!, tg!!, bs, modelService)
+                newBeanKInstanceWrapper.kcl = newKCL
                 registry.register(c, newBeanKInstanceWrapper)
                 bs.injectDictionary(c, newBeanInstance, true)
             }

@@ -10,6 +10,7 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.mqtt:latest
 
 add node0 : JavaNode
+set node0.log = "TRACE"
 
 add ch : MQTTChannel
 
