@@ -7,6 +7,7 @@ import org.kevoree.api.BootstrapService
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.ContainerRoot
 import org.kevoree.log.Log
+import org.kevoree.modeling.api.KMFContainer
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -63,11 +64,16 @@ class StartStopInstance(val c: Instance, val nodeName: String, val start: Boolea
         }
 
         //Look thread group
-        root = c.typeDefinition!!.eContainer() as ContainerRoot
+
+        var r : KMFContainer? = c
+        while(r?.eContainer() != null){
+            r = r?.eContainer()
+        }
+
+        root = r as ContainerRoot
         val ref = registry.lookup(c)
         if(ref != null && ref is KInstanceWrapper){
             iact = ref as KInstanceWrapper
-
             t = Thread(iact!!.tg, this)
             t!!.start()
             t!!.join()

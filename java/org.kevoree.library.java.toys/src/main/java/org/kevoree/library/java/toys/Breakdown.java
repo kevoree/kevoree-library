@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
  * Date: 06/12/2013
  * Time: 10:00
  */
-@Library(name = "Java :: Toys")
 @ComponentType
 public class Breakdown implements Runnable {
 

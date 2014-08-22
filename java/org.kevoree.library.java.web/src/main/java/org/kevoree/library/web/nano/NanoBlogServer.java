@@ -17,7 +17,6 @@ import java.util.Random;
  * Time: 14:31
  */
 @ComponentType
-@Library(name = "Java :: Web")
 public class NanoBlogServer extends NanoHTTPD {
 
     @Param(defaultValue = "8080")

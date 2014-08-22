@@ -18,7 +18,6 @@ import org.kevoree.modeling.api.trace.TraceSequence;
  */
 
 @GroupType
-@Library(name = "Java :: Groups")
 public class BroadcastGroup implements MessageListener, ModelListener {
 
     @KevoreeInject

@@ -19,7 +19,6 @@ import java.util.UUID;
  * Time: 11:20
  */
 @ChannelType
-@Library(name = "Java :: Channels")
 public class DistributedBroadcast implements MessageListener, ChannelDispatch {
 
     @KevoreeInject

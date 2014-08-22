@@ -19,7 +19,6 @@ import org.kevoree.log.Log;
  * Time: 12:37
  */
 @ComponentType
-@Library(name = "Java")
 public class WebEditor {
 
     @Param(optional = false, defaultValue = "3042")

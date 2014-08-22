@@ -12,7 +12,6 @@ import java.util.Random;
  * Time: 15:10
  */
 @ComponentType
-@Library(name = "Java :: Toys")
 public class Ticker implements Runnable {
 
     @Param(defaultValue = "3000")

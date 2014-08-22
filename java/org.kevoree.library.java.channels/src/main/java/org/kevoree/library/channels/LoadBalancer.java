@@ -17,7 +17,6 @@ import java.util.concurrent.Executors;
  */
 
 @ChannelType
-@Library(name = "Java :: Channels")
 public class LoadBalancer implements ChannelDispatch {
 
     @Param(defaultValue = "false")

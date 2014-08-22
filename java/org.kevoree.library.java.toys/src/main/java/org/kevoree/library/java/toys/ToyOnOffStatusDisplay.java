@@ -15,7 +15,6 @@ import javax.swing.*;
  * Time: 12:00
  */
 @ComponentType
-@Library(name="Java :: Toys")
 public class ToyOnOffStatusDisplay {
 
     @Param(defaultValue = "false")

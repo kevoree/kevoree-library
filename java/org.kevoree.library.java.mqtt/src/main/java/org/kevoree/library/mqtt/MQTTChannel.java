@@ -16,7 +16,6 @@ import java.net.URISyntaxException;
  * Created by duke on 6/3/14.
  */
 @ChannelType
-@Library(name = "Java")
 public class MQTTChannel implements ChannelDispatch, Listener {
 
     @KevoreeInject

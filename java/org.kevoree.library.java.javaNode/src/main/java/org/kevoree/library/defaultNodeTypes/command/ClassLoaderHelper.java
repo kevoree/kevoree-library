@@ -7,6 +7,7 @@ import org.kevoree.TypeDefinition;
 import org.kevoree.api.BootstrapService;
 import org.kevoree.kcl.api.FlexyClassLoader;
 import org.kevoree.kcl.api.FlexyClassLoaderFactory;
+import org.kevoree.log.Log;
 
 /**
  * Created by duke on 5/23/14.
@@ -24,10 +25,13 @@ public class ClassLoaderHelper {
 
     public static FlexyClassLoader createTypeClassLoader(TypeDefinition typeDefinition, String nodeName, BootstrapService bs) {
         FlexyClassLoader kcl = FlexyClassLoaderFactory.INSTANCE.create();
+        kcl.setKey(typeDefinition.path());
         for (DeployUnit du : typeDefinition.getDeployUnits()) {
             FlexyClassLoader resolved = bs.get(du);
             if (resolved != null) {
                 kcl.attachChild(resolved);
+            } else {
+                Log.error("Incomplete typeDefinition ClassPath, missing {}",du.path());
             }
         }
         return kcl;

@@ -21,7 +21,6 @@ import java.util.Random;
  * Created by duke on 05/12/2013.
  */
 @ComponentType
-@Library(name = "Java :: Web")
 public class DummyScaler implements Runnable {
 
     private Thread current = null;

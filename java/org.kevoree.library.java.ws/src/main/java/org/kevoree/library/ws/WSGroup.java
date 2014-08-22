@@ -39,7 +39,6 @@ import static org.kevoree.library.ws.Protocol.*;
  */
 
 @GroupType
-@Library(name = "Java :: Groups")
 public class WSGroup implements ModelListener, Runnable {
 
     private AtomicBoolean diverge = new AtomicBoolean(false);

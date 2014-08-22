@@ -6,7 +6,6 @@ import org.kevoree.api.Callback;
 import org.kevoree.api.ChannelContext;
 import org.kevoree.api.ChannelDispatch;
 import org.kevoree.api.Port;
-import org.kevoree.log.Log;
 
 import java.util.concurrent.*;
 
@@ -15,7 +14,6 @@ import java.util.concurrent.*;
  * The size of the buffer can be customized with the bufferSize property.
  */
 @ChannelType
-@Library(name = "Java :: Channels")
 public class SizeBufferedBroadcast implements ChannelDispatch, Runnable {
 
     class QueuedElement {
