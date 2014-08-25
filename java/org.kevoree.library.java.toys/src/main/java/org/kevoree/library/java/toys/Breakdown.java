@@ -5,7 +5,7 @@ import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.api.KevScriptService;
 import org.kevoree.api.ModelService;
-import org.kevoree.cloner.DefaultModelCloner;
+import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.log.Log;
 import org.kevoree.modeling.api.ModelCloner;
 
@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
  * Date: 06/12/2013
  * Time: 10:00
  */
-@Library(name = "Java :: Toys")
 @ComponentType
 public class Breakdown implements Runnable {
 
@@ -61,7 +60,7 @@ public class Breakdown implements Runnable {
     public void run() {
         try {
             Log.info("i'm alone... kill myself...");
-            ModelCloner cloner = new DefaultModelCloner();
+            ModelCloner cloner = new ModelCloner(new DefaultKevoreeFactory());
             ContainerRoot clonedModel = cloner.clone(modelService.getCurrentModel().getModel());
             kevScriptService.execute("remove " + context.getNodeName() + "." + context.getInstanceName(), clonedModel);
             modelService.update(clonedModel, null);

@@ -2,7 +2,6 @@ package org.kevoree.library.defaultNodeTypes.wrapper
 
 import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import java.io.File
-import java.util.Arrays
 import java.io.InputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -10,12 +9,12 @@ import java.io.IOException
 import org.kevoree.library.defaultNodeTypes.wrapper.NodeWrapper.Reader
 import java.io.FileOutputStream
 import org.kevoree.api.BootstrapService
-import org.kevoree.serializer.JSONModelSerializer
 import org.kevoree.ContainerRoot
 import org.kevoree.ContainerNode
-import org.kevoree.impl.DefaultKevoreeFactory
 import org.kevoree.log.Log
 import java.util.HashSet
+import org.kevoree.modeling.api.json.JSONModelSerializer
+import org.kevoree.factory.DefaultKevoreeFactory
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,8 +24,9 @@ import java.util.HashSet
  */
 
 public class NodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
+    override var kcl: ClassLoader? = null
 
-    class Reader(inputStream: InputStream, val nodeName: String, val error: Boolean) : Runnable{
+    class Reader(inputStream: InputStream, val nodeName: String, val error: Boolean) : Runnable {
 
         val br: BufferedReader
 
@@ -96,20 +96,20 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
             var classPathList = classPath?.split(':')
             newClassPath.append(platformJar!!.getAbsolutePath())
             classPathList?.forEach { cpe ->
-               if(!cpe.contains("org.kevoree.platform.standalone-")){
-                   newClassPath.append(File.pathSeparator)
-                   newClassPath.append(cpe)
-               }
+                if (!cpe.contains("org.kevoree.platform.standalone-")) {
+                    newClassPath.append(File.pathSeparator)
+                    newClassPath.append(cpe)
+                }
             }
 
             var devOption = "-Dkevoree.prod=true";
-            if(System.getProperty("kevoree.dev")!=null){
-                devOption = "-Dkevoree.dev="+System.getProperty("kevoree.dev")!!
+            if (System.getProperty("kevoree.dev") != null) {
+                devOption = "-Dkevoree.dev=" + System.getProperty("kevoree.dev")!!
             }
 
-            var execArray = array(getJava(),"-cp",newClassPath.toString(),devOption,"-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name,"org.kevoree.platform.standalone.App")
+            var execArray = array(getJava(), "-cp", newClassPath.toString(), devOption, "-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "org.kevoree.platform.standalone.App")
             if (jvmArgs != null) {
-                execArray = array(getJava(), jvmArgs!!,"-cp",newClassPath.toString(),devOption,"-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name,"org.kevoree.platform.standalone.App")
+                execArray = array(getJava(), jvmArgs!!, "-cp", newClassPath.toString(), devOption, "-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "org.kevoree.platform.standalone.App")
             }
 
             process = Runtime.getRuntime().exec(execArray)

@@ -2,11 +2,12 @@ package org.kevoree.library.defaultNodeTypes.planning
 
 import java.util.HashMap
 import java.util.ArrayList
-import org.kevoreeadaptation.KevoreeAdaptationFactory
-import org.kevoreeadaptation.AdaptationModel
-import org.kevoreeadaptation.AdaptationPrimitive
-import org.kevoreeadaptation.ParallelStep
-import org.kevoreeadaptation.Step
+import org.kevoree.factory.KevoreeFactory
+import org.kevoree.factory.DefaultKevoreeFactory
+import org.kevoree.api.adaptation.AdaptationModel
+import org.kevoree.api.adaptation.Step
+import org.kevoree.api.adaptation.AdaptationPrimitive
+import org.kevoree.api.adaptation.SequentialStep
 
 
 /**
@@ -18,11 +19,11 @@ import org.kevoreeadaptation.Step
 
 trait KevoreeScheduler {
 
-    var adaptationModelFactory: KevoreeAdaptationFactory
+    var adaptationModelFactory: KevoreeFactory
 
     open fun schedule(adaptionModel: AdaptationModel, nodeName: String): AdaptationModel {
         if (!adaptionModel.adaptations.isEmpty()) {
-            adaptationModelFactory = org.kevoreeadaptation.impl.DefaultKevoreeAdaptationFactory()
+            adaptationModelFactory = DefaultKevoreeFactory()
             val classedAdaptations = classify(adaptionModel.adaptations)
             adaptionModel.orderedPrimitiveSet = createStep(classedAdaptations.get(JavaPrimitive.AddDeployUnit.name()))
             var currentStep : Step? = adaptionModel.orderedPrimitiveSet
@@ -71,9 +72,9 @@ trait KevoreeScheduler {
 
     public fun createStep(commands: MutableList<AdaptationPrimitive>?): Step {
       //  var currentSteps = adaptationModelFactory.createParallelStep()
-        var currentSteps = adaptationModelFactory.createSequentialStep()
+        var currentSteps = SequentialStep()
         if(commands != null){
-            currentSteps.addAllAdaptations(commands)
+            currentSteps.adaptations.addAll(commands)
         }
         return currentSteps
     }

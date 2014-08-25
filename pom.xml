@@ -5,12 +5,12 @@
     <artifactId>org.kevoree.library</artifactId>
     <packaging>pom</packaging>
     <name>Kevoree :: Library</name>
-    <version>3.6.7-SNAPSHOT</version>
+    <version>5.0.1-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.version>0.7.271</kotlin.version>
-        <kevoree.version>3.6.8</kevoree.version>
+        <kotlin.version>0.8.11</kotlin.version>
+        <kevoree.version>5.0.1-SNAPSHOT</kevoree.version>
     </properties>
 
     <organization>

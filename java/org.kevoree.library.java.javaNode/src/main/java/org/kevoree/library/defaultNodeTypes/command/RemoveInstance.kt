@@ -22,40 +22,39 @@ import org.kevoree.log.Log
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class RemoveInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeName: String, val registry: ModelRegistry, val bs: BootstrapService,val modelService : ModelService) : PrimitiveCommand {
+class RemoveInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeName: String, val registry: ModelRegistry, val bs: BootstrapService, val modelService: ModelService) : PrimitiveCommand {
 
     override fun undo() {
         try {
-
-            Thread.currentThread().setContextClassLoader(ClassLoaderHelper.getClassLoader(registry,c,nodeName))
+            val previouslyCreatedWrapper = registry.lookup(c)
+            Thread.currentThread().setContextClassLoader((previouslyCreatedWrapper as? KInstanceWrapper)?.kcl)
             Thread.currentThread().setName("KevoreeRemoveInstance" + c.name!!)
 
-            val previouslyCreatedWrapper = registry.lookup(c)
-            if(previouslyCreatedWrapper == null){
-                AddInstance(wrapperFactory, c, nodeName, registry, bs,modelService).execute()
+            if (previouslyCreatedWrapper == null) {
+                AddInstance(wrapperFactory, c, nodeName, registry, bs, modelService).execute()
                 val newCreatedWrapper = registry.lookup(c)
-                if(newCreatedWrapper is KInstanceWrapper){
-                    bs.injectDictionary(c,newCreatedWrapper.targetObj,false)
+                if (newCreatedWrapper is KInstanceWrapper) {
+                    bs.injectDictionary(c, newCreatedWrapper.targetObj, false)
                 }
             }
 
             Thread.currentThread().setContextClassLoader(null)
 
         } catch(e: Exception) {
-            Log.error("Error during rollback",e)
+            Log.error("Error during rollback", e)
         }
     }
 
     override fun execute(): Boolean {
         try {
             val previousWrapper = registry.lookup(c)
-            if(previousWrapper is KInstanceWrapper){
+            if (previousWrapper is KInstanceWrapper) {
                 previousWrapper.destroy()
             }
             registry.drop(c)
-            Log.info("Remove instance {}",c.path())
+            Log.info("Remove instance {}", c.path())
             return true
-        } catch(e: Exception){
+        } catch(e: Exception) {
             return false
         }
     }

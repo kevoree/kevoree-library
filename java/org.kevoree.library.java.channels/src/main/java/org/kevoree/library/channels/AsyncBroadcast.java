@@ -17,7 +17,6 @@ import java.util.concurrent.Executors;
  * Time: 10:05
  */
 @ChannelType
-@Library(name = "Java :: Channels")
 public class AsyncBroadcast implements ChannelDispatch {
 
     @Param(defaultValue = "false")

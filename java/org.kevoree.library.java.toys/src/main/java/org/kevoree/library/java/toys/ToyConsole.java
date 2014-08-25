@@ -18,7 +18,6 @@ import javax.swing.*;
  * Time: 10:47
  */
 @ComponentType
-@Library(name="Java :: Toys")
 public class ToyConsole {
 
 

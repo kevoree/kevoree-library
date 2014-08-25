@@ -1,11 +1,8 @@
 package org.kevoree.library.defaultNodeTypes.wrapper
 
-import java.lang.reflect.InvocationTargetException
 import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.ContainerRoot
 import org.kevoree.api.BootstrapService
-import org.kevoree.Instance
-import org.kevoree.log.Log
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,29 +27,13 @@ public trait KInstanceWrapper {
 
     val bs: BootstrapService
 
-    /*
-    fun kUpdateDictionary(tmodel: ContainerRoot, instance: Instance): Boolean {
-        try {
-            //bs.injectDictionary(instance, targetObj)
-            if (isStarted) {
-                val met = resolver.resolve(javaClass<org.kevoree.annotation.Update>())
-                met?.invoke(targetObj)
-            }
-            return true
-        } catch(e: InvocationTargetException){
-            Log.error("Kevoree Component Instance Update Error !", e.getCause())
-            return false
-        } catch(e: Exception) {
-            Log.error("Kevoree Component Instance Update Error !", e)
-            return false
-        }
-    }*/
+    var kcl : ClassLoader?
 
-    fun create(){
+    fun create() {
 
     }
 
-    fun destroy(){
+    fun destroy() {
     }
 
 }

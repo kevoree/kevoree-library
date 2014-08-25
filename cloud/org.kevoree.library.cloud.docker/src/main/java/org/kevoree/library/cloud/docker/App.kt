@@ -5,20 +5,20 @@ import java.io.BufferedWriter
 import java.io.FileWriter
 import java.io.StringWriter
 import org.kevoree.log.Log
-import org.kevoree.impl.DefaultKevoreeFactory
-import org.kevoree.serializer.JSONModelSerializer
 import java.nio.file.Files
 import java.util.HashMap
 import org.kevoree.library.cloud.docker.client.DockerClientImpl
 import org.kevoree.library.cloud.docker.model.ContainerConfig
 import org.kevoree.library.cloud.docker.model.HostConfig
 import org.kevoree.library.cloud.docker.client.DockerException
+import org.kevoree.modeling.api.json.JSONModelSerializer
+import org.kevoree.factory.DefaultKevoreeFactory
 
 /**
  * Created by leiko on 20/05/14.
  */
 fun main(args: Array<String>) {
-    val REPO = "kevoree/java"
+    val REPO = "kevoree/watchdog"
     val docker = DockerClientImpl("http://localhost:2375")
 
     // retrieve current model and serialize it to JSON
@@ -39,7 +39,7 @@ fun main(args: Array<String>) {
         docker.pull(REPO)
 
         // create and store serialized model in temp dir
-        var dfileFolderPath = Files.createTempDirectory("docker_")
+        var dfileFolderPath = Files.createTempDirectory("kevoree_")
         var dfileFolder : File = File(dfileFolderPath.toString())
 
         // create temp model
@@ -52,7 +52,7 @@ fun main(args: Array<String>) {
         // use newly created image
         val conf = ContainerConfig()
         conf.setImage(REPO)
-        var volumes = HashMap<String, Object>();
+        var volumes = HashMap<String, Any>();
         volumes.put(dfileFolder.getAbsolutePath(), HashMap<String, String>());
         conf.setVolumes(volumes);
         conf.setCmd(array<String>(
@@ -60,7 +60,7 @@ fun main(args: Array<String>) {
                 "-Dnode.name=${node.name}",
                 "-Dnode.bootstrap=${modelFile.getAbsolutePath()}",
                 "-jar",
-                "/root/kevboot.jar",
+                "/root/kevoree.jar",
                 "release"
         ))
 

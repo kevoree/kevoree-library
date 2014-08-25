@@ -3,7 +3,6 @@ package org.kevoree.library.channels;
 import com.rits.cloning.Cloner;
 import org.kevoree.annotation.ChannelType;
 import org.kevoree.annotation.KevoreeInject;
-import org.kevoree.annotation.Library;
 import org.kevoree.annotation.Param;
 import org.kevoree.api.Callback;
 import org.kevoree.api.ChannelContext;
@@ -17,7 +16,6 @@ import org.kevoree.api.Port;
  * Time: 10:05
  */
 @ChannelType
-@Library(name = "Java :: Channels")
 public class SyncBroadcast implements ChannelDispatch {
 
     @Param(defaultValue = "false")

@@ -15,19 +15,31 @@ import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
  * Time: 16:25
  */
 @NodeType
-public class DockerNode extends JavaNode {
-
-    @Param(defaultValue = "0")
-    private Integer cpuShares;
-
-    @Param(defaultValue = "512")
-    private int memory;
-
-    @Param(defaultValue = "true")
-    private boolean startKevboot;
+public class DockerJavaNode extends JavaNode {
 
     @Param(defaultValue = "kevoree/watchdog")
     private String image;
+
+    @Param(optional = false)
+    private String commitRepo;
+
+    @Param
+    private String commitTag;
+
+    @Param
+    private String commitMsg;
+
+    @Param
+    private String commitAuthor;
+
+    @Param
+    private String command;
+
+    @Param(defaultValue = "0", optional = false)
+    private Integer cpuShares;
+
+    @Param(defaultValue = "512", optional = false)
+    private int memory;
 
     @KevoreeInject
     private ModelService modelService;

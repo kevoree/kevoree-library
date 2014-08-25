@@ -5,16 +5,15 @@ include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:release
 include mvn:org.kevoree.library.java:org.kevoree.library.java.mqtt:latest
 
 add node0 : JavaNode
-add pull : WSGroup
-attach node0 pull
+//add pull : WSGroup
+//attach node0 pull
 
-add node0.ch0 : JavaNode
-add node0.ch1 : JavaNode
+//add node0.ch0 : JavaNode
+//add node0.ch1 : JavaNode
 
-
-add sync : MQTTGroup
-set sync.broker = "tcp://localhost:1883"
-attach node0 sync
-attach ch0 sync
-attach ch1 sync
+add sync_3 : MQTTGroup
+set sync_3.broker = "tcp://mqtt.kevoree.org:81"
+attach node0 sync_3
+//attach ch0 sync
+//attach ch1 sync
 

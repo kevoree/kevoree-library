@@ -19,7 +19,6 @@ import java.awt.event.ActionListener;
  * Time: 12:00
  */
 @ComponentType
-@Library(name="Java :: Toys")
 public class ToyOnOffSwitch implements ActionListener {
 
     @KevoreeInject

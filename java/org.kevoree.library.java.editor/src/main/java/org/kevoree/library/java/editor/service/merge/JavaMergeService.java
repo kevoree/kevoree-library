@@ -2,11 +2,11 @@ package org.kevoree.library.java.editor.service.merge;
 
 import org.kevoree.ContainerRoot;
 import org.kevoree.api.BootstrapService;
-import org.kevoree.compare.DefaultModelCompare;
-import org.kevoree.impl.DefaultKevoreeFactory;
+import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.library.java.editor.model.Library;
-import org.kevoree.loader.JSONModelLoader;
 import org.kevoree.log.Log;
+import org.kevoree.modeling.api.compare.ModelCompare;
+import org.kevoree.modeling.api.json.JSONModelLoader;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,8 +32,8 @@ public class JavaMergeService implements MergeService {
     @Override
     public ContainerRoot process(Collection<Library> libraries, Set<String> repos) {
         DefaultKevoreeFactory factory = new DefaultKevoreeFactory();
-        DefaultModelCompare compare = new DefaultModelCompare();
-        JSONModelLoader loader = new JSONModelLoader();
+        ModelCompare compare = new ModelCompare(factory);
+        JSONModelLoader loader = new JSONModelLoader(factory);
         ContainerRoot model = factory.createContainerRoot();
 
         for (Library lib : libraries) {

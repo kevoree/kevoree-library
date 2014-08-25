@@ -9,6 +9,7 @@ import org.kevoree.log.Log
 import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory
 import org.kevoree.api.ModelService
 import org.kevoree.ContainerNode
+import org.kevoree.library.defaultNodeTypes.KevoreeThreadGroup
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -32,6 +33,7 @@ import org.kevoree.ContainerNode
  * Time: 17:53
  */
 
+
 class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeName: String, val registry: ModelRegistry, val bs: BootstrapService, val modelService: ModelService) : PrimitiveCommand, Runnable {
 
     var nodeTypeName: String? = null
@@ -42,7 +44,7 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
     override fun execute(): Boolean {
         var subThread: Thread? = null
         try {
-            tg = ThreadGroup("kev/" + c.path()!!)
+            tg = KevoreeThreadGroup("kev/" + c.path())
             subThread = Thread(tg, this)
             subThread!!.start()
             subThread!!.join()
@@ -51,7 +53,7 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
             if (subThread != null) {
                 try {
                     subThread!!.stop() //kill sub thread
-                } catch(t: Throwable){
+                } catch(t: Throwable) {
                     //ignore killing thread
                 }
             }
@@ -67,26 +69,26 @@ class AddInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeN
 
     public override fun run() {
         try {
-            Thread.currentThread().setContextClassLoader(ClassLoaderHelper.getClassLoader(registry,c,nodeName))
+            var newKCL = ClassLoaderHelper.createInstanceClassLoader(c, nodeName, bs)!!
+            Thread.currentThread().setContextClassLoader(newKCL)
             Thread.currentThread().setName("KevoreeAddInstance" + c.name!!)
-            var newBeanKInstanceWrapper: KInstanceWrapper? = null
+            var newBeanKInstanceWrapper: KInstanceWrapper
             if (c is ContainerNode) {
                 newBeanKInstanceWrapper: KInstanceWrapper? = wrapperFactory.wrap(c, this/* nodeInstance is useless because launched as external process */, tg!!, bs, modelService)
-                registry.register(c, newBeanKInstanceWrapper!!)
+                newBeanKInstanceWrapper.kcl = newKCL
+                registry.register(c, newBeanKInstanceWrapper)
             } else {
-                val newBeanInstance = bs.createInstance(c)
+                val newBeanInstance = bs.createInstance(c, newKCL)
                 newBeanKInstanceWrapper: KInstanceWrapper? = wrapperFactory.wrap(c, newBeanInstance!!, tg!!, bs, modelService)
-                registry.register(c, newBeanKInstanceWrapper!!)
+                newBeanKInstanceWrapper.kcl = newKCL
+                registry.register(c, newBeanKInstanceWrapper)
                 bs.injectDictionary(c, newBeanInstance, true)
             }
-            newBeanKInstanceWrapper?.create()
+            newBeanKInstanceWrapper.create()
             resultSub = true
-
             Thread.currentThread().setContextClassLoader(null)
-
-            Log.info("Add instance {}",c.path())
-
-        } catch(e: Throwable){
+            Log.info("Add instance {}", c.path())
+        } catch(e: Throwable) {
             Log.error("Error while adding instance {}", e, c.name)
             resultSub = false
         }

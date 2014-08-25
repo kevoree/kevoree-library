@@ -11,12 +11,13 @@ import org.kevoree.log.Log
 import org.kevoree.Channel
 import org.kevoree.api.ModelService
 
-public class ChannelWrapper(val modelElement: Channel, override val targetObj: Any, val _nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService, val modelService : ModelService) : KInstanceWrapper {
+public class ChannelWrapper(val modelElement: Channel, override val targetObj: Any, val _nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService, val modelService: ModelService) : KInstanceWrapper {
+    override var kcl: ClassLoader? = null
 
     val context: ChannelWrapperContext
 
     {
-        context = ChannelWrapperContext(modelElement.path()!!,_nodeName,modelService)
+        context = ChannelWrapperContext(modelElement.path()!!, _nodeName, modelService)
         bs.injectService(javaClass<ChannelContext>(), context, targetObj)
     }
 
@@ -25,8 +26,8 @@ public class ChannelWrapper(val modelElement: Channel, override val targetObj: A
     private val fieldResolver = FieldAnnotationResolver(targetObj.javaClass);
 
     fun call(callback: org.kevoree.api.Callback<out Any?>?, payload: Any?) {
-        if(isStarted){
-            (targetObj as ChannelDispatch).dispatch(payload,callback)
+        if (isStarted) {
+            (targetObj as ChannelDispatch).dispatch(payload, callback)
         }
     }
 
@@ -37,10 +38,10 @@ public class ChannelWrapper(val modelElement: Channel, override val targetObj: A
                 met?.invoke(targetObj)
                 isStarted = true
                 return true
-            }catch(e: InvocationTargetException){
+            } catch(e: InvocationTargetException) {
                 Log.error("Kevoree Channel Instance Start Error !", e.getCause())
                 return false
-            }catch(e: Exception) {
+            } catch(e: Exception) {
                 Log.error("Kevoree Channel Instance Start Error !", e)
                 return false
             }
@@ -57,7 +58,7 @@ public class ChannelWrapper(val modelElement: Channel, override val targetObj: A
                 met?.invoke(targetObj)
                 isStarted = false
                 return true
-            }catch(e: InvocationTargetException){
+            } catch(e: InvocationTargetException) {
                 Log.error("Kevoree Channel Instance Stop Error !", e.getCause())
                 return false
             } catch(e: Exception) {

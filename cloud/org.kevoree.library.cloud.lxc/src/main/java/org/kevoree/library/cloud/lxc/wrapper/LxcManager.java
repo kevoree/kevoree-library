@@ -1,8 +1,8 @@
 package org.kevoree.library.cloud.lxc.wrapper;
 
 import org.kevoree.ContainerNode;
-import org.kevoree.DictionaryValue;
-import org.kevoree.impl.DefaultKevoreeFactory;
+import org.kevoree.Value;
+import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.library.cloud.api.helper.ProcessStreamFileLogger;
 import org.kevoree.library.cloud.api.helper.ResourceConstraintManager;
 import org.kevoree.library.cloud.lxc.wrapper.utils.FileManager;
@@ -99,7 +99,7 @@ public class LxcManager {
     public boolean startContainer(ContainerNode node) {
         String[] cmd = new String[]{LxcContants.lxcstart, "-n", node.getName(), "-d"};
         if (node.getDictionary() != null) {
-            DictionaryValue dictionaryValue = node.getDictionary().findValuesByID("ARCH");
+            Value dictionaryValue = node.getDictionary().findValuesByID("ARCH");
             if (dictionaryValue != null) {
                 cmd = new String[]{LxcContants.lxcstart, "-n", node.getName(), "-d", "-s", "lxc.arch=" + dictionaryValue.getValue()};
             }

@@ -13,24 +13,20 @@ import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
-import org.kevoree.compare.DefaultModelCompare;
-import org.kevoree.loader.JSONModelLoader;
+import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.log.Log;
 import org.kevoree.modeling.api.compare.ModelCompare;
+import org.kevoree.modeling.api.json.JSONModelLoader;
+import org.kevoree.modeling.api.json.JSONModelSerializer;
 import org.kevoree.modeling.api.trace.TraceSequence;
-import org.kevoree.serializer.JSONModelSerializer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.kevoree.library.ws.Protocol.*;
@@ -43,7 +39,6 @@ import static org.kevoree.library.ws.Protocol.*;
  */
 
 @GroupType
-@Library(name = "Java :: Groups")
 public class WSGroup implements ModelListener, Runnable {
 
     private AtomicBoolean diverge = new AtomicBoolean(false);
@@ -119,10 +114,10 @@ public class WSGroup implements ModelListener, Runnable {
                                 //ok i've to merge locally
                                 ContainerRoot recModel = (ContainerRoot) jsonModelLoader.loadModelFromString(rm.getModel()).get(0);
                                 TraceSequence tseq = compare.merge(modelService.getCurrentModel().getModel(), recModel);
-                                modelService.submitSequence(tseq,new UpdateCallback() {
+                                modelService.submitSequence(tseq, new UpdateCallback() {
                                     @Override
                                     public void run(Boolean applied) {
-                                        Log.info("Master merged deploy {}",applied);
+                                        Log.info("Master merged deploy {}", applied);
                                     }
                                 });
                             }
@@ -183,7 +178,7 @@ public class WSGroup implements ModelListener, Runnable {
     }
 
     @Start
-    public void startWSGroup() throws UnknownHostException {
+    public void startWSGroup() throws Exception {
         serverHandler = new InternalWebSocketServer(new InetSocketAddress(port));
         modelService.registerModelListener(this);
         serverHandler.start();
@@ -217,9 +212,9 @@ public class WSGroup implements ModelListener, Runnable {
 
     }
 
-    private static JSONModelLoader jsonModelLoader = new JSONModelLoader();
+    private static JSONModelLoader jsonModelLoader = new JSONModelLoader(new DefaultKevoreeFactory());
     private static JSONModelSerializer jsonModelSaver = new JSONModelSerializer();
-    private static ModelCompare compare = new DefaultModelCompare();
+    private static ModelCompare compare = new ModelCompare(new DefaultKevoreeFactory());
 
     private boolean isMaster() {
         if (master == null) {
@@ -300,12 +295,12 @@ public class WSGroup implements ModelListener, Runnable {
                     ContainerRoot lastModel = modelService.getCurrentModel().getModel();
                     Group selfGroup = (Group) lastModel.findByPath(localContext.getPath());
                     //localize master node
-                    if (selfGroup != null) {
+                    if (selfGroup != null && master != null) {
                         FragmentDictionary masterDico = selfGroup.findFragmentDictionaryByID(master);
                         String defaultIP = "127.0.0.1";
                         String port = "9000";
                         if (masterDico != null) {
-                            DictionaryValue val = masterDico.findValuesByID("port");
+                            Value val = masterDico.findValuesByID("port");
                             port = val.getValue();
                         }
                         List<String> addresses = new ArrayList<String>();
@@ -335,7 +330,7 @@ public class WSGroup implements ModelListener, Runnable {
                 }
             }
         } catch (Exception e) {
-            Log.error("", e);
+            Log.error("error while connecting to master", e);
         }
     }
 

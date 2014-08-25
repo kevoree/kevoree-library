@@ -10,7 +10,6 @@ import org.kevoree.annotation.*;
  */
 
 @ComponentType
-@Library(name = "Java :: Hello")
 public class HelloJava {
 
     @Param

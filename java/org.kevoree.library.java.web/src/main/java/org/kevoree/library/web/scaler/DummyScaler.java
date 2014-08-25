@@ -7,9 +7,10 @@ import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.UpdateCallback;
-import org.kevoree.cloner.DefaultModelCloner;
+import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.kevscript.KevScriptEngine;
 import org.kevoree.log.Log;
+import org.kevoree.modeling.api.KMFContainer;
 import org.kevoree.modeling.api.ModelCloner;
 
 import java.util.ArrayList;
@@ -20,7 +21,6 @@ import java.util.Random;
  * Created by duke on 05/12/2013.
  */
 @ComponentType
-@Library(name = "Java :: Web")
 public class DummyScaler implements Runnable {
 
     private Thread current = null;
@@ -56,7 +56,7 @@ public class DummyScaler implements Runnable {
 
 
                 //Collect all instance of NanoServer
-                ModelCloner cloner = new DefaultModelCloner();
+                ModelCloner cloner = new ModelCloner(new DefaultKevoreeFactory());
                 ContainerRoot model = cloner.clone(modelService.getCurrentModel().getModel());
 
                 //collect used ports
@@ -64,8 +64,8 @@ public class DummyScaler implements Runnable {
                 List<String> names = new ArrayList<String>();
 
                 for (ContainerNode node : model.getNodes()) {
-                    List<Object> selected = node.selectByQuery("components[typeDefinition.name = NanoBlogServer]");
-                    for (Object loop : selected) {
+                    List<KMFContainer> selected = node.select("components[typeDefinition.name = NanoBlogServer]");
+                    for (KMFContainer loop : selected) {
                         ComponentInstance instance = (ComponentInstance) loop;
                         if (instance.getDictionary() != null) {
                             if (instance.getDictionary().findValuesByID(propName) != null) {

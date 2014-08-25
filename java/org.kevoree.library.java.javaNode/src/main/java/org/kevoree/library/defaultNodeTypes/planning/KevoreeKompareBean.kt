@@ -1,9 +1,7 @@
 package org.kevoree.library.defaultNodeTypes.planning
 
 import org.kevoree.*
-import org.kevoreeadaptation.*
 import org.kevoree.library.defaultNodeTypes.ModelRegistry
-import org.kevoree.compare.DefaultModelCompare
 import org.kevoree.modeling.api.KMFContainer
 import java.util.HashSet
 import org.kevoree.modeling.api.trace.TraceSequence
@@ -14,9 +12,13 @@ import org.kevoree.modeling.api.util.ModelVisitor
 import java.util.ArrayList
 import org.kevoree.modeling.api.trace.ModelTrace
 import org.kevoree.log.Log
+import org.kevoree.factory.KevoreeFactory
+import org.kevoree.factory.DefaultKevoreeFactory
+import org.kevoree.api.adaptation.AdaptationModel
+import org.kevoree.api.adaptation.AdaptationPrimitive
 
 open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
-    override var adaptationModelFactory: KevoreeAdaptationFactory = org.kevoreeadaptation.impl.DefaultKevoreeAdaptationFactory()
+    override var adaptationModelFactory: KevoreeFactory = DefaultKevoreeFactory()
 
     fun plan(actualModel: ContainerRoot, targetModel: ContainerRoot, nodeName: String): AdaptationModel {
         var adaptationModel = compareModels(actualModel, targetModel, nodeName)
@@ -24,11 +26,11 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
         return afterPlan
     }
 
-    private val modelCompare = DefaultModelCompare()
+    private val modelCompare = adaptationModelFactory.createModelCompare()
 
     /* Helper to create command */
     private fun adapt(primitive: JavaPrimitive, elem: Any?): AdaptationPrimitive {
-        val ccmd = adaptationModelFactory.createAdaptationPrimitive()
+        val ccmd = AdaptationPrimitive()
         ccmd.primitiveType = primitive.name()
         ccmd.ref = elem
         return ccmd
@@ -37,7 +39,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
     data class TupleObjPrim(val obj: KMFContainer, val p: JavaPrimitive)
 
     open public fun compareModels(currentModel: ContainerRoot, targetModel: ContainerRoot, nodeName: String): AdaptationModel {
-        val adaptationModel = adaptationModelFactory.createAdaptationModel()
+        val adaptationModel = AdaptationModel()
 
         val elementAlreadyProcessed = HashSet<TupleObjPrim>()
         val currentNode = currentModel.findNodesByID(nodeName)
@@ -47,7 +49,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
         fun fillAdditional() {
 
             for (n in targetNode!!.hosts) {
-                val previousNode = currentModel.findByPath(n.path()!!)
+                val previousNode = currentModel.findByPath(n.path())
                 if (previousNode != null) {
                     traces!!.populate(previousNode.createTraces(n, false, false, false, true))
                     //traces!!.append(modelCompare.diff(previousNode, n))
@@ -56,7 +58,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                 }
             }
             for (g in targetNode.groups) {
-                val previousGroup = currentModel.findByPath(g.path()!!)
+                val previousGroup = currentModel.findByPath(g.path())
                 if (previousGroup != null) {
                     traces!!.append(modelCompare.diff(previousGroup, g))
                 } else {
@@ -70,13 +72,13 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                     for (port in ports) {
                         for (b in port.bindings) {
                             if (b.hub != null && !channelsAlreadySeen.contains(b.hub!!.path())) {
-                                val previousChannel = currentModel.findByPath(b.hub!!.path()!!)
+                                val previousChannel = currentModel.findByPath(b.hub!!.path())
                                 if (previousChannel != null) {
                                     traces!!.append(modelCompare.diff(previousChannel, b.hub!!))
                                 } else {
                                     traces!!.populate(deepToTrace(b.hub!!, nodeName))
                                 }
-                                channelsAlreadySeen.add(b.hub!!.path()!!)
+                                channelsAlreadySeen.add(b.hub!!.path())
                             }
                         }
                     }
@@ -90,7 +92,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
             fillAdditional()
         } else {
             if (targetNode != null) {
-                traces = modelCompare.createSequence()
+                traces = TraceSequence(adaptationModelFactory)
                 traces?.populate(deepToTrace(targetNode, nodeName))
                 fillAdditional()
             }
@@ -111,12 +113,12 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                             when(trace) {
                                 is ModelAddTrace -> {
                                     val elemToAdd = targetModel.findByPath(trace.previousPath!!)
-                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.AddInstance, elemToAdd))
+                                    adaptationModel.adaptations.add(adapt(JavaPrimitive.AddInstance, elemToAdd))
                                 }
                                 is ModelRemoveTrace -> {
                                     val elemToAdd = currentModel.findByPath(trace.objPath)
-                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, elemToAdd))
-                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.StopInstance, elemToAdd))
+                                    adaptationModel.adaptations.add(adapt(JavaPrimitive.RemoveInstance, elemToAdd))
+                                    adaptationModel.adaptations.add(adapt(JavaPrimitive.StopInstance, elemToAdd))
                                 }
                             }
                         }
@@ -126,12 +128,12 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                             when(trace) {
                                 is ModelAddTrace -> {
                                     val elemToAdd = targetModel.findByPath(trace.previousPath!!)
-                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.AddInstance, elemToAdd))
+                                    adaptationModel.adaptations.add(adapt(JavaPrimitive.AddInstance, elemToAdd))
                                 }
                                 is ModelRemoveTrace -> {
                                     val elemToAdd = currentModel.findByPath(trace.objPath)
-                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, elemToAdd))
-                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.StopInstance, elemToAdd))
+                                    adaptationModel.adaptations.add(adapt(JavaPrimitive.RemoveInstance, elemToAdd))
+                                    adaptationModel.adaptations.add(adapt(JavaPrimitive.StopInstance, elemToAdd))
                                 }
                             }
                         }
@@ -141,12 +143,12 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                             when(trace) {
                                 is ModelAddTrace -> {
                                     val elemToAdd = targetModel.findByPath(trace.previousPath!!)
-                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.AddInstance, elemToAdd))
+                                    adaptationModel.adaptations.add(adapt(JavaPrimitive.AddInstance, elemToAdd))
                                 }
                                 is ModelRemoveTrace -> {
                                     val elemToAdd = currentModel.findByPath(trace.objPath)
-                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, elemToAdd))
-                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.StopInstance, elemToAdd))
+                                    adaptationModel.adaptations.add(adapt(JavaPrimitive.RemoveInstance, elemToAdd))
+                                    adaptationModel.adaptations.add(adapt(JavaPrimitive.StopInstance, elemToAdd))
                                 }
                             }
                         }
@@ -156,11 +158,11 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                             when(trace) {
                                 is ModelAddTrace -> {
                                     val binding = targetModel.findByPath(trace.previousPath!!) as? org.kevoree.MBinding
-                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.AddBinding, binding))
+                                    adaptationModel.adaptations.add(adapt(JavaPrimitive.AddBinding, binding))
                                     val channel = binding?.hub
                                     if (channel != null && registry.lookup(channel) == null) {
                                         if (!elementAlreadyProcessed.contains(TupleObjPrim(channel, JavaPrimitive.AddInstance))) {
-                                            adaptationModel.addAdaptations(adapt(JavaPrimitive.AddInstance, channel))
+                                            adaptationModel.adaptations.add(adapt(JavaPrimitive.AddInstance, channel))
                                             elementAlreadyProcessed.add(TupleObjPrim(channel, JavaPrimitive.AddInstance))
                                         }
                                     }
@@ -182,12 +184,12 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
 
                                     if (!stillUsed && registry.lookup(oldChannel!!) != null) {
                                         if (!elementAlreadyProcessed.contains(TupleObjPrim(oldChannel!!, JavaPrimitive.RemoveInstance))) {
-                                            adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveInstance, oldChannel))
+                                            adaptationModel.adaptations.add(adapt(JavaPrimitive.RemoveInstance, oldChannel))
                                             elementAlreadyProcessed.add(TupleObjPrim(oldChannel!!, JavaPrimitive.RemoveInstance))
                                             elementAlreadyProcessed.add(TupleObjPrim(oldChannel!!, JavaPrimitive.StopInstance))
                                         }
                                     }
-                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveBinding, binding))
+                                    adaptationModel.adaptations.add(adapt(JavaPrimitive.RemoveBinding, binding))
                                 }
                             }
                         }
@@ -204,12 +206,12 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                                 } else {
                                     if (trace.content?.toLowerCase() == "true") {
                                         if (!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.StartInstance))) {
-                                            adaptationModel.addAdaptations(adapt(JavaPrimitive.StartInstance, modelElement))
+                                            adaptationModel.adaptations.add(adapt(JavaPrimitive.StartInstance, modelElement))
                                             elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.StartInstance))
                                         }
                                     } else {
                                         if (!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.StopInstance))) {
-                                            adaptationModel.addAdaptations(adapt(JavaPrimitive.StopInstance, modelElement))
+                                            adaptationModel.adaptations.add(adapt(JavaPrimitive.StopInstance, modelElement))
                                             elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.StopInstance))
                                         }
                                     }
@@ -230,7 +232,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                                         //upgrade internally
                                         if (currentModelElement.started == true && targetModelElement.started == true) {
                                             if (!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.StopInstance))) {
-                                                adaptationModel.addAdaptations(adapt(JavaPrimitive.StopInstance, modelElement))
+                                                adaptationModel.adaptations.add(adapt(JavaPrimitive.StopInstance, modelElement))
                                                 elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.StopInstance))
                                             }
                                         }
@@ -238,33 +240,33 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                                         if (currentModelElement is Channel) {
                                             for (binding in currentModelElement.bindings) {
                                                 if (!elementAlreadyProcessed.contains(TupleObjPrim(binding, JavaPrimitive.RemoveBinding))) {
-                                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveBinding, binding))
+                                                    adaptationModel.adaptations.add(adapt(JavaPrimitive.RemoveBinding, binding))
                                                 }
                                             }
                                         } else {
                                             if (currentModelElement is ComponentInstance) {
                                                 for (binding in currentModelElement.required) {
                                                     if (!elementAlreadyProcessed.contains(TupleObjPrim(binding, JavaPrimitive.RemoveBinding))) {
-                                                        adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveBinding, binding))
+                                                        adaptationModel.adaptations.add(adapt(JavaPrimitive.RemoveBinding, binding))
                                                     }
                                                 }
                                                 for (binding in currentModelElement.provided) {
                                                     if (!elementAlreadyProcessed.contains(TupleObjPrim(binding, JavaPrimitive.RemoveBinding))) {
-                                                        adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveBinding, binding))
+                                                        adaptationModel.adaptations.add(adapt(JavaPrimitive.RemoveBinding, binding))
                                                     }
                                                 }
                                             }
                                         }
                                         if (!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.UpgradeInstance))) {
-                                            adaptationModel.addAdaptations(adapt(JavaPrimitive.UpgradeInstance, modelElement))
+                                            adaptationModel.adaptations.add(adapt(JavaPrimitive.UpgradeInstance, modelElement))
                                             elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.UpgradeInstance))
                                         }
                                         //reinject dictionary
-                                        val dicValues = targetModelElement?.dictionary?.values
+                                        val dicValues = targetModelElement.dictionary?.values
                                         if (dicValues != null) {
                                             for (dicValue in dicValues) {
                                                 var values = array<Any?>(modelElement, dicValue)
-                                                adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateDictionaryInstance, values))
+                                                adaptationModel.adaptations.add(adapt(JavaPrimitive.UpdateDictionaryInstance, values))
                                                 elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))
                                             }
                                         }
@@ -272,19 +274,19 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                                         if (targetModelElement is Channel) {
                                             for (binding in targetModelElement.bindings) {
                                                 if (!elementAlreadyProcessed.contains(TupleObjPrim(binding, JavaPrimitive.RemoveBinding))) {
-                                                    adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveBinding, binding))
+                                                    adaptationModel.adaptations.add(adapt(JavaPrimitive.RemoveBinding, binding))
                                                 }
                                             }
                                         } else {
                                             if (targetModelElement is ComponentInstance) {
                                                 for (binding in targetModelElement.required) {
                                                     if (!elementAlreadyProcessed.contains(TupleObjPrim(binding, JavaPrimitive.RemoveBinding))) {
-                                                        adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveBinding, binding))
+                                                        adaptationModel.adaptations.add(adapt(JavaPrimitive.RemoveBinding, binding))
                                                     }
                                                 }
                                                 for (binding in targetModelElement.provided) {
                                                     if (!elementAlreadyProcessed.contains(TupleObjPrim(binding, JavaPrimitive.RemoveBinding))) {
-                                                        adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveBinding, binding))
+                                                        adaptationModel.adaptations.add(adapt(JavaPrimitive.RemoveBinding, binding))
                                                     }
                                                 }
                                             }
@@ -292,7 +294,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                                         //restart
                                         if (currentModelElement.started == true && targetModelElement.started == true) {
                                             if (!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.StartInstance))) {
-                                                adaptationModel.addAdaptations(adapt(JavaPrimitive.StartInstance, modelElement))
+                                                adaptationModel.adaptations.add(adapt(JavaPrimitive.StartInstance, modelElement))
                                                 elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.StartInstance))
                                             }
                                         }
@@ -303,7 +305,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                         }
                     }
                     "value" -> {
-                        if (modelElement is org.kevoree.DictionaryValue) {
+                        if (modelElement is org.kevoree.Value) {
                             val parentInstance = modelElement.eContainer()?.eContainer() as? Instance
                             if (parentInstance != null && parentInstance is ContainerNode && parentInstance.name == nodeName && currentNode == null) {
                                 //noop
@@ -315,12 +317,12 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                                 } else {
                                     if (!elementAlreadyProcessed.contains(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))) {
                                         var values = array<Any?>(modelElement.eContainer()?.eContainer(), modelElement)
-                                        adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateDictionaryInstance, values))
+                                        adaptationModel.adaptations.add(adapt(JavaPrimitive.UpdateDictionaryInstance, values))
                                         elementAlreadyProcessed.add(TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance))
                                     }
                                     if (parentInstance != null) {
                                         if (!elementAlreadyProcessed.contains(TupleObjPrim(parentInstance, JavaPrimitive.UpdateCallMethod))) {
-                                            adaptationModel.addAdaptations(adapt(JavaPrimitive.UpdateCallMethod, parentInstance))
+                                            adaptationModel.adaptations.add(adapt(JavaPrimitive.UpdateCallMethod, parentInstance))
                                             elementAlreadyProcessed.add(TupleObjPrim(parentInstance, JavaPrimitive.UpdateCallMethod))
                                         }
                                     }
@@ -339,7 +341,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
         currentNode?.visit(object : ModelVisitor() {
             override fun visit(elem: KMFContainer, refNameInParent: String, parent: KMFContainer) {
                 if (elem is DeployUnit) {
-                    foundDeployUnitsToRemove.add(elem.path()!!)
+                    foundDeployUnitsToRemove.add(elem.path())
                 }
                 //optimization purpose
                 if ( (elem is ContainerNode && elem != currentNode)) {
@@ -353,10 +355,10 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
             override fun visit(elem: KMFContainer, refNameInParent: String, parent: KMFContainer) {
                 if (elem is DeployUnit) {
                     if (registry.lookup(elem) == null) {
-                        adaptationModel.addAdaptations(adapt(JavaPrimitive.AddDeployUnit, elem))
-                        adaptationModel.addAdaptations(adapt(JavaPrimitive.LinkDeployUnit, elem))
+                        adaptationModel.adaptations.add(adapt(JavaPrimitive.AddDeployUnit, elem))
+                        adaptationModel.adaptations.add(adapt(JavaPrimitive.LinkDeployUnit, elem))
                     }
-                    foundDeployUnitsToRemove.remove(elem.path()!!)
+                    foundDeployUnitsToRemove.remove(elem.path())
                 }
                 //optimization purpose
                 if ( (elem is ContainerNode && elem != currentNode) ) {
@@ -366,7 +368,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
             }
         }, true, true, true)
         for (pathDeployUnitToDrop in foundDeployUnitsToRemove) {
-            adaptationModel.addAdaptations(adapt(JavaPrimitive.RemoveDeployUnit, currentModel.findByPath(pathDeployUnitToDrop)))
+            adaptationModel.adaptations.add(adapt(JavaPrimitive.RemoveDeployUnit, currentModel.findByPath(pathDeployUnitToDrop)))
         }
         return adaptationModel
     }

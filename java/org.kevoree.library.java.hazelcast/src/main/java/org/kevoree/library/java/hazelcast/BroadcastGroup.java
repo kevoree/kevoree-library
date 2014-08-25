@@ -8,18 +8,16 @@ import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
-import org.kevoree.compare.DefaultModelCompare;
+import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.log.Log;
 import org.kevoree.modeling.api.compare.ModelCompare;
 import org.kevoree.modeling.api.trace.TraceSequence;
-import org.kevoree.trace.DefaultTraceSequence;
 
 /**
  * Created by duke on 04/12/2013.
  */
 
 @GroupType
-@Library(name = "Java :: Groups")
 public class BroadcastGroup implements MessageListener, ModelListener {
 
     @KevoreeInject
@@ -27,7 +25,7 @@ public class BroadcastGroup implements MessageListener, ModelListener {
 
     private HazelcastInstance localHazelCast = null;
     private ITopic topic = null;
-    private ModelCompare compare = new DefaultModelCompare();
+    private ModelCompare compare = new ModelCompare(new DefaultKevoreeFactory());
 
     @KevoreeInject
     ModelService modelService;
@@ -60,7 +58,7 @@ public class BroadcastGroup implements MessageListener, ModelListener {
         if (!message.getPublishingMember().localMember()) {
             Log.info("{} on {} receive a message", context.getInstanceName(), context.getNodeName());
             try {
-                TraceSequence newtraceSeq = new DefaultTraceSequence();
+                TraceSequence newtraceSeq = new TraceSequence(new DefaultKevoreeFactory());
                 newtraceSeq.populateFromString(message.getMessageObject().toString());
                 /*ContainerRoot clonedModel = cloner.clone(modelService.getCurrentModel().getModel());
                 newtraceSeq.applyOn(clonedModel);*/

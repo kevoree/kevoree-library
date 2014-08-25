@@ -5,15 +5,11 @@ import org.kevoree.ContainerRoot
 import org.kevoree.api.BootstrapService
 import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.ContainerNode
-import org.kevoree.Dictionary
-import org.kevoree.DictionaryValue
-import org.kevoree.serializer.JSONModelSerializer
 import java.io.File
 import java.io.BufferedWriter
 import java.io.FileWriter
 import org.kevoree.log.Log
 import java.nio.file.Files
-import org.kevoree.impl.DefaultKevoreeFactory
 import java.util.HashMap
 import java.io.StringWriter
 import org.kevoree.library.cloud.docker.client.DockerClient
@@ -24,6 +20,10 @@ import org.kevoree.library.cloud.docker.model.CommitConfig
 import org.kevoree.library.cloud.docker.client.DockerException
 import org.kevoree.api.ModelService
 import org.kevoree.api.handler.UpdateCallback
+import org.kevoree.modeling.api.json.JSONModelSerializer
+import org.kevoree.Dictionary
+import org.kevoree.Value
+import org.kevoree.kcl.api.FlexyClassLoaderFactory
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,34 +34,11 @@ import org.kevoree.api.handler.UpdateCallback
 class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup,
                         override val bs: BootstrapService, val modelService: ModelService) : KInstanceWrapper {
 
+    override var kcl : ClassLoader? = null
+
     private var image: String = "kevoree/watchdog";
     private var cpuShares : Int = 0
     private var memory : Long = 512
-    private var startKevboot : Boolean = true
-
-    {
-        val dic : Dictionary? = modelElement.dictionary
-        if (dic != null) {
-            val imgVal : DictionaryValue? = dic.findValuesByID("image")
-            if (imgVal != null) {
-                if (imgVal.value!!.length > 0) {
-                    image = imgVal.value!!
-                }
-            }
-            val cpuSharesVal : DictionaryValue? = dic.findValuesByID("cpuShares")
-            if (cpuSharesVal != null) {
-                cpuShares = cpuSharesVal.value!!.toInt()
-            }
-            val memoryVal : DictionaryValue? = dic.findValuesByID("memory")
-            if (memoryVal != null) {
-                memory = memoryVal.value!!.toLong()
-            }
-            val startKevbootVal : DictionaryValue? = dic.findValuesByID("startKevboot")
-            if (startKevbootVal != null) {
-                startKevboot = startKevbootVal.value!!.toBoolean()
-            }
-        }
-    }
 
     override var isStarted: Boolean = false
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
@@ -97,10 +74,32 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
     }
 
     override fun create() {
+        val dic : Dictionary? = modelElement.dictionary
+        if (dic != null) {
+            val imgVal = dic.findValuesByID("image")
+            if (imgVal != null) {
+                if (imgVal.value!!.length > 0) {
+                    image = imgVal.value!!
+                }
+            }
+
+            val commitRepo = dic.findValuesByID("commitRepo")
+            val commitTag = dic.findValuesByID("commitTag")
+
+            val cpuSharesVal = dic.findValuesByID("cpuShares")
+            if (cpuSharesVal != null) {
+                cpuShares = cpuSharesVal.value!!.toInt()
+            }
+            val memoryVal = dic.findValuesByID("memory")
+            if (memoryVal != null) {
+                memory = memoryVal.value!!.toLong()
+            }
+        }
+
         var model : ContainerRoot = modelElement.eContainer() as ContainerRoot
 
         // create and store serialized model in temp dir
-        var dfileFolderPath = Files.createTempDirectory("docker_")
+        var dfileFolderPath = Files.createTempDirectory("kevoree_")
         var dfileFolder : File = File(dfileFolderPath.toString())
 
         // retrieve current model and serialize it to JSON
@@ -120,7 +119,7 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
 
         } catch (e: DockerException) {
             // if getContainer() failed: then we need to create a new container
-            // pull kevoree/java if not already done
+            // so we need to pull image if not already done
             docker.pull(image)
 
             // create Container configuration
@@ -128,27 +127,23 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
             conf.setImage(image)
             conf.setMemoryLimit(memory*1024*1024) // compute attribute to set limit in MB
             conf.setCpuShares(cpuShares)
-            if (startKevboot) {
-                var volumes = HashMap<String, Any>();
-                volumes.put(dfileFolder.getAbsolutePath(), HashMap<String, String>());
-                conf.setVolumes(volumes);
-                conf.setCmd(array<String>(
-                        "java",
-                        "-Dnode.name=${modelElement.name}",
-                        "-Dnode.bootstrap=${modelFile.getAbsolutePath()}",
-                        "-jar",
-                        "/root/kevboot.jar",
-                        "release"
-                ))
-            }
+            var volumes = HashMap<String, Any>();
+            volumes.put(dfileFolder.getAbsolutePath(), HashMap<String, String>());
+            conf.setVolumes(volumes);
+            conf.setCmd(array<String>(
+                    "java",
+                    "-Dnode.name=${modelElement.name}",
+                    "-Dnode.bootstrap=${modelFile.getAbsolutePath()}",
+                    "-jar",
+                    "/root/kevoree.jar",
+                    "release"
+            ))
 
             val container = docker.createContainer(conf, modelElement.name)!!
             containerID = container.getId()
 
         } finally {
-            if (startKevboot) {
-                hostConf.setBinds(array<String>("${dfileFolder.getAbsolutePath()}:${dfileFolder.getAbsolutePath()}:ro"))
-            }
+            hostConf.setBinds(array<String>("${dfileFolder.getAbsolutePath()}:${dfileFolder.getAbsolutePath()}:ro"))
         }
     }
 
