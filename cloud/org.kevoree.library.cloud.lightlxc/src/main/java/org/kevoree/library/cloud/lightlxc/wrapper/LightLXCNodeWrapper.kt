@@ -39,6 +39,8 @@ class LightLXCNodeWrapper(val modelElement: ContainerNode, override val targetOb
 
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
     override var isStarted: Boolean = false
+    override var kcl: ClassLoader? = null
+
     var process: Process? = null
 
     var readerOUTthread: Thread? = null

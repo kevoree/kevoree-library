@@ -12,7 +12,6 @@ import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
  * Created by duke on 09/12/2013.
  */
 @NodeType
-@Library(name = "Cloud")
 public class LightLXCNode extends PlatformJavaNode {
 
     /**
@@ -76,16 +75,16 @@ public class LightLXCNode extends PlatformJavaNode {
     @Override
     protected WrapperFactory createWrapperFactory(String nodeName) {
         //nodeName: String,   val hostitfname: String,
-       // val hostitfip: String, val containeripbaseaddress: String,
+        // val hostitfip: String, val containeripbaseaddress: String,
         //        val bridgeName : String,val sshdStart : Boolean, val ip:String,
-         //       val gw:String,val netmask:String, val mac:String
-        if (updater ==null){
-            bservice =  new BridgeService(createBridge,hostitfname,context.getNodeName(),bridgeName,networkMask,routeditfname,containeripbaseaddress);
+        //       val gw:String,val netmask:String, val mac:String
+        if (updater == null) {
+            bservice = new BridgeService(createBridge, hostitfname, context.getNodeName(), bridgeName, networkMask, routeditfname, containeripbaseaddress);
             bservice.start();
             updater = new IpModelUpdater(modelsService);
             modelsService.registerModelListener(updater);
         }
-        fact = new LightLXCWrapperFactory(nodeName, hostitfname, hostitfip, containeripbaseaddress, bridgeName,sshdStart,ipStep,ipStart,networkMask,updater);
+        fact = new LightLXCWrapperFactory(nodeName, hostitfname, hostitfip, containeripbaseaddress, bridgeName, sshdStart, ipStep, ipStart, networkMask, updater);
         return fact;
     }
 
@@ -97,17 +96,17 @@ public class LightLXCNode extends PlatformJavaNode {
         }
     }
 
-    BridgeService bservice=null;
+    BridgeService bservice = null;
 
 
-    IpModelUpdater updater ;
+    IpModelUpdater updater;
 
     @Start
     public void startNode() {
         //System.err.println("pass par la");
 
-        if (updater ==null){
-            bservice =  new BridgeService(createBridge, hostitfname, context.getNodeName(), bridgeName, networkMask, routeditfname, containeripbaseaddress);
+        if (updater == null) {
+            bservice = new BridgeService(createBridge, hostitfname, context.getNodeName(), bridgeName, networkMask, routeditfname, containeripbaseaddress);
             bservice.start();
             updater = new IpModelUpdater(modelsService);
             modelsService.registerModelListener(updater);
@@ -118,7 +117,7 @@ public class LightLXCNode extends PlatformJavaNode {
 
     @Stop
     public void stopNode() {
-        bservice .stop();
+        bservice.stop();
         modelsService.unregisterModelListener(updater);
         super.stopNode();
 

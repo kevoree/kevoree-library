@@ -51,4 +51,5 @@ public class PlatformJavaNode extends JavaNode implements PlatformNode {
     public void setDISK_SIZE(String disk_size) {
         DISK_SIZE = disk_size;
     }
+
 }
