@@ -31,11 +31,11 @@ class UpdateDictionary(val c: Instance, val dicValue: Value, val nodeName: Strin
 
         //protection for default value injection
         val previousModel = modelService.getCurrentModel()?.getModel()
-        val previousValue = previousModel?.findByPath(dicValue.path()!!)
+        val previousValue = previousModel?.findByPath(dicValue.path())
         if (previousValue == null) {
             val parentDictionary = dicValue.eContainer()?.eContainer() as? Instance
             if (parentDictionary != null) {
-                val previousInstance = previousModel?.findByPath(c.path()!!)
+                val previousInstance = previousModel?.findByPath(c.path())
                 if(previousInstance != null){
                     val dt = parentDictionary.typeDefinition?.dictionaryType
                     val dicAtt = dt?.findAttributesByID(dicValue.name!!)

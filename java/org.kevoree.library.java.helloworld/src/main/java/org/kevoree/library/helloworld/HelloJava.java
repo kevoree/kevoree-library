@@ -1,6 +1,9 @@
 package org.kevoree.library.helloworld;
 
-import org.kevoree.annotation.*;
+import org.kevoree.annotation.ComponentType;
+import org.kevoree.annotation.Input;
+import org.kevoree.annotation.KevoreeInject;
+import org.kevoree.annotation.Param;
 
 /**
  * Created with IntelliJ IDEA.
