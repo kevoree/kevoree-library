@@ -18,6 +18,7 @@ class LXCNodeWrapper(val modelElement: ContainerNode, val lxc: LxcManager, overr
 
     override var isStarted: Boolean = false
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
+    override var kcl: ClassLoader? = null
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
         return  lxc.startContainer(modelElement)

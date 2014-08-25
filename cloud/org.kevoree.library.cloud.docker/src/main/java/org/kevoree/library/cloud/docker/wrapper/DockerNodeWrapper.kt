@@ -11,8 +11,6 @@ import java.io.FileWriter
 import org.kevoree.log.Log
 import java.nio.file.Files
 import java.util.HashMap
-import java.io.StringWriter
-import org.kevoree.library.cloud.docker.client.DockerClient
 import org.kevoree.library.cloud.docker.model.HostConfig
 import org.kevoree.library.cloud.docker.client.DockerClientImpl
 import org.kevoree.library.cloud.docker.model.ContainerConfig
@@ -31,7 +29,7 @@ import org.kevoree.modeling.api.json.JSONModelSerializer
 class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup,
                         override val bs: BootstrapService, val modelService: ModelService, val memory: Int,
                         val cpuShares: Int) : KInstanceWrapper {
-
+    override var kcl: ClassLoader? = null
     override var isStarted: Boolean = false
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
 
@@ -39,7 +37,7 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
 
     private var docker = DockerClientImpl("http://localhost:2375")
     private var containerID: String? = null
-    private var hostConf : HostConfig = HostConfig()
+    private var hostConf: HostConfig = HostConfig()
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
         if (containerID != null) {
@@ -50,7 +48,8 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
             val ipAddress = detail.getNetworkSettings()!!.getIpAddress()
 
             modelService.submitScript("network ${modelElement.name}.lan.ip $ipAddress", UpdateCallback {
-                fun run(b: Boolean) {}
+                fun run(b: Boolean) {
+                }
             });
 
             Log.info("Docker container {}{} started at {}", id, detail.getName(), ipAddress)
@@ -68,19 +67,19 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
     }
 
     override fun create() {
-        var model : ContainerRoot = modelElement.eContainer() as ContainerRoot
+        var model: ContainerRoot = modelElement.eContainer() as ContainerRoot
 
         // create and store serialized model in temp dir
         var dfileFolderPath = Files.createTempDirectory("docker_")
-        var dfileFolder : File = File(dfileFolderPath.toString())
+        var dfileFolder: File = File(dfileFolderPath.toString())
 
         // retrieve current model and serialize it to JSON
         var serializer = JSONModelSerializer()
         var modelJson = serializer.serialize(model)!!
 
         // create temp model
-        var modelFile : File = File(dfileFolder, "boot.json")
-        var writer : BufferedWriter
+        var modelFile: File = File(dfileFolder, "boot.json")
+        var writer: BufferedWriter
         writer = BufferedWriter(FileWriter(modelFile))
         writer.write(modelJson)
         writer.close()
@@ -97,7 +96,7 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
             // create Container configuration
             val conf = ContainerConfig();
             conf.setImage(IMAGE)
-            conf.setMemoryLimit(memory.toLong()*1024*1024) // compute attribute to set limit in MB
+            conf.setMemoryLimit(memory.toLong() * 1024 * 1024) // compute attribute to set limit in MB
             conf.setCpuShares(cpuShares)
             var volumes = HashMap<String, Any>();
             volumes.put(dfileFolder.getAbsolutePath(), HashMap<String, String>());
