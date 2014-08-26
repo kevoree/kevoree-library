@@ -107,10 +107,10 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
             */
             for (trace in traces!!.traces) {
                 val modelElement = targetModel.findByPath(trace.srcPath)
-                when(trace.refName) {
+                when (trace.refName) {
                     "components" -> {
                         if (trace.srcPath == targetNode!!.path()) {
-                            when(trace) {
+                            when (trace) {
                                 is ModelAddTrace -> {
                                     val elemToAdd = targetModel.findByPath(trace.previousPath!!)
                                     adaptationModel.adaptations.add(adapt(JavaPrimitive.AddInstance, elemToAdd))
@@ -125,7 +125,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                     }
                     "hosts" -> {
                         if (trace.srcPath == targetNode!!.path()) {
-                            when(trace) {
+                            when (trace) {
                                 is ModelAddTrace -> {
                                     val elemToAdd = targetModel.findByPath(trace.previousPath!!)
                                     adaptationModel.adaptations.add(adapt(JavaPrimitive.AddInstance, elemToAdd))
@@ -140,7 +140,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                     }
                     "groups" -> {
                         if (trace.srcPath == targetNode!!.path()) {
-                            when(trace) {
+                            when (trace) {
                                 is ModelAddTrace -> {
                                     val elemToAdd = targetModel.findByPath(trace.previousPath!!)
                                     adaptationModel.adaptations.add(adapt(JavaPrimitive.AddInstance, elemToAdd))
@@ -155,7 +155,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                     }
                     "bindings" -> {
                         if (!(targetModel.findByPath(trace.srcPath) is Channel)) {
-                            when(trace) {
+                            when (trace) {
                                 is ModelAddTrace -> {
                                     val binding = targetModel.findByPath(trace.previousPath!!) as? org.kevoree.MBinding
                                     adaptationModel.adaptations.add(adapt(JavaPrimitive.AddBinding, binding))
@@ -305,7 +305,7 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
                         }
                     }
                     "value" -> {
-                        if (modelElement is org.kevoree.Value) {
+                        if (modelElement is org.kevoree.Value && modelElement.getRefInParent() == "values" ) {
                             val parentInstance = modelElement.eContainer()?.eContainer() as? Instance
                             if (parentInstance != null && parentInstance is ContainerNode && parentInstance.name == nodeName && currentNode == null) {
                                 //noop

@@ -3,7 +3,7 @@ package org.kevoree.library.cloud.lxc.wrapper;
 import org.kevoree.ContainerNode;
 import org.kevoree.ContainerRoot;
 import org.kevoree.NetworkInfo;
-import org.kevoree.NetworkProperty;
+import org.kevoree.Value;
 import org.kevoree.library.cloud.lxc.LXCNode;
 import org.kevoree.library.cloud.lxc.wrapper.utils.IPAddressValidator;
 import org.kevoree.log.Log;
@@ -82,7 +82,7 @@ public class LxcSupervision implements Runnable {
                     if (ipvalidator.validate(ip)) {
                         Boolean found = false;
                         for (NetworkInfo n : containerNode.getNetworkInformation()) {
-                            for (NetworkProperty p : n.getValues()) {
+                            for (Value p : n.getValues()) {
                                 if (ip.equals(p.getValue())) {
                                     found = true;
                                 }

@@ -3,6 +3,7 @@ package org.kevoree.library.defaultNodeTypes.command
 import org.kevoree.DeployUnit
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.log.Log
+import org.kevoree.api.helper.KModelHelper
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -49,7 +50,7 @@ class AddDeployUnit(val du: DeployUnit, val bs: org.kevoree.api.BootstrapService
     }
 
     override fun toString(): String {
-        return "AddDeployUnit " + du.groupName + "/" + du.name + "/" + du.version + "/" + du.hashcode
+        return "AddDeployUnit " + KModelHelper.fqnGroup(du) + "/" + du.name + "/" + du.version + "/" + du.hashcode
     }
 
 

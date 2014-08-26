@@ -5,6 +5,7 @@ import org.kevoree.library.defaultNodeTypes.ModelRegistry
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.DeployUnit
 import org.kevoree.log.Log
+import org.kevoree.api.helper.KModelHelper
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -48,6 +49,6 @@ class RemoveDeployUnit(val du: DeployUnit, val bootstrap: org.kevoree.api.Bootst
     }
 
     override fun toString(): String {
-        return "RemoveDeployUnit " + du.groupName + "/" + du.name + "/" + du.version + "/" + du.hashcode
+        return "RemoveDeployUnit " + KModelHelper.fqnGroup(du) + "/" + du.name + "/" + du.version + "/" + du.hashcode
     }
 }

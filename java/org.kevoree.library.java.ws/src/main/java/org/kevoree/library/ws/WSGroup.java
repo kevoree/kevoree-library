@@ -307,7 +307,7 @@ public class WSGroup implements ModelListener, Runnable {
                         ContainerNode node = lastModel.findNodesByID(master);
                         if (node != null) {
                             for (NetworkInfo net : node.getNetworkInformation()) {
-                                for (NetworkProperty prop : net.getValues()) {
+                                for (Value prop : net.getValues()) {
                                     if (net.getName().toLowerCase().contains("ip") || prop.getName().toLowerCase().contains("ip")) {
                                         addresses.add(prop.getValue());
                                     }
