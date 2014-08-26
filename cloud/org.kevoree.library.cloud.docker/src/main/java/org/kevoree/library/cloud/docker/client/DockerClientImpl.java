@@ -2,6 +2,7 @@ package org.kevoree.library.cloud.docker.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import org.apache.commons.io.IOUtils;
 import org.kevoree.library.cloud.docker.model.*;
 import org.kevoree.log.Log;
@@ -215,6 +216,35 @@ public class DockerClientImpl implements DockerClient {
             StringWriter writer = new StringWriter();
             IOUtils.copy(res.getUrlConnection().getInputStream(), writer, "UTF-8");
             Log.info("{} pulled successfully", conf.getFromImage());
+
+        } catch (IOException e) {
+            throw new DockerException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void push(String name, AuthConfig conf) throws DockerException, JSONException {
+        this.push(name, null, conf);
+    }
+
+    @Override
+    public void push(String name, String tag, AuthConfig conf) throws DockerException, JSONException {
+        if (tag == null || tag.length() == 0) {
+            tag = "latest";
+        }
+
+        try {
+            Log.info("Pushing {}:{} to remote registry... (this may take a while)", name, tag);
+            Resty authResty = new Resty();
+            authResty.withHeader("X-Registry-Auth", Base64.encode(new ObjectMapper().writeValueAsString(conf).getBytes()));
+            JSONResource res = authResty.json(
+                    this.url + String.format(DockerApi.PUSH_IMAGE, name),
+                    form(String.format("?tag=%s", tag))
+            );
+
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(res.getUrlConnection().getInputStream(), writer, "UTF-8");
+            Log.info("{}:{} pushed successfully", name, tag);
 
         } catch (IOException e) {
             throw new DockerException(e.getMessage());

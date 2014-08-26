@@ -14,23 +14,31 @@ import org.kevoree.library.cloud.docker.client.DockerException
 import org.kevoree.modeling.api.json.JSONModelSerializer
 import org.kevoree.factory.DefaultKevoreeFactory
 import org.kevoree.library.cloud.docker.model.Image
+import org.kevoree.library.cloud.docker.model.CommitConfig
+import org.kevoree.library.cloud.docker.model.AuthConfig
 
 /**
  * Created by leiko on 20/05/14.
  */
 fun main(args: Array<String>) {
-    val REPO = "kevoree/watchdog"
     val docker = DockerClientImpl("http://localhost:2375")
 
     val conf = ContainerConfig()
-    conf.setStdinOpen(true)
     conf.setImage("kevoree/js")
     val info = docker.createContainer(conf)!!
     println("Created")
     docker.start(info.getId())
     println("Started")
-    docker.attach(info.getId(), false, true, false, true, true)
-    println("Attached")
+    val commitConf = CommitConfig()
+    commitConf.setContainer(info.getId())
+    commitConf.setRepo("maxleiko/foo")
+    commitConf.setTag("42")
+    docker.commit(commitConf)
+    val auth = AuthConfig()
+    auth.setEmail("max.tricoire@gmail.com")
+    auth.setUsername("maxleiko")
+    auth.setPassword("POTATO")
+    docker.push("maxleiko/foo", "42", auth)
 
 //    // retrieve current model and serialize it to JSON
 //    var serializer = JSONModelSerializer()

@@ -17,6 +17,7 @@ public interface DockerApi {
     static final String IMAGES_LIST         = "/images/json";
     static final String CREATE_IMAGE        = "/images/create";
     static final String SEARCH_IMAGE        = "/images/search";
+    static final String PUSH_IMAGE          = "/images/%s/push";
 
     static final int ATTACH_STDIN           = 0;
     static final int ATTACH_STDOUT          = 1;

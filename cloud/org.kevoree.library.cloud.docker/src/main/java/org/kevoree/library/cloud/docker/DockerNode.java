@@ -41,6 +41,21 @@ public class DockerNode extends JavaNode {
     @Param(defaultValue = "512", optional = false)
     private int memory;
 
+    @Param()
+    private String authUsername;
+
+    @Param()
+    private String authPassword;
+
+    @Param()
+    private String authEmail;
+
+    @Param(defaultValue = "https://index.docker.io/v1/")
+    private String pushRegistry;
+
+    @Param(defaultValue = "false")
+    private boolean pushOnDestroy;
+
     @KevoreeInject
     private ModelService modelService;
 
@@ -62,6 +77,26 @@ public class DockerNode extends JavaNode {
 
     public String getCmd() {
         return cmd;
+    }
+
+    public String getAuthUsername() {
+        return authUsername;
+    }
+
+    public String getAuthPassword() {
+        return authPassword;
+    }
+
+    public String getAuthEmail() {
+        return authEmail;
+    }
+
+    public String getPushRegistry() {
+        return pushRegistry;
+    }
+
+    public boolean getPushOnDestroy() {
+        return pushOnDestroy;
     }
 
     public ModelService getModelService() {
