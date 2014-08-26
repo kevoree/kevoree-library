@@ -35,4 +35,6 @@ public class ModelRegistry {
         registry.clear();
     }
 
+    public static final ThreadLocal<ModelRegistry> current = new ThreadLocal<ModelRegistry>();
+
 }
