@@ -26,6 +26,7 @@
         <module>org.kevoree.library.java.editor</module>
         <module>org.kevoree.library.java.mqtt</module>
 		<module>org.kevoree.library.java.mqttServer</module>
+		<module>org.kevoree.library.java.rest</module>
     </modules>
 
     <dependencies>
