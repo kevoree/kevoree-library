@@ -32,7 +32,7 @@ public class ContainerInfo {
 
     @Override
     public String toString() {
-        return "ContainerInfo{" + "id=" + id + ", warnings=" + warnings + '}';
+        return "ContainerInfo{" + "id=" + id + "}";
     }
     
 }

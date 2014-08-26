@@ -2,17 +2,17 @@ repo "https://oss.sonatype.org/content/groups/public/"
 
 include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.docker:latest
 include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:release
-include mvn:org.kevoree.library.cloud:org.kevoree.library.cloud.web:release
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:release
 
-add node0, node0.container0 : DockerNode
+add host: DockerNode
 add sync : WSGroup
+add host.nodejs : DockerNode
 
-set sync.port/node0 = "9000"
-set sync.port/container0 = "9000"
+set sync.port/host = "9000"
 set sync.master = "node0"
 
-set container0.cpuShares = "5"
-set container0.memory = "2048"
+set host.commitRepo = "maxleiko"
 
-attach node0, container0 sync
+set nodejs.cmd = "node -v"
 
+attach host sync

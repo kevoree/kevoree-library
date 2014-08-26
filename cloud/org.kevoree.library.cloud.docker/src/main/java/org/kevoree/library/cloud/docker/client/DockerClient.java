@@ -3,7 +3,6 @@ package org.kevoree.library.cloud.docker.client;
 import org.kevoree.library.cloud.docker.model.*;
 import us.monoid.json.JSONException;
 
-import java.io.IOException;
 import java.util.List;
 
 /***
@@ -18,15 +17,21 @@ public interface DockerClient {
     void stop(String id) throws DockerException;
     void stop(String id, int timeout) throws DockerException;
 
+    void attach(String id, boolean logs, boolean stream, boolean stdin, boolean stdout, boolean stderr) throws DockerException, JSONException;
+
     void deleteContainer(String id) throws DockerException, JSONException;
 
     List<Container> getContainers() throws DockerException, JSONException;
 
     ContainerDetail getContainer(String idOrName) throws DockerException, JSONException;
 
-    void pull(String name) throws DockerException, JSONException;
-    void pull(String name, String tag) throws DockerException, JSONException;
+    List<Image> getImages() throws DockerException, JSONException;
+    List<Image> getImages(boolean all, String filters) throws DockerException, JSONException;
     void createImage(ImageConfig conf) throws DockerException, JSONException;
+    List<ImageInfo> searchImage(String term) throws DockerException, JSONException;
+
+    void pull(String name) throws DockerException, JSONException;
+    void pull(ImageConfig conf) throws DockerException, JSONException;
 
     ContainerInfo commit(CommitConfig conf) throws DockerException, JSONException;
 

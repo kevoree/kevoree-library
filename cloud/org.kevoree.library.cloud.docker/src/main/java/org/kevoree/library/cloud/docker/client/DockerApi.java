@@ -9,9 +9,16 @@ public interface DockerApi {
     static final String CREATE_CONTAINER    = "/containers/create";
     static final String START_CONTAINER     = "/containers/%s/start";
     static final String STOP_CONTAINER      = "/containers/%s/stop";
-    static final String KILL_CONTAINER      = "/containers/%s/kill";
+    static final String ATTACH_CONTAINER    = "/containers/%s/attach";
     static final String DELETE_CONTAINER    = "/containers/%s";
-    static final String RESTART_CONTAINER   = "/containers/%s/restart";
+
     static final String COMMIT_IMAGE        = "/commit";
+
+    static final String IMAGES_LIST         = "/images/json";
     static final String CREATE_IMAGE        = "/images/create";
+    static final String SEARCH_IMAGE        = "/images/search";
+
+    static final int ATTACH_STDIN           = 0;
+    static final int ATTACH_STDOUT          = 1;
+    static final int ATTACH_STDERR          = 2;
 }

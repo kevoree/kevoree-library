@@ -15,9 +15,9 @@ import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
  * Time: 16:25
  */
 @NodeType
-public class DockerJavaNode extends JavaNode {
+public class DockerNode extends JavaNode {
 
-    @Param(defaultValue = "kevoree/watchdog")
+    @Param()
     private String image;
 
     @Param(optional = false)
@@ -33,7 +33,7 @@ public class DockerJavaNode extends JavaNode {
     private String commitAuthor;
 
     @Param
-    private String command;
+    private String cmd;
 
     @Param(defaultValue = "0", optional = false)
     private Integer cpuShares;
@@ -44,8 +44,32 @@ public class DockerJavaNode extends JavaNode {
     @KevoreeInject
     private ModelService modelService;
 
+    public String getCommitRepo() {
+        return commitRepo;
+    }
+
+    public String getCommitTag() {
+        return commitTag;
+    }
+
+    public String getCommitMsg() {
+        return commitMsg;
+    }
+
+    public String getCommitAuthor() {
+        return commitAuthor;
+    }
+
+    public String getCmd() {
+        return cmd;
+    }
+
+    public ModelService getModelService() {
+        return modelService;
+    }
+
     @Override
     protected WrapperFactory createWrapperFactory(String nodeName) {
-        return new DockerWrapperFactory(nodeName, modelService);
+        return new DockerWrapperFactory(nodeName, this);
     }
 }

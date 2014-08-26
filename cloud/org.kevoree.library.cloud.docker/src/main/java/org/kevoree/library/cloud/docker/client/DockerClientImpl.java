@@ -7,14 +7,13 @@ import org.kevoree.library.cloud.docker.model.*;
 import org.kevoree.log.Log;
 import us.monoid.json.JSONArray;
 import us.monoid.json.JSONException;
+import us.monoid.web.BinaryResource;
 import us.monoid.web.Content;
 import us.monoid.web.JSONResource;
 import us.monoid.web.Resty;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
+import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import static us.monoid.web.Resty.*;
@@ -74,6 +73,76 @@ public class DockerClientImpl implements DockerClient {
     }
 
     @Override
+    public void attach(final String id, boolean logs, boolean stream, boolean stdin, boolean stdout, boolean stderr) throws DockerException, JSONException {
+        try {
+            final BinaryResource res = this.resty.bytes(
+                    this.url + String.format(DockerApi.ATTACH_CONTAINER, id),
+                    form(String.format("logs=%b&stream=%b&stdin=%b&stdout=%b&stderr=%b", logs, stream, stdin, stdout, stderr))
+            );
+
+            // non-blocking io
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // https://docs.docker.com/reference/api/docker_remote_api_v1.13/#attach-to-a-container
+                        // implementation of the Stream payload hack
+                        byte[] header = new byte[8];
+                        int read = res.stream().read(header);
+                        while (read != -1) {
+                            ByteBuffer bb = ByteBuffer.wrap(header, 4, 4);
+                            byte[] payload = new byte[bb.getInt()];
+                            res.stream().read(payload);
+                            StringWriter writer = new StringWriter();
+                            writer.write(id.substring(0, 12));
+                            writer.write(" > ");
+                            writer.write(new String(payload));
+                            switch (header[0]) {
+                                default:
+                                case DockerApi.ATTACH_STDOUT:
+                                    System.out.print(writer.toString());
+                                    break;
+
+                                case DockerApi.ATTACH_STDERR:
+                                    System.err.print(writer.toString());
+                                    break;
+                            }
+                            read = res.stream().read(header);
+                        }
+                    } catch (IOException e) {
+                        Log.error("DockerClient: attach({}) stream error", id.substring(0, 12));
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        } catch (IOException e) {
+            throw new DockerException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<Image> getImages() throws DockerException, JSONException {
+        return this.getImages(false, null);
+    }
+
+    @Override
+    public List<Image> getImages(boolean all, String filters) throws DockerException, JSONException {
+        if (filters == null) {
+            filters = "";
+        }
+
+        try {
+            JSONArray res = this.resty.json(this.url + DockerApi.IMAGES_LIST + String.format("?all=%s&filters=%s", all, filters)).array();
+
+            ObjectMapper mapper = build();
+            return mapper.readValue(res.toString(), mapper.getTypeFactory().constructCollectionType(List.class, Image.class));
+
+        } catch (IOException e) {
+            throw new DockerException(e.getMessage());
+        }
+    }
+
+    @Override
     public List<Container> getContainers() throws DockerException, JSONException {
         try {
             JSONArray res = this.resty.json(this.url + DockerApi.CONTAINERS_LIST).array();
@@ -126,24 +195,26 @@ public class DockerClientImpl implements DockerClient {
 
     @Override
     public void pull(String name) throws DockerException, JSONException {
-        this.pull(name, "");
+        ImageConfig conf = new ImageConfig();
+        conf.setFromImage(name);
+        this.pull(conf);
     }
 
     @Override
-    public void pull(String name, String tag) throws DockerException, JSONException {
-        if (tag == null) {
-            tag = "";
+    public void pull(ImageConfig conf) throws DockerException, JSONException {
+        if (conf == null) {
+            conf = new ImageConfig();
         }
         try {
-            Log.info("Pulling {}...(this may take a while)", name);
+            Log.info("Pulling {}...(this may take a while)", conf.getFromImage());
             JSONResource res = this.resty.json(
                     this.url + DockerApi.CREATE_IMAGE,
-                    form(String.format("fromImage=%s&tag=%s", name, tag))
+                    form(String.format("fromImage=%s&fromSrc=%s&repo=%s&tag=%s&registry=%s", conf.getFromImage(), conf.getFromSrc(), conf.getRepo(), conf.getTag(), conf.getRegistry()))
             );
 
             StringWriter writer = new StringWriter();
             IOUtils.copy(res.getUrlConnection().getInputStream(), writer, "UTF-8");
-            Log.info("{} pulled successfully", name);
+            Log.info("{} pulled successfully", conf.getFromImage());
 
         } catch (IOException e) {
             throw new DockerException(e.getMessage());
@@ -162,6 +233,19 @@ public class DockerClientImpl implements DockerClient {
 
             StringWriter writer = new StringWriter();
             IOUtils.copy(res.getUrlConnection().getInputStream(), writer, "UTF-8");
+
+        } catch (IOException e) {
+            throw new DockerException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<ImageInfo> searchImage(String term) throws DockerException, JSONException {
+        try {
+            JSONArray res = this.resty.json(this.url + DockerApi.SEARCH_IMAGE + String.format("?term=%s", term)).array();
+
+            ObjectMapper mapper = build();
+            return mapper.readValue(res.toString(), mapper.getTypeFactory().constructCollectionType(List.class, ImageInfo.class));
 
         } catch (IOException e) {
             throw new DockerException(e.getMessage());

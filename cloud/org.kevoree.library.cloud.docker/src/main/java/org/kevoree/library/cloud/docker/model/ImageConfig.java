@@ -11,16 +11,16 @@ public class ImageConfig {
     private String fromImage;
 
     @JsonProperty("fromSrc")
-    private String fromSrc;
+    private String fromSrc = "";
 
     @JsonProperty("repo")
-    private String repo;
+    private String repo = "";
 
     @JsonProperty("tag")
-    private String tag;
+    private String tag = "";
 
     @JsonProperty("registry")
-    private String registry;
+    private String registry = "";
 
     public String getFromImage() {
         return fromImage;
@@ -60,5 +60,10 @@ public class ImageConfig {
 
     public void setRegistry(String registry) {
         this.registry = registry;
+    }
+
+    @Override
+    public String toString() {
+        return "ImageConfig {fromImage="+fromImage+", fromSrc="+fromSrc+", repo="+repo+", tag="+tag+", registry="+registry+"}";
     }
 }
