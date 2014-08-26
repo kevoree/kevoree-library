@@ -35,8 +35,9 @@ import org.kevoree.library.cloud.docker.model.AuthConfig
  */
 class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup,
                         override val bs: BootstrapService, val dockerNode: DockerNode) : KInstanceWrapper {
+    override var kcl: ClassLoader? = null
 
-//    override var kcl : ClassLoader? = null
+    //    override var kcl : ClassLoader? = null
 
     override var isStarted: Boolean = false
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
