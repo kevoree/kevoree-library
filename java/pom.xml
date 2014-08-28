@@ -49,10 +49,14 @@
                 <artifactId>org.kevoree.tools.mavenplugin</artifactId>
                 <version>${kevoree.version}</version>
                 <extensions>true</extensions>
+                <configuration>
+                    <registry>http://localhost:8080/</registry>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
                             <goal>generate</goal>
+							<goal>deploy</goal>
                         </goals>
                     </execution>
                 </executions>
