@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.kevoree.library.java</groupId>
@@ -25,8 +26,8 @@
         <module>org.kevoree.library.java.web</module>
         <module>org.kevoree.library.java.editor</module>
         <module>org.kevoree.library.java.mqtt</module>
-		<module>org.kevoree.library.java.mqttServer</module>
-		<module>org.kevoree.library.java.rest</module>
+        <module>org.kevoree.library.java.mqttServer</module>
+        <module>org.kevoree.library.java.rest</module>
     </modules>
 
     <dependencies>
@@ -49,14 +50,11 @@
                 <artifactId>org.kevoree.tools.mavenplugin</artifactId>
                 <version>${kevoree.version}</version>
                 <extensions>true</extensions>
-                <configuration>
-                    <registry>http://localhost:8080/</registry>
-                </configuration>
                 <executions>
                     <execution>
                         <goals>
                             <goal>generate</goal>
-							<goal>deploy</goal>
+                            <goal>deploy</goal>
                         </goals>
                     </execution>
                 </executions>
