@@ -11,7 +11,7 @@ add node0 : JavaNode
 add sync : WSGroup
 attach node0 sync
 
-add node0.h1 : HelloJava
+add node0.h1 : org.kevoree.library.helloworld.HelloJava
 set node0.h1.message = "payload"
 add node0.h2 : HelloJava
 
