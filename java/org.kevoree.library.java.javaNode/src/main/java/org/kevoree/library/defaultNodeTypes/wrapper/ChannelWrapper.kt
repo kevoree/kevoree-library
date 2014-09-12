@@ -17,7 +17,7 @@ public class ChannelWrapper(val modelElement: Channel, override val targetObj: A
     val context: ChannelWrapperContext
 
     {
-        context = ChannelWrapperContext(modelElement.path()!!, _nodeName, modelService)
+        context = ChannelWrapperContext(modelElement.path(), _nodeName, modelService)
         bs.injectService(javaClass<ChannelContext>(), context, targetObj)
     }
 

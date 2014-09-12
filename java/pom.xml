@@ -5,12 +5,12 @@
     <artifactId>org.kevoree.library.java.root</artifactId>
     <packaging>pom</packaging>
     <name>Kevoree :: Library :: Java :: Root</name>
-    <version>5.0.1-SNAPSHOT</version>
+    <version>5.0.2-SNAPSHOT</version>
 
     <parent>
         <artifactId>org.kevoree.library</artifactId>
         <groupId>org.kevoree.library</groupId>
-        <version>5.0.1-SNAPSHOT</version>
+        <version>5.0.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -25,7 +25,8 @@
         <module>org.kevoree.library.java.web</module>
         <module>org.kevoree.library.java.editor</module>
         <module>org.kevoree.library.java.mqtt</module>
-		<module>org.kevoree.library.java.mqttServer</module>
+        <module>org.kevoree.library.java.mqttServer</module>
+        <module>org.kevoree.library.java.rest</module>
     </modules>
 
     <dependencies>
@@ -52,6 +53,7 @@
                     <execution>
                         <goals>
                             <goal>generate</goal>
+                            <goal>deploy</goal>
                         </goals>
                     </execution>
                 </executions>
