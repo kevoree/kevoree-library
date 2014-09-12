@@ -37,6 +37,10 @@ public class DockerClientImpl implements DockerClient {
         this.url = url;
     }
 
+    public DockerClientImpl() {
+        this("http://localhost:2375");
+    }
+
     @Override
     public void start(String id) throws DockerException, JSONException {
         this.start(id, null);
@@ -74,48 +78,15 @@ public class DockerClientImpl implements DockerClient {
     }
 
     @Override
-    public void attach(final String id, boolean logs, boolean stream, boolean stdin, boolean stdout, boolean stderr) throws DockerException, JSONException {
+    public InputStream attach(final String id, boolean logs, boolean stream, boolean stdin, boolean stdout, boolean stderr) throws DockerException, JSONException {
         try {
             final BinaryResource res = this.resty.bytes(
                     this.url + String.format(DockerApi.ATTACH_CONTAINER, id),
                     form(String.format("logs=%b&stream=%b&stdin=%b&stdout=%b&stderr=%b", logs, stream, stdin, stdout, stderr))
             );
 
-            // non-blocking io
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        // https://docs.docker.com/reference/api/docker_remote_api_v1.13/#attach-to-a-container
-                        // implementation of the Stream payload hack
-                        byte[] header = new byte[8];
-                        int read = res.stream().read(header);
-                        while (read != -1) {
-                            ByteBuffer bb = ByteBuffer.wrap(header, 4, 4);
-                            byte[] payload = new byte[bb.getInt()];
-                            res.stream().read(payload);
-                            StringWriter writer = new StringWriter();
-                            writer.write(id.substring(0, 12));
-                            writer.write(" > ");
-                            writer.write(new String(payload));
-                            switch (header[0]) {
-                                default:
-                                case DockerApi.ATTACH_STDOUT:
-                                    System.out.print(writer.toString());
-                                    break;
+            return res.stream();
 
-                                case DockerApi.ATTACH_STDERR:
-                                    System.err.print(writer.toString());
-                                    break;
-                            }
-                            read = res.stream().read(header);
-                        }
-                    } catch (IOException e) {
-                        Log.error("DockerClient: attach({}) stream error", id.substring(0, 12));
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
         } catch (IOException e) {
             throw new DockerException(e.getMessage());
         }

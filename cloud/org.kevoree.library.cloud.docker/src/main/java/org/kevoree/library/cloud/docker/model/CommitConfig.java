@@ -1,8 +1,11 @@
 package org.kevoree.library.cloud.docker.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Created by leiko on 22/05/14.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CommitConfig {
 
     private String container = "";

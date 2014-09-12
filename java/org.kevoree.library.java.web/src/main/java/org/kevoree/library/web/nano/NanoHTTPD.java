@@ -70,7 +70,7 @@ public abstract class NanoHTTPD {
      * Pseudo-Parameter to use to store the actual query string in the parameters map for later re-processing.
      */
     private static final String QUERY_STRING_PARAMETER = "NanoHttpd.QUERY_STRING";
-    String hostname="127.0.0.1";
+    String hostname="0.0.0.0";
     protected int myPort=8080;
     private ServerSocket myServerSocket;
     private Set<Socket> openConnections = new HashSet<Socket>();

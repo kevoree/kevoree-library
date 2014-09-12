@@ -19,7 +19,7 @@ public interface DockerApi {
     static final String SEARCH_IMAGE        = "/images/search";
     static final String PUSH_IMAGE          = "/images/%s/push";
 
-    static final int ATTACH_STDIN           = 0;
-    static final int ATTACH_STDOUT          = 1;
-    static final int ATTACH_STDERR          = 2;
+    static final byte ATTACH_STDIN           = 0;
+    static final byte ATTACH_STDOUT          = 1;
+    static final byte ATTACH_STDERR          = 2;
 }

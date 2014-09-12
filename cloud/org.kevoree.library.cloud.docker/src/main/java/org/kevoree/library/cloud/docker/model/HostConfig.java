@@ -1,13 +1,14 @@
 package org.kevoree.library.cloud.docker.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by leiko on 22/05/14.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HostConfig {
 
-    @JsonProperty("ContainerIDFile") private String     containerIDFile;
     @JsonProperty("Binds")           private String[]   binds;
     @JsonProperty("LxcConf")         private Object     lxcConf;
     @JsonProperty("PortBindings")    private String[]   portBindings;
@@ -15,9 +16,9 @@ public class HostConfig {
     @JsonProperty("Privileged")      private boolean    privileged;
     @JsonProperty("Links")           private Object     links;
     @JsonProperty("Dns")             private Object     dns;
-    @JsonProperty("DnsSearch")       private Object     dnsSearch;
-    @JsonProperty("VolumesFrom")     private Object     volumesFrom;
-    @JsonProperty("NetworkMode")     private String     networkMode = "";
+    @JsonProperty("VolumesFrom")     private String[]   volumesFrom;
+    @JsonProperty("CapAdd")          private String[]   capAdd;
+    @JsonProperty("CapDrop")         private String[]   capDrop;
 
     public String[] getBinds() {
         return binds;
@@ -59,14 +60,6 @@ public class HostConfig {
         this.privileged = privileged;
     }
 
-    public String getContainerIDFile() {
-        return containerIDFile;
-    }
-
-    public void setContainerIDFile(String containerIDFile) {
-        this.containerIDFile = containerIDFile;
-    }
-
     public Object getLinks() {
         return links;
     }
@@ -83,28 +76,30 @@ public class HostConfig {
         this.dns = dns;
     }
 
-    public Object getDnsSearch() {
-        return dnsSearch;
-    }
 
-    public void setDnsSearch(Object dnsSearch) {
-        this.dnsSearch = dnsSearch;
-    }
 
     public Object getVolumesFrom() {
         return volumesFrom;
     }
 
-    public void setVolumesFrom(Object volumesFrom) {
+    public void setVolumesFrom(String[] volumesFrom) {
         this.volumesFrom = volumesFrom;
     }
 
-    public String getNetworkMode() {
-        return networkMode;
+    public String[] getCapAdd() {
+        return capAdd;
     }
 
-    public void setNetworkMode(String networkMode) {
-        this.networkMode = networkMode;
+    public void setCapAdd(String[] capAdd) {
+        this.capAdd = capAdd;
+    }
+
+    public String[] getCapDrop() {
+        return capDrop;
+    }
+
+    public void setCapDrop(String[] capDrop) {
+        this.capDrop = capDrop;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.kevoree.library.cloud.docker.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import java.util.Map;
  *
  * @author expi
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class NetworkSettings {
 
     @JsonProperty("IPAddress")

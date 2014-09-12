@@ -3,6 +3,7 @@ package org.kevoree.library.cloud.docker.client;
 import org.kevoree.library.cloud.docker.model.*;
 import us.monoid.json.JSONException;
 
+import java.io.InputStream;
 import java.util.List;
 
 /***
@@ -17,7 +18,7 @@ public interface DockerClient {
     void stop(String id) throws DockerException;
     void stop(String id, int timeout) throws DockerException;
 
-    void attach(String id, boolean logs, boolean stream, boolean stdin, boolean stdout, boolean stderr) throws DockerException, JSONException;
+    InputStream attach(String id, boolean logs, boolean stream, boolean stdin, boolean stdout, boolean stderr) throws DockerException, JSONException;
 
     void deleteContainer(String id) throws DockerException, JSONException;
 

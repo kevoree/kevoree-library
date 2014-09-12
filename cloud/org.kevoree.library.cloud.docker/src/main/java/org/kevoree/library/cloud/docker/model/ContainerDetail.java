@@ -8,6 +8,7 @@ import java.util.Map;
  *
  * @author expi
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ContainerDetail {
 
     @JsonProperty("Id")              private String              id;

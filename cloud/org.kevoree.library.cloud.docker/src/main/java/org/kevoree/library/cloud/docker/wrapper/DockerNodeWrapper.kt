@@ -26,6 +26,10 @@ import org.kevoree.library.cloud.docker.model.Image
 import org.kevoree.TypeDefinition
 import org.kevoree.library.cloud.docker.model.ImageConfig
 import org.kevoree.library.cloud.docker.model.AuthConfig
+import java.io.PrintStream
+import org.kevoree.library.cloud.docker.client.DockerApi
+import java.nio.ByteBuffer
+import java.io.IOException
 
 /**
  * Created with IntelliJ IDEA.
@@ -36,12 +40,12 @@ import org.kevoree.library.cloud.docker.model.AuthConfig
 class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, override var tg: ThreadGroup,
                         override val bs: BootstrapService, val dockerNode: DockerNode) : KInstanceWrapper {
 
-//    override var kcl : ClassLoader? = null
+    override var kcl : ClassLoader? = null
 
     override var isStarted: Boolean = false
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
 
-    private var docker = DockerClientImpl("http://localhost:2375")
+    private var docker = DockerClientImpl()
     private var containerID: String? = null
     private var hostConf: HostConfig? = null
 
@@ -50,7 +54,44 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
             val id = containerID!!.substring(0, 12)
 
             // attach container stdout/stderr to System.out/err
-            docker.attach(containerID, false, true, false, true, true)
+            val stream = docker.attach(containerID, false, true, false, true, true)!!
+
+            Thread(object : Runnable {
+                override fun run() {
+                    try {
+                        // https://docs.docker.com/reference/api/docker_remote_api_v1.13/#attach-to-a-container
+                        // implementation of the Stream payload hack
+                        val header = ByteArray(8)
+                        var read = stream.read(header)
+                        val output: PrintStream
+                        while (read != -1) {
+                            // detect STD type
+                            when (header[0]) {
+                                DockerApi.ATTACH_STDERR -> output = System.err
+                                else                    -> output = System.out
+                            }
+
+                            // strip content from package (separate STD header from message content)
+                            val bb = ByteBuffer.wrap(header, 4, 4)
+                            val payload = ByteArray(bb.getInt())
+                            if (stream.read(payload) > 0) {
+                                val content = String(payload)
+                                // output logs properly
+                                if (content != System.getProperty("line.separator")) {
+                                    output.print("${modelElement.name} > ")
+                                }
+                                output.print(content)
+                            }
+                            // read what's left in the stream
+                            read = stream.read(header)
+                        }
+                    } catch (e: IOException) {
+                        Log.error("DockerClient: attach({}) stream error", id.substring(0, 12))
+                        Log.debug(e.getStackTrace().toString());
+                    }
+
+                }
+            }).start()
 
             // start container
             Log.info("Starting docker container {} ...", id)
@@ -93,6 +134,10 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
             conf.setAuthor(dockerNode.getCommitAuthor())
             docker.commit(conf)
             Log.info("Container $id commited into ${conf.getRepo()}:$tag")
+
+            // delete stopped container
+            docker.deleteContainer(containerID)
+            Log.info("Container ${containerID!!.substring(0, 12)} successfully deleted")
         }
         return true
     }
@@ -194,7 +239,6 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
 
         } else {
             // imageName is not available locally
-            // TODO check if image is remotely available
             Log.info("Looking for $repo/${modelElement.name} on remote Docker registry...")
             var searchRes = docker.searchImage("$repo/${modelElement.name}")!!;
             if (searchRes.size() > 0) {
@@ -239,10 +283,10 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
                 }
             }
         }
-
-        // config for every containers
-        conf.setAttachStdout(true)
-        conf.setAttachStderr(true)
+//
+//        // config for every containers
+//        conf.setAttachStdout(true)
+//        conf.setAttachStderr(true)
 
         // create container
         try {
@@ -260,9 +304,6 @@ class DockerNodeWrapper(val modelElement: ContainerNode, override val targetObj:
 
     override fun destroy() {
         if (containerID != null) {
-            docker.deleteContainer(containerID)
-            Log.info("Container ${containerID!!.substring(0, 12)} successfully deleted")
-
             // push image
             var repo = dockerNode.getCommitRepo()
             if (repo == null) {
