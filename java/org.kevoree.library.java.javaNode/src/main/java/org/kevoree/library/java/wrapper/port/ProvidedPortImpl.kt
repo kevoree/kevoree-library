@@ -5,7 +5,7 @@ import org.kevoree.api.Callback
 import java.lang.reflect.Method
 import org.kevoree.log.Log
 import org.kevoree.annotation.Input
-import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
+import org.kevoree.library.java.wrapper.ComponentWrapper
 import java.lang.invoke.MethodHandles
 import java.lang.invoke.MethodType
 import java.lang.invoke.MethodHandle

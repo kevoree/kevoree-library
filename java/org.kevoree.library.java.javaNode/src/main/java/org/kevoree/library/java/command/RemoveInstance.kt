@@ -4,8 +4,8 @@ import org.kevoree.library.java.ModelRegistry
 import org.kevoree.Instance
 import org.kevoree.api.BootstrapService
 import org.kevoree.api.PrimitiveCommand
-import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory
-import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
+import org.kevoree.library.java.wrapper.WrapperFactory
+import org.kevoree.library.java.wrapper.KInstanceWrapper
 import org.kevoree.api.ModelService
 import org.kevoree.log.Log
 

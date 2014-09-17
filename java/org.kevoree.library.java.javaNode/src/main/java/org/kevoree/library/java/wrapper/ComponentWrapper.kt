@@ -19,8 +19,8 @@ import org.kevoree.library.java.reflect.FieldAnnotationResolver
 import org.kevoree.log.Log
 import java.lang.reflect.InvocationTargetException
 import org.kevoree.api.BootstrapService
-import org.kevoree.library.defaultNodeTypes.wrapper.port.RequiredPortImpl
-import org.kevoree.library.defaultNodeTypes.wrapper.port.ProvidedPortImpl
+import org.kevoree.library.java.wrapper.port.RequiredPortImpl
+import org.kevoree.library.java.wrapper.port.ProvidedPortImpl
 import java.util.HashMap
 import java.lang.reflect.Field
 import org.kevoree.library.java.reflect.MethodAnnotationResolver

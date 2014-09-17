@@ -1,6 +1,6 @@
 package org.kevoree.library.java.command
 
-import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
+import org.kevoree.library.java.wrapper.KInstanceWrapper
 import org.kevoree.library.java.ModelRegistry
 import org.kevoree.Instance
 import org.kevoree.api.BootstrapService

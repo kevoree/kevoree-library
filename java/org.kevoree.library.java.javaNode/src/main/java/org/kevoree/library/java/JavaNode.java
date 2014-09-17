@@ -10,10 +10,10 @@ import org.kevoree.api.adaptation.AdaptationModel;
 import org.kevoree.api.adaptation.AdaptationPrimitive;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateContext;
-import org.kevoree.library.defaultNodeTypes.command.*;
-import org.kevoree.library.defaultNodeTypes.planning.JavaPrimitive;
-import org.kevoree.library.defaultNodeTypes.planning.KevoreeKompareBean;
-import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
+import org.kevoree.library.java.command.*;
+import org.kevoree.library.java.planning.JavaPrimitive;
+import org.kevoree.library.java.planning.KevoreeKompareBean;
+import org.kevoree.library.java.wrapper.WrapperFactory;
 import org.kevoree.log.Log;
 
 

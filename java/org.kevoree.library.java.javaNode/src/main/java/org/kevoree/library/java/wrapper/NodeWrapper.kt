@@ -6,7 +6,7 @@ import java.io.InputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.IOException
-import org.kevoree.library.defaultNodeTypes.wrapper.NodeWrapper.Reader
+import org.kevoree.library.java.wrapper.NodeWrapper.Reader
 import java.io.FileOutputStream
 import org.kevoree.api.BootstrapService
 import org.kevoree.ContainerRoot

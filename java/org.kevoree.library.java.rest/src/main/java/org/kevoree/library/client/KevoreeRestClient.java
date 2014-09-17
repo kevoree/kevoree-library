@@ -38,8 +38,6 @@ public class KevoreeRestClient {
         con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
         con.setDoOutput(true);
 
-        System.out.println(obj);
-
         DataOutputStream wr = new DataOutputStream(con.getOutputStream());
         wr.writeBytes(payload);
         wr.flush();
