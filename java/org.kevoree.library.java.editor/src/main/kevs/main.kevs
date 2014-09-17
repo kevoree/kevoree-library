@@ -1,14 +1,8 @@
-repo "http://oss.sonatype.org/content/groups/public/"
-include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:release
-include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:release
-include mvn:org.kevoree.library.java:org.kevoree.library.java.editor:latest
-
-add node0 : JavaNode
-add sync : WSGroup
-add node0.editor : WebEditor
+add node0 : org.kevoree.library.java.JavaNode
+add sync : org.kevoree.library.ws.WSGroup
+add node0.editor : org.kevoree.library.java.editor.WebEditor/5.0.2-SNAPSHOT
 
 attach node0 sync
 
 set sync.port/node0 = "9000"
 set node0.editor.port = "3042"
-set node0.editor.cacheDuration = "10"
