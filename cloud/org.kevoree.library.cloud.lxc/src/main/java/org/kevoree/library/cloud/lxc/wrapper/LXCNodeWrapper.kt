@@ -1,11 +1,11 @@
 package org.kevoree.library.cloud.lxc.wrapper
 
-import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
 import org.kevoree.ContainerRoot
 import org.kevoree.api.BootstrapService
-import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.ContainerNode
 import org.kevoree.log.Log
+import org.kevoree.library.java.reflect.MethodAnnotationResolver
+import org.kevoree.library.java.wrapper.KInstanceWrapper
 
 /**
  * Created with IntelliJ IDEA.

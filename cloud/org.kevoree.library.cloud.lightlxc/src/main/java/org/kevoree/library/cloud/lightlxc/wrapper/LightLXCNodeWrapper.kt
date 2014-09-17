@@ -1,9 +1,7 @@
 package org.kevoree.library.cloud.docker.wrapper
 
-import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
 import org.kevoree.ContainerRoot
 import org.kevoree.api.BootstrapService
-import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.ContainerNode
 import java.io.InputStream
 import java.io.BufferedReader
@@ -21,6 +19,8 @@ import org.kevoree.library.cloud.lightlxc.wrapper.Reader
 import org.kevoree.api.ModelService
 import org.kevoree.modeling.api.json.JSONModelSerializer
 import org.kevoree.factory.DefaultKevoreeFactory
+import org.kevoree.library.java.wrapper.KInstanceWrapper
+import org.kevoree.library.java.reflect.MethodAnnotationResolver
 
 /**
  * Created with IntelliJ IDEA.

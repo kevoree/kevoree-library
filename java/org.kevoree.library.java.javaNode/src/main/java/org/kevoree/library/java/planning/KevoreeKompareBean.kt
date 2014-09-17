@@ -16,9 +16,8 @@ import org.kevoree.factory.KevoreeFactory
 import org.kevoree.factory.DefaultKevoreeFactory
 import org.kevoree.api.adaptation.AdaptationModel
 import org.kevoree.api.adaptation.AdaptationPrimitive
-import org.kevoree.library.defaultNodeTypes.planning
 
-open class KevoreeKompareBean(val registry: ModelRegistry) : planning.KevoreeScheduler {
+open class KevoreeKompareBean(val registry: ModelRegistry) : KevoreeScheduler {
     override var adaptationModelFactory: KevoreeFactory = DefaultKevoreeFactory()
 
     fun plan(actualModel: ContainerRoot, targetModel: ContainerRoot, nodeName: String): AdaptationModel {
@@ -30,14 +29,14 @@ open class KevoreeKompareBean(val registry: ModelRegistry) : planning.KevoreeSch
     private val modelCompare = adaptationModelFactory.createModelCompare()
 
     /* Helper to create command */
-    private fun adapt(primitive: planning.JavaPrimitive, elem: Any?): AdaptationPrimitive {
+    private fun adapt(primitive: JavaPrimitive, elem: Any?): AdaptationPrimitive {
         val ccmd = AdaptationPrimitive()
         ccmd.primitiveType = primitive.name()
         ccmd.ref = elem
         return ccmd
     }
 
-    data class TupleObjPrim(val obj: KMFContainer, val p: planning.JavaPrimitive)
+    data class TupleObjPrim(val obj: KMFContainer, val p: JavaPrimitive)
 
     open public fun compareModels(currentModel: ContainerRoot, targetModel: ContainerRoot, nodeName: String): AdaptationModel {
         val adaptationModel = AdaptationModel()

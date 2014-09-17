@@ -5,8 +5,8 @@ import org.kevoree.annotation.NodeType;
 import org.kevoree.annotation.Param;
 import org.kevoree.api.ModelService;
 import org.kevoree.library.cloud.docker.wrapper.DockerWrapperFactory;
-import org.kevoree.library.defaultNodeTypes.JavaNode;
-import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
+import org.kevoree.library.java.JavaNode;
+import org.kevoree.library.java.wrapper.WrapperFactory;
 
 /**
  * Created with IntelliJ IDEA.

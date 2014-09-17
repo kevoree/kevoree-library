@@ -25,9 +25,8 @@ import java.util.HashMap
 import java.lang.reflect.Field
 import org.kevoree.library.java.reflect.MethodAnnotationResolver
 import org.kevoree.kcl.api.FlexyClassLoader
-import org.kevoree.library.defaultNodeTypes.wrapper
 
-public class ComponentWrapper(val modelElement: ComponentInstance, override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : wrapper.KInstanceWrapper {
+public class ComponentWrapper(val modelElement: ComponentInstance, override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
     override var kcl: ClassLoader? = null
 
     public val providedPorts: HashMap<String, ProvidedPortImpl> = HashMap<String, ProvidedPortImpl>()

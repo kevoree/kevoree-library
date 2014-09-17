@@ -1,9 +1,7 @@
 package org.kevoree.library.cloud.docker.wrapper
 
-import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
 import org.kevoree.ContainerRoot
 import org.kevoree.api.BootstrapService
-import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
 import org.kevoree.ContainerNode
 import java.io.File
 import java.io.BufferedWriter
@@ -30,6 +28,8 @@ import java.io.PrintStream
 import org.kevoree.library.cloud.docker.client.DockerApi
 import java.nio.ByteBuffer
 import java.io.IOException
+import org.kevoree.library.java.wrapper.KInstanceWrapper
+import org.kevoree.library.java.reflect.MethodAnnotationResolver
 
 /**
  * Created with IntelliJ IDEA.

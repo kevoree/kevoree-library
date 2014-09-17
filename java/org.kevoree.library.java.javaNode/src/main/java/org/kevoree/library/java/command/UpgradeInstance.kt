@@ -6,7 +6,6 @@ import org.kevoree.library.java.ModelRegistry
 import org.kevoree.api.BootstrapService
 import org.kevoree.api.ModelService
 import org.kevoree.api.PrimitiveCommand
-import org.kevoree.library.defaultNodeTypes.command
 
 /**
  * Created by duke on 6/5/14.
@@ -14,8 +13,8 @@ import org.kevoree.library.defaultNodeTypes.command
 
 class UpgradeInstance(val wrapperFactory: WrapperFactory, val c: Instance, val nodeName: String, val registry: ModelRegistry, val bs: BootstrapService, val modelService: ModelService) : PrimitiveCommand {
 
-    val remove_cmd = command.RemoveInstance(wrapperFactory, c, nodeName, registry, bs, modelService)
-    val add_cmd = command.AddInstance(wrapperFactory, c, nodeName, registry, bs, modelService)
+    val remove_cmd = RemoveInstance(wrapperFactory, c, nodeName, registry, bs, modelService)
+    val add_cmd = AddInstance(wrapperFactory, c, nodeName, registry, bs, modelService)
 
     override fun execute(): Boolean {
         if (remove_cmd.execute()) {

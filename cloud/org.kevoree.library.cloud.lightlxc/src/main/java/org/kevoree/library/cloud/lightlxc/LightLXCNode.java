@@ -6,7 +6,7 @@ import org.kevoree.api.ModelService;
 import org.kevoree.library.cloud.api.PlatformJavaNode;
 import org.kevoree.library.cloud.docker.wrapper.LightLXCWrapperFactory;
 import org.kevoree.library.cloud.lightlxc.wrapper.IpModelUpdater;
-import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
+import org.kevoree.library.java.wrapper.WrapperFactory;
 
 /**
  * Created by duke on 09/12/2013.

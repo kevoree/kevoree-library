@@ -7,7 +7,6 @@ import org.kevoree.Channel
 import org.kevoree.ContainerNode
 import org.kevoree.api.BootstrapService
 import org.kevoree.api.ModelService
-import org.kevoree.library.defaultNodeTypes.wrapper
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,19 +17,19 @@ import org.kevoree.library.defaultNodeTypes.wrapper
 
 open class WrapperFactory(val nodeName: String) {
 
-    open fun wrap(modelElement: KMFContainer, newBeanInstance: Any, tg: ThreadGroup, bs: BootstrapService, modelService : ModelService): wrapper.KInstanceWrapper {
+    open fun wrap(modelElement: KMFContainer, newBeanInstance: Any, tg: ThreadGroup, bs: BootstrapService, modelService : ModelService): KInstanceWrapper {
         when(modelElement) {
             is ComponentInstance -> {
-                return wrapper.ComponentWrapper(modelElement, newBeanInstance, nodeName, tg, bs)
+                return ComponentWrapper(modelElement, newBeanInstance, nodeName, tg, bs)
             }
             is Group -> {
-                return wrapper.GroupWrapper(modelElement, newBeanInstance, nodeName, tg, bs)
+                return GroupWrapper(modelElement, newBeanInstance, nodeName, tg, bs)
             }
             is Channel -> {
-                return wrapper.ChannelWrapper(modelElement, newBeanInstance, nodeName, tg, bs, modelService)
+                return ChannelWrapper(modelElement, newBeanInstance, nodeName, tg, bs, modelService)
             }
             is ContainerNode -> {
-                return wrapper.NodeWrapper(modelElement, newBeanInstance, nodeName, tg, bs)
+                return NodeWrapper(modelElement, newBeanInstance, nodeName, tg, bs)
             }
             else -> {
                 throw Exception("Unknow instance type " + modelElement.metaClassName())

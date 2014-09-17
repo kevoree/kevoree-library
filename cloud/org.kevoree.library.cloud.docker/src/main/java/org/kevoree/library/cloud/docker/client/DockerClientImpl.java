@@ -14,7 +14,6 @@ import us.monoid.web.JSONResource;
 import us.monoid.web.Resty;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.util.List;
 
 import static us.monoid.web.Resty.*;

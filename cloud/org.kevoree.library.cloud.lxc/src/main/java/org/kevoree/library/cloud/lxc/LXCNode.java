@@ -4,7 +4,7 @@ import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.library.cloud.api.PlatformJavaNode;
 import org.kevoree.library.cloud.lxc.wrapper.*;
-import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory;
+import org.kevoree.library.java.wrapper.WrapperFactory;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;

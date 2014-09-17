@@ -1,11 +1,11 @@
 package org.kevoree.library.cloud.lxc.wrapper
 
-import org.kevoree.library.defaultNodeTypes.wrapper.WrapperFactory
 import org.kevoree.modeling.api.KMFContainer
 import org.kevoree.api.BootstrapService
-import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
 import org.kevoree.ContainerNode
 import org.kevoree.api.ModelService
+import org.kevoree.library.java.wrapper.WrapperFactory
+import org.kevoree.library.java.wrapper.KInstanceWrapper
 
 /**
  * Created with IntelliJ IDEA.
