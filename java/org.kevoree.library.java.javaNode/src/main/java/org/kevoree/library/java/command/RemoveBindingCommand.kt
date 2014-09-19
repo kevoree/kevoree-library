@@ -1,7 +1,7 @@
 package org.kevoree.library.java.command
 
-import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper
-import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
+import org.kevoree.library.java.wrapper.ComponentWrapper
+import org.kevoree.library.java.wrapper.ChannelWrapper
 import org.kevoree.library.java.ModelRegistry
 import org.kevoree.MBinding
 import org.kevoree.api.PrimitiveCommand

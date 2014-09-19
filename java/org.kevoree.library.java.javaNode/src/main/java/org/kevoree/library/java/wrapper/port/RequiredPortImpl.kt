@@ -1,6 +1,6 @@
 package org.kevoree.library.java.wrapper.port
 
-import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper
+import org.kevoree.library.java.wrapper.ChannelWrapper
 import org.kevoree.api.Port
 import org.kevoree.api.Callback
 import org.kevoree.log.Log

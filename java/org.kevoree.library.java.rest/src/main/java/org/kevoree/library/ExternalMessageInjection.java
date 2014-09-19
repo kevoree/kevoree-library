@@ -5,10 +5,10 @@ import org.kevoree.ComponentInstance;
 import org.kevoree.api.Callback;
 import org.kevoree.api.ModelService;
 import org.kevoree.library.java.ModelRegistry;
-import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper;
-import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper;
-import org.kevoree.library.defaultNodeTypes.wrapper.port.ProvidedPortImpl;
-import org.kevoree.library.defaultNodeTypes.wrapper.port.RequiredPortImpl;
+import org.kevoree.library.java.wrapper.ChannelWrapper;
+import org.kevoree.library.java.wrapper.ComponentWrapper;
+import org.kevoree.library.java.wrapper.port.ProvidedPortImpl;
+import org.kevoree.library.java.wrapper.port.RequiredPortImpl;
 import org.kevoree.log.Log;
 
 import java.util.concurrent.Callable;

@@ -1,6 +1,6 @@
-add node0 : org.kevoree.library.java.JavaNode
-add sync : org.kevoree.library.ws.WSGroup
-add node0.editor : org.kevoree.library.java.editor.WebEditor/5.0.2-SNAPSHOT
+add node0 : org.kevoree.library.JavaNode
+add sync : org.kevoree.library.WSGroup
+add node0.editor : org.kevoree.library.WebEditor/5.0.2-SNAPSHOT
 
 attach node0 sync
 

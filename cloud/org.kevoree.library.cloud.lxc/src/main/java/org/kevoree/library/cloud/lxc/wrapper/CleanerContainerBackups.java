@@ -2,7 +2,7 @@ package org.kevoree.library.cloud.lxc.wrapper;
 
 
 
-import org.kevoree.library.cloud.lxc.LXCNode;
+import org.kevoree.library.LXCNode;
 import org.kevoree.library.cloud.lxc.wrapper.utils.FileManager;
 import org.kevoree.log.Log;
 

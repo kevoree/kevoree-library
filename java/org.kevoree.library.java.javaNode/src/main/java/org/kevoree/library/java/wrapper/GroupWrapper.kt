@@ -21,9 +21,8 @@ import org.kevoree.api.BootstrapService
 import org.kevoree.ContainerRoot
 import org.kevoree.log.Log
 import org.kevoree.Group
-import org.kevoree.library.defaultNodeTypes.wrapper
 
-public class GroupWrapper(val modelElement: Group, override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : wrapper.KInstanceWrapper {
+public class GroupWrapper(val modelElement: Group, override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
     override var kcl: ClassLoader? = null
 
     override var isStarted: Boolean = false

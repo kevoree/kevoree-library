@@ -1,6 +1,6 @@
 package org.kevoree.library.java.core.console;
 
-import org.kevoree.library.java.toys.ToyConsole;
+import org.kevoree.library.ToyConsole;
 import org.kevoree.log.Log;
 
 import javax.swing.*;

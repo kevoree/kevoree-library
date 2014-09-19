@@ -1,7 +1,7 @@
 package org.kevoree.library.cloud.lxc.wrapper;
 
-import org.kevoree.library.cloud.api.helper.ProcessStreamFileLogger;
-import org.kevoree.library.cloud.api.helper.ResourceConstraintManager;
+import org.kevoree.library.api.helper.ProcessStreamFileLogger;
+import org.kevoree.library.api.helper.ResourceConstraintManager;
 import org.kevoree.log.Log;
 
 import java.io.File;

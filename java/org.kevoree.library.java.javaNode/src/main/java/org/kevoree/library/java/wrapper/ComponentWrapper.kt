@@ -19,15 +19,14 @@ import org.kevoree.library.java.reflect.FieldAnnotationResolver
 import org.kevoree.log.Log
 import java.lang.reflect.InvocationTargetException
 import org.kevoree.api.BootstrapService
-import org.kevoree.library.defaultNodeTypes.wrapper.port.RequiredPortImpl
-import org.kevoree.library.defaultNodeTypes.wrapper.port.ProvidedPortImpl
+import org.kevoree.library.java.wrapper.port.RequiredPortImpl
+import org.kevoree.library.java.wrapper.port.ProvidedPortImpl
 import java.util.HashMap
 import java.lang.reflect.Field
 import org.kevoree.library.java.reflect.MethodAnnotationResolver
 import org.kevoree.kcl.api.FlexyClassLoader
-import org.kevoree.library.defaultNodeTypes.wrapper
 
-public class ComponentWrapper(val modelElement: ComponentInstance, override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : wrapper.KInstanceWrapper {
+public class ComponentWrapper(val modelElement: ComponentInstance, override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
     override var kcl: ClassLoader? = null
 
     public val providedPorts: HashMap<String, ProvidedPortImpl> = HashMap<String, ProvidedPortImpl>()
@@ -42,7 +41,7 @@ public class ComponentWrapper(val modelElement: ComponentInstance, override val 
             if(!field!!.isAccessible()){
                 field!!.setAccessible(true)
             }
-            var portWrapper = RequiredPortImpl(requiredPort.path()!!)
+            var portWrapper = RequiredPortImpl(requiredPort.path())
             field!!.set(targetObj, portWrapper)
             requiredPorts.put(requiredPort.portTypeRef!!.name!!, portWrapper)
             } else {
@@ -50,7 +49,7 @@ public class ComponentWrapper(val modelElement: ComponentInstance, override val 
             }
         }
         for(providedPort in modelElement.provided){
-            var portWrapper = ProvidedPortImpl(targetObj, providedPort.portTypeRef!!.name!!, providedPort.path()!!,this)
+            var portWrapper = ProvidedPortImpl(targetObj, providedPort.portTypeRef!!.name!!, providedPort.path(),this)
             providedPorts.put(providedPort.portTypeRef!!.name!!, portWrapper)
         }
     }

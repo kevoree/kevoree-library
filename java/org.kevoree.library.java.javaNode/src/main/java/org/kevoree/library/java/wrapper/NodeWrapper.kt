@@ -6,7 +6,7 @@ import java.io.InputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.IOException
-import org.kevoree.library.defaultNodeTypes.wrapper.NodeWrapper.Reader
+import org.kevoree.library.java.wrapper.NodeWrapper.Reader
 import java.io.FileOutputStream
 import org.kevoree.api.BootstrapService
 import org.kevoree.ContainerRoot
@@ -15,7 +15,6 @@ import org.kevoree.log.Log
 import java.util.HashSet
 import org.kevoree.modeling.api.json.JSONModelSerializer
 import org.kevoree.factory.DefaultKevoreeFactory
-import org.kevoree.library.defaultNodeTypes.wrapper
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,7 +23,7 @@ import org.kevoree.library.defaultNodeTypes.wrapper
  * Time: 20:03
  */
 
-public class NodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : wrapper.KInstanceWrapper {
+public class NodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
     override var kcl: ClassLoader? = null
 
     class Reader(inputStream: InputStream, val nodeName: String, val error: Boolean) : Runnable {

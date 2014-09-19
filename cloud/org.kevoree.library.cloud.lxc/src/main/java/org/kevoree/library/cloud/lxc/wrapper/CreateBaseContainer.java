@@ -2,7 +2,7 @@
 package org.kevoree.library.cloud.lxc.wrapper;
 
 import org.kevoree.api.handler.LockCallBack;
-import org.kevoree.library.cloud.lxc.LXCNode;
+import org.kevoree.library.LXCNode;
 import org.kevoree.log.Log;
 
 import java.util.UUID;

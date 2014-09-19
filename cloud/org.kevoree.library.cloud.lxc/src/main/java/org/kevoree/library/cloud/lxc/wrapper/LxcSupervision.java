@@ -4,7 +4,7 @@ import org.kevoree.ContainerNode;
 import org.kevoree.ContainerRoot;
 import org.kevoree.NetworkInfo;
 import org.kevoree.Value;
-import org.kevoree.library.cloud.lxc.LXCNode;
+import org.kevoree.library.LXCNode;
 import org.kevoree.library.cloud.lxc.wrapper.utils.IPAddressValidator;
 import org.kevoree.log.Log;
 

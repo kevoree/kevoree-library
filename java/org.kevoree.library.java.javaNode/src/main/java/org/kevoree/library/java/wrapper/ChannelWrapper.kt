@@ -10,15 +10,14 @@ import org.kevoree.ContainerRoot
 import org.kevoree.log.Log
 import org.kevoree.Channel
 import org.kevoree.api.ModelService
-import org.kevoree.library.defaultNodeTypes.wrapper
 
-public class ChannelWrapper(val modelElement: Channel, override val targetObj: Any, val _nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService, val modelService: ModelService) : wrapper.KInstanceWrapper {
+public class ChannelWrapper(val modelElement: Channel, override val targetObj: Any, val _nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService, val modelService: ModelService) : KInstanceWrapper {
     override var kcl: ClassLoader? = null
 
-    val context: wrapper.ChannelWrapperContext
+    val context: ChannelWrapperContext
 
     {
-        context = wrapper.ChannelWrapperContext(modelElement.path(), _nodeName, modelService)
+        context = ChannelWrapperContext(modelElement.path(), _nodeName, modelService)
         bs.injectService(javaClass<ChannelContext>(), context, targetObj)
     }
 
