@@ -1,7 +1,7 @@
 package org.kevoree.library.cloud.api;
 
 import org.kevoree.annotation.Param;
-import org.kevoree.library.java.JavaNode;
+import org.kevoree.library.JavaNode;
 
 /**
  * User: Erwan Daubert - erwan.daubert@gmail.com

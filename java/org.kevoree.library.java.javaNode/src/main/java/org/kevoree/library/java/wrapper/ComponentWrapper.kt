@@ -41,7 +41,7 @@ public class ComponentWrapper(val modelElement: ComponentInstance, override val 
             if(!field!!.isAccessible()){
                 field!!.setAccessible(true)
             }
-            var portWrapper = RequiredPortImpl(requiredPort.path()!!)
+            var portWrapper = RequiredPortImpl(requiredPort.path())
             field!!.set(targetObj, portWrapper)
             requiredPorts.put(requiredPort.portTypeRef!!.name!!, portWrapper)
             } else {
@@ -49,7 +49,7 @@ public class ComponentWrapper(val modelElement: ComponentInstance, override val 
             }
         }
         for(providedPort in modelElement.provided){
-            var portWrapper = ProvidedPortImpl(targetObj, providedPort.portTypeRef!!.name!!, providedPort.path()!!,this)
+            var portWrapper = ProvidedPortImpl(targetObj, providedPort.portTypeRef!!.name!!, providedPort.path(),this)
             providedPorts.put(providedPort.portTypeRef!!.name!!, portWrapper)
         }
     }

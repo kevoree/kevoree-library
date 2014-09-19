@@ -1,4 +1,4 @@
-package org.kevoree.library.java;
+package org.kevoree.library;
 
 import org.kevoree.*;
 import org.kevoree.annotation.*;
@@ -10,6 +10,7 @@ import org.kevoree.api.adaptation.AdaptationModel;
 import org.kevoree.api.adaptation.AdaptationPrimitive;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateContext;
+import org.kevoree.library.java.ModelRegistry;
 import org.kevoree.library.java.command.*;
 import org.kevoree.library.java.planning.JavaPrimitive;
 import org.kevoree.library.java.planning.KevoreeKompareBean;
