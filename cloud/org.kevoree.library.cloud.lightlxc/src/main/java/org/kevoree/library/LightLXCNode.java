@@ -3,7 +3,6 @@ package org.kevoree.library;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
-import org.kevoree.library.api.PlatformJavaNode;
 import org.kevoree.library.cloud.docker.wrapper.LightLXCWrapperFactory;
 import org.kevoree.library.cloud.lightlxc.BridgeService;
 import org.kevoree.library.cloud.lightlxc.wrapper.IpModelUpdater;
