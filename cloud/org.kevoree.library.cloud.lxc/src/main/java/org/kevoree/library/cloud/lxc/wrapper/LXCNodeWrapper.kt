@@ -2,10 +2,6 @@ package org.kevoree.library.cloud.lxc.wrapper
 
 import org.kevoree.ContainerRoot
 import org.kevoree.api.BootstrapService
-<<<<<<< HEAD
-import org.kevoree.library.java.reflect.MethodAnnotationResolver
-=======
->>>>>>> b82eaf3ccb3649ab0da065bfcadd25099d43e9a0
 import org.kevoree.ContainerNode
 import org.kevoree.log.Log
 import org.kevoree.library.java.reflect.MethodAnnotationResolver
