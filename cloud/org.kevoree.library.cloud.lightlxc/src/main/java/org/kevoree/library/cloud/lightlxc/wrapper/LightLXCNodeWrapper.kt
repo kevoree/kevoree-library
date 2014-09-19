@@ -3,7 +3,7 @@ package org.kevoree.library.cloud.docker.wrapper
 import org.kevoree.library.defaultNodeTypes.wrapper.KInstanceWrapper
 import org.kevoree.ContainerRoot
 import org.kevoree.api.BootstrapService
-import org.kevoree.library.defaultNodeTypes.reflect.MethodAnnotationResolver
+import org.kevoree.library.java.reflect.MethodAnnotationResolver
 import org.kevoree.ContainerNode
 import java.io.InputStream
 import java.io.BufferedReader

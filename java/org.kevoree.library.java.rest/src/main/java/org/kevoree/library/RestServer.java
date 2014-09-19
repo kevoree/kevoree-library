@@ -8,7 +8,7 @@ import io.undertow.util.Headers;
 import io.undertow.util.HttpString;
 import org.kevoree.annotation.*;
 import org.kevoree.api.ModelService;
-import org.kevoree.library.defaultNodeTypes.ModelRegistry;
+import org.kevoree.library.java.ModelRegistry;
 
 import java.io.BufferedReader;
 import java.io.IOException;

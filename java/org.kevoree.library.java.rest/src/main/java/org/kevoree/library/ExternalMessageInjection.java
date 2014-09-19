@@ -4,7 +4,7 @@ import org.kevoree.Channel;
 import org.kevoree.ComponentInstance;
 import org.kevoree.api.Callback;
 import org.kevoree.api.ModelService;
-import org.kevoree.library.defaultNodeTypes.ModelRegistry;
+import org.kevoree.library.java.ModelRegistry;
 import org.kevoree.library.defaultNodeTypes.wrapper.ChannelWrapper;
 import org.kevoree.library.defaultNodeTypes.wrapper.ComponentWrapper;
 import org.kevoree.library.defaultNodeTypes.wrapper.port.ProvidedPortImpl;
