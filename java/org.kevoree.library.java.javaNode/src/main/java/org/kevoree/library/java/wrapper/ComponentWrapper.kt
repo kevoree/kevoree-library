@@ -24,7 +24,6 @@ import org.kevoree.library.java.wrapper.port.ProvidedPortImpl
 import java.util.HashMap
 import java.lang.reflect.Field
 import org.kevoree.library.java.reflect.MethodAnnotationResolver
-import org.kevoree.kcl.api.FlexyClassLoader
 
 public class ComponentWrapper(val modelElement: ComponentInstance, override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
     override var kcl: ClassLoader? = null
@@ -35,26 +34,26 @@ public class ComponentWrapper(val modelElement: ComponentInstance, override val 
 
     {
         /* Init Required and Provided Port */
-        for(requiredPort in modelElement.required){
+        for (requiredPort in modelElement.required) {
             var field = recursivelyLookForDeclaredRequiredPort(requiredPort.portTypeRef!!.name!!, targetObj.javaClass)
             if (field != null) {
-            if(!field!!.isAccessible()){
-                field!!.setAccessible(true)
-            }
-            var portWrapper = RequiredPortImpl(requiredPort.path())
-            field!!.set(targetObj, portWrapper)
-            requiredPorts.put(requiredPort.portTypeRef!!.name!!, portWrapper)
+                if (!field!!.isAccessible()) {
+                    field!!.setAccessible(true)
+                }
+                var portWrapper = RequiredPortImpl(requiredPort.path())
+                field!!.set(targetObj, portWrapper)
+                requiredPorts.put(requiredPort.portTypeRef!!.name!!, portWrapper)
             } else {
                 Log.warn("A required Port is defined at the model level but is not available at the implementation level")
             }
         }
-        for(providedPort in modelElement.provided){
-            var portWrapper = ProvidedPortImpl(targetObj, providedPort.portTypeRef!!.name!!, providedPort.path(),this)
+        for (providedPort in modelElement.provided) {
+            var portWrapper = ProvidedPortImpl(targetObj, providedPort.portTypeRef!!.name!!, providedPort.path(), this)
             providedPorts.put(providedPort.portTypeRef!!.name!!, portWrapper)
         }
     }
 
-    private fun recursivelyLookForDeclaredRequiredPort(name : String, javaClass : Class<in Any>) : Field? {
+    private fun recursivelyLookForDeclaredRequiredPort(name: String, javaClass: Class<in Any>): Field? {
         try {
             return javaClass.getDeclaredField(name)
         } catch (e: NoSuchFieldException) {
@@ -77,13 +76,16 @@ public class ComponentWrapper(val modelElement: ComponentInstance, override val 
     }
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
-        if (!isStarted){
+        if (!isStarted) {
             try {
                 val met = resolver.resolve(javaClass<org.kevoree.annotation.Start>())
                 met?.invoke(targetObj)
                 isStarted = true
+                for (pp in providedPorts) {
+                    pp.value.processPending()
+                }
                 return true
-            } catch(e: InvocationTargetException){
+            } catch(e: InvocationTargetException) {
                 Log.error("Kevoree Component Instance Start Error for {} !", e, modelElement.name)
                 isStarted = true //WE PUT COMPONENT IN START STATE TO ALLOW ROLLBACK TO UNSET VARIABLE
                 return false
@@ -99,13 +101,13 @@ public class ComponentWrapper(val modelElement: ComponentInstance, override val 
     }
 
     override fun kInstanceStop(tmodel: ContainerRoot): Boolean {
-        if (isStarted){
+        if (isStarted) {
             try {
                 val met = resolver.resolve(javaClass<org.kevoree.annotation.Stop>())
                 met?.invoke(targetObj)
                 isStarted = false
                 return true
-            } catch(e: InvocationTargetException){
+            } catch(e: InvocationTargetException) {
                 Log.error("Kevoree Component Instance Stop Error !", e.getCause())
                 return false
 
