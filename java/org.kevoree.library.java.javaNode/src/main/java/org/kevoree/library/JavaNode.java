@@ -12,10 +12,15 @@ import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.library.java.ModelRegistry;
 import org.kevoree.library.java.command.*;
+import org.kevoree.library.java.network.UDPWrapper;
+import org.kevoree.library.java.network.UDPWrapper;
+import org.kevoree.library.java.network.UDPWrapper;
 import org.kevoree.library.java.planning.JavaPrimitive;
 import org.kevoree.library.java.planning.KevoreeKompareBean;
 import org.kevoree.library.java.wrapper.WrapperFactory;
 import org.kevoree.log.Log;
+
+import java.net.SocketException;
 
 
 /**
@@ -66,14 +71,24 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
 
     protected WrapperFactory wrapperFactory = null;
 
+    UDPWrapper adminSrv;
+    Thread adminReader;
+
     @Start
-    public void startNode() {
+    public void startNode() throws SocketException {
         Log.info("Starting node type of {}", modelService.getNodeName());
         preTime = System.currentTimeMillis();
         modelService.registerModelListener(this);
         kompareBean = new KevoreeKompareBean(modelRegistry);
         wrapperFactory = createWrapperFactory(modelService.getNodeName());
         modelRegistry.registerFromPath(context.getPath(), this);
+
+        if (System.getProperty("node.admin") != null) {
+            adminSrv = new UDPWrapper(Integer.parseInt(System.getProperty("node.admin").toString()));
+            adminReader = new Thread(adminSrv);
+            adminReader.start();
+        }
+
     }
 
     protected WrapperFactory createWrapperFactory(String nodeName) {
@@ -82,6 +97,11 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
 
     @Stop
     public void stopNode() {
+
+        if(adminReader!= null){
+            adminReader.interrupt();
+        }
+
         Log.info("Stopping node type of {}", modelService.getNodeName());
         modelService.unregisterModelListener(this);
         kompareBean = null;

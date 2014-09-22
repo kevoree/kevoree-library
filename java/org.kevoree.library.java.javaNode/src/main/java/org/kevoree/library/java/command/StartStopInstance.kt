@@ -35,19 +35,19 @@ class StartStopInstance(val c: Instance, val nodeName: String, val start: Boolea
             // FIXME when a deployUnit will have multiple DeployUnit, we need to find the right one...
             Thread.currentThread().setContextClassLoader(iact!!.kcl)
             ModelRegistry.current.set(registry)
-            if(start){
+            if (start) {
                 Thread.currentThread().setName("KevoreeStartInstance" + c.name!!)
                 resultAsync = iact!!.kInstanceStart(root!!)
             } else {
                 Thread.currentThread().setName("KevoreeStopInstance" + c.name!!)
                 val res = iact!!.kInstanceStop(root!!)
-                if(!res){
+                if (!res) {
                     Log.error("Error while Stopping Wrapper ")
                 }
                 Thread.currentThread().setContextClassLoader(null)
                 resultAsync = res
             }
-        } catch (e: Exception){
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
@@ -58,34 +58,40 @@ class StartStopInstance(val c: Instance, val nodeName: String, val start: Boolea
 
     override fun execute(): Boolean {
 
-        if(start){
-            Log.info("Starting {}",c.path())
+        if (start) {
+            Log.info("Starting {}", c.path())
         } else {
-            Log.info("Stopping {}",c.path())
+            Log.info("Stopping {}", c.path())
         }
 
         //Look thread group
 
-        var r : KMFContainer? = c
-        while(r?.eContainer() != null){
+        var r: KMFContainer? = c
+        while (r?.eContainer() != null) {
             r = r?.eContainer()
         }
 
         root = r as ContainerRoot
         val ref = registry.lookup(c)
-        if(ref != null && ref is KInstanceWrapper){
+        if (ref != null && ref is KInstanceWrapper) {
             iact = ref as KInstanceWrapper
             t = Thread(iact!!.tg, this)
             t!!.start()
             t!!.join()
-            if(!start){
+            if (!start) {
                 //kill subthread
                 val subThread: Array<Thread> = Array<Thread>(iact!!.tg.activeCount(), { i -> Thread.currentThread() })
                 iact!!.tg.enumerate(subThread)
-                for(subT in subThread){
+                for (subT in subThread) {
                     try {
-                        subT.stop()
-                    } catch(t: Throwable){
+                        if (subT.isAlive()) {
+                            subT.interrupt()
+                        }
+                    } catch(t: Throwable) {
+                        //ignore
+                    } catch(e: Exception) {
+                        //ignore
+                    } catch(e: Error) {
                         //ignore
                     }
                 }

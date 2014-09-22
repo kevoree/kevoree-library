@@ -15,6 +15,10 @@ import org.kevoree.log.Log
 import java.util.HashSet
 import org.kevoree.modeling.api.json.JSONModelSerializer
 import org.kevoree.factory.DefaultKevoreeFactory
+import java.net.DatagramSocket
+import java.net.InetAddress
+import java.net.DatagramPacket
+import java.nio.charset.Charset
 
 /**
  * Created with IntelliJ IDEA.
@@ -66,6 +70,7 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
 
     override fun kInstanceStart(tmodel: ContainerRoot): Boolean {
         if (!isStarted) {
+
             var urls = HashSet<String>()
             urls.add("http://repo1.maven.org/maven2")
             val version = DefaultKevoreeFactory().getVersion()
@@ -107,9 +112,11 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
                 devOption = "-Dkevoree.dev=" + System.getProperty("kevoree.dev")!!
             }
 
-            var execArray = array(getJava(), "-cp", newClassPath.toString(), devOption, "-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "org.kevoree.platform.standalone.App")
+            adminPort = FreeSocketDetector.detect(50000, 60000);
+
+            var execArray = array(getJava(), "-cp", newClassPath.toString(), devOption, "-Dnode.admin=" + adminPort, "-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "org.kevoree.platform.standalone.App")
             if (jvmArgs != null) {
-                execArray = array(getJava(), jvmArgs!!, "-cp", newClassPath.toString(), devOption, "-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "org.kevoree.platform.standalone.App")
+                execArray = array(getJava(), jvmArgs!!, "-cp", newClassPath.toString(), devOption, "-Dnode.admin=" + adminPort, "-Dnode.bootstrap=" + tempFile!!.getAbsolutePath(), "-Dnode.name=" + modelElement.name, "org.kevoree.platform.standalone.App")
             }
 
             process = Runtime.getRuntime().exec(execArray)
@@ -121,14 +128,25 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
         }
         return true
     }
+
+    var adminPort: Int? = null
+
     override fun kInstanceStop(tmodel: ContainerRoot): Boolean {
         if (isStarted) {
-            process?.destroy()
+
+            val clientSocket = DatagramSocket();
+            val iPAddress = InetAddress.getByName("localhost");
+            val payload = "stop".toByteArray(Charset.defaultCharset());
+            val sendPacket = DatagramPacket(payload, payload.size, iPAddress, adminPort!!)
+            clientSocket.send(sendPacket);
+
             process?.waitFor()
-            readerOUTthread?.stop()
-            readerERRthread?.stop()
+            readerOUTthread?.interrupt()
+            readerERRthread?.interrupt()
             tempFile?.delete()
             isStarted = false
+
+
         }
         return true
     }
