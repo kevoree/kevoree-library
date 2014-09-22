@@ -10,6 +10,8 @@ import org.kevoree.ContainerRoot
 import org.kevoree.log.Log
 import org.kevoree.Channel
 import org.kevoree.api.ModelService
+import java.util.ArrayList
+import org.kevoree.api.Callback
 
 public class ChannelWrapper(val modelElement: Channel, override val targetObj: Any, val _nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService, val modelService: ModelService) : KInstanceWrapper {
     override var kcl: ClassLoader? = null
@@ -25,9 +27,15 @@ public class ChannelWrapper(val modelElement: Channel, override val targetObj: A
     override val resolver: MethodAnnotationResolver = MethodAnnotationResolver(targetObj.javaClass)
     private val fieldResolver = FieldAnnotationResolver(targetObj.javaClass);
 
+    private val pending = ArrayList<StoredCall>()
+
+    data class StoredCall(val payload: Any?, val callback: Callback<out Any?>?)
+
     fun call(callback: org.kevoree.api.Callback<out Any?>?, payload: Any?) {
         if (isStarted) {
             (targetObj as ChannelDispatch).dispatch(payload, callback)
+        } else {
+            pending.add(StoredCall(payload, callback))
         }
     }
 
@@ -57,6 +65,7 @@ public class ChannelWrapper(val modelElement: Channel, override val targetObj: A
                 val met = resolver.resolve(javaClass<org.kevoree.annotation.Stop>())
                 met?.invoke(targetObj)
                 isStarted = false
+                processPending()
                 return true
             } catch(e: InvocationTargetException) {
                 Log.error("Kevoree Channel Instance Stop Error !", e.getCause())
@@ -67,6 +76,20 @@ public class ChannelWrapper(val modelElement: Channel, override val targetObj: A
             }
         } else {
             return true
+        }
+    }
+
+    fun processPending() {
+        if (!pending.isEmpty()) {
+            val t = Thread(object : Runnable {
+                override fun run() {
+                    for (c in pending) {
+                        call(c.callback, c.payload)
+                    }
+                    pending.clear()
+                }
+            })
+            t.start()
         }
     }
 
