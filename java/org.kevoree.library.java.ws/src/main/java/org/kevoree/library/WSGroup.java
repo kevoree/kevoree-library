@@ -205,7 +205,7 @@ public class WSGroup implements ModelListener, Runnable {
             rcache.clear();
         }
         if (masterClients[0] != null && masterClients[0].getConnection().isOpen()) {
-            masterClients[0].closeBlocking();
+            masterClients[0].close();
             masterClients[0] = null;
         }
         running = false;
