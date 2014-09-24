@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.java.editor</artifactId>
@@ -6,6 +7,7 @@
     <version>5.0.5-SNAPSHOT</version>
 
     <properties>
+        <undertow.version>1.0.15.Final</undertow.version>
         <jetty-version>9.1.0.v20131115</jetty-version>
         <kwe-version>5.0.1-SNAPSHOT</kwe-version>
     </properties>
@@ -24,24 +26,9 @@
             <version>${kevoree.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>${jetty-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-http</artifactId>
-            <version>${jetty-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-client</artifactId>
-            <version>${jetty-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.kevoree.log</groupId>
-            <artifactId>org.kevoree.log</artifactId>
-            <version>1</version>
+            <groupId>io.undertow</groupId>
+            <artifactId>undertow-core</artifactId>
+            <version>${undertow.version}</version>
         </dependency>
     </dependencies>
 
@@ -66,7 +53,7 @@
                                     <version>${kwe-version}</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.outputDirectory}/webapp</outputDirectory>
+                                    <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                             <excludes>**/*.class</excludes>

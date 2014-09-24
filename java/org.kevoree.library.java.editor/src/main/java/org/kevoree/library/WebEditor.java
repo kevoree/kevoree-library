@@ -1,11 +1,21 @@
 package org.kevoree.library;
 
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.kevoree.annotation.*;
-import org.kevoree.library.java.editor.handler.ClasspathResourceHandler;
+import io.undertow.Undertow;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.resource.ClassPathResourceManager;
+import io.undertow.server.handlers.resource.ResourceHandler;
+import org.kevoree.annotation.ComponentType;
+import org.kevoree.annotation.Param;
+import org.kevoree.annotation.Start;
+import org.kevoree.annotation.Stop;
+import org.kevoree.factory.DefaultKevoreeFactory;
+import org.kevoree.kcl.api.FlexyClassLoader;
+import org.kevoree.kcl.impl.FlexyClassLoaderImpl;
 import org.kevoree.log.Log;
+import org.xnio.Xnio;
+import org.xnio.XnioProvider;
+
+import java.util.ServiceLoader;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,16 +29,18 @@ public class WebEditor {
     @Param(optional = false, defaultValue = "3042")
     private Integer port;
 
-    private Server server;
+    private Undertow server;
 
     @Start
     public void start() throws Exception {
-        Log.debug("WebEditor START");
-
-        server = new Server(port);
-        HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] { new ClasspathResourceHandler() });
-        server.setHandler(handlers);
+        server = Undertow.builder()
+                .addHttpListener(port, "0.0.0.0")
+                .setHandler(new ResourceHandler(new ClassPathResourceManager(this.getClass().getClassLoader(), "static/")) {
+                    @Override
+                    public void handleRequest(HttpServerExchange exchange) throws Exception {
+                        super.handleRequest(exchange);
+                    }
+                }).build();
         server.start();
         Log.info("Kevoree Web Editor Service: started on port {}", port);
     }
