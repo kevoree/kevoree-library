@@ -76,7 +76,7 @@ class ProvidedPortImpl(val targetObj: Any, name: String, val portPath: String, v
         if (!pending.isEmpty()) {
             val t = Thread(object : Runnable {
                 override fun run() {
-                    for (c in pending) {
+                    for (c in ArrayList(pending)) {
                         call(c.payload, c.callback)
                     }
                     pending.clear()

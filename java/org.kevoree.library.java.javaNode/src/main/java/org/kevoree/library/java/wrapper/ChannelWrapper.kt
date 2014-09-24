@@ -45,6 +45,7 @@ public class ChannelWrapper(val modelElement: Channel, override val targetObj: A
                 val met = resolver.resolve(javaClass<org.kevoree.annotation.Start>())
                 met?.invoke(targetObj)
                 isStarted = true
+                processPending()
                 return true
             } catch(e: InvocationTargetException) {
                 Log.error("Kevoree Channel Instance Start Error !", e.getCause())
@@ -65,7 +66,6 @@ public class ChannelWrapper(val modelElement: Channel, override val targetObj: A
                 val met = resolver.resolve(javaClass<org.kevoree.annotation.Stop>())
                 met?.invoke(targetObj)
                 isStarted = false
-                processPending()
                 return true
             } catch(e: InvocationTargetException) {
                 Log.error("Kevoree Channel Instance Stop Error !", e.getCause())
@@ -83,7 +83,7 @@ public class ChannelWrapper(val modelElement: Channel, override val targetObj: A
         if (!pending.isEmpty()) {
             val t = Thread(object : Runnable {
                 override fun run() {
-                    for (c in pending) {
+                    for (c in ArrayList(pending)) {
                         call(c.callback, c.payload)
                     }
                     pending.clear()
