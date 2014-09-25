@@ -54,6 +54,7 @@ public class MQTTGroup implements ModelListener, Listener {
         mqtt.setClientId(clientID);
         mqtt.setCleanSession(true);
         mqtt.setHost(broker);
+        mqtt.setReconnectDelayMax(3000);
         connection = mqtt.callbackConnection();
         connection.listener(this);
 

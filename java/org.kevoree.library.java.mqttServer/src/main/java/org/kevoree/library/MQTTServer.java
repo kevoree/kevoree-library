@@ -3,6 +3,7 @@ package org.kevoree.library;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.library.mqtt.internal.ExServer;
+import org.kevoree.log.Log;
 
 import java.io.IOException;
 
@@ -22,8 +23,9 @@ public class MQTTServer {
 
     @Start
     public void start() throws IOException {
-        server = new ExServer(context.getNodeName(),context.getInstanceName(),port);
+        server = new ExServer(context.getNodeName(), context.getInstanceName(), port);
         server.startServer();
+        Log.info("MQTT Server started in port {}", port);
     }
 
     @Stop

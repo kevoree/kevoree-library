@@ -15,7 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>org.kevoree</groupId>
-            <artifactId>org.kevoree.api</artifactId>
+            <artifactId>org.kevoree.annotation.api</artifactId>
             <version>${kevoree.version}</version>
         </dependency>
 
@@ -64,14 +64,7 @@
         <dependency>
             <groupId>com.googlecode.disruptor</groupId>
             <artifactId>disruptor</artifactId>
-            <version>2.7.1</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.fusesource.hawtbuf</groupId>
-            <artifactId>hawtbuf</artifactId>
-            <version>1.9</version>
+            <version>2.10.4</version>
         </dependency>
 
         <dependency>
