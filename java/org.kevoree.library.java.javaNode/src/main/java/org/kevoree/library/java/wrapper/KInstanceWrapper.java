@@ -2,6 +2,7 @@ package org.kevoree.library.java.wrapper;
 
 import org.kevoree.ContainerRoot;
 import org.kevoree.api.BootstrapService;
+import org.kevoree.api.ModelService;
 import org.kevoree.library.java.reflect.FieldAnnotationResolver;
 import org.kevoree.library.java.reflect.MethodAnnotationResolver;
 import org.kevoree.pmodeling.api.KMFContainer;
@@ -17,6 +18,16 @@ public abstract class KInstanceWrapper {
     private ClassLoader kcl;
     private MethodAnnotationResolver resolver;
     private Object targetObj;
+
+    public ModelService getModelService() {
+        return modelService;
+    }
+
+    public void setModelService(ModelService modelService) {
+        this.modelService = modelService;
+    }
+
+    private ModelService modelService;
 
     public FieldAnnotationResolver getFieldResolver() {
         return fieldResolver;

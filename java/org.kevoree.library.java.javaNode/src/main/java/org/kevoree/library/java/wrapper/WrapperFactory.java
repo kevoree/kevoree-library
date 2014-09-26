@@ -31,6 +31,7 @@ public class WrapperFactory {
             return new NodeWrapper();
         }
         if (wrapper != null) {
+            wrapper.setModelService(modelService);
             wrapper.setBs(bs);
             wrapper.setIsStarted(false);
             wrapper.setTg(tg);

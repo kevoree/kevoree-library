@@ -31,11 +31,11 @@ public class ComponentWrapper extends KInstanceWrapper {
                 if (!field.isAccessible()) {
                     field.setAccessible(true);
                 }
-                Field portWrapper = RequiredPortImpl(requiredPort.path());
+                Field portWrapper = new RequiredPortImpl(requiredPort.path());
                 field.set(getTargetObj(), portWrapper);
                 requiredPorts.put(requiredPort.getPortTypeRef().getName(), portWrapper);
             } else {
-                Log.warn("A required Port is defined at the model level but is not available at the implementation level")
+                Log.warn("A required Port is defined at the model level but is not available at the implementation level");
             }
         }
         for (Port providedPort : instance.getProvided()) {
