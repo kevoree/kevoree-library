@@ -1,12 +1,12 @@
 package org.kevoree.library.java.wrapper;
 
 import org.kevoree.ContainerRoot;
+import org.kevoree.Instance;
+import org.kevoree.api.Callback;
 import org.kevoree.api.ChannelContext;
 import org.kevoree.api.ChannelDispatch;
 import org.kevoree.log.Log;
-import org.kevoree.pmodeling.api.KMFContainer;
 
-import javax.security.auth.callback.Callback;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class ChannelWrapper extends KInstanceWrapper {
                 return false;
             }
         } else {
-            Log.error("Try to start the channel {} while it is already start", modelElement.name);
+            Log.error("Try to start the channel {} while it is already start", getModelElement().getName());
             return false;
         }
     }
@@ -59,7 +59,7 @@ public class ChannelWrapper extends KInstanceWrapper {
                 return false;
             }
         } else {
-            return true
+            return true;
         }
     }
 
@@ -75,8 +75,7 @@ public class ChannelWrapper extends KInstanceWrapper {
 
     private ChannelWrapperContext context;
 
-    @Override
-    public void setModelElement(KMFContainer modelElement) {
+    public void setModelElement(Instance modelElement) {
         super.setModelElement(modelElement);
         context = new ChannelWrapperContext(modelElement.path(), getNodeName(), getModelService());
         getBs().injectService(ChannelContext.class, context, getTargetObj());
@@ -114,7 +113,7 @@ public class ChannelWrapper extends KInstanceWrapper {
 
     public void call(org.kevoree.api.Callback callback, Object payload) {
         if (getIsStarted()) {
-            ((ChannelDispatch) targetObj).dispatch(payload, callback);
+            ((ChannelDispatch) getTargetObj()).dispatch(payload, callback);
         } else {
             pending.add(new StoredCall(payload, callback));
         }
@@ -122,9 +121,9 @@ public class ChannelWrapper extends KInstanceWrapper {
 
     public void processPending() {
         if (!pending.isEmpty()) {
-            Thread t = new Thread(new Runnable {
+            Thread t = new Thread(new Runnable() {
                 public void run() {
-                    for (StoredCall c in ArrayList(pending)){
+                    for (StoredCall c : pending){
                         call(c.getCallback(), c.getPayload());
                     }
                     pending.clear();

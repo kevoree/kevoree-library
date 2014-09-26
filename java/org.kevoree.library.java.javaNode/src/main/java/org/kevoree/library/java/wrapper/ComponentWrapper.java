@@ -2,6 +2,7 @@ package org.kevoree.library.java.wrapper;
 
 import org.kevoree.ComponentInstance;
 import org.kevoree.ContainerRoot;
+import org.kevoree.Instance;
 import org.kevoree.Port;
 import org.kevoree.library.java.wrapper.port.ProvidedPortImpl;
 import org.kevoree.library.java.wrapper.port.RequiredPortImpl;
@@ -21,25 +22,28 @@ public class ComponentWrapper extends KInstanceWrapper {
     public HashMap<String, ProvidedPortImpl> providedPorts = new HashMap<String, ProvidedPortImpl>();
     public HashMap<String, RequiredPortImpl> requiredPorts = new HashMap<String, RequiredPortImpl>();
 
-    @Override
-    public void setModelElement(KMFContainer modelElement) {
+    public void setModelElement(Instance modelElement) {
         super.getModelElement();
         ComponentInstance instance = (ComponentInstance) getModelElement();
         for (Port requiredPort : instance.getRequired()) {
-            Field field = recursivelyLookForDeclaredRequiredPort(requiredPort.getPortTypeRef().getName(), targetObj.getClass());
+            Field field = recursivelyLookForDeclaredRequiredPort(requiredPort.getPortTypeRef().getName(), getTargetObj().getClass());
             if (field != null) {
                 if (!field.isAccessible()) {
                     field.setAccessible(true);
                 }
-                Field portWrapper = new RequiredPortImpl(requiredPort.path());
-                field.set(getTargetObj(), portWrapper);
+                RequiredPortImpl portWrapper = new RequiredPortImpl(requiredPort.path());
+                try {
+                    field.set(getTargetObj(), portWrapper);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
                 requiredPorts.put(requiredPort.getPortTypeRef().getName(), portWrapper);
             } else {
                 Log.warn("A required Port is defined at the model level but is not available at the implementation level");
             }
         }
         for (Port providedPort : instance.getProvided()) {
-            ProvidedPortImpl portWrapper = ProvidedPortImpl(getTargetObj(), providedPort.getPortTypeRef().getName(), providedPort.path(), this);
+            ProvidedPortImpl portWrapper = new ProvidedPortImpl(getTargetObj(), providedPort.getPortTypeRef().getName(), providedPort.path(), this);
             providedPorts.put(providedPort.getPortTypeRef().getName(), portWrapper);
         }
 
