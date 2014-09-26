@@ -16,18 +16,29 @@ public class WrapperFactory {
     private String nodeName;
 
     public KInstanceWrapper wrap(KMFContainer modelElement, Object newBeanInstance, ThreadGroup tg, BootstrapService bs, ModelService modelService) {
+
+        KInstanceWrapper wrapper = null;
         if (modelElement instanceof ComponentInstance) {
-            return new ComponentWrapper(modelElement, newBeanInstance, nodeName, tg, bs);
+            return new ComponentWrapper();
         }
         if (modelElement instanceof Group) {
-            return new GroupWrapper(modelElement, newBeanInstance, nodeName, tg, bs);
+            return new GroupWrapper();
         }
         if (modelElement instanceof Channel) {
-            return new ChannelWrapper(modelElement, newBeanInstance, nodeName, tg, bs, modelService);
+            return new ChannelWrapper();
         }
         if (modelElement instanceof ContainerNode) {
-            return new NodeWrapper(modelElement, newBeanInstance, nodeName, tg, bs);
+            return new NodeWrapper();
         }
+        if (wrapper != null) {
+            wrapper.setBs(bs);
+            wrapper.setIsStarted(false);
+            wrapper.setTg(tg);
+            wrapper.setNodeName(nodeName);
+            wrapper.setTargetObj(newBeanInstance);
+            wrapper.setModelElement(modelElement);
+        }
+
         throw new Exception("Unknow instance type " + modelElement.metaClassName());
     }
 
