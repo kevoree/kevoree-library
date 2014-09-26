@@ -13,7 +13,7 @@ import org.kevoree.ContainerRoot
 import org.kevoree.ContainerNode
 import org.kevoree.log.Log
 import java.util.HashSet
-import org.kevoree.modeling.api.json.JSONModelSerializer
+import org.kevoree.pmodeling.api.json.JSONModelSerializer
 import org.kevoree.factory.DefaultKevoreeFactory
 import java.net.DatagramSocket
 import java.net.InetAddress
