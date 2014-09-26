@@ -1,0 +1,145 @@
+package org.kevoree.library.java.wrapper;
+
+import org.kevoree.Instance;
+import org.kevoree.Value;
+import org.kevoree.library.java.reflect.MethodAnnotationResolver;
+import java.io.File;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import org.kevoree.library.java.wrapper.NodeWrapper.Reader;
+import java.io.FileOutputStream;
+import org.kevoree.api.BootstrapService;
+import org.kevoree.ContainerRoot;
+import org.kevoree.ContainerNode;
+import org.kevoree.log.Log;
+import java.util.HashSet;
+import org.kevoree.pmodeling.api.json.JSONModelSerializer;
+import org.kevoree.factory.DefaultKevoreeFactory;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.DatagramPacket;
+import java.nio.charset.Charset;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: duke
+ * Date: 17/11/2013
+ * Time: 20:03
+ */
+
+public class NodeWrapper extends KInstanceWrapper {
+
+
+    private int adminPort = 0;
+    private JSONModelSerializer modelSaver = new JSONModelSerializer();
+    private Process process = null;
+    private File tempFile = null;
+    private Thread readerOUTthread = null;
+    private Thread readerERRthread = null;
+
+    @Override
+    public boolean kInstanceStart(ContainerRoot model) {
+        if (!getIsStarted()) {
+
+            HashSet<String> urls = new HashSet<String>();
+            urls.add("http://repo1.maven.org/maven2");
+            String version = new DefaultKevoreeFactory().getVersion();
+            if (version.toString().contains("SNAPSHOT")) {
+                urls.add("http://oss.sonatype.org/content/groups/public/");
+            }
+            File platformJar = getBs().resolve("mvn:org.kevoree.platform:org.kevoree.platform.standalone:" + version, urls);
+            if (platformJar == null) {
+                Log.error("Can't download Kevoree platform, abording starting node");
+                return false;
+            }
+            String jvmArgs;
+            if (((Instance)getModelElement()).getDictionary() != null) {
+                Value jvmArgsAttribute = ((Instance)getModelElement()).getDictionary().findValuesByID("jvmArgs");
+                if (jvmArgsAttribute != null) {
+                    jvmArgs = jvmArgsAttribute.toString();
+                }
+            }
+            Log.debug("Fork platform using {}", platformJar.getAbsolutePath());
+            try {
+                tempFile = File.createTempFile("bootModel" + ((Instance)getModelElement()).getName(), ".json");
+                FileOutputStream tempIO = new FileOutputStream(tempFile);
+                modelSaver.serializeToStream(tmodel, tempIO);
+                tempIO.close();
+                tempIO.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            String classPath = System.getProperty("java.class.path");
+            StringBuilder newClassPath = new StringBuilder();
+            String[] classPathList = classPath.split(":");
+            newClassPath.append(platformJar.getAbsolutePath());
+
+            for(String cpe : classPathList) {
+                if (!cpe.contains("org.kevoree.platform.standalone-")) {
+                    newClassPath.append(File.pathSeparator);
+                    newClassPath.append(cpe);
+                }
+            }
+
+            String devOption = "-Dkevoree.prod=true";
+            if (System.getProperty("kevoree.dev") != null) {
+                devOption = "-Dkevoree.dev=" + System.getProperty("kevoree.dev");
+            }
+
+            adminPort = FreeSocketDetector.detect(50000, 60000);
+
+            String[] execArray = {getJava(), "-cp", newClassPath.toString(), devOption, "-Dnode.admin=" + adminPort, "-Dnode.bootstrap=" + tempFile.getAbsolutePath(), "-Dnode.name=" + ((Instance) getModelElement()).getName(), "org.kevoree.platform.standalone.App"};
+            if (jvmArgs != null) {
+                execArray = {getJava(), jvmArgs, "-cp", newClassPath.toString(), devOption, "-Dnode.admin=" + adminPort, "-Dnode.bootstrap=" + tempFile.getAbsolutePath(), "-Dnode.name=" + ((Instance) getModelElement()).getName(), "org.kevoree.platform.standalone.App"}
+            }
+
+            process = Runtime.getRuntime().exec(execArray);
+            readerOUTthread = Thread(Reader(process!!.getInputStream()!!, modelElement.name!!, false));
+            readerERRthread = Thread(Reader(process!!.getErrorStream()!!, modelElement.name!!, true));
+            readerOUTthread!!.start();
+            readerERRthread!!.start();
+            isStarted = true;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean kInstanceStop(ContainerRoot model) {
+        if (isStarted) {
+
+            val clientSocket = new DatagramSocket();
+            val iPAddress = InetAddress.getByName("localhost");
+            val payload = "stop".toByteArray(Charset.defaultCharset());
+            val sendPacket = DatagramPacket(payload, payload.size, iPAddress, adminPort);
+            clientSocket.send(sendPacket);
+
+            process.waitFor();
+            readerOUTthread.interrupt();
+            readerERRthread.interrupt();
+            tempFile.delete();
+            isStarted = false;
+
+        }
+        return true;
+    }
+
+    @Override
+    public void create() {
+
+    }
+
+    @Override
+    public void destroy() {
+
+    }
+
+
+    private String getJava() {
+        String java_home = System.getProperty("java.home");
+        return java_home + File.separator + "bin" + File.separator + "java";
+    }
+}
