@@ -1,4 +1,4 @@
-package org.kevoree.library.java.wrapper
+/*package org.kevoree.library.java.wrapper
 
 import org.kevoree.library.java.reflect.MethodAnnotationResolver
 import java.io.File
@@ -19,13 +19,6 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.DatagramPacket
 import java.nio.charset.Charset
-
-/**
- * Created with IntelliJ IDEA.
- * User: duke
- * Date: 17/11/2013
- * Time: 20:03
- */
 
 public class NodeWrapper(val modelElement: ContainerNode, override val targetObj: Any, val nodeName: String, override var tg: ThreadGroup, override val bs: BootstrapService) : KInstanceWrapper {
     override var kcl: ClassLoader? = null
@@ -157,3 +150,5 @@ public class NodeWrapper(val modelElement: ContainerNode, override val targetObj
     }
 
 }
+
+*/

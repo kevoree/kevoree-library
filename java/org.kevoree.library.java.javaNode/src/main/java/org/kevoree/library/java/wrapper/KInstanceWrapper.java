@@ -1,6 +1,7 @@
 package org.kevoree.library.java.wrapper;
 
 import org.kevoree.ContainerRoot;
+import org.kevoree.Instance;
 import org.kevoree.api.BootstrapService;
 import org.kevoree.api.ModelService;
 import org.kevoree.library.java.reflect.FieldAnnotationResolver;
@@ -49,15 +50,15 @@ public abstract class KInstanceWrapper {
 
     private String nodeName;
 
-    public KMFContainer getModelElement() {
+    public Instance getModelElement() {
         return modelElement;
     }
 
-    public void setModelElement(KMFContainer modelElement) {
+    public void setModelElement(Instance modelElement) {
         this.modelElement = modelElement;
     }
 
-    private KMFContainer modelElement;
+    private Instance modelElement;
 
     public Object getTargetObj() {
         return targetObj;
