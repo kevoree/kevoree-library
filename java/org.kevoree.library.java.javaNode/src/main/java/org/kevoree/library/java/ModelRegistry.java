@@ -1,6 +1,6 @@
 package org.kevoree.library.java;
 
-import org.kevoree.modeling.api.KMFContainer;
+import org.kevoree.pmodeling.api.KMFContainer;
 
 import java.util.HashMap;
 import java.util.Map;

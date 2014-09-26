@@ -1,4 +1,4 @@
 
 add node0 : org.kevoree.library.JavaNode
-add node0.server : org.kevoree.library.MQTTServer/5.0.7-SNAPSHOT
+add node0.server : org.kevoree.library.MQTTServer
 

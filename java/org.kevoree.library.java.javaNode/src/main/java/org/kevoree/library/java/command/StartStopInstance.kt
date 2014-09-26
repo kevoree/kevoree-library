@@ -7,7 +7,7 @@ import org.kevoree.api.BootstrapService
 import org.kevoree.api.PrimitiveCommand
 import org.kevoree.ContainerRoot
 import org.kevoree.log.Log
-import org.kevoree.modeling.api.KMFContainer
+import org.kevoree.pmodeling.api.KMFContainer
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;

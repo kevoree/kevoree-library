@@ -23,8 +23,9 @@ public class ChannelWrapperContext(val channelPath: String, val localNodePath: S
         if (channel != null) {
             for (binding in channel.bindings) {
                 if ( (binding.port?.eContainer()?.eContainer() as? ContainerNode)?.name != localNodePath) {
-                    if (binding.port != null) {
-                        result.add(binding.port!!.path())
+                    val finalPort = binding.port
+                    if (finalPort != null) {
+                        result.add(finalPort.path())
                     }
                 }
             }
