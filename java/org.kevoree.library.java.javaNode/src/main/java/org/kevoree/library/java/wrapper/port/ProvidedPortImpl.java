@@ -85,7 +85,7 @@ public class ProvidedPortImpl implements Port {
 
     public void call(Object payload, Callback callback) {
         try {
-            if (componentWrapper.isStarted()) {
+            if (componentWrapper.getIsStarted()) {
                 Object result = null;
                 if (paramSize == 0) {
                     if (methodHandler != null) {

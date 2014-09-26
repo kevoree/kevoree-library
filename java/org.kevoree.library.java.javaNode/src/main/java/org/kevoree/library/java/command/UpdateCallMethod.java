@@ -44,7 +44,7 @@ public class UpdateCallMethod implements PrimitiveCommand {
         Object reffound = registry.lookup(c);
         if (reffound != null) {
             if (reffound instanceof KInstanceWrapper) {
-                if (((KInstanceWrapper)reffound).isStarted()) {
+                if (((KInstanceWrapper)reffound).getIsStarted()) {
                     ClassLoader previousCL = Thread.currentThread().getContextClassLoader();
                     Thread.currentThread().setContextClassLoader(((KInstanceWrapper) reffound).getTargetObj().getClass().getClassLoader());
                     MethodAnnotationResolver resolver = new MethodAnnotationResolver(((KInstanceWrapper) reffound).getTargetObj().getClass());
@@ -89,7 +89,6 @@ public class UpdateCallMethod implements PrimitiveCommand {
             Log.error("Can update dictionary of " + c.getName());
             return false;
         }
-        return true;
     }
 
     public void undo() {
