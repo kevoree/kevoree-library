@@ -32,6 +32,14 @@ public class ChannelWrapperContext implements ChannelContext {
         return new ArrayList(portsBinded.values());
     }
 
+    public HashMap<String, Port> getPortsBinded() {
+        return portsBinded;
+    }
+
+    public void setPortsBinded(HashMap<String, Port> portsBinded) {
+        this.portsBinded = portsBinded;
+    }
+
     HashMap<String, Port> portsBinded = new HashMap<String, Port>();
 
     @Override

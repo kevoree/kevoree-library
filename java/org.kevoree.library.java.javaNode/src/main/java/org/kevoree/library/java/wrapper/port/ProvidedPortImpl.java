@@ -89,14 +89,14 @@ public class ProvidedPortImpl implements Port {
                 Object result = null;
                 if (paramSize == 0) {
                     if (methodHandler != null) {
-                        result = methodHandler.invokeExact(targetObj);
+                        //result = methodHandler.invokeExact(targetObj);
                     } else {
                         result = targetMethod.invoke(targetObj);
                     }
                 } else {
                     if (paramSize == 1) {
                         if (methodHandler != null) {
-                            result = methodHandler.invokeExact(targetObj, payload);
+                            //result = methodHandler.invokeExact(targetObj, payload);
                         } else {
                             result = targetMethod.invoke(targetObj, payload);
                         }

@@ -56,7 +56,7 @@ public class UpdateDictionary implements PrimitiveCommand {
                 if(previousInstance != null){
                     DictionaryType dt = parentDictionary.getTypeDefinition().getDictionaryType();
                     DictionaryAttribute dicAtt = dt.findAttributesByID(dicValue.getName());
-                    if (dicAtt.getDefaultValue() == dicValue.getValue()) {
+                    if (dicAtt.getDefaultValue().equals(dicValue.getValue())) {
                         Log.debug("Do not reinject default {}", dicValue.getValue());
                         return true;
                     }

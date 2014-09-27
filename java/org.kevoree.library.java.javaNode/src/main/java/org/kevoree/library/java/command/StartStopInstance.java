@@ -1,11 +1,11 @@
 package org.kevoree.library.java.command;
 
-import org.kevoree.library.java.wrapper.KInstanceWrapper;
-import org.kevoree.library.java.ModelRegistry;
+import org.kevoree.ContainerRoot;
 import org.kevoree.Instance;
 import org.kevoree.api.BootstrapService;
 import org.kevoree.api.PrimitiveCommand;
-import org.kevoree.ContainerRoot;
+import org.kevoree.library.java.ModelRegistry;
+import org.kevoree.library.java.wrapper.KInstanceWrapper;
 import org.kevoree.log.Log;
 import org.kevoree.pmodeling.api.KMFContainer;
 
@@ -14,9 +14,9 @@ import org.kevoree.pmodeling.api.KMFContainer;
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- * 	http://www.gnu.org/licenses/lgpl-3.0.txt
- *
+ * <p/>
+ * http://www.gnu.org/licenses/lgpl-3.0.txt
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,15 +37,13 @@ public class StartStopInstance implements PrimitiveCommand, Runnable {
     private ContainerRoot root = null;
     private KInstanceWrapper iact = null;
 
-    StartStopInstance(Instance c, String nodeName, boolean start, ModelRegistry registry, BootstrapService bs) {
+    public StartStopInstance(Instance c, String nodeName, boolean start, ModelRegistry registry, BootstrapService bs) {
         this.c = c;
         this.nodeName = nodeName;
         this.start = start;
         this.registry = registry;
         this.bs = bs;
     }
-
-
 
     public void run() {
         try {
@@ -84,16 +82,16 @@ public class StartStopInstance implements PrimitiveCommand, Runnable {
         //Look thread group
 
         KMFContainer r = c;
-        if(r != null) {
+        if (r != null) {
             while (r.eContainer() != null) {
                 r = r.eContainer();
             }
         }
 
-        ContainerRoot root = (ContainerRoot)r;
+        ContainerRoot root = (ContainerRoot) r;
         Object ref = registry.lookup(c);
         if (ref != null && ref instanceof KInstanceWrapper) {
-            iact = (KInstanceWrapper)ref;
+            iact = (KInstanceWrapper) ref;
             t = new Thread(iact.getTg(), this);
             t.start();
             try {
@@ -115,7 +113,7 @@ public class StartStopInstance implements PrimitiveCommand, Runnable {
                         if (subT.isAlive()) {
                             subT.interrupt();
                         }
-                    } catch(Throwable t) {
+                    } catch (Throwable t) {
                         //ignore
                     }
                 }
@@ -129,7 +127,7 @@ public class StartStopInstance implements PrimitiveCommand, Runnable {
     }
 
     public String toString() {
-        String s = "StartStopInstance " +c.getName();
+        String s = "StartStopInstance " + c.getName();
         if (start) {
             s += " start";
         } else {

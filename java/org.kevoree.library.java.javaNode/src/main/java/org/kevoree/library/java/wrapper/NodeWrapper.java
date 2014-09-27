@@ -35,15 +35,6 @@ public class NodeWrapper extends KInstanceWrapper {
     private File tempFile = null;
     private int adminPort;
 
-    public NodeWrapper(ContainerNode modelElement, Object targetObj, String nodeName, ThreadGroup tg, BootstrapService bs) throws UnknownHostException {
-        setModelElement(modelElement);
-        setTargetObj(targetObj);
-        setNodeName(nodeName);
-        setTg(tg);
-        setBs(bs);
-    }
-
-
     private class Reader implements Runnable {
         private InputStream inputStream;
         private String nodeName;

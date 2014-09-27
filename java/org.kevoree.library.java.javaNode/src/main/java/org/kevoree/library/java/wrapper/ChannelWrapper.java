@@ -73,6 +73,14 @@ public class ChannelWrapper extends KInstanceWrapper {
 
     }
 
+    public ChannelWrapperContext getContext() {
+        return context;
+    }
+
+    public void setContext(ChannelWrapperContext context) {
+        this.context = context;
+    }
+
     private ChannelWrapperContext context;
 
     public void setModelElement(Instance modelElement) {

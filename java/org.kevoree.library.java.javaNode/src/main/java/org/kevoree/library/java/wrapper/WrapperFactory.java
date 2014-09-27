@@ -1,5 +1,6 @@
 package org.kevoree.library.java.wrapper;
 
+import org.kevoree.*;
 import org.kevoree.api.BootstrapService;
 import org.kevoree.api.ModelService;
 import org.kevoree.pmodeling.api.KMFContainer;
@@ -15,20 +16,20 @@ public class WrapperFactory {
 
     private String nodeName;
 
-    public KInstanceWrapper wrap(KMFContainer modelElement, Object newBeanInstance, ThreadGroup tg, BootstrapService bs, ModelService modelService) {
+    public KInstanceWrapper wrap(KMFContainer modelElement, Object newBeanInstance, ThreadGroup tg, BootstrapService bs, ModelService modelService) throws Exception {
 
         KInstanceWrapper wrapper = null;
         if (modelElement instanceof ComponentInstance) {
-            return new ComponentWrapper();
+            wrapper = new ComponentWrapper();
         }
         if (modelElement instanceof Group) {
-            return new GroupWrapper();
+            wrapper = new GroupWrapper();
         }
         if (modelElement instanceof Channel) {
-            return new ChannelWrapper();
+            wrapper = new ChannelWrapper();
         }
         if (modelElement instanceof ContainerNode) {
-            return new NodeWrapper();
+            wrapper = new NodeWrapper();
         }
         if (wrapper != null) {
             wrapper.setModelService(modelService);
@@ -37,10 +38,11 @@ public class WrapperFactory {
             wrapper.setTg(tg);
             wrapper.setNodeName(nodeName);
             wrapper.setTargetObj(newBeanInstance);
-            wrapper.setModelElement(modelElement);
+            wrapper.setModelElement((Instance) modelElement);
+            return wrapper;
+        } else {
+            throw new Exception("Unknow instance type " + modelElement.metaClassName());
         }
-
-        throw new Exception("Unknow instance type " + modelElement.metaClassName());
     }
 
 }

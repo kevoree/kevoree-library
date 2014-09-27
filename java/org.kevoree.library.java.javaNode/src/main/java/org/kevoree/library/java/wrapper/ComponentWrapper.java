@@ -19,6 +19,22 @@ import java.util.HashMap;
  */
 public class ComponentWrapper extends KInstanceWrapper {
 
+    public HashMap<String, ProvidedPortImpl> getProvidedPorts() {
+        return providedPorts;
+    }
+
+    public void setProvidedPorts(HashMap<String, ProvidedPortImpl> providedPorts) {
+        this.providedPorts = providedPorts;
+    }
+
+    public HashMap<String, RequiredPortImpl> getRequiredPorts() {
+        return requiredPorts;
+    }
+
+    public void setRequiredPorts(HashMap<String, RequiredPortImpl> requiredPorts) {
+        this.requiredPorts = requiredPorts;
+    }
+
     public HashMap<String, ProvidedPortImpl> providedPorts = new HashMap<String, ProvidedPortImpl>();
     public HashMap<String, RequiredPortImpl> requiredPorts = new HashMap<String, RequiredPortImpl>();
 

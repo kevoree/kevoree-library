@@ -28,6 +28,13 @@ import org.kevoree.log.Log;
 public class RemoveBindingCommand implements PrimitiveCommand {
 
     private MBinding c;
+
+    public RemoveBindingCommand(MBinding c, String nodeName, ModelRegistry registry) {
+        this.c = c;
+        this.nodeName = nodeName;
+        this.registry = registry;
+    }
+
     private  String nodeName;
     private ModelRegistry registry;
 
