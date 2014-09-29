@@ -58,7 +58,7 @@ public class UpdateCallMethod implements PrimitiveCommand {
                             e.printStackTrace();
                         }
                     } else {
-                        Log.error("Method not resolved org.kevoree.annotation.Update.class");
+                        Log.debug("Method not resolved org.kevoree.annotation.Update.class");
                     }
                     Thread.currentThread().setContextClassLoader(previousCL);
                 }
@@ -72,7 +72,7 @@ public class UpdateCallMethod implements PrimitiveCommand {
                     if(met != null) {
                         met.invoke(reffound);
                     } else {
-                        Log.error("Method not resolved org.kevoree.annotation.Update.class");
+                        Log.debug("Method not resolved org.kevoree.annotation.Update.class");
                     }
                     Thread.currentThread().setContextClassLoader(previousCL);
                     return true;
