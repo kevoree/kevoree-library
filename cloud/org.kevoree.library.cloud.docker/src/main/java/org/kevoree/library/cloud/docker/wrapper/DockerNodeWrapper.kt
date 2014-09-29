@@ -16,7 +16,7 @@ import org.kevoree.library.cloud.docker.model.CommitConfig
 import org.kevoree.library.cloud.docker.client.DockerException
 import org.kevoree.api.ModelService
 import org.kevoree.api.handler.UpdateCallback
-import org.kevoree.modeling.api.json.JSONModelSerializer
+import org.kevoree.pmodeling.api.json.JSONModelSerializer
 import org.kevoree.Dictionary
 import org.kevoree.kcl.api.FlexyClassLoaderFactory
 import org.kevoree.library.DockerNode

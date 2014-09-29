@@ -7,7 +7,7 @@ import org.kevoree.api.KevScriptService;
 import org.kevoree.api.ModelService;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.log.Log;
-import org.kevoree.modeling.api.ModelCloner;
+import org.kevoree.pmodeling.api.ModelCloner;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

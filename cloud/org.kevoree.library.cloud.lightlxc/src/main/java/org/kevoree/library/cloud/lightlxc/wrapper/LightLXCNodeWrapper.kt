@@ -17,7 +17,7 @@ import org.kevoree.library.cloud.lightlxc.wrapper.NodeManager
 import org.kevoree.library.cloud.lightlxc.wrapper.MkNodeCommandExecutor
 import org.kevoree.library.cloud.lightlxc.wrapper.Reader
 import org.kevoree.api.ModelService
-import org.kevoree.modeling.api.json.JSONModelSerializer
+import org.kevoree.pmodeling.api.json.JSONModelSerializer
 import org.kevoree.factory.DefaultKevoreeFactory
 import org.kevoree.library.java.wrapper.KInstanceWrapper
 import org.kevoree.library.java.reflect.MethodAnnotationResolver

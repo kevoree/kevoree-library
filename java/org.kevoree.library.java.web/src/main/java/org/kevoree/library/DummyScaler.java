@@ -10,8 +10,8 @@ import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.kevscript.KevScriptEngine;
 import org.kevoree.log.Log;
-import org.kevoree.modeling.api.KMFContainer;
-import org.kevoree.modeling.api.ModelCloner;
+import org.kevoree.pmodeling.api.KMFContainer;
+import org.kevoree.pmodeling.api.ModelCloner;
 
 import java.util.ArrayList;
 import java.util.List;

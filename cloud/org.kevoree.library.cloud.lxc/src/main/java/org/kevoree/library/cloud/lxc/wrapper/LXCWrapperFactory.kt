@@ -1,6 +1,6 @@
 package org.kevoree.library.cloud.lxc.wrapper
 
-import org.kevoree.modeling.api.KMFContainer
+import org.kevoree.pmodeling.api.KMFContainer
 import org.kevoree.api.BootstrapService
 import org.kevoree.ContainerNode
 import org.kevoree.api.ModelService

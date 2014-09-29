@@ -10,8 +10,8 @@ import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.log.Log;
-import org.kevoree.modeling.api.compare.ModelCompare;
-import org.kevoree.modeling.api.trace.TraceSequence;
+import org.kevoree.pmodeling.api.compare.ModelCompare;
+import org.kevoree.pmodeling.api.trace.TraceSequence;
 
 /**
  * Created by duke on 04/12/2013.

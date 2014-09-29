@@ -7,8 +7,8 @@ import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.log.Log;
-import org.kevoree.modeling.api.json.JSONModelSerializer;
-import org.kevoree.modeling.api.trace.TraceSequence;
+import org.kevoree.pmodeling.api.json.JSONModelSerializer;
+import org.kevoree.pmodeling.api.trace.TraceSequence;
 import org.webbitserver.BaseWebSocketHandler;
 import org.webbitserver.WebSocketConnection;
 

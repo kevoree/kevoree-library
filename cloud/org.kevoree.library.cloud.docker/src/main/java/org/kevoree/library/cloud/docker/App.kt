@@ -11,7 +11,7 @@ import org.kevoree.library.cloud.docker.client.DockerClientImpl
 import org.kevoree.library.cloud.docker.model.ContainerConfig
 import org.kevoree.library.cloud.docker.model.HostConfig
 import org.kevoree.library.cloud.docker.client.DockerException
-import org.kevoree.modeling.api.json.JSONModelSerializer
+import org.kevoree.pmodeling.api.json.JSONModelSerializer
 import org.kevoree.factory.DefaultKevoreeFactory
 import org.kevoree.library.cloud.docker.model.Image
 import org.kevoree.library.cloud.docker.model.CommitConfig
