@@ -110,12 +110,12 @@ public abstract class KInstanceWrapper {
         this.tg = tg;
     }
 
-    public abstract boolean kInstanceStart(ContainerRoot model);
+    public abstract boolean kInstanceStart(ContainerRoot model) throws Exception;
 
-    public abstract boolean kInstanceStop(ContainerRoot model);
+    public abstract boolean kInstanceStop(ContainerRoot model) throws Exception;
 
-    public abstract void create();
+    public abstract void create() throws Exception;
 
-    public abstract void destroy();
+    public abstract void destroy() throws Exception;
 
 }

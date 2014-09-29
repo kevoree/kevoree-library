@@ -18,9 +18,11 @@
         <module>org.kevoree.library.cloud.api</module>
         <module>org.kevoree.library.cloud.web</module>
         <module>org.kevoree.library.cloud.docker</module>
+		<!--
         <module>org.kevoree.library.cloud.lxc</module>
         <module>org.kevoree.library.cloud.lightlxc</module>
         <module>org.kevoree.library.cloud.system</module>
+			-->
     </modules>
 
     <dependencies>
