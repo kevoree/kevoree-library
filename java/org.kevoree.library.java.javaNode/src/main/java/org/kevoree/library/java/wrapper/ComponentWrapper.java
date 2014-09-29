@@ -39,7 +39,7 @@ public class ComponentWrapper extends KInstanceWrapper {
     public HashMap<String, RequiredPortImpl> requiredPorts = new HashMap<String, RequiredPortImpl>();
 
     public void setModelElement(Instance modelElement) {
-        super.getModelElement();
+        super.setModelElement(modelElement);
         ComponentInstance instance = (ComponentInstance) getModelElement();
         for (Port requiredPort : instance.getRequired()) {
             Field field = recursivelyLookForDeclaredRequiredPort(requiredPort.getPortTypeRef().getName(), getTargetObj().getClass());
