@@ -131,7 +131,7 @@ public class ChannelWrapper extends KInstanceWrapper {
         if (!pending.isEmpty()) {
             Thread t = new Thread(new Runnable() {
                 public void run() {
-                    for (StoredCall c : pending){
+                    for (StoredCall c : pending) {
                         call(c.getCallback(), c.getPayload());
                     }
                     pending.clear();

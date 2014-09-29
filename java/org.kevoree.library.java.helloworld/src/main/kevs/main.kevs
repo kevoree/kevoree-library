@@ -5,8 +5,9 @@ add sync : WSGroup/5.0.8-SNAPSHOT
 attach node0 sync
 
 add node0.h1 : org.kevoree.library.HelloJava/5.0.8-SNAPSHOT
-//set node0.h1.message = "payload"
-add node0.h2 : HelloJava/5.0.8-SNAPSHOT
+set node0.h1.message = "payload"
+add node0.h2 : org.kevoree.library.HelloJava/5.0.8-SNAPSHOT
+set node0.h2.message = "msg2"
 
 add node0.ticker : Ticker/5.0.8-SNAPSHOT
 add hub : SyncBroadcast/5.0.8-SNAPSHOT
