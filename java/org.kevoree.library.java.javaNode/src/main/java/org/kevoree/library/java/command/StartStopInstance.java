@@ -88,7 +88,7 @@ public class StartStopInstance implements PrimitiveCommand, Runnable {
             }
         }
 
-        ContainerRoot root = (ContainerRoot) r;
+        root = (ContainerRoot) r;
         Object ref = registry.lookup(c);
         if (ref != null && ref instanceof KInstanceWrapper) {
             iact = (KInstanceWrapper) ref;
