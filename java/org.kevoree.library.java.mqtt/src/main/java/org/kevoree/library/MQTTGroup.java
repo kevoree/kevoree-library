@@ -44,6 +44,8 @@ public class MQTTGroup implements ModelListener, Listener {
     @Start
     public void start() throws URISyntaxException {
 
+        Log.info("Starting MqttGroup, connecting to adress:{}", broker);
+
         String clientID = KEVOREE_PREFIX + localContext.getInstanceName() + "_" + localContext.getNodeName();
         if (clientID.length() > 23) {
             clientID = clientID.substring(0, 23);
@@ -187,6 +189,7 @@ public class MQTTGroup implements ModelListener, Listener {
     @Override
     public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack) {
         try {
+            Log.info("MqttGroup for node {} just received a model", localContext.getNodeName());
             String payload = new String(body.utf8().toString());
             if (payload.startsWith("pull")) {
                 Log.info("Pull receive, send back model");

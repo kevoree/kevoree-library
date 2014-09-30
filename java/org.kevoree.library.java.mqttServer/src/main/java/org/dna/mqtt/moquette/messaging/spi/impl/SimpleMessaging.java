@@ -128,7 +128,7 @@ public class SimpleMessaging implements IMessaging, EventHandler<ValueEvent> {
     
     public void onEvent(ValueEvent t, long l, boolean bln) throws Exception {
         MessagingEvent evt = t.getEvent();
-        LOG.info("onEvent processing messaging event from input ringbuffer {}", evt);
+        LOG.trace("onEvent processing messaging event from input ringbuffer {}", evt);
         if (evt instanceof PublishEvent) {
             m_processor.processPublish((PublishEvent) evt);
         } else if (evt instanceof StopEvent) {

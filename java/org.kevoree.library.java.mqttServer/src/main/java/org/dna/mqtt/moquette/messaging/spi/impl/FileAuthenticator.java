@@ -40,7 +40,7 @@ public class FileAuthenticator implements IAuthenticator {
     
     FileAuthenticator(String parent, String filePath) {
         File file = new File(parent, filePath);
-        LOG.info("Loading password file: " + file);
+        LOG.debug("Loading password file: " + file);
         if (file.isDirectory()) {
             LOG.warn(String.format("Bad file reference %s is a directory", file));
             return;
