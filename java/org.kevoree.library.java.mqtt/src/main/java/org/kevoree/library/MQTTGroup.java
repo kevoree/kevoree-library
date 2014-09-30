@@ -17,6 +17,8 @@ import org.kevoree.pmodeling.api.json.JSONModelLoader;
 import org.kevoree.pmodeling.api.json.JSONModelSerializer;
 
 import java.net.URISyntaxException;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by duke on 6/3/14.
@@ -62,18 +64,18 @@ public class MQTTGroup implements ModelListener, Listener {
 
         connection.connect(new Callback<Void>() {
             public void onFailure(Throwable value) {
-                Log.error("MQTT connexion error ", value);
+                Log.error("MQTT Group connexion error ", value);
             }
 
             public void onSuccess(Void v) {
                 Topic[] topics = {new Topic(topicName, QoS.AT_LEAST_ONCE)};
                 connection.subscribe(topics, new Callback<byte[]>() {
                     public void onSuccess(byte[] qoses) {
-                        Log.info("MQTT Group " + getFQN() + " connected ");
+                        Log.info("MQTT Group " + getFQN() + " connected and subscribed to " + topicName);
                     }
 
                     public void onFailure(Throwable value) {
-                        Log.error("MQTT subscription error ", value);
+                        Log.error("MQTT Group subscription error ", value);
                     }
                 });
             }
@@ -83,24 +85,37 @@ public class MQTTGroup implements ModelListener, Listener {
 
     @Stop
     public void stop() {
+        Log.info("Stopping MqttGroup on node {}", localContext.getNodeName());
         modelService.unregisterModelListener(this);
-        connection.kill(new Callback<Void>() {
-            @Override
-            public void onSuccess(Void value) {
-                //TODO
+        if(connection != null) {
+            final Semaphore lock = new Semaphore(0);
+            connection.kill(new Callback<Void>() {
+                @Override
+                public void onSuccess(Void value) {
+                   lock.release();
+                }
+
+                @Override
+                public void onFailure(Throwable value) {
+                    lock.release();
+                }
+            });
+            try {
+                lock.tryAcquire(2, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Log.error("MqttGroup disconnection doid not complete within 2s.", e);
             }
 
-            @Override
-            public void onFailure(Throwable value) {
-                //TODO
-            }
-        });
+        }
     }
 
     @Update
     public void update() throws URISyntaxException {
-        stop();
-        start();
+        if(!broker.equals(mqtt.getHost().toString())) {
+            Log.info("MqttGroup reboot. Switching from {} to {}", mqtt.getHost().toString(), broker);
+            stop();
+            start();
+        }
     }
 
     @Override
@@ -115,8 +130,8 @@ public class MQTTGroup implements ModelListener, Listener {
 
     @Override
     public boolean afterLocalUpdate(UpdateContext context) {
-        Log.info("Model Update local, send to all ...");
         if (!context.getCallerPath().equals(localContext.getPath())) {
+        Log.info("Model Update local, send to all ...");
             sendToServer(context.getProposedModel());
         }
         return true;
