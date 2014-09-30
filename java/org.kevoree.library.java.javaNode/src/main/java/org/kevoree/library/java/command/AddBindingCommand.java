@@ -26,7 +26,6 @@ public class AddBindingCommand implements PrimitiveCommand {
         new RemoveBindingCommand(c, nodeName, registry).execute();
     }
 
-
     @Override
     public boolean execute() {
         Object kevoreeChannelFound = registry.lookup(c.getHub());

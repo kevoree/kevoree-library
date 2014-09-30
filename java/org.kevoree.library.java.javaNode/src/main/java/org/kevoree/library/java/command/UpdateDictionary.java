@@ -2,23 +2,21 @@ package org.kevoree.library.java.command;
 
 import org.kevoree.*;
 import org.kevoree.api.BootstrapService;
-import org.kevoree.library.java.wrapper.KInstanceWrapper;
-import org.kevoree.library.java.ModelRegistry;
-import org.kevoree.api.PrimitiveCommand;
-import org.kevoree.log.Log;
-
 import org.kevoree.api.ModelService;
+import org.kevoree.api.PrimitiveCommand;
 import org.kevoree.factory.DefaultKevoreeFactory;
-import org.kevoree.Value;
+import org.kevoree.library.java.ModelRegistry;
+import org.kevoree.library.java.wrapper.KInstanceWrapper;
+import org.kevoree.log.Log;
 import org.kevoree.pmodeling.api.KMFContainer;
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p/>
  * http://www.gnu.org/licenses/lgpl-3.0.txt
- *
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,10 +51,10 @@ public class UpdateDictionary implements PrimitiveCommand {
             Instance parentDictionary = (Instance) dicValue.eContainer().eContainer();
             if (parentDictionary != null) {
                 KMFContainer previousInstance = previousModel.findByPath(c.path());
-                if(previousInstance != null){
+                if (previousInstance != null) {
                     DictionaryType dt = parentDictionary.getTypeDefinition().getDictionaryType();
                     DictionaryAttribute dicAtt = dt.findAttributesByID(dicValue.getName());
-                    if(dicAtt != null && dicAtt.getDefaultValue() != null && dicAtt.getDefaultValue().equals(dicValue.getValue())) {
+                    if (dicAtt != null && dicAtt.getDefaultValue() != null && dicAtt.getDefaultValue().equals(dicValue.getValue())) {
                         Log.debug("Do not reinject default {}", dicValue.getValue());
                         return true;
                     }
@@ -79,7 +77,7 @@ public class UpdateDictionary implements PrimitiveCommand {
                     bs.injectDictionaryValue(dicValue, reffound);
                     Thread.currentThread().setContextClassLoader(previousCL);
                     return true;
-                } catch(Exception e) {
+                } catch (Exception e) {
                     Log.error("Kevoree NodeType Instance Update Error !", e);
                     return false;
                 }
@@ -94,12 +92,12 @@ public class UpdateDictionary implements PrimitiveCommand {
     public void undo() {
         try {
             //try to found old value
-            String valueToInject  = null;
+            String valueToInject = null;
             KMFContainer previousValue = modelService.getCurrentModel().getModel().findByPath(dicValue.path());
             if (previousValue != null && previousValue instanceof Value) {
-                valueToInject = ((Value)previousValue).getValue();
+                valueToInject = ((Value) previousValue).getValue();
             } else {
-                Instance instance = (Instance)dicValue.eContainer().eContainer();
+                Instance instance = (Instance) dicValue.eContainer().eContainer();
                 DictionaryAttribute dicAtt = instance.getTypeDefinition().getDictionaryType().findAttributesByID(dicValue.getName());
                 if (dicAtt.getDefaultValue() != null && !dicAtt.getDefaultValue().equals("")) {
                     valueToInject = dicAtt.getDefaultValue();
@@ -112,7 +110,7 @@ public class UpdateDictionary implements PrimitiveCommand {
                 Object reffoundO = registry.lookup(c);
                 if (reffoundO != null) {
                     if (reffoundO instanceof KInstanceWrapper) {
-                        KInstanceWrapper reffound = (KInstanceWrapper)reffoundO;
+                        KInstanceWrapper reffound = (KInstanceWrapper) reffoundO;
                         ClassLoader previousCL = Thread.currentThread().getContextClassLoader();
                         Thread.currentThread().setContextClassLoader(reffound.getTargetObj().getClass().getClassLoader());
                         bs.injectDictionaryValue(fakeDicoValue, reffound.getTargetObj());
