@@ -44,7 +44,7 @@ public class GroupWrapper extends KInstanceWrapper {
                 setIsStarted(false);
                 return true;
             } catch (InvocationTargetException e) {
-                Log.error("Kevoree Group Instance Stop Error !", e.getCause());
+                Log.error("Kevoree Group Instance Stop Error !", e);
                 return false;
             } catch (Exception e) {
                 Log.error("Kevoree Group Instance Stop Error !", e);
