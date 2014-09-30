@@ -86,7 +86,9 @@ public class MQTTGroup implements ModelListener, Listener {
     @Stop
     public void stop() {
         Log.info("Stopping MqttGroup on node {}", localContext.getNodeName());
-        modelService.unregisterModelListener(this);
+        if(modelService != null) {
+            modelService.unregisterModelListener(this);
+        }
         if(connection != null) {
             final Semaphore lock = new Semaphore(0);
             connection.kill(new Callback<Void>() {
@@ -103,7 +105,7 @@ public class MQTTGroup implements ModelListener, Listener {
             try {
                 lock.tryAcquire(2, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                Log.error("MqttGroup disconnection doid not complete within 2s.", e);
+                Log.error("MqttGroup disconnection did not complete within 2s.", e);
             }
 
         }
