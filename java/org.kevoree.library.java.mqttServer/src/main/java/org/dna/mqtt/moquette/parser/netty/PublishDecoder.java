@@ -21,27 +21,25 @@ import io.netty.channel.ChannelHandlerContext;
 import java.util.List;
 import org.dna.mqtt.moquette.proto.messages.AbstractMessage;
 import org.dna.mqtt.moquette.proto.messages.PublishMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.kevoree.log.Log;
 
 /**
  *
  * @author andrea
  */
 class PublishDecoder extends DemuxDecoder {
-    
-    private static Logger LOG = LoggerFactory.getLogger(PublishDecoder.class);
+
 
     @Override
     void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        LOG.trace("decode invoked with buffer {}", in);
+        Log.trace("decode invoked with buffer {}", in);
         in.resetReaderIndex();
         int startPos = in.readerIndex();
 
         //Common decoding part
         PublishMessage message = new PublishMessage();
         if (!decodeCommonHeader(message, in)) {
-            LOG.trace("decode ask for more data after {}", in);
+            Log.trace("decode ask for more data after {}", in);
             in.resetReaderIndex();
             return;
         }

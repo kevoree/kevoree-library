@@ -21,15 +21,14 @@ import java.text.ParseException;
 import java.util.Properties;
 import org.dna.mqtt.moquette.messaging.spi.impl.SimpleMessaging;
 import org.dna.mqtt.moquette.server.netty.NettyAcceptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.kevoree.log.Log;
 /**
  * Launch a  configured version of the server.
  * @author andrea
  */
 public class Server {
     
-    private static final Logger LOG = LoggerFactory.getLogger(Server.class);
+
     
     public static final String STORAGE_FILE_PATH = System.getProperty("user.home") + 
             File.separator + "moquette_store.hawtdb";
@@ -58,7 +57,7 @@ public class Server {
             String configPath = System.getProperty("moquette.path", null);
             confParser.parse(new File(configPath, "config/moquette.conf"));
         } catch (ParseException pex) {
-            LOG.warn("An error occured in parsing configuration, fallback on default configuration", pex);
+            Log.warn("An error occured in parsing configuration, fallback on default configuration", pex);
         }
         Properties configProps = confParser.getProperties();
         

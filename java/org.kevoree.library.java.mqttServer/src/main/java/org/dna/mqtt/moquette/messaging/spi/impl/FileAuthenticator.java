@@ -25,8 +25,7 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import org.dna.mqtt.moquette.server.IAuthenticator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.kevoree.log.Log;
 
 /**
  *
@@ -34,15 +33,15 @@ import org.slf4j.LoggerFactory;
  */
 public class FileAuthenticator implements IAuthenticator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FileAuthenticator.class);
+
     
     private Map<String, String> m_identities = new HashMap<String, String>();
     
     FileAuthenticator(String parent, String filePath) {
         File file = new File(parent, filePath);
-        LOG.debug("Loading password file: " + file);
+        Log.debug("Loading password file: " + file);
         if (file.isDirectory()) {
-            LOG.warn(String.format("Bad file reference %s is a directory", file));
+            Log.warn(String.format("Bad file reference %s is a directory", file));
             return;
         }
             
@@ -50,9 +49,9 @@ public class FileAuthenticator implements IAuthenticator {
             FileReader reader = new FileReader(file);
             parse(reader);
         } catch (FileNotFoundException fex) {
-            //LOG.warn(String.format("Parsing not existing file %s", file), fex);
+            //Log.warn(String.format("Parsing not existing file %s", file), fex);
         } catch (ParseException pex) {
-            LOG.warn(String.format("Fromat ero in parsing password file %s", file), pex);
+            Log.warn(String.format("Fromat ero in parsing password file %s", file), pex);
         }
     }
     
