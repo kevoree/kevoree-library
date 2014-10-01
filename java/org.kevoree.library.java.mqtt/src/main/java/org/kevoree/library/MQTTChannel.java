@@ -3,11 +3,10 @@ package org.kevoree.library;
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.hawtbuf.UTF8Buffer;
 import org.fusesource.mqtt.client.*;
+import org.kevoree.ContainerNode;
+import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.*;
-import org.kevoree.api.ChannelContext;
-import org.kevoree.api.ChannelDispatch;
-import org.kevoree.api.Context;
-import org.kevoree.api.Port;
+import org.kevoree.api.*;
 import org.kevoree.log.Log;
 
 import java.net.URISyntaxException;
@@ -18,14 +17,57 @@ import java.net.URISyntaxException;
 @ChannelType
 public class MQTTChannel implements ChannelDispatch, Listener {
 
-    @KevoreeInject
-    Context context;
+    private static final String KEVOREE_PREFIX = "kev/";
 
     @KevoreeInject
-    ChannelContext channelContext;
+    private ModelService modelService;
 
-    @Param(defaultValue = "tcp://mqtt.kevoree.org:81")
-    String broker;
+    @KevoreeInject
+    private Context context;
+
+    @KevoreeInject
+    private ChannelContext channelContext;
+
+    @Param(defaultValue = "mqtt.kevoree.org")
+    private String host;
+
+    @Param(defaultValue = "81")
+    private int port;
+
+    private MQTT mqtt;
+    private CallbackConnection connection;
+
+    @Start
+    public void start() throws URISyntaxException {
+        mqtt = new MQTT();
+        mqtt.setHost(host, port);
+
+        connection = mqtt.callbackConnection();
+        connection.listener(this);
+
+        connection.connect(new org.fusesource.mqtt.client.Callback<Void>() {
+            public void onFailure(Throwable value) {
+                Log.error("{} unable to connect to {}:{}", context.getInstanceName(), host, port);
+            }
+
+            public void onSuccess(Void v) {
+                Log.info("{} connected to {}:{}", context.getInstanceName(), host, port);
+            }
+        });
+    }
+
+    @Stop
+    public void stop() {
+        connection.kill(new org.fusesource.mqtt.client.Callback<Void>() {
+            @Override
+            public void onSuccess(Void value) {}
+
+            @Override
+            public void onFailure(Throwable value) {}
+        });
+        connection = null;
+        mqtt = null;
+    }
 
     @Update
     public void update() throws URISyntaxException {
@@ -33,113 +75,64 @@ public class MQTTChannel implements ChannelDispatch, Listener {
         start();
     }
 
-    private MQTT mqtt;
-
-    private CallbackConnection connection;
-
-    private static final String KEVOREE_PREFIX = "kev/";
-
-    private String topicName;
-
-    public String getFQN() {
-        return context.getInstanceName() + "@" + context.getNodeName();
-    }
-
-    @Start
-    public void start() throws URISyntaxException {
-
-        String clientID = KEVOREE_PREFIX + context.getInstanceName() + "_" + context.getNodeName();
-        if (clientID.length() > 23) {
-            clientID = clientID.substring(0, 23);
-        }
-        topicName = KEVOREE_PREFIX + context.getInstanceName();
-
-        mqtt = new MQTT();
-        mqtt.setClientId(clientID);
-        mqtt.setCleanSession(true);
-        mqtt.setHost(broker);
-
-        connection = mqtt.callbackConnection();
-        connection.listener(this);
-
-        connection.connect(new org.fusesource.mqtt.client.Callback<Void>() {
-            public void onFailure(Throwable value) {
-                Log.error("MQTT connexion error ", value);
-            }
-
-            public void onSuccess(Void v) {
-                Topic[] topics = {new Topic(topicName, QoS.AT_LEAST_ONCE)};
-                connection.subscribe(topics, new org.fusesource.mqtt.client.Callback<byte[]>() {
-                    public void onSuccess(byte[] qoses) {
-                        Log.info("MQTT Channel " + getFQN() + " connected ");
-                    }
-
-                    public void onFailure(Throwable value) {
-                        Log.error("MQTT subscription error ", value);
-                    }
-                });
-            }
-        });
-
-    }
-
-    @Stop
-    public void stop() {
-        connection.kill(new org.fusesource.mqtt.client.Callback<Void>() {
-            @Override
-            public void onSuccess(Void value) {
-                //TODO
-            }
-
-            @Override
-            public void onFailure(Throwable value) {
-                //TODO
-            }
-        });
-        connection = null;
-        mqtt = null;
-    }
-
-
     @Override
     public void onConnected() {
+        final String topicName = KEVOREE_PREFIX + context.getInstanceName() + "_" + context.getNodeName();
+        Topic[] topics = { new Topic(topicName, QoS.AT_LEAST_ONCE) };
+        connection.subscribe(topics, new org.fusesource.mqtt.client.Callback<byte[]>() {
+            public void onSuccess(byte[] qoses) {
+                Log.info("{} subscribed to topic {}", context.getInstanceName(), topicName);
+            }
 
+            public void onFailure(Throwable value) {
+                Log.error("{} unable to subscribe to topic {} (reason: {})", context.getInstanceName(), topicName, value.getMessage());
+            }
+        });
     }
 
     @Override
-    public void onDisconnected() {
-
-    }
+    public void onDisconnected() {}
 
     @Override
     public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack) {
         for (Port p : channelContext.getLocalPorts()) {
-            p.call(body.utf8().toString(), null);//TODO callback retain strategy
+            p.call(body.utf8().toString(), null);
         }
         ack.run();
     }
 
     @Override
     public void onFailure(Throwable value) {
-        Log.error("MQTT error ", value);
+        Log.error("{} error: {}", context.getInstanceName(), value.getMessage());
     }
 
     @Override
     public void dispatch(Object payload, org.kevoree.api.Callback callback) {
-        /*for (Port p : channelContext.getLocalPorts()) {
-            p.call(payload, callback);
-        }
-        if (!channelContext.getRemotePortPaths().isEmpty()) {
-        */
-        connection.publish(topicName, payload.toString().getBytes(), QoS.AT_LEAST_ONCE, false, new org.fusesource.mqtt.client.Callback<Void>() {
-            public void onSuccess(Void v) {
-                Log.debug("message published on {}", topicName);
+//        ContainerRoot model = modelService.getPendingModel();
+
+        if (connection != null) {
+            // remote dispatch
+            for (String portPath : channelContext.getRemotePortPaths()) {
+                // FIXME ugly hack because I can't get ModelService to work using Kevoree 5.0.12
+                // otherwise I would have taken the targetNodeName in the currentModel.findByPath(portPath).eContainer().eContainer().getName()
+                String targetNodeName = portPath.replace("/nodes[", "").replaceFirst("\\].+", "");
+//                targetNodeName = ((ContainerNode) model.findByPath(portPath).eContainer().eContainer()).getName();
+
+                // publish message over the different topics
+                final String topicName = KEVOREE_PREFIX + context.getInstanceName() + "_" + targetNodeName;
+                try {
+                    connection.publish(topicName, payload.toString().getBytes(), QoS.AT_LEAST_ONCE, false, null);
+                } catch (Exception e) {
+                    Log.error("Something went wrong while {} published a message. (reason: {})", context.getInstanceName(), e.getMessage());
+                }
             }
 
-            public void onFailure(Throwable value) {
-                Log.error("Error while sending mqtt message", value);
+            // local dispatch
+            for (Port p : channelContext.getLocalPorts()) {
+                p.call(payload, callback);
             }
-        });
-        /* } */
+        } else {
+            Log.debug("Cannot dispatch message. Channel {} appears to be stopped.", context.getInstanceName());
+        }
     }
 }
