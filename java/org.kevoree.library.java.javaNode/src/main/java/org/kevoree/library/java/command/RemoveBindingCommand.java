@@ -63,7 +63,7 @@ public class RemoveBindingCommand implements PrimitiveCommand {
                 if(foundHostedPort != null){
                     //Seems useless
                     //ComponentInstance component = (ComponentInstance)c.getPort().eContainer();
-                    ((ChannelWrapper) kevoreeChannelFound).getContext().getPortsBinded().remove("$component/$portName");
+                    ((ChannelWrapper) kevoreeChannelFound).getContext().getPortsBinded().remove(foundHostedPort.getPath());
                     return true;
                 }
                 return false;

@@ -1,9 +1,10 @@
 package org.kevoree.library.java.command;
 
-import org.kevoree.library.java.wrapper.ChannelWrapper;
-import org.kevoree.library.java.ModelRegistry;
+import org.kevoree.ComponentInstance;
 import org.kevoree.MBinding;
 import org.kevoree.api.PrimitiveCommand;
+import org.kevoree.library.java.ModelRegistry;
+import org.kevoree.library.java.wrapper.ChannelWrapper;
 import org.kevoree.library.java.wrapper.ComponentWrapper;
 import org.kevoree.library.java.wrapper.port.ProvidedPortImpl;
 import org.kevoree.library.java.wrapper.port.RequiredPortImpl;
@@ -21,14 +22,13 @@ public class AddBindingCommand implements PrimitiveCommand {
         this.registry = registry;
     }
 
-   public void undo() {
+    public void undo() {
         new RemoveBindingCommand(c, nodeName, registry).execute();
     }
 
-
     @Override
     public boolean execute() {
-        Object kevoreeChannelFound =  registry.lookup(c.getHub());
+        Object kevoreeChannelFound = registry.lookup(c.getHub());
         Object kevoreeComponentFound = registry.lookup(c.getPort().eContainer());
         if (kevoreeChannelFound != null && kevoreeComponentFound != null && kevoreeComponentFound instanceof ComponentWrapper && kevoreeChannelFound instanceof ChannelWrapper) {
             String portName = c.getPort().getPortTypeRef().getName();
@@ -40,22 +40,28 @@ public class AddBindingCommand implements PrimitiveCommand {
             }
             if (foundNeedPort != null) {
                 foundNeedPort.getDelegate().add((ChannelWrapper) kevoreeChannelFound);
+                Log.info("Bind {} {}", c.getPort().path(), c.getHub().path());
                 return true;
             }
-            if (foundHostedPort != null) {
-                //Seems useless
-                //ComponentInstance component = (ComponentInstance) c.getPort().eContainer();
-                ((ChannelWrapper) kevoreeChannelFound).getContext().getPortsBinded().put("$component/$portName", foundHostedPort);
-                return true;
-            }
-            return false;
+            //Seems useless
+            ((ChannelWrapper) kevoreeChannelFound).getContext().getPortsBinded().put(foundHostedPort.getPath(), foundHostedPort);
+            Log.info("Bind {} {}", c.getPort().path(), c.getHub().path());
+            return true;
         } else {
-            Log.error("Error while apply binding , channelFound=${kevoreeChannelFound}, componentFound=${kevoreeComponentFound}");
+            Log.error("Error while apply binding , channelFound=" + kevoreeChannelFound + ", componentFound=" + kevoreeComponentFound);
             return false;
         }
     }
 
     public String toString() {
-        return "AddBindingCommand ${c.hub?.name} <-> ${(c.port?.eContainer() as? ComponentInstance)?.name}";
+        String hubName = "";
+        if (c.getHub() != null) {
+            hubName = c.getHub().getName();
+        }
+        String compName = "";
+        if (c.getPort() != null) {
+            compName = ((ComponentInstance) c.getPort().eContainer()).getName();
+        }
+        return "AddBindingCommand " + hubName + " <-> " + compName;
     }
 }

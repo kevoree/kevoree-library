@@ -29,8 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.kevoree.log.Log;
 
 /**
  */
@@ -43,7 +42,7 @@ public class MemoryStorageService implements IStorageService {
     private Map<String, PublishEvent> m_inflightStore = new HashMap<String, PublishEvent>();
     private Map<String, PublishEvent> m_qos2Store = new HashMap<String, PublishEvent>();
     
-    private static final Logger LOG = LoggerFactory.getLogger(MemoryStorageService.class);
+
     
     public void initStore() {
         //To change body of implemented methods use File | Settings | File Templates.
@@ -62,7 +61,7 @@ public class MemoryStorageService implements IStorageService {
     }
 
     public Collection<HawtDBStorageService.StoredMessage> searchMatching(IMatchingCondition condition) {
-        LOG.debug("searchMatching scanning all retained messages, presents are {}", m_retainedStore.size());
+        Log.debug("searchMatching scanning all retained messages, presents are {}", m_retainedStore.size());
 
         List<HawtDBStorageService.StoredMessage> results = new ArrayList<HawtDBStorageService.StoredMessage>();
 
@@ -77,7 +76,7 @@ public class MemoryStorageService implements IStorageService {
     }
 
     public void storePublishForFuture(PublishEvent evt) {
-        LOG.debug("storePublishForFuture store evt {}", evt);
+        Log.debug("storePublishForFuture store evt {}", evt);
         List<PublishEvent> storedEvents;
         String clientID = evt.getClientID();
         if (!m_persistentMessageStore.containsKey(clientID)) {
@@ -147,7 +146,7 @@ public class MemoryStorageService implements IStorageService {
     }
 
     public void persistQoS2Message(String publishKey, PublishEvent evt) {
-        LOG.debug("persistQoS2Message store pubKey {}, evt {}", publishKey, evt);
+        Log.debug("persistQoS2Message store pubKey {}, evt {}", publishKey, evt);
         m_qos2Store.put(publishKey, evt);
     }
 

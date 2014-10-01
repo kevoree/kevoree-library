@@ -31,7 +31,6 @@ public class StartStopInstance implements PrimitiveCommand, Runnable {
     private boolean start;
     private ModelRegistry registry;
     private BootstrapService bs;
-
     private Thread t = null;
     private boolean resultAsync = false;
     private ContainerRoot root = null;
@@ -88,7 +87,7 @@ public class StartStopInstance implements PrimitiveCommand, Runnable {
             }
         }
 
-        ContainerRoot root = (ContainerRoot) r;
+        root = (ContainerRoot) r;
         Object ref = registry.lookup(c);
         if (ref != null && ref instanceof KInstanceWrapper) {
             iact = (KInstanceWrapper) ref;
@@ -102,11 +101,6 @@ public class StartStopInstance implements PrimitiveCommand, Runnable {
             if (!start) {
                 //kill subthread
                 Thread[] subThreads = new Thread[iact.getTg().activeCount()];
-                /*List<Thread> subThread = new ArrayList<Thread>();
-                for(int i = 0 ; i < ; i++){
-                    subThread.add(Thread.currentThread());
-                }
-                */
                 iact.getTg().enumerate(subThreads);
                 for (Thread subT : subThreads) {
                     try {

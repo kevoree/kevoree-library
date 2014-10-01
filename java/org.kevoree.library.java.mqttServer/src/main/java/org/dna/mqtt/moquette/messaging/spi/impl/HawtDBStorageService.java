@@ -30,8 +30,7 @@ import org.dna.mqtt.moquette.proto.messages.AbstractMessage;
 import org.dna.mqtt.moquette.server.Server;
 import org.fusesource.hawtbuf.codec.StringCodec;
 import org.fusesource.hawtdb.api.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.kevoree.log.Log;
 
 
 /**
@@ -64,7 +63,7 @@ public class HawtDBStorageService implements IStorageService {
     }
 
 
-    private static final Logger LOG = LoggerFactory.getLogger(HawtDBStorageService.class);
+
 
     private MultiIndexFactory m_multiIndexFactory;
     private PageFileFactory pageFactory;
@@ -90,7 +89,7 @@ public class HawtDBStorageService implements IStorageService {
             tmpFile = new File(storeFile);
             tmpFile.createNewFile();
         } catch (IOException ex) {
-            LOG.error(null, ex);
+            Log.error(null, ex);
             throw new MQTTException("Can't create temp file for subscriptions storage [" + storeFile + "]", ex);
         }
         pageFactory.setFile(tmpFile);
@@ -164,7 +163,7 @@ public class HawtDBStorageService implements IStorageService {
 
     @Override
     public Collection<StoredMessage> searchMatching(IMatchingCondition condition) {
-        LOG.debug("searchMatching scanning all retained messages, presents are {}", m_retainedStore.size());
+        Log.debug("searchMatching scanning all retained messages, presents are {}", m_retainedStore.size());
 
         List<StoredMessage> results = new ArrayList<StoredMessage>();
 
@@ -189,7 +188,7 @@ public class HawtDBStorageService implements IStorageService {
         storedEvents.add(convertToStored(evt));
         m_persistentMessageStore.put(clientID, storedEvents);
         //NB rewind the evt message content
-        LOG.debug("Stored published message for client <{}> on topic <{}>", clientID, evt.getTopic());
+        Log.debug("Stored published message for client <{}> on topic <{}>", clientID, evt.getTopic());
     }
 
     @Override
@@ -234,15 +233,15 @@ public class HawtDBStorageService implements IStorageService {
     }
 
     public void addNewSubscription(Subscription newSubscription, String clientID) {
-        LOG.debug("addNewSubscription invoked with subscription {} for client {}", newSubscription, clientID);
+        Log.debug("addNewSubscription invoked with subscription {} for client {}", newSubscription, clientID);
         if (!m_persistentSubscriptions.containsKey(clientID)) {
-            LOG.debug("clientID {} is a newcome, creating it's subscriptions set", clientID);
+            Log.debug("clientID {} is a newcome, creating it's subscriptions set", clientID);
             m_persistentSubscriptions.put(clientID, new HashSet<Subscription>());
         }
 
         Set<Subscription> subs = m_persistentSubscriptions.get(clientID);
         if (!subs.contains(newSubscription)) {
-            LOG.debug("updating clientID {} subscriptions set with new subscription", clientID);
+            Log.debug("updating clientID {} subscriptions set with new subscription", clientID);
             //TODO check the subs doesn't contain another subscription to the same topic with different
             Subscription existingSubscription = null;
             for (Subscription scanSub : subs) {
@@ -256,7 +255,7 @@ public class HawtDBStorageService implements IStorageService {
             }
             subs.add(newSubscription);
             m_persistentSubscriptions.put(clientID, subs);
-            LOG.debug("clientID {} subscriptions set now is {}", clientID, subs);
+            Log.debug("clientID {} subscriptions set now is {}", clientID, subs);
         }
     }
 
@@ -269,22 +268,22 @@ public class HawtDBStorageService implements IStorageService {
         for (Map.Entry<String, Set<Subscription>> entry : m_persistentSubscriptions) {
             allSubscriptions.addAll(entry.getValue());
         }
-        LOG.debug("retrieveAllSubscriptions returning subs {}", allSubscriptions);
+        Log.debug("retrieveAllSubscriptions returning subs {}", allSubscriptions);
         return allSubscriptions;
     }
 
     public void close() {
-        LOG.debug("closing disk storage");
+        Log.debug("closing disk storage");
         try {
             pageFactory.close();
         } catch (IOException ex) {
-            LOG.error(null, ex);
+            Log.error(null, ex);
         }
     }
 
     /*-------- QoS 2  storage management --------------*/
     public void persistQoS2Message(String publishKey, PublishEvent evt) {
-        LOG.debug("persistQoS2Message store pubKey: {}, evt: {}", publishKey, evt);
+        Log.debug("persistQoS2Message store pubKey: {}, evt: {}", publishKey, evt);
         m_qos2Store.put(publishKey, convertToStored(evt));
     }
 

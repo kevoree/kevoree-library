@@ -13,6 +13,7 @@ import org.kevoree.ContainerNode;
 import org.kevoree.log.Log;
 
 import java.net.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import org.kevoree.pmodeling.api.json.JSONModelSerializer;
 import org.kevoree.factory.DefaultKevoreeFactory;
@@ -120,14 +121,28 @@ public class NodeWrapper extends KInstanceWrapper {
 
             adminPort = FreeSocketDetector.detect(50000, 60000);
 
-            String[] execArray = {getJava(), "-cp", newClassPath.toString(), devOption, "-Dnode.admin=" + adminPort, "-Dnode.bootstrap=" + tempFile.getAbsolutePath(), "-Dnode.name=" + getModelElement().getName(), "org.kevoree.platform.standalone.App"};
-            if (jvmArgs != null) {
-                String[] newArray = {getJava(), jvmArgs, "-cp", newClassPath.toString(), devOption, "-Dnode.admin=" + adminPort, "-Dnode.bootstrap=" + tempFile.getAbsolutePath(), "-Dnode.name=" + getModelElement().getName(), "org.kevoree.platform.standalone.App"};
-                execArray = newArray;
+            String kevoreeVersion = System.getProperty("version");
+            if (kevoreeVersion == null) {
+                kevoreeVersion = System.getProperty("kevoree.version");
             }
 
+            ArrayList<String> execArray = new ArrayList<String>();
+            execArray.add(getJava());
+            if(jvmArgs != null) {
+                execArray.add(jvmArgs);
+            }
+            execArray.add("-cp");
+            execArray.add(newClassPath.toString());
+            execArray.add(devOption);
+            execArray.add("-Dkevoree.version=" + kevoreeVersion);
+            execArray.add("-Dnode.admin=" + adminPort);
+            execArray.add("-Dnode.bootstrap=" + tempFile.getAbsolutePath());
+            execArray.add("-Dnode.name=" + getModelElement().getName());
+            execArray.add("org.kevoree.platform.standalone.App");
+
+
             try {
-                process = Runtime.getRuntime().exec(execArray);
+                process = Runtime.getRuntime().exec(execArray.toArray(new String[execArray.size()]));
                 readerOUTthread = new Thread(new Reader(process.getInputStream(), getModelElement().getName(), false));
                 readerERRthread = new Thread(new Reader(process.getErrorStream(), getModelElement().getName(), true));
                 readerOUTthread.start();

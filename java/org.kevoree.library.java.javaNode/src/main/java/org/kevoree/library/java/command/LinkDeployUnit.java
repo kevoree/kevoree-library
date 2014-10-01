@@ -23,7 +23,6 @@ public class LinkDeployUnit implements PrimitiveCommand {
     private  org.kevoree.api.BootstrapService bs;
     private ModelRegistry registry;
 
-
     public LinkDeployUnit(DeployUnit du, BootstrapService bs, ModelRegistry registry) {
         this.du = du;
         this.bs = bs;

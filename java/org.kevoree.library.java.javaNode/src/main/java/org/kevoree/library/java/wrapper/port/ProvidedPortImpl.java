@@ -1,12 +1,11 @@
 package org.kevoree.library.java.wrapper.port;
 
-import org.kevoree.api.Port;
 import org.kevoree.api.Callback;
+import org.kevoree.api.Port;
+import org.kevoree.library.java.wrapper.ComponentWrapper;
+import org.kevoree.log.Log;
 
 import java.lang.reflect.Method;
-import org.kevoree.log.Log;
-import org.kevoree.library.java.wrapper.ComponentWrapper;
-import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +26,7 @@ public class ProvidedPortImpl implements Port {
 
     private Method targetMethod = null;
     private int paramSize = 0;
-    private MethodHandle methodHandler = null;
+    //private MethodHandle methodHandler = null;
 
 
     public ProvidedPortImpl(Object targetObj, String name, String portPath, ComponentWrapper componentWrapper) {
@@ -47,7 +46,7 @@ public class ProvidedPortImpl implements Port {
         //  methodHandler = MethodHandles.lookup().findVirtual(targetObj.javaClass, name, mt)
     }
 
-    public int getConnectedBindingsSize(){
+    public int getConnectedBindingsSize() {
         throw new UnsupportedOperationException();
     }
 
@@ -88,18 +87,18 @@ public class ProvidedPortImpl implements Port {
             if (componentWrapper.getIsStarted()) {
                 Object result = null;
                 if (paramSize == 0) {
-                    if (methodHandler != null) {
-                        //result = methodHandler.invokeExact(targetObj);
-                    } else {
-                        result = targetMethod.invoke(targetObj);
-                    }
+                    //if (methodHandler != null) {
+                    //result = methodHandler.invokeExact(targetObj);
+                    //} else {
+                    result = targetMethod.invoke(targetObj);
+                    //}
                 } else {
                     if (paramSize == 1) {
-                        if (methodHandler != null) {
-                            //result = methodHandler.invokeExact(targetObj, payload);
-                        } else {
-                            result = targetMethod.invoke(targetObj, payload);
-                        }
+                        // if (methodHandler != null) {
+                        //result = methodHandler.invokeExact(targetObj, payload);
+                        //} else {
+                        result = targetMethod.invoke(targetObj, payload);
+                        //}
                     } else {
                         if (payload.getClass().isArray()) {
                             if (((Object[]) payload).length == paramSize) {
@@ -143,7 +142,6 @@ public class ProvidedPortImpl implements Port {
     public String getPath() {
         return portPath;
     }
-
 
 
 }

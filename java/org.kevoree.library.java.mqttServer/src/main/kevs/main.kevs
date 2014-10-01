@@ -1,4 +1,5 @@
 
-add node0 : org.kevoree.library.JavaNode
-add node0.server : org.kevoree.library.MQTTServer
+add node0 : org.kevoree.library.JavaNode/5.0.8-SNAPSHOT
+add node0.server : org.kevoree.library.MQTTServer/5.0.8-SNAPSHOT
+set node0.server.port = '2727'
 

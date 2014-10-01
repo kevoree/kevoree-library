@@ -23,8 +23,7 @@ import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 import org.dna.mqtt.moquette.messaging.spi.IPersistentSubscriptionStore;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.kevoree.log.Log;
 
 /**
  * Represents a tree of topics subscriptions.
@@ -71,7 +70,7 @@ public class SubscriptionsStore {
     }
 
     private TreeNode subscriptions = new TreeNode(null);
-    private static final Logger LOG = LoggerFactory.getLogger(SubscriptionsStore.class);
+
 
     private IPersistentSubscriptionStore m_storageService;
 
@@ -80,21 +79,21 @@ public class SubscriptionsStore {
      * client's topics subscriptions
      */
     public void init(IPersistentSubscriptionStore storageService) {
-        LOG.debug("init invoked");
+        Log.debug("init invoked");
 
         m_storageService = storageService;
 
         //reload any subscriptions persisted
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Reloading all stored subscriptions...subscription tree before {}", dumpTree());
+        if (Log.DEBUG) {
+            Log.debug("Reloading all stored subscriptions...subscription tree before {}", dumpTree());
         }
         
         for (Subscription subscription : m_storageService.retrieveAllSubscriptions()) {
-            LOG.debug("Re-subscribing {} to topic {}", subscription.getClientId(), subscription.getTopic());
+            Log.debug("Re-subscribing {} to topic {}", subscription.getClientId(), subscription.getTopic());
             addDirect(subscription);
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Finished loading. Subscription tree after {}", dumpTree());
+        if (Log.DEBUG) {
+            Log.debug("Finished loading. Subscription tree after {}", dumpTree());
         }
     }
     
@@ -109,7 +108,7 @@ public class SubscriptionsStore {
             tokens = splitTopic(topic);
         } catch (ParseException ex) {
             //TODO handle the parse exception
-            LOG.error(null, ex);
+            Log.error(null, ex);
 //            return;
         }
 
@@ -185,7 +184,7 @@ public class SubscriptionsStore {
     }
 
     public void activate(String clientID) {
-        LOG.debug("Activating subscriptions for clientID <{}>", clientID);
+        Log.debug("Activating subscriptions for clientID <{}>", clientID);
         subscriptions.activate(clientID);
     }
 
@@ -200,7 +199,7 @@ public class SubscriptionsStore {
             tokens = splitTopic(topic);
         } catch (ParseException ex) {
             //TODO handle the parse exception
-            LOG.error(null, ex);
+            Log.error(null, ex);
             return Collections.EMPTY_LIST;
         }
 
@@ -269,7 +268,7 @@ public class SubscriptionsStore {
 //            }
             return i == msgTokens.size();
         } catch (ParseException ex) {
-            LOG.error(null, ex);
+            Log.error(null, ex);
             throw new RuntimeException(ex);
         }
     }
