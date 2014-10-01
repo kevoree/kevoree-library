@@ -1,19 +1,13 @@
-repo "http://repo1.maven.org/maven2"
+add node0 : JavaNode/5.0.8-SNAPSHOT
+add sync : WSGroup/5.0.8-SNAPSHOT
 
-include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
+set node0.log = "DEBUG"
 
-add node0 : JavaNode
-add sync : WSGroup
 //set sync.master = "node0"
 attach node0 sync
-
 
 //add node0.sub0 : JavaNode
 //attach sub0 sync
 //set sync.port/node0 = "9000"
 //set sync.port/sub0 = "9001"
 //set sync.master = "node0"
-
-
-
