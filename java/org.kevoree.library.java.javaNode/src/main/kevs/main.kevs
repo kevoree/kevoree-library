@@ -1,5 +1,5 @@
 add node0 : JavaNode/5.0.8-SNAPSHOT
 //add node0.aaa : Ticker
-add sync : WSGroup
+add sync : WSGroup/5.0.8-SNAPSHOT
 
 attach node0 sync

@@ -80,7 +80,6 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
         kompareBean = new KevoreeKompareBean(modelRegistry);
         wrapperFactory = createWrapperFactory(modelService.getNodeName());
         modelRegistry.registerFromPath(context.getPath(), this);
-
         if (System.getProperty("node.admin") != null) {
             try {
                 adminSrv = new UDPWrapper(Integer.parseInt(System.getProperty("node.admin").toString()));
@@ -90,7 +89,6 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
             adminReader = new Thread(adminSrv);
             adminReader.start();
         }
-
     }
 
     protected WrapperFactory createWrapperFactory(String nodeName) {
@@ -99,11 +97,13 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
 
     @Stop
     public void stopNode() {
-
         if (adminReader != null) {
-            adminReader.interrupt();
+            try {
+                adminReader.interrupt();
+            } catch (Exception e) {
+                Log.error("Error while stopping admin thread JavaNode ", e);
+            }
         }
-
         Log.info("Stopping node type of {}", modelService.getNodeName());
         modelService.unregisterModelListener(this);
         kompareBean = null;

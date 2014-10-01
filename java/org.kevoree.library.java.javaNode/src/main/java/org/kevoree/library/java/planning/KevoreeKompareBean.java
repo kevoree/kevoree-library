@@ -427,17 +427,14 @@ public class KevoreeKompareBean extends KevoreeScheduler {
             targetNode.visit(new ModelVisitor() {
                 public void visit(KMFContainer elem, String refNameInParent, KMFContainer parent) {
                     if (elem instanceof DeployUnit) {
-//                        if (elem.select("filters[name=platform,value=java]").size() == 1 && modelRegistry.lookup(elem) == null) {
-//                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.AddDeployUnit, elem));
-//                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.LinkDeployUnit, elem));
-//                        } else {
-//                            Log.error("Unable to find any DeployUnit for platform \"java\"");
-//                        }
-                        if (modelRegistry.lookup(elem) == null) {
-                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.AddDeployUnit, elem));
-                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.LinkDeployUnit, elem));
+                        DeployUnit elemDU = (DeployUnit) elem;
+                        if (elemDU.findFiltersByID("platform") == null || elemDU.findFiltersByID("platform").getValue().equals("java")) {
+                            if (modelRegistry.lookup(elem) == null) {
+                                adaptationModel.getAdaptations().add(adapt(JavaPrimitive.AddDeployUnit, elem));
+                                adaptationModel.getAdaptations().add(adapt(JavaPrimitive.LinkDeployUnit, elem));
+                            }
+                            foundDeployUnitsToRemove.remove(elem.path());
                         }
-                        foundDeployUnitsToRemove.remove(elem.path());
                     }
                     //optimization purpose
                     if ((elem instanceof ContainerNode && elem != currentNode)) {
