@@ -18,12 +18,11 @@ import us.monoid.json.JSONException;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 /**
- * Created by duke on 9/29/14.
+ * Created by leiko on 9/29/14.
  */
 public class DockerNodeWrapper extends KInstanceWrapper {
 
@@ -46,11 +45,10 @@ public class DockerNodeWrapper extends KInstanceWrapper {
             Thread t = new Thread(new Runnable() {
                 public void run() {
                     try {
-                        final InputStream final_stream = stream;
                         // https://docs.docker.com/reference/api/docker_remote_api_v1.13/#attach-to-a-container
                         // implementation of the Stream payload hack
                         byte[] header = new byte[8];
-                        int read = final_stream.read(header);
+                        int read = stream.read(header);
                         PrintStream output;
                         while (read != -1) {
                             // detect STD type
@@ -65,8 +63,8 @@ public class DockerNodeWrapper extends KInstanceWrapper {
                             if (stream.read(payload) > 0) {
                                 String content = new String(payload);
                                 // output logs properly
-                                if (content != System.getProperty("line.separator")) {
-                                    output.print("${modelElement.name} > ");
+                                if (!content.equals(System.getProperty("line.separator"))) {
+                                    output.print(getModelElement().getName()+" > ");
                                 }
                                 output.print(content);
                             }
@@ -75,7 +73,7 @@ public class DockerNodeWrapper extends KInstanceWrapper {
                         }
                     } catch (IOException e) {
                         Log.error("DockerClient: attach({}) stream error", id.substring(0, 12));
-                        Log.debug(e.getStackTrace().toString());
+                        Log.debug(e.getMessage());
                     }
                 }
             });
@@ -85,14 +83,14 @@ public class DockerNodeWrapper extends KInstanceWrapper {
             Log.info("Starting docker container {} ...", id);
             docker.start(containerID, hostConf);
             ContainerDetail detail = docker.getContainer(containerID);
-            String ipAddress = detail.getNetworkSettings().getIpAddress();
-            dockerNode.getModelService().submitScript("network ${modelElement.name}.lan.ip $ipAddress", new UpdateCallback() {
+            String script = "network "+this.getModelElement().getName()+".lan.ip "+detail.getNetworkSettings().getIpAddress();
+            dockerNode.getModelService().submitScript(script, new UpdateCallback() {
                 @Override
                 public void run(Boolean aBoolean) {
 
                 }
             });
-            Log.info("Docker container $id started at $ipAddress");
+            Log.info("Docker container {} started at "+detail.getNetworkSettings().getIpAddress(), id);
         }
         return true;
     }
@@ -103,7 +101,7 @@ public class DockerNodeWrapper extends KInstanceWrapper {
             String id = containerID.substring(0, 12);
             // stop container
             docker.stop(containerID);
-            Log.info("Docker container $id successfully stopped");
+            Log.info("Docker container {} successfully stopped", id);
             // commit container
             CommitConfig conf = new CommitConfig();
             conf.setContainer(containerID);
@@ -115,16 +113,16 @@ public class DockerNodeWrapper extends KInstanceWrapper {
             if (tag == null || tag.length() == 0) {
                 tag = "latest";
             }
-            conf.setRepo("$repo/${modelElement.name}");
+            conf.setRepo(repo+"/"+this.getModelElement().getName());
             conf.setTag(tag);
             conf.setMessage(dockerNode.getCommitMsg());
             conf.setAuthor(dockerNode.getCommitAuthor());
             docker.commit(conf);
-            Log.info("Container $id commited into ${conf.getRepo()}:$tag");
+            Log.info("Container {} commited into {}:{}", id, conf.getRepo(), tag);
 
             // delete stopped container
             docker.deleteContainer(containerID);
-            Log.info("Container ${containerID!!.substring(0, 12)} successfully deleted");
+            Log.info("Container {} successfully deleted", containerID.substring(0, 12));
         }
         return true;
     }
@@ -141,7 +139,7 @@ public class DockerNodeWrapper extends KInstanceWrapper {
         if (tag == null || tag.length() == 0) {
             tag = "latest";
         }
-        String imageName = "$repo/${modelElement.name}:$tag";
+        String imageName = repo+"/"+getModelElement().getName()+":"+tag;
         // check if imageName is available locally
         if (isLocallyAvailable(imageName)) {
             // imageName is available locally: use it
@@ -159,11 +157,11 @@ public class DockerNodeWrapper extends KInstanceWrapper {
 
         } else {
             // imageName is not available locally
-            Log.info("Looking for $repo/${modelElement.name} on remote Docker registry...");
-            List<ImageInfo> searchRes = docker.searchImage("$repo/${modelElement.name}");
+            Log.info("Looking for "+repo+"/"+getModelElement().getName()+" on remote Docker registry...");
+            List<ImageInfo> searchRes = docker.searchImage(repo+"/"+getModelElement().getName());
             if (searchRes.size() > 0) {
                 // image available remotely: pulling it
-                docker.pull("$repo/${modelElement.name}");
+                docker.pull(repo+"/"+getModelElement().getName());
                 conf.setImage(imageName);
                 if (isChildOf(getModelElement().getTypeDefinition(), "DockerNode")) {
                     // child node is a DockerNode
@@ -193,18 +191,14 @@ public class DockerNodeWrapper extends KInstanceWrapper {
                     }
 
                 } else if (isChildOf(getModelElement().getTypeDefinition(), "JavaNode")) {
-                    // use kevoree/watchdog image when child node is a JavaNode (or one of its subtypes excepted DockerNode)
-                    conf.setImage("kevoree/watchdog");
+                    // use kevoree/java image when child node is a JavaNode (or one of its subtypes excepted DockerNode)
+                    conf.setImage("kevoree/java");
                     configureJavaNode(conf);
                 } else {
-                    throw new Exception("DockerNode does not handle ${modelElement.typeDefinition!!.name} (only DockerNode & JavaNode)");
+                    throw new Exception("DockerNode does not handle "+getModelElement().getTypeDefinition().getName()+" (only DockerNode & JavaNode)");
                 }
             }
         }
-//
-//        // config for every containers
-//        conf.setAttachStdout(true)
-//        conf.setAttachStderr(true)
 
         // create container
         try {
@@ -239,11 +233,17 @@ public class DockerNodeWrapper extends KInstanceWrapper {
                 auth.setPassword(dockerNode.getAuthPassword()); // FIXME protect password in kevoree model...
                 auth.setEmail(dockerNode.getAuthEmail());
                 auth.setServerAddress(dockerNode.getPushRegistry());
-                docker.push("$repo/${modelElement.name}", tag, auth);
+                docker.push(repo+"/"+getModelElement().getName(), tag, auth);
             }
         }
     }
 
+    /**
+     *
+     * @param source source TypeDefinition
+     * @param target TypeDefinition name
+     * @return {Boolean} true if source is a child of target
+     */
     private boolean isChildOf(TypeDefinition source, String target) {
         if (source.getName().equals(target)) {
             return true;
@@ -267,8 +267,10 @@ public class DockerNodeWrapper extends KInstanceWrapper {
     /**
      * Checks whether or not given "image" is available locally in Docker
      *
-     * @param {String} full image tag (repo/name:tag)
-     * @return {Boolean} true if image is available locally; false otherwise
+     * @param image full image tag (repo/name:tag)
+     * @return {Boolean} true if locally available
+     * @throws DockerException
+     * @throws JSONException
      */
     public boolean isLocallyAvailable(String image) throws DockerException, JSONException {
         List<Image> images = docker.getImages();
@@ -314,15 +316,17 @@ public class DockerNodeWrapper extends KInstanceWrapper {
         HashMap<String, Object> volumes = new HashMap<String, Object>();
         volumes.put(dfileFolder.getAbsolutePath(), new HashMap<String, String>());
         conf.setVolumes(volumes);
-        hostConf.setBinds(Arrays.asList("${dfileFolder.getAbsolutePath()}:${dfileFolder.getAbsolutePath()}:rw").toArray(new String[0]));
-        conf.setCmd(Arrays.asList(
+        hostConf.setBinds(new String[] {
+                dfileFolder.getAbsolutePath()+":"+dfileFolder.getAbsolutePath()+":rw"
+        });
+        conf.setCmd(new String[] {
                 "java",
-                "-Dnode.name=${modelElement.name}",
-                "-Dnode.bootstrap=${modelFile.getAbsolutePath()}",
+                "-Dnode.name="+getModelElement().getName(),
+                "-Dnode.bootstrap="+modelFile.getAbsolutePath(),
                 "-jar",
-                "/root/kevboot.jar",
+                "/root/kevoree.jar",
                 "release"
-        ).toArray(new String[0]));
+        });
     }
 
 
