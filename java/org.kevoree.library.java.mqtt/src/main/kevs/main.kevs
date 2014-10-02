@@ -2,7 +2,7 @@ add node0 : JavaNode
 add sync : WSGroup
 add node0.console : ConsolePrinter
 add node0.ticker : Ticker
-add broker : MQTTChannel/5.0.8-SNAPSHOT
+add broker : MQTTChannel/5.1.1-SNAPSHOT
 
 attach node0 sync
 

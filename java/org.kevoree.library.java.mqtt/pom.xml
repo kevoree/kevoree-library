@@ -24,5 +24,18 @@
             <version>1.10</version>
         </dependency>
     </dependencies>
+
+    <!--<build>-->
+        <!--<plugins>-->
+            <!--<plugin>-->
+                <!--<groupId>org.kevoree.tools</groupId>-->
+                <!--<artifactId>org.kevoree.tools.mavenplugin</artifactId>-->
+                <!--<configuration>-->
+                    <!--<model>${project.basedir}/src/main/kevs/chat.kevs</model>-->
+                    <!--<nodename>node1</nodename>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
+        <!--</plugins>-->
+    <!--</build>-->
 </project>
 

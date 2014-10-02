@@ -1,10 +1,12 @@
-add node0, node1, node2 : JavaNode/5.0.8-SNAPSHOT
-add node0.log, node1.log, node2.log : ConsolePrinter/5.0.8-SNAPSHOT
-add node1.ticker : Ticker/5.0.8-SNAPSHOT
-add sync : WSGroup/5.0.8-SNAPSHOT
-add broker : MQTTChannel/5.0.8-SNAPSHOT
+add node0, node1, node2 : JavaNode/5.1.1-SNAPSHOT
+add node0.log, node1.log, node2.log : ConsolePrinter/5.1.1-SNAPSHOT
+add node1.ticker : Ticker/5.1.1-SNAPSHOT
+add sync : WSGroup/5.1.1-SNAPSHOT
+add broker : MQTTChannel/5.1.1-SNAPSHOT
 
 attach node0, node1, node2 sync
+
+set sync.master = "node0"
 
 bind node0.log.input broker
 //bind node1.log.input broker

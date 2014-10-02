@@ -12,7 +12,7 @@ import org.kevoree.log.Log;
 import java.net.URISyntaxException;
 
 /**
- * Created by duke on 6/3/14.
+ * Created by leiko on 6/3/14.
  */
 @ChannelType
 public class MQTTChannel implements ChannelDispatch, Listener {
@@ -108,15 +108,15 @@ public class MQTTChannel implements ChannelDispatch, Listener {
 
     @Override
     public void dispatch(Object payload, org.kevoree.api.Callback callback) {
-//        ContainerRoot model = modelService.getPendingModel();
+        ContainerRoot model = modelService.getPendingModel();
+        if (model == null) {
+            model = modelService.getCurrentModel().getModel();
+        }
 
         if (connection != null) {
             // remote dispatch
             for (String portPath : channelContext.getRemotePortPaths()) {
-                // FIXME ugly hack because I can't get ModelService to work using Kevoree 5.0.12
-                // otherwise I would have taken the targetNodeName in the currentModel.findByPath(portPath).eContainer().eContainer().getName()
-                String targetNodeName = portPath.replace("/nodes[", "").replaceFirst("\\].+", "");
-//                targetNodeName = ((ContainerNode) model.findByPath(portPath).eContainer().eContainer()).getName();
+                String targetNodeName = ((ContainerNode) model.findByPath(portPath).eContainer().eContainer()).getName();
 
                 // publish message over the different topics
                 final String topicName = KEVOREE_PREFIX + context.getInstanceName() + "_" + targetNodeName;
