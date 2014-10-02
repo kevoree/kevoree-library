@@ -44,7 +44,7 @@ public class WSGroup implements ModelListener, Runnable {
     private AtomicBoolean diverge = new AtomicBoolean(false);
 
     @KevoreeInject
-    public Context localContext;
+    public Context context;
 
     @KevoreeInject
     public ModelService modelService;
@@ -178,14 +178,17 @@ public class WSGroup implements ModelListener, Runnable {
     }
 
     @Start
-    public void startWSGroup() throws Exception {
-        serverHandler = new InternalWebSocketServer(new InetSocketAddress(port));
+    public void startWSGroup() {
         modelService.registerModelListener(this);
-        serverHandler.start();
-        Log.info("WSGroup listen on " + port);
         running = true;
         scheduledThreadPool = Executors.newScheduledThreadPool(1);
         scheduledThreadPool.scheduleAtFixedRate(this, 0, 3000, TimeUnit.MILLISECONDS);
+
+        if (isMaster()) {
+            serverHandler = new InternalWebSocketServer(new InetSocketAddress(port));
+            serverHandler.start();
+            Log.info("WSGroup listen on " + port);
+        }
     }
 
     private Map<String, WebSocket> cache = new ConcurrentHashMap<String, WebSocket>();
@@ -217,16 +220,7 @@ public class WSGroup implements ModelListener, Runnable {
     private static ModelCompare compare = new ModelCompare(new DefaultKevoreeFactory());
 
     private boolean isMaster() {
-        if (master == null) {
-            return false;
-        } else {
-            return localContext.getNodeName().equals(master);
-        }
-    }
-
-    @Override
-    public boolean preUpdate(UpdateContext context) {
-        return true;
+        return (master == null || master.isEmpty() || context.getNodeName().equals(master));
     }
 
     @Override
@@ -234,7 +228,7 @@ public class WSGroup implements ModelListener, Runnable {
         if (isMaster()) {
             return true;
         } else {
-            if (!context.getCallerPath().equals(localContext.getPath())) {
+            if (!context.getCallerPath().equals(this.context.getPath())) {
                 return !pushToMaster(context.getProposedModel());
             }
             return true;
@@ -271,29 +265,14 @@ public class WSGroup implements ModelListener, Runnable {
         return true;
     }
 
-    @Override
-    public void modelUpdated() {
-
-    }
-
-    @Override
-    public void preRollback(UpdateContext context) {
-
-    }
-
-    @Override
-    public void postRollback(UpdateContext context) {
-
-    }
-
     private final WebSocketClient[] masterClients = new WebSocketClient[1];
 
     public void run() {
         try {
-            if (!isMaster() && localContext != null) {
+            if (!isMaster() && context != null) {
                 if (masterClients[0] == null || !masterClients[0].getConnection().isOpen()) {
                     ContainerRoot lastModel = modelService.getCurrentModel().getModel();
-                    Group selfGroup = (Group) lastModel.findByPath(localContext.getPath());
+                    Group selfGroup = (Group) lastModel.findByPath(context.getPath());
                     //localize master node
                     if (selfGroup != null && master != null) {
                         FragmentDictionary masterDico = selfGroup.findFragmentDictionaryByID(master);
@@ -314,13 +293,13 @@ public class WSGroup implements ModelListener, Runnable {
                                 }
                             }
                             for (String ip : addresses) {
-                                masterClients[0] = createWSClient(ip, port, localContext.getNodeName(), modelService, diverge);
+                                masterClients[0] = createWSClient(ip, port, context.getNodeName(), modelService, diverge);
                                 if (masterClients[0] != null && masterClients[0].getConnection().isOpen()) {
                                     Log.info("Master connection opened on {}:{}", ip, port);
                                     return;
                                 }
                             }
-                            masterClients[0] = createWSClient(defaultIP, port, localContext.getNodeName(), modelService, diverge);
+                            masterClients[0] = createWSClient(defaultIP, port, context.getNodeName(), modelService, diverge);
                             if (masterClients[0] != null && masterClients[0].getConnection().isOpen()) {
                                 Log.info("Master connection opened on {}:{}", defaultIP, port);
                                 return;
@@ -401,4 +380,17 @@ public class WSGroup implements ModelListener, Runnable {
         }
     }
 
+    @Override
+    public boolean preUpdate(UpdateContext context) {
+        return true;
+    }
+
+    @Override
+    public void modelUpdated() {}
+
+    @Override
+    public void preRollback(UpdateContext context) {}
+
+    @Override
+    public void postRollback(UpdateContext context) {}
 }
