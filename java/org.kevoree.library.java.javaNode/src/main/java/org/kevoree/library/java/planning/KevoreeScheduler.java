@@ -4,12 +4,9 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.kevoree.api.adaptation.*;
 import org.kevoree.factory.KevoreeFactory;
 import org.kevoree.factory.DefaultKevoreeFactory;
-import org.kevoree.api.adaptation.AdaptationModel;
-import org.kevoree.api.adaptation.Step;
-import org.kevoree.api.adaptation.AdaptationPrimitive;
-import org.kevoree.api.adaptation.SequentialStep;
 
 
 /**
@@ -27,29 +24,29 @@ public abstract class KevoreeScheduler {
         if (!adaptionModel.getAdaptations().isEmpty()) {
             adaptationModelFactory = new DefaultKevoreeFactory();
             HashMap<String, List<AdaptationPrimitive>> classedAdaptations = classify(adaptionModel.getAdaptations());
-            adaptionModel.setOrderedPrimitiveSet(createStep(classedAdaptations.get(JavaPrimitive.AddDeployUnit.name())));
+            adaptionModel.setOrderedPrimitiveSet(createStep(classedAdaptations.get(AdaptationType.AddDeployUnit.name()),AdaptationType.AddDeployUnit));
             Step currentStep = adaptionModel.getOrderedPrimitiveSet();
-            currentStep.setNextStep(createStep(classedAdaptations.get(JavaPrimitive.LinkDeployUnit.name())));
+            currentStep.setNextStep(createStep(classedAdaptations.get(AdaptationType.LinkDeployUnit.name()),AdaptationType.LinkDeployUnit));
             currentStep = currentStep.getNextStep();
-            currentStep.setNextStep(createStep(classedAdaptations.get(JavaPrimitive.AddInstance.name())));
+            currentStep.setNextStep(createStep(classedAdaptations.get(AdaptationType.AddInstance.name()),AdaptationType.AddInstance));
            currentStep = currentStep.getNextStep();
-            currentStep.setNextStep(createStep(classedAdaptations.get(JavaPrimitive.StopInstance.name())));
+            currentStep.setNextStep(createStep(classedAdaptations.get(AdaptationType.StopInstance.name()),AdaptationType.StopInstance));
            currentStep = currentStep.getNextStep();
-            currentStep.setNextStep(createStep(classedAdaptations.get(JavaPrimitive.RemoveBinding.name())));
+            currentStep.setNextStep(createStep(classedAdaptations.get(AdaptationType.RemoveBinding.name()),AdaptationType.RemoveBinding));
            currentStep = currentStep.getNextStep();
-            currentStep.setNextStep(createStep(classedAdaptations.get(JavaPrimitive.UpgradeInstance.name())));
+            currentStep.setNextStep(createStep(classedAdaptations.get(AdaptationType.UpgradeInstance.name()),AdaptationType.UpgradeInstance));
            currentStep = currentStep.getNextStep();
-            currentStep.setNextStep(createStep(classedAdaptations.get(JavaPrimitive.RemoveInstance.name())));
+            currentStep.setNextStep(createStep(classedAdaptations.get(AdaptationType.RemoveInstance.name()),AdaptationType.RemoveInstance));
            currentStep = currentStep.getNextStep();
-            currentStep.setNextStep(createStep(classedAdaptations.get(JavaPrimitive.AddBinding.name())));
+            currentStep.setNextStep(createStep(classedAdaptations.get(AdaptationType.AddBinding.name()),AdaptationType.AddBinding));
            currentStep = currentStep.getNextStep();
-            currentStep.setNextStep(createStep(classedAdaptations.get(JavaPrimitive.UpdateDictionaryInstance.name())));
+            currentStep.setNextStep(createStep(classedAdaptations.get(AdaptationType.UpdateDictionaryInstance.name()),AdaptationType.UpdateDictionaryInstance));
            currentStep = currentStep.getNextStep();
-            currentStep.setNextStep(createStep(classedAdaptations.get(JavaPrimitive.UpdateCallMethod.name())));
+            currentStep.setNextStep(createStep(classedAdaptations.get(AdaptationType.UpdateCallMethod.name()),AdaptationType.UpdateCallMethod));
            currentStep = currentStep.getNextStep();
-            currentStep.setNextStep(createStep(classedAdaptations.get(JavaPrimitive.StartInstance.name())));
+            currentStep.setNextStep(createStep(classedAdaptations.get(AdaptationType.StartInstance.name()),AdaptationType.StartInstance));
            currentStep = currentStep.getNextStep();
-            currentStep.setNextStep(createStep(classedAdaptations.get(JavaPrimitive.RemoveDeployUnit.name())));
+            currentStep.setNextStep(createStep(classedAdaptations.get(AdaptationType.RemoveDeployUnit.name()),AdaptationType.RemoveDeployUnit));
         } else {
             adaptionModel.setOrderedPrimitiveSet(null);
         }
@@ -72,9 +69,10 @@ public abstract class KevoreeScheduler {
         return result;
     }
 
-    public Step createStep(List<AdaptationPrimitive> commands) {
+    public Step createStep(List<AdaptationPrimitive> commands, AdaptationType type) {
       //  var currentSteps = adaptationModelFactory.createParallelStep()
-        SequentialStep currentSteps = new SequentialStep();
+        Step currentSteps = new Step();
+        currentSteps.setAdaptationType(type);
         if(commands != null){
             currentSteps.getAdaptations().addAll(commands);
         }

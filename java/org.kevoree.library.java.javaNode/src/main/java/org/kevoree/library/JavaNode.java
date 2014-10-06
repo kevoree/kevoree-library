@@ -8,12 +8,12 @@ import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.adaptation.AdaptationModel;
 import org.kevoree.api.adaptation.AdaptationPrimitive;
+import org.kevoree.api.adaptation.AdaptationType;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.library.java.ModelRegistry;
 import org.kevoree.library.java.command.*;
 import org.kevoree.library.java.network.UDPWrapper;
-import org.kevoree.library.java.planning.JavaPrimitive;
 import org.kevoree.library.java.planning.KevoreeKompareBean;
 import org.kevoree.library.java.wrapper.WrapperFactory;
 import org.kevoree.log.Log;
@@ -119,42 +119,42 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     public org.kevoree.api.PrimitiveCommand getPrimitive(AdaptationPrimitive adaptationPrimitive) {
         String pTypeName = adaptationPrimitive.getPrimitiveType();
         String nodeName = modelService.getNodeName();
-        if (pTypeName.equals(JavaPrimitive.UpdateDictionaryInstance.name())) {
+        if (pTypeName.equals(AdaptationType.UpdateDictionaryInstance.name())) {
             Object[] values = (Object[]) adaptationPrimitive.getRef();
             return new UpdateDictionary((Instance) values[0], (Value) values[1], nodeName, modelRegistry, bootstrapService, modelService);
         }
-        if (pTypeName.equals(JavaPrimitive.UpdateCallMethod.name())) {
+        if (pTypeName.equals(AdaptationType.UpdateCallMethod.name())) {
             return new UpdateCallMethod((Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService);
         }
-        if (pTypeName.equals(JavaPrimitive.StartInstance.name())) {
+        if (pTypeName.equals(AdaptationType.StartInstance.name())) {
             return new StartStopInstance((Instance) adaptationPrimitive.getRef(), nodeName, true, modelRegistry, bootstrapService);
         }
-        if (pTypeName.equals(JavaPrimitive.StopInstance.name())) {
+        if (pTypeName.equals(AdaptationType.StopInstance.name())) {
             return new StartStopInstance((Instance) adaptationPrimitive.getRef(), nodeName, false, modelRegistry, bootstrapService);
         }
-        if (pTypeName.equals(JavaPrimitive.AddBinding.name())) {
+        if (pTypeName.equals(AdaptationType.AddBinding.name())) {
             return new AddBindingCommand((MBinding) adaptationPrimitive.getRef(), nodeName, modelRegistry);
         }
-        if (pTypeName.equals(JavaPrimitive.RemoveBinding.name())) {
+        if (pTypeName.equals(AdaptationType.RemoveBinding.name())) {
             return new RemoveBindingCommand((MBinding) adaptationPrimitive.getRef(), nodeName, modelRegistry);
         }
-        if (pTypeName.equals(JavaPrimitive.AddDeployUnit.name())) {
+        if (pTypeName.equals(AdaptationType.AddDeployUnit.name())) {
             return new AddDeployUnit((DeployUnit) adaptationPrimitive.getRef(), bootstrapService);
         }
-        if (pTypeName.equals(JavaPrimitive.LinkDeployUnit.name())) {
+        if (pTypeName.equals(AdaptationType.LinkDeployUnit.name())) {
             return new LinkDeployUnit((DeployUnit) adaptationPrimitive.getRef(), bootstrapService, modelRegistry);
         }
-        if (pTypeName.equals(JavaPrimitive.RemoveDeployUnit.name())) {
+        if (pTypeName.equals(AdaptationType.RemoveDeployUnit.name())) {
             RemoveDeployUnit res = new RemoveDeployUnit((DeployUnit) adaptationPrimitive.getRef(), bootstrapService);
             return res;
         }
-        if (pTypeName.equals(JavaPrimitive.AddInstance.name())) {
+        if (pTypeName.equals(AdaptationType.AddInstance.name())) {
             return new AddInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService, modelService);
         }
-        if (pTypeName.equals(JavaPrimitive.RemoveInstance.name())) {
+        if (pTypeName.equals(AdaptationType.RemoveInstance.name())) {
             return new RemoveInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService, modelService);
         }
-        if (pTypeName.equals(JavaPrimitive.UpgradeInstance.name())) {
+        if (pTypeName.equals(AdaptationType.UpgradeInstance.name())) {
             return new UpgradeInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService, modelService);
         }
         return null;

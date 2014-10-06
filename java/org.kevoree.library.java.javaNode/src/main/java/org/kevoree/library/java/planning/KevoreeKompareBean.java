@@ -3,6 +3,7 @@ package org.kevoree.library.java.planning;
 import org.kevoree.*;
 import org.kevoree.api.adaptation.AdaptationModel;
 import org.kevoree.api.adaptation.AdaptationPrimitive;
+import org.kevoree.api.adaptation.AdaptationType;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.factory.KevoreeFactory;
 import org.kevoree.library.java.ModelRegistry;
@@ -39,7 +40,7 @@ public class KevoreeKompareBean extends KevoreeScheduler {
 
 
     /* Helper to create command */
-    private AdaptationPrimitive adapt(JavaPrimitive primitive, Object elem) {
+    private AdaptationPrimitive adapt(AdaptationType primitive, Object elem) {
         AdaptationPrimitive ccmd = new AdaptationPrimitive();
         ccmd.setPrimitiveType(primitive.name());
         ccmd.setRef(elem);
@@ -49,16 +50,16 @@ public class KevoreeKompareBean extends KevoreeScheduler {
     private class TupleObjPrim {
         private KMFContainer obj;
 
-        private TupleObjPrim(KMFContainer obj, JavaPrimitive p) {
+        private TupleObjPrim(KMFContainer obj, AdaptationType p) {
             this.obj = obj;
             this.p = p;
         }
 
-        public JavaPrimitive getP() {
+        public AdaptationType getP() {
             return p;
         }
 
-        public void setP(JavaPrimitive p) {
+        public void setP(AdaptationType p) {
             this.p = p;
         }
 
@@ -70,7 +71,7 @@ public class KevoreeKompareBean extends KevoreeScheduler {
             this.obj = obj;
         }
 
-        private JavaPrimitive p;
+        private AdaptationType p;
 
         @Override
         public boolean equals(Object second) {
@@ -184,12 +185,12 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                     if (trace.getSrcPath().equals(targetNode.path())) {
                         if (trace instanceof ModelAddTrace) {
                             KMFContainer elemToAdd = targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
-                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.AddInstance, elemToAdd));
+                            adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, elemToAdd));
                         }
                         if (trace instanceof ModelRemoveTrace) {
                             KMFContainer elemToAdd = currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
-                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.RemoveInstance, elemToAdd));
-                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.StopInstance, elemToAdd));
+                            adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, elemToAdd));
+                            adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, elemToAdd));
                         }
                     }
                 }
@@ -197,12 +198,12 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                     if (trace.getSrcPath().equals(targetNode.path())) {
                         if (trace instanceof ModelAddTrace) {
                             KMFContainer elemToAdd = targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
-                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.AddInstance, elemToAdd));
+                            adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, elemToAdd));
                         }
                         if (trace instanceof ModelRemoveTrace) {
                             KMFContainer elemToAdd = currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
-                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.RemoveInstance, elemToAdd));
-                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.StopInstance, elemToAdd));
+                            adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, elemToAdd));
+                            adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, elemToAdd));
                         }
                     }
                 }
@@ -210,12 +211,12 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                     if (trace.getSrcPath().equals(targetNode.path())) {
                         if (trace instanceof ModelAddTrace) {
                             KMFContainer elemToAdd = targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
-                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.AddInstance, elemToAdd));
+                            adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, elemToAdd));
                         }
                         if (trace instanceof ModelRemoveTrace) {
                             KMFContainer elemToAdd = currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
-                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.RemoveInstance, elemToAdd));
-                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.StopInstance, elemToAdd));
+                            adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, elemToAdd));
+                            adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, elemToAdd));
                         }
                     }
                 }
@@ -223,12 +224,12 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                     if (!(targetModel.findByPath(trace.getSrcPath()) instanceof Channel)) {
                         if (trace instanceof ModelAddTrace) {
                             MBinding binding = (MBinding) targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
-                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.AddBinding, binding));
+                            adaptationModel.getAdaptations().add(adapt(AdaptationType.AddBinding, binding));
                             Channel channel = binding.getHub();
                             if (channel != null && modelRegistry.lookup(channel) == null) {
-                                TupleObjPrim newTuple = new TupleObjPrim(channel, JavaPrimitive.AddInstance);
+                                TupleObjPrim newTuple = new TupleObjPrim(channel, AdaptationType.AddInstance);
                                 if (!elementAlreadyProcessed.containsKey(newTuple.getKey())) {
-                                    adaptationModel.getAdaptations().add(adapt(JavaPrimitive.AddInstance, channel));
+                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, channel));
                                     elementAlreadyProcessed.put(newTuple.getKey(), newTuple);
                                 }
                             }
@@ -250,15 +251,15 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                                 }
                             }
                             if (!stillUsed && modelRegistry.lookup(oldChannel) != null) {
-                                TupleObjPrim removeTuple = new TupleObjPrim(oldChannel, JavaPrimitive.RemoveInstance);
+                                TupleObjPrim removeTuple = new TupleObjPrim(oldChannel, AdaptationType.RemoveInstance);
                                 if (!elementAlreadyProcessed.containsKey(removeTuple.getKey())) {
-                                    adaptationModel.getAdaptations().add(adapt(JavaPrimitive.RemoveInstance, oldChannel));
+                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, oldChannel));
                                     elementAlreadyProcessed.put(removeTuple.getKey(), removeTuple);
-                                    TupleObjPrim stopTuple = new TupleObjPrim(oldChannel, JavaPrimitive.StopInstance);
+                                    TupleObjPrim stopTuple = new TupleObjPrim(oldChannel, AdaptationType.StopInstance);
                                     elementAlreadyProcessed.put(stopTuple.getKey(), stopTuple);
                                 }
                             }
-                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.RemoveBinding, binding));
+                            adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
                         }
                     }
                 }
@@ -271,15 +272,15 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                                 //HaraKiri case
                             } else {
                                 if (((ModelSetTrace) trace).getContent().toLowerCase().equals("true")) {
-                                    TupleObjPrim sIT = new TupleObjPrim(modelElement, JavaPrimitive.StartInstance);
+                                    TupleObjPrim sIT = new TupleObjPrim(modelElement, AdaptationType.StartInstance);
                                     if (!elementAlreadyProcessed.containsKey(sIT.getKey())) {
-                                        adaptationModel.getAdaptations().add(adapt(JavaPrimitive.StartInstance, modelElement));
+                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.StartInstance, modelElement));
                                         elementAlreadyProcessed.put(sIT.getKey(), sIT);
                                     }
                                 } else {
-                                    TupleObjPrim sit = new TupleObjPrim(modelElement, JavaPrimitive.StopInstance);
+                                    TupleObjPrim sit = new TupleObjPrim(modelElement, AdaptationType.StopInstance);
                                     if (!elementAlreadyProcessed.containsKey(sit.getKey())) {
-                                        adaptationModel.getAdaptations().add(adapt(JavaPrimitive.StopInstance, modelElement));
+                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, modelElement));
                                         elementAlreadyProcessed.put(sit.getKey(), sit);
                                     }
                                 }
@@ -299,36 +300,36 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                                 } else {
                                     //upgrade internally
                                     if (currentModelElement.getStarted() == true && targetModelElement.getStarted() == true) {
-                                        TupleObjPrim stopIns = new TupleObjPrim(modelElement, JavaPrimitive.StopInstance);
+                                        TupleObjPrim stopIns = new TupleObjPrim(modelElement, AdaptationType.StopInstance);
                                         if (!elementAlreadyProcessed.containsKey(stopIns.getKey())) {
-                                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.StopInstance, modelElement));
+                                            adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, modelElement));
                                             elementAlreadyProcessed.put(stopIns.getKey(), stopIns);
                                         }
                                     }
                                     //unbind
                                     if (currentModelElement instanceof Channel) {
                                         for (MBinding binding : ((Channel) currentModelElement).getBindings()) {
-                                            if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, JavaPrimitive.RemoveBinding).getKey())) {
-                                                adaptationModel.getAdaptations().add(adapt(JavaPrimitive.RemoveBinding, binding));
+                                            if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
+                                                adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
                                             }
                                         }
                                     } else {
                                         if (currentModelElement instanceof ComponentInstance) {
                                             for (Port binding : ((ComponentInstance) currentModelElement).getRequired()) {
-                                                if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, JavaPrimitive.RemoveBinding).getKey())) {
-                                                    adaptationModel.getAdaptations().add(adapt(JavaPrimitive.RemoveBinding, binding));
+                                                if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
+                                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
                                                 }
                                             }
                                             for (Port binding : ((ComponentInstance) currentModelElement).getProvided()) {
-                                                if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, JavaPrimitive.RemoveBinding).getKey())) {
-                                                    adaptationModel.getAdaptations().add(adapt(JavaPrimitive.RemoveBinding, binding));
+                                                if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
+                                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
                                                 }
                                             }
                                         }
                                     }
-                                    TupleObjPrim upgradeTuple = new TupleObjPrim(modelElement, JavaPrimitive.UpgradeInstance);
+                                    TupleObjPrim upgradeTuple = new TupleObjPrim(modelElement, AdaptationType.UpgradeInstance);
                                     if (!elementAlreadyProcessed.containsKey(upgradeTuple.getKey())) {
-                                        adaptationModel.getAdaptations().add(adapt(JavaPrimitive.UpgradeInstance, modelElement));
+                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.UpgradeInstance, modelElement));
                                         elementAlreadyProcessed.put(upgradeTuple.getKey(), upgradeTuple);
                                     }
                                     //reinject dictionary
@@ -336,37 +337,37 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                                     if (dicValues != null) {
                                         for (Value dicValue : dicValues) {
                                             Object[] values = new Object[]{modelElement, dicValue};
-                                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.UpdateDictionaryInstance, values));
-                                            TupleObjPrim updatedicT = new TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance);
+                                            adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateDictionaryInstance, values));
+                                            TupleObjPrim updatedicT = new TupleObjPrim(modelElement, AdaptationType.UpdateDictionaryInstance);
                                             elementAlreadyProcessed.put(updatedicT.getKey(), updatedicT);
                                         }
                                     }
                                     //rebind
                                     if (targetModelElement instanceof Channel) {
                                         for (MBinding binding : ((Channel) targetModelElement).getBindings()) {
-                                            if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, JavaPrimitive.RemoveBinding).getKey())) {
-                                                adaptationModel.getAdaptations().add(adapt(JavaPrimitive.RemoveBinding, binding));
+                                            if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
+                                                adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
                                             }
                                         }
                                     } else {
                                         if (targetModelElement instanceof ComponentInstance) {
                                             for (Port binding : ((ComponentInstance) targetModelElement).getRequired()) {
-                                                if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, JavaPrimitive.RemoveBinding).getKey())) {
-                                                    adaptationModel.getAdaptations().add(adapt(JavaPrimitive.RemoveBinding, binding));
+                                                if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
+                                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
                                                 }
                                             }
                                             for (Port binding : ((ComponentInstance) targetModelElement).getProvided()) {
-                                                if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, JavaPrimitive.RemoveBinding).getKey())) {
-                                                    adaptationModel.getAdaptations().add(adapt(JavaPrimitive.RemoveBinding, binding));
+                                                if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
+                                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
                                                 }
                                             }
                                         }
                                     }
                                     //restart
                                     if (currentModelElement.getStarted() == true && targetModelElement.getStarted() == true) {
-                                        TupleObjPrim startTuple = new TupleObjPrim(modelElement, JavaPrimitive.StartInstance);
+                                        TupleObjPrim startTuple = new TupleObjPrim(modelElement, AdaptationType.StartInstance);
                                         if (!elementAlreadyProcessed.containsKey(startTuple.getKey())) {
-                                            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.StartInstance, modelElement));
+                                            adaptationModel.getAdaptations().add(adapt(AdaptationType.StartInstance, modelElement));
                                             elementAlreadyProcessed.put(startTuple.getKey(), startTuple);
                                         }
                                     }
@@ -387,16 +388,16 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                             if (dictionaryParent != null && dictionaryParent instanceof FragmentDictionary && !((FragmentDictionary) dictionaryParent).getName().equals(nodeName)) {
 
                             } else {
-                                TupleObjPrim updateDic = new TupleObjPrim(modelElement, JavaPrimitive.UpdateDictionaryInstance);
+                                TupleObjPrim updateDic = new TupleObjPrim(modelElement, AdaptationType.UpdateDictionaryInstance);
                                 if (!elementAlreadyProcessed.containsKey(updateDic)) {
                                     Object[] values = new Object[]{modelElement.eContainer().eContainer(), modelElement};
-                                    adaptationModel.getAdaptations().add(adapt(JavaPrimitive.UpdateDictionaryInstance, values));
+                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateDictionaryInstance, values));
                                     elementAlreadyProcessed.put(updateDic.getKey(), updateDic);
                                 }
                                 if (parentInstance != null) {
-                                    TupleObjPrim updateTuple = new TupleObjPrim(parentInstance, JavaPrimitive.UpdateCallMethod);
+                                    TupleObjPrim updateTuple = new TupleObjPrim(parentInstance, AdaptationType.UpdateCallMethod);
                                     if (!elementAlreadyProcessed.containsKey(updateTuple.getKey())) {
-                                        adaptationModel.getAdaptations().add(adapt(JavaPrimitive.UpdateCallMethod, parentInstance));
+                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateCallMethod, parentInstance));
                                         elementAlreadyProcessed.put(updateTuple.getKey(), updateTuple);
                                     }
                                 }
@@ -430,8 +431,8 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                         DeployUnit elemDU = (DeployUnit) elem;
                         if (elemDU.findFiltersByID("platform") == null || elemDU.findFiltersByID("platform").getValue().equals("java")) {
                             if (modelRegistry.lookup(elem) == null) {
-                                adaptationModel.getAdaptations().add(adapt(JavaPrimitive.AddDeployUnit, elem));
-                                adaptationModel.getAdaptations().add(adapt(JavaPrimitive.LinkDeployUnit, elem));
+                                adaptationModel.getAdaptations().add(adapt(AdaptationType.AddDeployUnit, elem));
+                                adaptationModel.getAdaptations().add(adapt(AdaptationType.LinkDeployUnit, elem));
                             }
                             foundDeployUnitsToRemove.remove(elem.path());
                         }
@@ -445,7 +446,7 @@ public class KevoreeKompareBean extends KevoreeScheduler {
             }, true, true, true);
         }
         for (String pathDeployUnitToDrop : foundDeployUnitsToRemove) {
-            adaptationModel.getAdaptations().add(adapt(JavaPrimitive.RemoveDeployUnit, currentModel.findByPath(pathDeployUnitToDrop)));
+            adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveDeployUnit, currentModel.findByPath(pathDeployUnitToDrop)));
         }
         return adaptationModel;
     }
