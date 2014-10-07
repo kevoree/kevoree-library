@@ -320,12 +320,8 @@ public class DockerNodeWrapper extends KInstanceWrapper {
                 dfileFolder.getAbsolutePath()+":"+dfileFolder.getAbsolutePath()+":rw"
         });
         conf.setCmd(new String[] {
-                "java",
                 "-Dnode.name="+getModelElement().getName(),
-                "-Dnode.bootstrap="+modelFile.getAbsolutePath(),
-                "-jar",
-                "/root/kevoree.jar",
-                "release"
+                "-Dnode.bootstrap="+modelFile.getAbsolutePath()
         });
     }
 

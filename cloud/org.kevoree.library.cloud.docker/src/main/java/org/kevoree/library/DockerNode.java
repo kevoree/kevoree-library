@@ -5,7 +5,6 @@ import org.kevoree.annotation.NodeType;
 import org.kevoree.annotation.Param;
 import org.kevoree.api.ModelService;
 import org.kevoree.library.cloud.docker.wrapper.DockerWrapperFactory;
-import org.kevoree.library.JavaNode;
 import org.kevoree.library.java.wrapper.WrapperFactory;
 
 /**
@@ -17,7 +16,7 @@ import org.kevoree.library.java.wrapper.WrapperFactory;
 @NodeType
 public class DockerNode extends JavaNode {
 
-    @Param()
+    @Param
     private String image;
 
     @Param(optional = false)
@@ -41,13 +40,13 @@ public class DockerNode extends JavaNode {
     @Param(defaultValue = "512", optional = false)
     private int memory;
 
-    @Param()
+    @Param
     private String authUsername;
 
-    @Param()
+    @Param
     private String authPassword;
 
-    @Param()
+    @Param
     private String authEmail;
 
     @Param(defaultValue = "https://index.docker.io/v1/")
