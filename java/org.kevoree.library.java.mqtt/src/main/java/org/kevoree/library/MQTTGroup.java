@@ -91,17 +91,22 @@ public class MQTTGroup implements ModelListener, Listener {
         }
         if(connection != null) {
             final Semaphore lock = new Semaphore(0);
-            connection.kill(new Callback<Void>() {
-                @Override
-                public void onSuccess(Void value) {
-                   lock.release();
-                }
+            try {
+                connection.kill(new Callback<Void>() {
+                    @Override
+                    public void onSuccess(Void value) {
+                        lock.release();
+                    }
 
-                @Override
-                public void onFailure(Throwable value) {
-                    lock.release();
-                }
-            });
+                    @Override
+                    public void onFailure(Throwable value) {
+                        lock.release();
+                    }
+                });
+            } catch (NullPointerException t) {
+                //Ignore
+                lock.release();
+            }
             try {
                 lock.tryAcquire(2, TimeUnit.SECONDS);
             } catch (InterruptedException e) {

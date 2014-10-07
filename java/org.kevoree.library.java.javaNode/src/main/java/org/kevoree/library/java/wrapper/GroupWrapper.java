@@ -22,7 +22,7 @@ public class GroupWrapper extends KInstanceWrapper {
                 setIsStarted(true);
                 return true;
             } catch (InvocationTargetException e) {
-                Log.error("Kevoree Group Instance Start Error !", e.getCause());
+                Log.error("Kevoree Group Instance Start Error !", e);
                 return false;
             } catch (Exception e) {
                 Log.error("Kevoree Group Instance Start Error !", e);
