@@ -42,8 +42,7 @@
                 <groupId>org.kevoree.tools</groupId>
                 <artifactId>org.kevoree.tools.mavenplugin</artifactId>
                 <configuration>
-                    <nodename>node0</nodename>
-                    <model>${project.basedir}/src/main/kevs/master.kevs</model>
+                    <nodename>node1</nodename>
                 </configuration>
             </plugin>
         </plugins>

@@ -131,12 +131,10 @@ public class Protocol {
         if (msg.startsWith(PULL)) {
             return new PullMessage();
         }
-        /* retro compact */
+        /* retro compat */
         if (msg.startsWith("get")) {
             return new PullMessage();
         }
         return new PushMessage(msg);
     }
-
-
 }
