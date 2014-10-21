@@ -2,6 +2,7 @@ package org.kevoree.library;
 
 import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
+import org.kevoree.log.Log;
 
 import java.util.Random;
 
@@ -14,10 +15,11 @@ import java.util.Random;
 @ComponentType
 public class Ticker implements Runnable {
 
+    private boolean running;
+    private Random rand = new Random();
+
     @Param(defaultValue = "3000")
     Long period = 3000l;
-
-    private Thread t = null;
 
     @Output
     org.kevoree.api.Port tick;
@@ -25,23 +27,22 @@ public class Ticker implements Runnable {
     @Param(optional = true, defaultValue = "false")
     Boolean random;
 
-    private Random rand = new Random();
-
     @Start
     public void start() {
-        t = new Thread(this);
+        Thread t = new Thread(this);
+        running = true;
         t.start();
     }
 
     @Stop
     public void stop() {
-        t.stop();
+        running = false;
     }
 
     @Override
     public void run() {
         try {
-            while (true) {
+            while (running) {
                 Thread.sleep(period);
                 String value = System.currentTimeMillis() + "";
                 if (random) {
@@ -54,14 +55,13 @@ public class Ticker implements Runnable {
                             System.out.println("ticker return : " + result);
                         }
                     }
+
                     @Override
                     public void onError(Throwable exception) {
-                        exception.printStackTrace();
+                        Log.warn(exception.getMessage());
                     }
                 });
             }
-        } catch (InterruptedException e) {
-
-        }
+        } catch (InterruptedException e) { /* ignore */ }
     }
 }
