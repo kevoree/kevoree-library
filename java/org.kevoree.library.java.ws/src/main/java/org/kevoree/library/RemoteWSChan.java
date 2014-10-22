@@ -4,7 +4,9 @@ import com.google.gson.*;
 import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
-import org.kevoree.ContainerRoot;
+import org.kevoree.Channel;
+import org.kevoree.MBinding;
+import org.kevoree.NamedElement;
 import org.kevoree.annotation.*;
 import org.kevoree.api.*;
 import org.kevoree.log.Log;
@@ -18,6 +20,7 @@ public class RemoteWSChan implements ChannelDispatch {
 
     @KevoreeInject Context context;
     @KevoreeInject ChannelContext channelContext;
+    @KevoreeInject ModelService modelService;
 
     @Param private String path;
     @Param private int    port;
@@ -60,12 +63,12 @@ public class RemoteWSChan implements ChannelDispatch {
             JsonObject msg = new JsonObject();
             msg.addProperty("action", "send");
             msg.addProperty("message", new String(payload.toString().getBytes()));
-            JsonArray destIDs = new JsonArray();
+            JsonArray destPaths = new JsonArray();
             List<String> remotePortPaths = channelContext.getRemotePortPaths();
             for (String path : remotePortPaths) {
-                destIDs.add(new JsonPrimitive(path));
+                destPaths.add(new JsonPrimitive(path));
             }
-            msg.add("destIDs", destIDs);
+            msg.add("dest", destPaths);
 
             this.client.send(new Gson().toJson(msg));
         }
@@ -98,9 +101,16 @@ public class RemoteWSChan implements ChannelDispatch {
             public void onOpen(ServerHandshake serverHandshake) {
                 Log.info("'{}' connected to remote WebSocket server {}", context.getInstanceName(), uri);
 
-                List<Port> ports = channelContext.getLocalPorts();
-                for (Port p : ports) {
-                    this.send(p.getPath());
+                Channel chan = (Channel) modelService.getCurrentModel().getModel().findByPath(context.getPath());
+                for (MBinding binding : chan.getBindings()) {
+                    if (binding.getPort() != null && binding.getPort().getRefInParent().equals("provided")) {
+                        if (((NamedElement) binding.getPort().eContainer().eContainer()).getName().equals(context.getNodeName())) {
+                            JsonObject msg = new JsonObject();
+                            msg.addProperty("action", "register");
+                            msg.addProperty("id", binding.getPort().path());
+                            this.send(new Gson().toJson(msg));
+                        }
+                    }
                 }
             }
 

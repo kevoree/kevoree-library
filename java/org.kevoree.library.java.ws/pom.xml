@@ -36,16 +36,4 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.kevoree.tools</groupId>
-                <artifactId>org.kevoree.tools.mavenplugin</artifactId>
-                <configuration>
-                    <nodename>node1</nodename>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>

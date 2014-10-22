@@ -115,7 +115,7 @@ public class WSGroup implements ModelListener, Runnable {
                                 //ok i've to merge locally
                                 ContainerRoot recModel = (ContainerRoot) jsonModelLoader.loadModelFromString(rm.getModel()).get(0);
                                 TraceSequence tseq = compare.merge(modelService.getCurrentModel().getModel(), recModel);
-                                Log.info("New client registered \"\". Merging his model with mine...", ((RegisterMessage) parsedMsg).getNodeName());
+                                Log.info("New client registered \"{}\". Merging his model with mine...", ((RegisterMessage) parsedMsg).getNodeName());
                                 modelService.submitSequence(tseq, new UpdateCallback() {
                                     @Override
                                     public void run(Boolean applied) {
