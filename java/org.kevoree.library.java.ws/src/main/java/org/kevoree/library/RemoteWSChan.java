@@ -32,12 +32,6 @@ public class RemoteWSChan implements ChannelDispatch {
     public void start() {
         URI uri = constructURL(host, port, path);
         createClient(uri);
-
-        try {
-            this.client.connectBlocking();
-        } catch (Exception e) {
-            Log.trace("Error while creating WS client on {}", uri);
-        }
     }
 
     @Stop
@@ -96,7 +90,7 @@ public class RemoteWSChan implements ChannelDispatch {
     }
 
     private void createClient(URI uri) {
-        this.client =  new WebSocketClient(uri) {
+        this.client = new WebSocketClient(uri) {
             @Override
             public void onOpen(ServerHandshake serverHandshake) {
                 Log.info("'{}' connected to remote WebSocket server {}", context.getInstanceName(), uri);
@@ -109,6 +103,7 @@ public class RemoteWSChan implements ChannelDispatch {
                             msg.addProperty("action", "register");
                             msg.addProperty("id", binding.getPort().path());
                             this.send(new Gson().toJson(msg));
+                            System.out.println("Register message sent = " + new Gson().toJson(msg).toString());
                         }
                     }
                 }
@@ -132,16 +127,13 @@ public class RemoteWSChan implements ChannelDispatch {
                     Thread.sleep(5000);
                     createClient(uri);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    /* ignore interrupt exception it is probably Kevoree Core
+                     * shutting myself because I had to stop */
                 }
             }
         };
 
-        try {
-            client.connectBlocking();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        client.connect();
     }
 
     public static void main(String[] args) {
