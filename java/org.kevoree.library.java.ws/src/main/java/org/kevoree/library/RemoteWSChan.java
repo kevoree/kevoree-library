@@ -103,7 +103,6 @@ public class RemoteWSChan implements ChannelDispatch {
                             msg.addProperty("action", "register");
                             msg.addProperty("id", binding.getPort().path());
                             this.send(new Gson().toJson(msg));
-                            System.out.println("Register message sent = " + new Gson().toJson(msg).toString());
                         }
                     }
                 }
