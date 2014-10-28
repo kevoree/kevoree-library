@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.java.ws</artifactId>
     <name>Kevoree :: Library :: Java :: WebSocket</name>
-    <version>5.1.1-SNAPSHOT</version>
+    <version>5.1.1</version>
 
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
         <groupId>org.kevoree.library.java</groupId>
-        <version>5.1.1-SNAPSHOT</version>
+        <version>5.1.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
