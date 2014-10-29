@@ -30,8 +30,6 @@ public class ClassLoaderHelper {
             FlexyClassLoader resolved = bs.get(du);
             if (resolved != null) {
                 kcl.attachChild(resolved);
-            } else {
-                Log.error("Incomplete typeDefinition ClassPath, missing {}",du.path());
             }
         }
         return kcl;

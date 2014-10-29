@@ -1,10 +1,4 @@
-include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.web:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
-
-add node0 : JavaNode
+add node0 : JavaNode/5.1.2-SNAPSHOT
 add sync : WSGroup
 attach node0 sync
 

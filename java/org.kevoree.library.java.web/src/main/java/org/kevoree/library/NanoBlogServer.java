@@ -30,6 +30,9 @@ public class NanoBlogServer extends NanoHTTPD {
 
     @Start
     public void startBlog() throws IOException {
+
+        System.out.println(context.getInstanceName() + ":" + http_port);
+
         this.myPort = http_port;
         pageCache = read(this.getClass().getClassLoader().getResourceAsStream("hello.html"));
         int randomColorIndice = new Random().nextInt(colors.length);

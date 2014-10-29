@@ -13,5 +13,5 @@ add node0.srv1 : NanoBlogServer
 set node0.srv0.http_port = "8081"
 set node0.srv1.http_port = "8082"
 
-add node0.scaler : DummyScaler
+add node0.scaler : DummyScaler/5.1.2-SNAPSHOT
 

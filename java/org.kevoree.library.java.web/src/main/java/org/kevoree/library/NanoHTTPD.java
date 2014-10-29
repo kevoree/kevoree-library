@@ -70,8 +70,8 @@ public abstract class NanoHTTPD {
      * Pseudo-Parameter to use to store the actual query string in the parameters map for later re-processing.
      */
     private static final String QUERY_STRING_PARAMETER = "NanoHttpd.QUERY_STRING";
-    String hostname="0.0.0.0";
-    protected int myPort=8080;
+    String hostname = "0.0.0.0";
+    protected int myPort = 8080;
     private ServerSocket myServerSocket;
     private Set<Socket> openConnections = new HashSet<Socket>();
     private Thread myThread;
@@ -83,7 +83,6 @@ public abstract class NanoHTTPD {
      * Pluggable strategy for creating and cleaning up temporary files.
      */
     private TempFileManagerFactory tempFileManagerFactory;
-
 
 
     /**
@@ -136,7 +135,12 @@ public abstract class NanoHTTPD {
      */
     public void start() throws IOException {
         myServerSocket = new ServerSocket();
-        myServerSocket.bind((hostname != null) ? new InetSocketAddress(hostname, myPort) : new InetSocketAddress(myPort));
+        try {
+            myServerSocket.bind((hostname != null) ? new InetSocketAddress(hostname, myPort) : new InetSocketAddress(myPort));
+        } catch (Exception e) {
+            System.err.println("error while assigning port " + myPort);
+        }
+
 
         myThread = new Thread(new Runnable() {
             @Override
@@ -203,8 +207,7 @@ public abstract class NanoHTTPD {
     /**
      * Registers that a new connection has been set up.
      *
-     * @param socket
-     *            the {@link Socket} for the connection.
+     * @param socket the {@link Socket} for the connection.
      */
     public synchronized void registerConnection(Socket socket) {
         openConnections.add(socket);
@@ -213,8 +216,7 @@ public abstract class NanoHTTPD {
     /**
      * Registers that a connection has been closed
      *
-     * @param socket
-     *            the {@link Socket} for the connection.
+     * @param socket the {@link Socket} for the connection.
      */
     public synchronized void unRegisterConnection(Socket socket) {
         openConnections.remove(socket);
@@ -643,7 +645,7 @@ public abstract class NanoHTTPD {
 
         private void sendAsFixedLength(OutputStream outputStream, PrintWriter pw) throws IOException {
             int pending = data != null ? data.available() : 0; // This is to support partial sends, see serveFile()
-            pw.print("Content-Length: "+pending+"\r\n");
+            pw.print("Content-Length: " + pending + "\r\n");
 
             pw.print("\r\n");
             pw.flush();
@@ -777,6 +779,7 @@ public abstract class NanoHTTPD {
 
         /**
          * Adds the files in the request body to the files map.
+         *
          * @arg files - map to modify
          */
         void parseBody(Map<String, String> files) throws IOException, ResponseException;
@@ -844,7 +847,7 @@ public abstract class NanoHTTPD {
                 }
 
                 parms = new HashMap<String, String>();
-                if(null == headers) {
+                if (null == headers) {
                     headers = new HashMap<String, String>();
                 }
 
@@ -1304,7 +1307,8 @@ public abstract class NanoHTTPD {
             }
         }
 
-        @Override public Iterator<String> iterator() {
+        @Override
+        public Iterator<String> iterator() {
             return cookies.keySet().iterator();
         }
 

@@ -50,37 +50,31 @@ public class DummyScaler implements Runnable {
     @Override
     public void run() {
         while (true) {
-
             try {
                 Thread.sleep(5000);
-
-
                 //Collect all instance of NanoServer
                 ModelCloner cloner = new ModelCloner(new DefaultKevoreeFactory());
                 ContainerRoot model = cloner.clone(modelService.getCurrentModel().getModel());
-
                 //collect used ports
                 List<String> ports = new ArrayList<String>();
                 List<String> names = new ArrayList<String>();
-
                 for (ContainerNode node : model.getNodes()) {
-                    List<KMFContainer> selected = node.select("components[typeDefinition.name = NanoBlogServer]");
-                    for (KMFContainer loop : selected) {
-                        ComponentInstance instance = (ComponentInstance) loop;
-                        if (instance.getDictionary() != null) {
-                            if (instance.getDictionary().findValuesByID(propName) != null) {
-                                ports.add(instance.getDictionary().findValuesByID(propName).getValue());
-                                names.add(instance.getName());
-                            }
-                        } else {
-                            if (instance.getTypeDefinition().getDictionaryType().findAttributesByID(propName).getDefaultValue() != null) {
-                                ports.add(instance.getTypeDefinition().getDictionaryType().findAttributesByID(propName).getDefaultValue());
-                                names.add(instance.getName());
+                    for(ComponentInstance instance : node.getComponents()){
+                        if(instance.getTypeDefinition().getName().equals("NanoBlogServer")){
+                            if (instance.getDictionary() != null) {
+                                if (instance.getDictionary().findValuesByID(propName) != null) {
+                                    ports.add(instance.getDictionary().findValuesByID(propName).getValue());
+                                    names.add(instance.getName());
+                                }
+                            } else {
+                                if (instance.getTypeDefinition().getDictionaryType().findAttributesByID(propName).getDefaultValue() != null) {
+                                    ports.add(instance.getTypeDefinition().getDictionaryType().findAttributesByID(propName).getDefaultValue());
+                                    names.add(instance.getName());
+                                }
                             }
                         }
                     }
                 }
-
                 if (ports.size() != target) {
 
                     KevScriptEngine engine = new KevScriptEngine();
