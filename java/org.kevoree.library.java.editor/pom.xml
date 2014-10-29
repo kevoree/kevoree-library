@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.java.editor</artifactId>
     <name>Kevoree :: Library :: Java :: Editor</name>
-    <version>5.1.2-SNAPSHOT</version>
+    <version>5.1.2</version>
 
     <properties>
         <undertow.version>1.0.15.Final</undertow.version>
@@ -14,7 +14,7 @@
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
         <groupId>org.kevoree.library.java</groupId>
-        <version>5.1.2-SNAPSHOT</version>
+        <version>5.1.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
