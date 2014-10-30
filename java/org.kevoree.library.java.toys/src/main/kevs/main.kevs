@@ -1,27 +1,12 @@
-include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
 
 add node0 : JavaNode
 add sync : WSGroup
 attach node0 sync
 set node0.log = "INFO"
 
-//add node0.breakdown : Breakdown
-//add hub : SyncBroadcast
-//bind node0.breakdown.input hub
-//add node0.ticker : Ticker
-//bind node0.ticker.tick hub
-
-add node0.typedtic : TwoValueTicker
-set node0.typedtic.period = "1000"
-
-add node0.typedconsole : TwoValueHello
-add hub2 : SyncBroadcast
-bind node0.typedconsole.input hub2
-bind node0.typedtic.tick hub2
-set hub2.clone = "true"
-
-
-
+add node0.breakdown : Breakdown
+add hub : SyncBroadcast
+bind node0.breakdown.input hub
+add node0.ticker : Ticker
+set node0.ticker.period="1000"
+bind node0.ticker.tick hub

@@ -41,8 +41,8 @@ public class Ticker implements Runnable {
 
     @Override
     public void run() {
-        try {
-            while (running) {
+        while (running) {
+            try {
                 Thread.sleep(period);
                 String value = System.currentTimeMillis() + "";
                 if (random) {
@@ -61,7 +61,7 @@ public class Ticker implements Runnable {
                         Log.warn(exception.getMessage());
                     }
                 });
-            }
-        } catch (InterruptedException e) { /* ignore */ }
+            } catch (InterruptedException e) { /* ignore */ }
+        }
     }
 }

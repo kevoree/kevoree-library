@@ -86,10 +86,10 @@ public class MQTTGroup implements ModelListener, Listener {
     @Stop
     public void stop() {
         Log.info("Stopping MqttGroup on node {}", localContext.getNodeName());
-        if(modelService != null) {
+        if (modelService != null) {
             modelService.unregisterModelListener(this);
         }
-        if(connection != null) {
+        if (connection != null) {
             final Semaphore lock = new Semaphore(0);
             try {
                 connection.kill(new Callback<Void>() {
@@ -118,7 +118,7 @@ public class MQTTGroup implements ModelListener, Listener {
 
     @Update
     public void update() throws URISyntaxException {
-        if(!broker.equals(mqtt.getHost().toString())) {
+        if (!broker.equals(mqtt.getHost().toString())) {
             Log.info("MqttGroup reboot. Switching from {} to {}", mqtt.getHost().toString(), broker);
             stop();
             start();
@@ -138,7 +138,7 @@ public class MQTTGroup implements ModelListener, Listener {
     @Override
     public boolean afterLocalUpdate(UpdateContext context) {
         if (!context.getCallerPath().equals(localContext.getPath())) {
-        Log.info("Model Update local, send to all ...");
+            Log.info("Model Update local, send to all ...");
             sendToServer(context.getProposedModel());
         }
         return true;
@@ -172,7 +172,7 @@ public class MQTTGroup implements ModelListener, Listener {
     private static final String sep = "#";
 
     public void sendToServer(ContainerRoot model) {
-        Log.info("Send Model to MQTT topic , origin:{}",model.getGenerated_KMF_ID());
+        Log.info("Send Model to MQTT topic , origin:{}", model.getGenerated_KMF_ID());
         try {
             final StringBuilder builder = new StringBuilder();
             builder.append(getFQN());
@@ -212,42 +212,64 @@ public class MQTTGroup implements ModelListener, Listener {
     public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack) {
         try {
             Log.info("MqttGroup for node {} just received a model", localContext.getNodeName());
-            String payload = new String(body.utf8().toString());
-            if (payload.startsWith("pull")) {
-                Log.info("Pull receive, send back model");
-                sendToServer(modelService.getCurrentModel().getModel());
-            } else {
-                int indexSep = payload.indexOf(sep);
-                String originName = null;
-                if (indexSep != -1) {
-                    originName = payload.substring(0, indexSep);
-                }
-                if (originName == null || !getFQN().equals(originName)) {
+            String payload = new String(body.utf8().toString()).trim();
+            try {
+                if (payload.startsWith("pull")) {
+                    Log.info("Pull receive, send back model");
+                    sendToServer(modelService.getCurrentModel().getModel());
+                } else {
 
-                    String modelPayload;
-                    if (originName == null) {
-                        modelPayload = payload;
-                    } else {
-                        modelPayload = payload.substring(indexSep + 1, payload.length());
-                    }
+                    if (payload.startsWith("push/")) {
+                        final ContainerRoot model = (ContainerRoot) loader.loadModelFromString(payload.substring("push/".length())).get(0);
+                        modelService.update(model, new UpdateCallback() {
+                            @Override
+                            public void run(Boolean applied) {
 
-                    final ContainerRoot model = (ContainerRoot) loader.loadModelFromString(modelPayload).get(0);
-                    boolean broad = false;
-                    if (model.findNodesByID(localContext.getNodeName()) == null) {
-                        broad = true;
-                        //Merge and update locally
-                        compare.merge(model, modelService.getCurrentModel().getModel()).applyOn(model);
-                    }
-                    final boolean finalBroad = broad;
-                    modelService.update(model, new UpdateCallback() {
-                        @Override
-                        public void run(Boolean applied) {
-                            if (finalBroad) {
-                                sendToServer(model);
                             }
+                        });
+                    } else if (payload.startsWith("{")) {
+                        final ContainerRoot model = (ContainerRoot) loader.loadModelFromString(payload).get(0);
+                        modelService.update(model, new UpdateCallback() {
+                            @Override
+                            public void run(Boolean applied) {
+
+                            }
+                        });
+                    } else {
+                        int indexSep = payload.indexOf(sep);
+                        String originName = null;
+                        if (indexSep != -1) {
+                            originName = payload.substring(0, indexSep);
                         }
-                    });
+                        if (originName == null || !getFQN().equals(originName)) {
+                            String modelPayload;
+                            if (originName == null) {
+                                modelPayload = payload;
+                            } else {
+                                modelPayload = payload.substring(indexSep + 1, payload.length());
+                            }
+                            final ContainerRoot model = (ContainerRoot) loader.loadModelFromString(modelPayload).get(0);
+                            boolean broad = false;
+                            if (model.findNodesByID(localContext.getNodeName()) == null) {
+                                broad = true;
+                                //Merge and update locally
+                                compare.merge(model, modelService.getCurrentModel().getModel()).applyOn(model);
+                            }
+                            final boolean finalBroad = broad;
+                            modelService.update(model, new UpdateCallback() {
+                                @Override
+                                public void run(Boolean applied) {
+                                    if (finalBroad) {
+                                        sendToServer(model);
+                                    }
+                                }
+                            });
+                        }
+                    }
                 }
+            } catch (Exception e) {
+                System.err.println(payload);
+                e.printStackTrace();
             }
         } catch (Exception e) {
             e.printStackTrace();

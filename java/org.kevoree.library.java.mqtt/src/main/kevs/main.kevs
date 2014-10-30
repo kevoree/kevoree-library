@@ -1,10 +1,5 @@
 add node0 : JavaNode
-add sync : WSGroup
-add node0.console : ConsolePrinter
-add node0.ticker : Ticker
-add broker : MQTTChannel/5.1.1-SNAPSHOT
 
-attach node0 sync
-
-bind node0.console.input broker
-bind node0.ticker.tick broker
+add sync_3 : MQTTGroup
+attach node0 sync_3
+set sync_3.broker = "tcp://mqtt.kevoree.org:81"

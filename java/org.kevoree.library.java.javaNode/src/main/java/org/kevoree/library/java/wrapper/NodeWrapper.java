@@ -126,6 +126,7 @@ public class NodeWrapper extends KInstanceWrapper {
                 kevoreeVersion = System.getProperty("kevoree.version");
             }
 
+
             ArrayList<String> execArray = new ArrayList<String>();
             execArray.add(getJava());
             if(jvmArgs != null) {
@@ -134,12 +135,13 @@ public class NodeWrapper extends KInstanceWrapper {
             execArray.add("-cp");
             execArray.add(newClassPath.toString());
             execArray.add(devOption);
-            execArray.add("-Dkevoree.version=" + kevoreeVersion);
+            if(kevoreeVersion!= null){
+                execArray.add("-Dkevoree.version=" + kevoreeVersion);
+            }
             execArray.add("-Dnode.admin=" + adminPort);
             execArray.add("-Dnode.bootstrap=" + tempFile.getAbsolutePath());
             execArray.add("-Dnode.name=" + getModelElement().getName());
             execArray.add("org.kevoree.platform.standalone.App");
-
 
             try {
                 process = Runtime.getRuntime().exec(execArray.toArray(new String[execArray.size()]));
