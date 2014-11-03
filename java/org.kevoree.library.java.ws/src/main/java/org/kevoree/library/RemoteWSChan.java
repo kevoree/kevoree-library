@@ -1,19 +1,17 @@
 package org.kevoree.library;
 
-import com.google.gson.*;
-import org.java_websocket.WebSocket;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
-import org.kevoree.Channel;
-import org.kevoree.MBinding;
-import org.kevoree.NamedElement;
+import fr.braindead.wsmsgbroker.Response;
+import fr.braindead.wsmsgbroker.WSMsgBrokerClient;
+import fr.braindead.wsmsgbroker.callback.AnswerCallback;
+import org.java_websocket.exceptions.WebsocketNotConnectedException;
+import org.kevoree.*;
 import org.kevoree.annotation.*;
+import org.kevoree.annotation.ChannelType;
 import org.kevoree.api.*;
+import org.kevoree.api.Port;
 import org.kevoree.log.Log;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @ChannelType
 public class RemoteWSChan implements ChannelDispatch {
@@ -26,22 +24,41 @@ public class RemoteWSChan implements ChannelDispatch {
     @Param private int    port;
     @Param private String host;
 
-    private WebSocketClient client;
+    private Map<String, WSMsgBrokerClient> clients;
 
     @Start
     public void start() {
-        URI uri = constructURL(host, port, path);
-        createClient(uri);
+        clients = new HashMap<String, WSMsgBrokerClient>();
+        if (path == null) { path = ""; }
+
+        ContainerRoot model = modelService.getPendingModel();
+        if (model == null) {
+            model = modelService.getCurrentModel().getModel();
+        }
+        Channel thisChan = (Channel) model.findByPath(context.getPath());
+        List<String> inputPaths = getPortsPath(thisChan, "provided");
+        List<String> outputPaths = getPortsPath(thisChan, "required");
+
+        for (String path : inputPaths) {
+            // create input WSMsgBroker clients
+            createInputClient(path);
+        }
+
+        for (String path : outputPaths) {
+            // create output WSMsgBroker clients
+            createOutputClient(path);
+        }
     }
 
     @Stop
     public void stop() {
-        if (this.client != null) {
-            try {
-                this.client.closeBlocking();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        if (this.clients != null) {
+            for (WSMsgBrokerClient client : clients.values()) {
+                if (client != null) {
+                    client.close();
+                }
             }
+            this.clients = null;
         }
     }
 
@@ -52,123 +69,124 @@ public class RemoteWSChan implements ChannelDispatch {
     }
 
     @Override
-    public void dispatch(final Object payload, final Callback callback) {
-        if (this.client != null && this.client.getReadyState() == WebSocket.READYSTATE.OPEN) {
-            JsonObject msg = new JsonObject();
-            msg.addProperty("action", "send");
-            msg.addProperty("message", new String(payload.toString().getBytes()));
-            JsonArray destPaths = new JsonArray();
-            List<String> remotePortPaths = channelContext.getRemotePortPaths();
-            for (String path : remotePortPaths) {
-                destPaths.add(new JsonPrimitive(path));
-            }
-            msg.add("dest", destPaths);
+    public void dispatch(Object o, final Callback callback) {
+        ContainerRoot model = modelService.getCurrentModel().getModel();
+        Channel thisChan = (Channel) model.findByPath(context.getPath());
+        List<String> outputPaths = getPortsPath(thisChan, "required");
 
-            this.client.send(new Gson().toJson(msg));
-        }
-    }
+        String[] dest = new String[channelContext.getRemotePortPaths().size()];
+        channelContext.getRemotePortPaths().toArray(dest);
 
-    private URI constructURL(String host, int port, String path) {
-        StringBuilder builder = new StringBuilder();
-
-        if (host.contains(":")) {
-            // IPv6
-            builder.append("ws://[").append(host).append("]:");
-        } else {
-            // IPv4
-            builder.append("ws://").append(host).append(":");
-        }
-        builder.append(port);
-        if (path != null) {
-            if (path.length() > 0 && !path.substring(0, 1).equals("/")) {
-                builder.append("/");
-            }
-            builder.append(path);
-        }
-
-        return URI.create(builder.toString());
-    }
-
-    private void createClient(URI uri) {
-        this.client = new WebSocketClient(uri) {
-            @Override
-            public void onOpen(ServerHandshake serverHandshake) {
-                Log.info("'{}' connected to remote WebSocket server {}", context.getInstanceName(), uri);
-
-                Channel chan = (Channel) modelService.getCurrentModel().getModel().findByPath(context.getPath());
-                for (MBinding binding : chan.getBindings()) {
-                    if (binding.getPort() != null && binding.getPort().getRefInParent().equals("provided")) {
-                        if (((NamedElement) binding.getPort().eContainer().eContainer()).getName().equals(context.getNodeName())) {
-                            JsonObject msg = new JsonObject();
-                            msg.addProperty("action", "register");
-                            msg.addProperty("id", binding.getPort().path());
-                            this.send(new Gson().toJson(msg));
-                        }
+        for (String outputPath : outputPaths) {
+            WSMsgBrokerClient client = this.clients.get(outputPath);
+            if (client != null) {
+                try {
+                    if (callback != null) {
+                        client.send(o, dest, new AnswerCallback() {
+                            @Override
+                            public void execute(String from, Object o) {
+                                callback.onSuccess(o);
+                            }
+                        });
+                    } else {
+                        client.send(o, dest);
                     }
+                } catch (WebsocketNotConnectedException e) {
+                    Log.warn("Unable to send message, no connection established for {}", outputPath);
                 }
             }
+        }
+    }
+
+    private void createInputClient(final String id) {
+        this.clients.put(id, new WSMsgBrokerClient(id, host, port, path, true) {
+            @Override
+            public void onUnregistered(String s) {
+                Log.info("{} unregistered from remote server", id);
+            }
 
             @Override
-            public void onMessage(String s) {
+            public void onRegistered(String s) {
+                Log.info("{} registered on remote server", id);
+            }
+
+            @Override
+            public void onMessage(Object o, final Response response) {
+                Callback cb = null;
+
+                if (response != null) {
+                    cb = new Callback() {
+                        @Override
+                        public void onSuccess(Object o) {
+                            if (o != null) {
+                                response.send(o);
+                            }
+                        }
+
+                        @Override
+                        public void onError(Throwable throwable) {
+                            response.send(throwable);
+                        }
+                    };
+                }
+
                 List<Port> ports = channelContext.getLocalPorts();
                 for (Port p : ports) {
-                    p.call(s, null);
+                    p.call(o, cb);
                 }
             }
 
             @Override
-            public void onError(Exception e) {}
+            public void onError(Exception e) {
+//                Log.error("Something went wrong with the connection of {} (reason: {})", id, e.getMessage());
+            }
 
             @Override
-            public void onClose(int i, String reason, boolean b) {
-                Log.info("'{}' connection lost with {} (reason: {})", context.getInstanceName(), uri, reason);
-                try {
-                    Thread.sleep(5000);
-                    createClient(uri);
-                } catch (InterruptedException e) {
-                    /* ignore interrupt exception it is probably Kevoree Core
-                     * shutting myself because I had to stop */
-                }
+            public void onClose(int code, String reason, boolean remote) {
+                Log.error("Connection closed by remote server for {}", id);
             }
-        };
-
-        client.connect();
+        });
     }
 
-    public static void main(String[] args) {
-        // UGLY TEST
-        RemoteWSChan chan = new RemoteWSChan();
-        chan.context = new Context() {
-            public String getPath() {
-                return "hubs[chan]";
-            }
-
-            public String getNodeName() {
-                return "node0";
-            }
-
-            public String getInstanceName() {
-                return "chan";
-            }
-        };
-        chan.channelContext = new ChannelContext() {
+    private void createOutputClient(final String id) {
+        this.clients.put(id, new WSMsgBrokerClient(id, host, port, path, true) {
             @Override
-            public List<Port> getLocalPorts() {
-                return new ArrayList<Port>();
+            public void onUnregistered(String s) {
+                Log.debug("{} unregistered from remote server", id);
             }
 
             @Override
-            public List<String> getRemotePortPaths() {
-                List<String> list = new ArrayList<String>();
-                list.add("nodes[node0]/components[printer]/provided[input]");
-                return list;
+            public void onRegistered(String s) {
+                Log.debug("{} registered on remote server", id);
             }
-        };
-        chan.host = "127.0.0.1";
-        chan.port = 9001;
-        chan.path = "";
 
-        chan.start();
-        chan.dispatch("test", null);
+            @Override
+            public void onMessage(Object o, final Response response) {}
+
+            @Override
+            public void onError(Exception e) {
+                Log.debug("Something went wrong with the connection of {} (reason: {})", id, e.getMessage());
+            }
+
+            @Override
+            public void onClose(int code, String reason, boolean remote) {
+                Log.debug("Connection closed by remote server for {}", id);
+            }
+        });
+    }
+
+    private List<String> getPortsPath(Channel chan, String type) {
+        List<String> paths = new ArrayList<String>();
+        for (MBinding binding : chan.getBindings()) {
+            if (binding.getPort() != null
+                    && binding.getPort().getRefInParent() != null
+                    && binding.getPort().getRefInParent().equals(type)) {
+                ContainerNode node = (ContainerNode) binding.getPort().eContainer().eContainer();
+                if (node.getName().equals(context.getNodeName())) {
+                    paths.add(binding.getPort().path());
+                }
+            }
+        }
+        return paths;
     }
 }

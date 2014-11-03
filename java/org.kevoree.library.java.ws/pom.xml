@@ -24,16 +24,24 @@
             <version>${kevoree.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.2.4</version>
-        </dependency>
-        <dependency>
             <groupId>org.kevoree.tools</groupId>
             <artifactId>org.kevoree.tools.test</artifactId>
             <version>${kevoree.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>fr.braindead</groupId>
+            <artifactId>wsmsgbroker-client</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>braindead.internal</id>
+            <name>Braindead Archiva Releases Repository</name>
+            <url>http://archiva.braindead.fr/repository/internal</url>
+        </repository>
+    </repositories>
 
 </project>
