@@ -5,8 +5,10 @@ import org.kevoree.api.Port;
 import org.kevoree.library.java.wrapper.ComponentWrapper;
 import org.kevoree.log.Log;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -87,30 +89,21 @@ public class ProvidedPortImpl implements Port {
             if (componentWrapper.getIsStarted()) {
                 Object result = null;
                 if (paramSize == 0) {
-                    //if (methodHandler != null) {
-                    //result = methodHandler.invokeExact(targetObj);
-                    //} else {
                     result = targetMethod.invoke(targetObj);
-                    //}
                 } else {
-                    if (paramSize == 1) {
-                        // if (methodHandler != null) {
-                        //result = methodHandler.invokeExact(targetObj, payload);
-                        //} else {
-                        result = targetMethod.invoke(targetObj, payload);
-                        //}
+                    Object[] values;
+                    if (payload instanceof Array) {
+                        values = (Object[]) payload;
+                    } else if (payload instanceof List) {
+                        values = ((List) payload).toArray();
                     } else {
-                        if (payload.getClass().isArray()) {
-                            if (((Object[]) payload).length == paramSize) {
-                                if (targetMethod != null) {
-                                    result = CallBackCaller.callMethod(targetMethod, targetObj, payload);
-                                }
-                            } else {
-                                callback.onError(new Exception("Non corresponding parameters, " + paramSize + " expected, found " + ((Object[]) payload).length));
-                            }
-                        } else {
-                            callback.onError(new Exception("Non corresponding parameters, " + paramSize + " expected, found : not an array == 1"));
-                        }
+                        values = new Object[] { payload };
+                    }
+
+                    if (values.length == paramSize) {
+                        result = CallBackCaller.callMethod(targetMethod, targetObj, values);
+                    } else {
+                        callback.onError(new Exception("Non corresponding parameters: " + paramSize + " expected, found " + values.length));
                     }
                 }
                 if (callback != null) {
