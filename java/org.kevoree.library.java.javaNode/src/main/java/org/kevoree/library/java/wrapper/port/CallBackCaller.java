@@ -15,7 +15,7 @@ public class CallBackCaller {
             if (t instanceof ParameterizedType) {
                 ((Class) ((ParameterizedType) t).getActualTypeArguments()[0]).cast(result);
             }
-            callback.onSuccess(result);
+            callback.onSuccess(null, null, result);
         } catch (Exception e) {
             if (result != null) {
                 callback.onError(new Exception("Bad Callback parameter " + result.getClass().getName(), e));

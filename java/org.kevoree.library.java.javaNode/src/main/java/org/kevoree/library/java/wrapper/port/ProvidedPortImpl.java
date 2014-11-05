@@ -8,7 +8,6 @@ import org.kevoree.log.Log;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
