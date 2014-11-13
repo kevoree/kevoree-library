@@ -96,8 +96,6 @@ public class WSGroup implements ModelListener, Runnable {
 
         @Override
         public void onMessage(WebSocket webSocket, String s) {
-            System.out.println("Received message");
-            System.out.println(s);
             try {
                 Message parsedMsg = Protocol.parse(s);
                 if (parsedMsg == null) {
@@ -143,7 +141,7 @@ public class WSGroup implements ModelListener, Runnable {
                                         for (WebSocket ws : cache.values()) {
                                             count++;
                                             if (ws.getReadyState() == WebSocket.READYSTATE.OPEN) {
-                                                ws.send(((PushMessage) parsedMsg).getModel());
+                                                ws.send(pm.toRaw());
                                             }
                                         }
 
