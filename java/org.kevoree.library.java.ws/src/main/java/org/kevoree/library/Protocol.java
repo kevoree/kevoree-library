@@ -124,7 +124,7 @@ public class Protocol {
             }
             return new Protocol.RegisterMessage(buffer.toString(), model);
         }
-        if (msg.startsWith(PUSH)) {
+        if (msg.startsWith(PUSH + SEP)) {
             String model = msg.substring(PUSH.length() + SEP.length());
             return new PushMessage(model);
         }
@@ -135,6 +135,7 @@ public class Protocol {
         if (msg.startsWith("get")) {
             return new PullMessage();
         }
-        return new PushMessage(msg);
+
+        return null;
     }
 }

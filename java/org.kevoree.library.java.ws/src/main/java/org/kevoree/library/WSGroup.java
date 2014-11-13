@@ -96,90 +96,100 @@ public class WSGroup implements ModelListener, Runnable {
 
         @Override
         public void onMessage(WebSocket webSocket, String s) {
-            Message parsedMsg = Protocol.parse(s);
-            if (parsedMsg == null) {
-                Log.error("\"{}\" unknown Kevoree message {}", context.getInstanceName(), s);
-            } else {
-                switch (parsedMsg.getType()) {
-                    case REGISTER_TYPE:
-                        RegisterMessage rm = (RegisterMessage) parsedMsg;
-                        cache.put(rm.getNodeName(), webSocket);
-                        rcache.put(webSocket, rm.getNodeName());
-                        if (isMaster()) {
-                            if (rm.getModel() == null) {
-                                String currentModel = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
-                                PushMessage pushMessage = new PushMessage(currentModel);
-                                Log.info("Sending my model to client \"{}\"", ((RegisterMessage) parsedMsg).getNodeName());
-                                webSocket.send(pushMessage.toRaw());
-                            } else {
-                                //ok i've to merge locally
-                                ContainerRoot recModel = (ContainerRoot) jsonModelLoader.loadModelFromString(rm.getModel()).get(0);
-                                TraceSequence tseq = compare.merge(modelService.getCurrentModel().getModel(), recModel);
-                                Log.info("New client registered \"{}\". Merging his model with mine...", ((RegisterMessage) parsedMsg).getNodeName());
-                                modelService.submitSequence(tseq, new UpdateCallback() {
+            try {
+                Message parsedMsg = Protocol.parse(s);
+                if (parsedMsg == null) {
+                    Log.warn(WSGroup.this.getClass().getSimpleName()+"  \"{}\" received an unknown message '{}'", context.getInstanceName(), s);
+                } else {
+                    switch (parsedMsg.getType()) {
+                        case REGISTER_TYPE:
+                            RegisterMessage rm = (RegisterMessage) parsedMsg;
+                            cache.put(rm.getNodeName(), webSocket);
+                            rcache.put(webSocket, rm.getNodeName());
+                            if (isMaster()) {
+                                if (rm.getModel() == null) {
+                                    String currentModel = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
+                                    PushMessage pushMessage = new PushMessage(currentModel);
+                                    Log.info("Sending my model to client \"{}\"", ((RegisterMessage) parsedMsg).getNodeName());
+                                    webSocket.send(pushMessage.toRaw());
+                                } else {
+                                    //ok i've to merge locally
+                                    ContainerRoot recModel = (ContainerRoot) jsonModelLoader.loadModelFromString(rm.getModel()).get(0);
+                                    TraceSequence tseq = compare.merge(modelService.getCurrentModel().getModel(), recModel);
+                                    Log.info("New client registered \"{}\". Merging his model with mine...", ((RegisterMessage) parsedMsg).getNodeName());
+                                    modelService.submitSequence(tseq, new UpdateCallback() {
+                                        @Override
+                                        public void run(Boolean applied) {
+                                            Log.info("Merge model result: {}", applied);
+                                        }
+                                    });
+                                }
+                            }
+                            break;
+                        case PULL_TYPE:
+                            String modelReturn = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
+                            Log.info("{} \"{}\": pull requested", WSGroup.this.getClass().getSimpleName(), context.getInstanceName());
+                            webSocket.send(modelReturn);
+                            break;
+                        case PUSH_TYPE:
+                            PushMessage pm = (PushMessage) parsedMsg;
+                            try {
+                                ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
+                                if (hasMaster()) {
+                                    if (isMaster()) {
+                                        int count = 0;
+                                        for (WebSocket ws : cache.values()) {
+                                            count++;
+                                            if (ws.getReadyState() == WebSocket.READYSTATE.OPEN) {
+                                                ws.send(((PushMessage) parsedMsg).getModel());
+                                            }
+                                        }
+
+                                        if (count > 0) {
+                                            Log.info("Broadcast model over {} client{}", count, (count > 1) ? "s" : "");
+                                        }
+                                    }
+                                } else {
+                                    Log.info("No master specified, model will NOT be send to all other nodes");
+                                }
+
+                                Log.info("{} \"{}\": push received, applying locally...", WSGroup.this.getClass().getSimpleName(), context.getInstanceName());
+                                modelService.update(model, new UpdateCallback() {
                                     @Override
                                     public void run(Boolean applied) {
-                                        Log.info("Merge model result: {}", applied);
+                                        Log.info("{} \"{}\" update result: {}", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), applied);
                                     }
                                 });
+                            } catch (Exception e) {
+                                Log.warn("{} \"{}\" received a malformed push message '{}'", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), s);
                             }
-                        }
-                        break;
-                    case PULL_TYPE:
-                        String modelReturn = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
-                        Log.info("Pull requested");
-                        webSocket.send(modelReturn);
-                        break;
-                    case PUSH_TYPE:
-                        PushMessage pm = (PushMessage) parsedMsg;
-                        ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
-                        if (hasMaster()) {
-                            if (isMaster()) {
-                                int count = 0;
-                                for (WebSocket ws : cache.values()) {
-                                    count++;
-                                    if (ws.getReadyState() == WebSocket.READYSTATE.OPEN) {
-                                        ws.send(((PushMessage) parsedMsg).getModel());
-                                    }
-                                }
-
-                                if (count > 0) {
-                                    Log.info("Broadcast model over {} client{}", count, (count > 1) ? "s" : "");
-                                }
-                            }
-                        } else {
-                            Log.info("No master specified, model will NOT be send to all other nodes");
-                        }
-
-                        Log.info("Push received, applying locally...");
-                        modelService.update(model, new UpdateCallback() {
-                            @Override
-                            public void run(Boolean applied) {
-                                Log.info("WSGroup update result : {}", applied);
-                            }
-                        });
-                        break;
-                    default:
-                        Log.error("\"{}\" unhandled Kevoree message {}", context.getInstanceName(), s);
-                        break;
+                            break;
+                        default:
+                            Log.warn("{} \"{}\" unhandled message '{}'", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), s);
+                            break;
+                    }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
         @Override
         public void onError(WebSocket webSocket, Exception e) {
-            Log.error("", e);
+            Log.error(WSGroup.this.getClass().getSimpleName()+" \"{}\": {}", context.getInstanceName(), e.getMessage());
             try {
-                webSocket.close();
+                if (webSocket != null) {
+                    webSocket.close();
+                    if (rcache != null) {
+                        String name = rcache.get(webSocket);
+                        if (name != null) {
+                            cache.remove(name);
+                        }
+                        rcache.remove(webSocket);
+                    }
+                }
             } catch (Exception ee) {
                 e.printStackTrace();
-            }
-            if (rcache != null) {
-                String name = rcache.get(webSocket);
-                if (name != null) {
-                    cache.remove(name);
-                }
-                rcache.remove(webSocket);
             }
         }
     }
@@ -190,7 +200,7 @@ public class WSGroup implements ModelListener, Runnable {
             if (this.isMaster()) {
                 serverHandler = new InternalWebSocketServer(new InetSocketAddress(port));
                 serverHandler.start();
-                Log.info("WSGroup listen on " + port);
+                Log.info(WSGroup.this.getClass().getSimpleName()+" \"{}\" listen on {}", context.getInstanceName(), port);
             } else {
                 modelService.registerModelListener(this);
                 running = true;
@@ -200,7 +210,7 @@ public class WSGroup implements ModelListener, Runnable {
         } else {
             serverHandler = new InternalWebSocketServer(new InetSocketAddress(port));
             serverHandler.start();
-            Log.info("WSGroup listen on " + port);
+            Log.info(WSGroup.this.getClass().getSimpleName()+" \"{}\" listen on {}", context.getInstanceName(), port);
         }
     }
 
@@ -244,14 +254,7 @@ public class WSGroup implements ModelListener, Runnable {
 
     @Override
     public boolean initUpdate(UpdateContext context) {
-        if (isMaster()) {
-            return true;
-        } else {
-            if (!context.getCallerPath().equals(this.context.getPath())) {
-                return !pushToMaster(context.getProposedModel());
-            }
-            return true;
-        }
+        return isMaster() || context.getCallerPath().equals(this.context.getPath()) || !pushToMaster(context.getProposedModel());
 
     }
 
@@ -321,7 +324,6 @@ public class WSGroup implements ModelListener, Runnable {
                             masterClient = createWSClient(defaultIP, port, context.getNodeName(), modelService, diverge);
                             if (masterClient != null && masterClient.getConnection().isOpen()) {
                                 Log.info("Master connection opened on {}:{}", defaultIP, port);
-                                return;
                             }
                         }
                     }
@@ -332,9 +334,9 @@ public class WSGroup implements ModelListener, Runnable {
         }
     }
 
-    public static WebSocketClient createWSClient(String ip, String port, String currentNodeName, final ModelService modelService, final AtomicBoolean diverge) {
+    public WebSocketClient createWSClient(String ip, String port, String currentNodeName, final ModelService modelService, final AtomicBoolean diverge) {
         final WebSocketClient[] client = new WebSocketClient[1];
-        URI uri = null;
+        URI uri;
         if (ip.contains(":")) {
             uri = URI.create("ws://[" + ip + "]:" + port);
         } else {
@@ -350,7 +352,7 @@ public class WSGroup implements ModelListener, Runnable {
 
                 Protocol.Message parsedMsg = Protocol.parse(message);
                 if (parsedMsg == null) {
-                    Log.error("Unknow Kevoree message {}", message);
+                    Log.warn(WSGroup.this.getClass().getSimpleName()+" \"{}\" unknown message '{}'", context.getInstanceName(), message);
                 } else {
                     switch (parsedMsg.getType()) {
                         case PUSH_TYPE:
@@ -361,12 +363,12 @@ public class WSGroup implements ModelListener, Runnable {
                             modelService.update(model, new UpdateCallback() {
                                 @Override
                                 public void run(Boolean applied) {
-                                    Log.info("WSGroup update result : {}", applied);
+                                    Log.info(WSGroup.this.getClass().getSimpleName()+" \"{}\" update result: {}", context.getInstanceName(), applied);
                                 }
                             });
                             break;
                         default:
-                            Log.error("Unknow Kevoree message {}", message);
+                            Log.warn(WSGroup.this.getClass().getSimpleName()+" \"{}\" unhandled message '{}'", context.getInstanceName(), message);
                             break;
                     }
                 }
