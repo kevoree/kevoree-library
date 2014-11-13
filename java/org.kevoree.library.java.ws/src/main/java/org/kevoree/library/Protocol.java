@@ -50,13 +50,7 @@ public class Protocol {
 
         @Override
         public String toRaw() {
-            StringBuilder buffer = new StringBuilder();
-            buffer.append(REGISTER);
-            buffer.append(SEP);
-            buffer.append(nodeName);
-            buffer.append(SEP);
-            buffer.append(model);
-            return buffer.toString();
+            return REGISTER + SEP + nodeName + SEP + model;
         }
     }
 
@@ -69,9 +63,7 @@ public class Protocol {
 
         @Override
         public String toRaw() {
-            StringBuilder buffer = new StringBuilder();
-            buffer.append(PULL);
-            return buffer.toString();
+            return PULL;
         }
     }
 
@@ -94,11 +86,7 @@ public class Protocol {
 
         @Override
         public String toRaw() {
-            StringBuilder buffer = new StringBuilder();
-            buffer.append(PUSH);
-            buffer.append(SEP);
-            buffer.append(model);
-            return buffer.toString();
+            return PUSH + SEP + model;
         }
     }
 
@@ -107,7 +95,7 @@ public class Protocol {
             String payload = msg.substring(REGISTER.length() + SEP.length());
             int i = 0;
             char ch = payload.charAt(i);
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             while (i < payload.length() && ch != "/".charAt(0)) {
                 i++;
                 buffer.append(ch);

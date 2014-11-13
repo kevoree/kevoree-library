@@ -96,10 +96,12 @@ public class WSGroup implements ModelListener, Runnable {
 
         @Override
         public void onMessage(WebSocket webSocket, String s) {
+            System.out.println("Received message");
+            System.out.println(s);
             try {
                 Message parsedMsg = Protocol.parse(s);
                 if (parsedMsg == null) {
-                    Log.warn(WSGroup.this.getClass().getSimpleName()+"  \"{}\" received an unknown message '{}'", context.getInstanceName(), s);
+                    Log.warn(WSGroup.this.getClass().getSimpleName() + "  \"{}\" received an unknown message '{}'", context.getInstanceName(), s);
                 } else {
                     switch (parsedMsg.getType()) {
                         case REGISTER_TYPE:
@@ -107,7 +109,7 @@ public class WSGroup implements ModelListener, Runnable {
                             cache.put(rm.getNodeName(), webSocket);
                             rcache.put(webSocket, rm.getNodeName());
                             if (isMaster()) {
-                                if (rm.getModel() == null) {
+                                if (rm.getModel() == null || rm.getModel().equals("null")) {
                                     String currentModel = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
                                     PushMessage pushMessage = new PushMessage(currentModel);
                                     Log.info("Sending my model to client \"{}\"", ((RegisterMessage) parsedMsg).getNodeName());
@@ -349,10 +351,9 @@ public class WSGroup implements ModelListener, Runnable {
 
             @Override
             public void onMessage(String message) {
-
                 Protocol.Message parsedMsg = Protocol.parse(message);
                 if (parsedMsg == null) {
-                    Log.warn(WSGroup.this.getClass().getSimpleName()+" \"{}\" unknown message '{}'", context.getInstanceName(), message);
+                    Log.warn(WSGroup.this.getClass().getSimpleName() + " \"{}\" unknown message '{}'", context.getInstanceName(), message);
                 } else {
                     switch (parsedMsg.getType()) {
                         case PUSH_TYPE:
@@ -368,7 +369,7 @@ public class WSGroup implements ModelListener, Runnable {
                             });
                             break;
                         default:
-                            Log.warn(WSGroup.this.getClass().getSimpleName()+" \"{}\" unhandled message '{}'", context.getInstanceName(), message);
+                            Log.warn(WSGroup.this.getClass().getSimpleName() + " \"{}\" unhandled message '{}'", context.getInstanceName(), message);
                             break;
                     }
                 }
