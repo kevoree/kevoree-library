@@ -32,16 +32,8 @@
         <dependency>
             <groupId>fr.braindead</groupId>
             <artifactId>wsmsgbroker-client</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.2</version>
         </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>braindead.internal</id>
-            <name>Braindead Archiva Releases Repository</name>
-            <url>http://archiva.braindead.fr/repository/internal</url>
-        </repository>
-    </repositories>
 
 </project>
