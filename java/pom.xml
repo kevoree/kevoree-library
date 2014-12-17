@@ -20,7 +20,6 @@
         <module>org.kevoree.library.java.toys</module>
         <module>org.kevoree.library.java.helloworld</module>
         <module>org.kevoree.library.java.ws</module>
-        <module>org.kevoree.library.java.hazelcast</module>
         <module>org.kevoree.library.java.haproxy</module>
         <module>org.kevoree.library.java.web</module>
         <module>org.kevoree.library.java.editor</module>

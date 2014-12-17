@@ -1,6 +1,10 @@
+include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.ws:latest
+include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
 
-add node0 : JavaNode
-add sync : WSGroup
+add node0 : JavaNode/5.1.4-SNAPSHOT
+add sync : WSGroup/5.1.4-SNAPSHOT
 attach node0 sync
 set node0.log = "INFO"
 

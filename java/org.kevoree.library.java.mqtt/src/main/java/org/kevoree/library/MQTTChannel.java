@@ -60,10 +60,12 @@ public class MQTTChannel implements ChannelDispatch, Listener {
     public void stop() {
         connection.kill(new org.fusesource.mqtt.client.Callback<Void>() {
             @Override
-            public void onSuccess(Void value) {}
+            public void onSuccess(Void value) {
+            }
 
             @Override
-            public void onFailure(Throwable value) {}
+            public void onFailure(Throwable value) {
+            }
         });
         connection = null;
         mqtt = null;
@@ -78,7 +80,7 @@ public class MQTTChannel implements ChannelDispatch, Listener {
     @Override
     public void onConnected() {
         final String topicName = KEVOREE_PREFIX + context.getInstanceName() + "_" + context.getNodeName();
-        Topic[] topics = { new Topic(topicName, QoS.AT_LEAST_ONCE) };
+        Topic[] topics = {new Topic(topicName, QoS.AT_LEAST_ONCE)};
         connection.subscribe(topics, new org.fusesource.mqtt.client.Callback<byte[]>() {
             public void onSuccess(byte[] qoses) {
                 Log.info("{} subscribed to topic {}", context.getInstanceName(), topicName);
@@ -91,12 +93,13 @@ public class MQTTChannel implements ChannelDispatch, Listener {
     }
 
     @Override
-    public void onDisconnected() {}
+    public void onDisconnected() {
+    }
 
     @Override
     public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack) {
         for (Port p : channelContext.getLocalPorts()) {
-            p.call(body.utf8().toString(), null);
+            p.send(body.utf8().toString(), null);
         }
         ack.run();
     }
@@ -107,7 +110,7 @@ public class MQTTChannel implements ChannelDispatch, Listener {
     }
 
     @Override
-    public void dispatch(Object payload, org.kevoree.api.Callback callback) {
+    public void dispatch(String payload, org.kevoree.api.Callback callback) {
         ContainerRoot model = modelService.getPendingModel();
         if (model == null) {
             model = modelService.getCurrentModel().getModel();
@@ -129,7 +132,7 @@ public class MQTTChannel implements ChannelDispatch, Listener {
 
             // local dispatch
             for (Port p : channelContext.getLocalPorts()) {
-                p.call(payload, callback);
+                p.send(payload, callback);
             }
         } else {
             Log.debug("Cannot dispatch message. Channel {} appears to be stopped.", context.getInstanceName());

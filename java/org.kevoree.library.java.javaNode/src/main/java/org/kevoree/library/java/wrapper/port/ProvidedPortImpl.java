@@ -51,17 +51,13 @@ public class ProvidedPortImpl implements Port {
         throw new UnsupportedOperationException();
     }
 
-    public void send(Object payload) {
-        call(payload, null);
-    }
-
     private List<StoredCall> pending = new ArrayList<StoredCall>();
 
     private class StoredCall {
-        private Object payload;
+        private String payload;
         private Callback<Object> callback;
 
-        private StoredCall(Object payload, Callback<Object> callback) {
+        private StoredCall(String payload, Callback<Object> callback) {
             this.payload = payload;
             this.callback = callback;
         }
@@ -70,7 +66,7 @@ public class ProvidedPortImpl implements Port {
             return payload;
         }
 
-        public void setPayload(Object payload) {
+        public void setPayload(String payload) {
             this.payload = payload;
         }
 
@@ -83,30 +79,32 @@ public class ProvidedPortImpl implements Port {
         }
     }
 
-    public void call(Object payload, Callback callback) {
+    public void send(String payload, Callback callback) {
         try {
             if (componentWrapper.getIsStarted()) {
                 Object result = null;
                 if (paramSize == 0) {
+                    //if (methodHandler != null) {
+                    //result = methodHandler.invokeExact(targetObj);
+                    //} else {
                     result = targetMethod.invoke(targetObj);
                 } else {
-                    Object[] values;
-                    if (payload instanceof Array) {
-                        values = (Object[]) payload;
-                    } else if (payload instanceof List) {
-                        values = ((List) payload).toArray();
+                    //}
+                } else {
+                    if (paramSize == 1) {
+                        result = targetMethod.invoke(targetObj, payload);
                     } else {
-                        values = new Object[] { payload };
-                    }
-
-                    if (values.length == paramSize) {
-                        result = CallBackCaller.callMethod(targetMethod, targetObj, values);
-                    } else {
-                        callback.onError(new Exception("Non corresponding parameters: " + paramSize + " expected, found " + values.length));
+                        callback.onError(new Exception("Only one parameter is allowed"));
                     }
                 }
                 if (callback != null) {
-                    CallBackCaller.call(result, callback);
+                    String stringResult;
+                    if (result != null) {
+                        stringResult = result.toString();
+                    } else {
+                        stringResult = null;
+                    }
+                    CallBackCaller.call(stringResult, callback);
                 }
             } else {
                 //store call somewhere
@@ -122,7 +120,7 @@ public class ProvidedPortImpl implements Port {
             Thread t = new Thread(new Runnable() {
                 public void run() {
                     for (StoredCall c : pending) {
-                        call(c.payload, c.callback);
+                        send(c.payload, c.callback);
                     }
                     pending.clear();
                 }

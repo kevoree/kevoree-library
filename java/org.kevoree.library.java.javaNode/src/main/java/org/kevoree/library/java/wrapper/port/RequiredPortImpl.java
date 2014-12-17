@@ -4,6 +4,7 @@ import org.kevoree.library.java.wrapper.ChannelWrapper;
 import org.kevoree.api.Port;
 import org.kevoree.api.Callback;
 import org.kevoree.log.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,22 +24,19 @@ public class RequiredPortImpl implements Port {
         this.portPath = portPath;
     }
 
-    public int getConnectedBindingsSize(){
+    public int getConnectedBindingsSize() {
         return delegate.size();
     }
 
-    public void call(Object payload, Callback callback) {
+    public void send(String payload, Callback callback) {
         if (!delegate.isEmpty()) {
             for (ChannelWrapper wrapper : delegate) {
                 wrapper.call(callback, payload);
             }
         } else {
             callback.onError(new Exception("Message lost, because port is not bind"));
-            Log.warn("Message lost, because no binding found : {}", payload.toString());
+            Log.warn("Message lost, because no binding found : {}", payload);
         }
-    }
-    public void send(Object payload) {
-        call(payload, null);
     }
 
     public String getPath() {

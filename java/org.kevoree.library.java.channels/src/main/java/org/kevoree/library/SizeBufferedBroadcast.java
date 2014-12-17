@@ -1,6 +1,5 @@
 package org.kevoree.library;
 
-import com.rits.cloning.Cloner;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
 import org.kevoree.api.ChannelContext;
@@ -17,12 +16,9 @@ import java.util.concurrent.*;
 public class SizeBufferedBroadcast implements ChannelDispatch, Runnable {
 
     class QueuedElement {
-        Object payload;
+        String payload;
         Callback callback;
     }
-
-    @Param(defaultValue = "false")
-    boolean clone;
 
     @Param(optional = true)
     int bufferSize = 5;
@@ -48,10 +44,9 @@ public class SizeBufferedBroadcast implements ChannelDispatch, Runnable {
         executor = null;
     }
 
-    private Cloner cloner=new Cloner();
 
     @Override
-    public void dispatch(final Object payload,final Callback callback) {
+    public void dispatch(final String payload, final Callback callback) {
         try {
             QueuedElement e = new QueuedElement();
             e.callback = callback;
@@ -60,7 +55,7 @@ public class SizeBufferedBroadcast implements ChannelDispatch, Runnable {
         } catch (InterruptedException e1) {
             e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-        if(queue.size() >= bufferSize) {
+        if (queue.size() >= bufferSize) {
             executor.submit(this);
         }
 
@@ -68,14 +63,10 @@ public class SizeBufferedBroadcast implements ChannelDispatch, Runnable {
 
 
     public void run() {
-        while(!queue.isEmpty()) {
+        while (!queue.isEmpty()) {
             QueuedElement e = queue.poll();
             for (Port p : channelContext.getLocalPorts()) {
-                if(clone){
-                    p.call(cloner.deepClone(e.payload),e.callback);
-                } else {
-                    p.call(e.payload,e.callback);
-                }
+                p.send(e.payload, e.callback);
             }
         }
     }

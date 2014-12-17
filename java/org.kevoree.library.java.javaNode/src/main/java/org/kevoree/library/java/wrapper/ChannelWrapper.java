@@ -93,11 +93,11 @@ public class ChannelWrapper extends KInstanceWrapper {
 
     private class StoredCall {
 
-        public Object getPayload() {
+        public String getPayload() {
             return payload;
         }
 
-        public void setPayload(Object payload) {
+        public void setPayload(String payload) {
             this.payload = payload;
         }
 
@@ -109,17 +109,17 @@ public class ChannelWrapper extends KInstanceWrapper {
             this.callback = callback;
         }
 
-        private Object payload;
+        private String payload;
         private Callback callback;
 
-        private StoredCall(Object payload, Callback callback) {
+        private StoredCall(String payload, Callback callback) {
             this.payload = payload;
             this.callback = callback;
         }
     }
 
 
-    public void call(org.kevoree.api.Callback callback, Object payload) {
+    public void call(org.kevoree.api.Callback callback, String payload) {
         if (getIsStarted()) {
             ((ChannelDispatch) getTargetObj()).dispatch(payload, callback);
         } else {

@@ -1,7 +1,6 @@
 package org.kevoree.library.java.command;
 
 
-
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
  * you may not use this file except in compliance with the License.
@@ -44,7 +43,7 @@ public class AddDeployUnit implements PrimitiveCommand {
         new RemoveDeployUnit(du, bs).execute();
     }
 
-   public boolean execute() {
+    public boolean execute() {
         try {
             FlexyClassLoader kclResolved = bs.get(du);
             if (kclResolved == null) {
@@ -57,9 +56,9 @@ public class AddDeployUnit implements PrimitiveCommand {
             } else {
                 return true;
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             Log.debug("error ", e);
-           return false;
+            return false;
         }
     }
 

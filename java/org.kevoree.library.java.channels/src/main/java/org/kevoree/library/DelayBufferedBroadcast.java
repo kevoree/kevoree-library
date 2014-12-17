@@ -1,13 +1,11 @@
 package org.kevoree.library;
 
-import com.rits.cloning.Cloner;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
 import org.kevoree.api.ChannelContext;
 import org.kevoree.api.ChannelDispatch;
 import org.kevoree.api.Port;
 
-import java.util.LinkedList;
 import java.util.concurrent.*;
 
 /**
@@ -19,11 +17,8 @@ import java.util.concurrent.*;
 @ChannelType
 public class DelayBufferedBroadcast implements ChannelDispatch, Runnable {
 
-    @Param(defaultValue = "false")
-    boolean clone;
-
     class QueuedElement {
-        Object payload;
+        String payload;
         Callback callback;
     }
 
@@ -35,10 +30,6 @@ public class DelayBufferedBroadcast implements ChannelDispatch, Runnable {
 
     private ScheduledExecutorService executor;
     private ArrayBlockingQueue<QueuedElement> queue = new ArrayBlockingQueue<QueuedElement>(30);
-    private Cloner cloner = new Cloner();
-
-    public DelayBufferedBroadcast() {
-    }
 
     @Start
     public void channelStart() {
@@ -54,13 +45,13 @@ public class DelayBufferedBroadcast implements ChannelDispatch, Runnable {
     }
 
     @Update
-    public void update(){
+    public void update() {
         channelStop();
         channelStart();
     }
 
     @Override
-    public void dispatch(final Object payload,final Callback callback) {
+    public void dispatch(String payload, final Callback callback) {
         try {
             QueuedElement e = new QueuedElement();
             e.callback = callback;
@@ -74,17 +65,10 @@ public class DelayBufferedBroadcast implements ChannelDispatch, Runnable {
 
 
     public void run() {
-        while(!queue.isEmpty()) {
+        while (!queue.isEmpty()) {
             QueuedElement e = queue.poll();
             for (Port p : channelContext.getLocalPorts()) {
-
-                if (clone) {
-                    p.call(cloner.deepClone(e.payload), e.callback);
-                } else {
-                    p.call(e.payload, e.callback);
-                }
-
-                p.call(e.payload,e.callback);
+                p.send(e.payload, e.callback);
             }
         }
     }

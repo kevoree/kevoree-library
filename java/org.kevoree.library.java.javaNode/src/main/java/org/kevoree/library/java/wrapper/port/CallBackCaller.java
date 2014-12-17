@@ -1,6 +1,7 @@
 package org.kevoree.library.java.wrapper.port;
 
 import org.kevoree.api.Callback;
+import org.kevoree.api.CallbackResult;
 
 import java.lang.reflect.*;
 
@@ -9,13 +10,17 @@ import java.lang.reflect.*;
  */
 public class CallBackCaller {
 
-    public static void call(Object result, Callback callback) {
+    public static void call(String result, Callback callback) {
         try {
             Type t = callback.getClass().getGenericInterfaces()[0];
             if (t instanceof ParameterizedType) {
                 ((Class) ((ParameterizedType) t).getActualTypeArguments()[0]).cast(result);
             }
-            callback.onSuccess(null, null, result);
+
+            CallbackResult resObj = new CallbackResult();
+            resObj.setPayload(result);
+
+            callback.onSuccess(resObj);
         } catch (Exception e) {
             if (result != null) {
                 callback.onError(new Exception("Bad Callback parameter " + result.getClass().getName(), e));

@@ -2,6 +2,7 @@ package org.kevoree.library;
 
 import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
+import org.kevoree.api.CallbackResult;
 import org.kevoree.log.Log;
 
 import java.util.Random;
@@ -48,11 +49,11 @@ public class Ticker implements Runnable {
                 if (random) {
                     value = rand.nextInt(100) + "";
                 }
-                tick.call(value, new Callback() {
+                tick.send(value, new Callback() {
                     @Override
-                    public void onSuccess(Object result) {
+                    public void onSuccess(CallbackResult result) {
                         if (result != null) {
-                            System.out.println("ticker return : " + result);
+                            System.out.println("ticker return : " + result.getPayload());
                         }
                     }
 

@@ -3,6 +3,7 @@ package org.kevoree.library;
 import org.kevoree.Channel;
 import org.kevoree.ComponentInstance;
 import org.kevoree.api.Callback;
+import org.kevoree.api.CallbackResult;
 import org.kevoree.api.ModelService;
 import org.kevoree.library.java.ModelRegistry;
 import org.kevoree.library.java.wrapper.ChannelWrapper;
@@ -49,7 +50,7 @@ public class ExternalMessageInjection implements Callable<String> {
                     if (obj != null) {
                         obj.call(new Callback<Object>() {
                             @Override
-                            public void onSuccess(Object result) {
+                            public void onSuccess(CallbackResult result) {
                                 //TODO collect result here
                             }
 
@@ -78,9 +79,9 @@ public class ExternalMessageInjection implements Callable<String> {
                     if (obj != null) {
                         ProvidedPortImpl pport = obj.getProvidedPorts().get(paths[1]);
                         if (pport != null) {
-                            pport.call(payload, new Callback() {
+                            pport.send(payload, new Callback() {
                                 @Override
-                                public void onSuccess(Object result) {
+                                public void onSuccess(CallbackResult result) {
 
                                 }
 
@@ -92,9 +93,9 @@ public class ExternalMessageInjection implements Callable<String> {
                         }
                         RequiredPortImpl rport = obj.getRequiredPorts().get(paths[1]);
                         if (rport != null) {
-                            rport.call(payload, new Callback() {
+                            rport.send(payload, new Callback() {
                                 @Override
-                                public void onSuccess(Object result) {
+                                public void onSuccess(CallbackResult result) {
 
                                 }
 

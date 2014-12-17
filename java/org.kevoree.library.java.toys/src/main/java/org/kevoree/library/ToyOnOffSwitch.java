@@ -59,11 +59,11 @@ public class ToyOnOffSwitch implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand().equals("ON")) {
-            onPressed.send(null);
+            onPressed.send(null,null);
         } else if(e.getActionCommand().equals("OFF")) {
-            offPressed.send(null);
+            offPressed.send(null,null);
         } else if(e.getActionCommand().equals("TOGGLE")) {
-            togglePressed.send(null);
+            togglePressed.send(null,null);
         }
     }
 }

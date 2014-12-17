@@ -14,15 +14,21 @@ import org.kevoree.log.Log;
 import java.util.*;
 
 @ChannelType
-public class RemoteWSChan implements ChannelDispatch {
+public class WSChan implements ChannelDispatch {
 
-    @KevoreeInject Context context;
-    @KevoreeInject ChannelContext channelContext;
-    @KevoreeInject ModelService modelService;
+    @KevoreeInject
+    Context context;
+    @KevoreeInject
+    ChannelContext channelContext;
+    @KevoreeInject
+    ModelService modelService;
 
-    @Param private String path;
-    @Param private int    port;
-    @Param private String host;
+    @Param
+    private String path;
+    @Param
+    private int port;
+    @Param
+    private String host;
 
     private Map<String, WSMsgBrokerClient> clients;
 
