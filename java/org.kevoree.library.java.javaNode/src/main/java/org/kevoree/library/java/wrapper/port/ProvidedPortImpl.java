@@ -89,8 +89,6 @@ public class ProvidedPortImpl implements Port {
                     //} else {
                     result = targetMethod.invoke(targetObj);
                 } else {
-                    //}
-                } else {
                     if (paramSize == 1) {
                         result = targetMethod.invoke(targetObj, payload);
                     } else {
@@ -104,7 +102,7 @@ public class ProvidedPortImpl implements Port {
                     } else {
                         stringResult = null;
                     }
-                    CallBackCaller.call(stringResult, callback);
+                    CallBackCaller.call(stringResult, callback, portPath);
                 }
             } else {
                 //store call somewhere

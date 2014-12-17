@@ -9,8 +9,8 @@ attach node0 sync
 set node0.log = "INFO"
 
 add node0.breakdown : Breakdown
-add hub : SyncBroadcast
+add hub : SyncBroadcast/5.1.4-SNAPSHOT
 bind node0.breakdown.input hub
-add node0.ticker : Ticker
+add node0.ticker : Ticker/5.1.4-SNAPSHOT
 set node0.ticker.period="1000"
 bind node0.ticker.tick hub

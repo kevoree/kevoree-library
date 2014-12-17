@@ -16,6 +16,10 @@ import java.util.List;
  */
 public class ChannelWrapperContext implements ChannelContext {
 
+    public String getChannelPath() {
+        return channelPath;
+    }
+
     private String channelPath;
     private String localNodePath;
 

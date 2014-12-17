@@ -35,7 +35,9 @@ public class WSChan implements ChannelDispatch {
     @Start
     public void start() {
         clients = new HashMap<String, WSMsgBrokerClient>();
-        if (path == null) { path = ""; }
+        if (path == null) {
+            path = "";
+        }
 
         ContainerRoot model = modelService.getPendingModel();
         if (model == null) {
@@ -75,7 +77,7 @@ public class WSChan implements ChannelDispatch {
     }
 
     @Override
-    public void dispatch(Object o, final Callback callback) {
+    public void dispatch(String o, final Callback callback) {
         ContainerRoot model = modelService.getCurrentModel().getModel();
         Channel thisChan = (Channel) model.findByPath(context.getPath());
         List<String> outputPaths = getPortsPath(thisChan, "required");
@@ -91,7 +93,9 @@ public class WSChan implements ChannelDispatch {
                         client.send(o, dest, new AnswerCallback() {
                             @Override
                             public void execute(String from, Object o) {
-                                callback.onSuccess(o);
+                                CallbackResult result = new CallbackResult();
+                                result.setPayload(o.toString());
+                                callback.onSuccess(result);
                             }
                         });
                     } else {
@@ -123,7 +127,7 @@ public class WSChan implements ChannelDispatch {
                 if (response != null) {
                     cb = new Callback() {
                         @Override
-                        public void onSuccess(Object o) {
+                        public void onSuccess(CallbackResult o) {
                             if (o != null) {
                                 response.send(o);
                             }
@@ -138,7 +142,7 @@ public class WSChan implements ChannelDispatch {
 
                 List<Port> ports = channelContext.getLocalPorts();
                 for (Port p : ports) {
-                    p.call(o, cb);
+                    p.send(o.toString(), cb);
                 }
             }
 
@@ -167,7 +171,8 @@ public class WSChan implements ChannelDispatch {
             }
 
             @Override
-            public void onMessage(Object o, final Response response) {}
+            public void onMessage(Object o, final Response response) {
+            }
 
             @Override
             public void onError(Exception e) {

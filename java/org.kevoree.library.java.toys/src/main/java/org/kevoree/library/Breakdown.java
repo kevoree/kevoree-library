@@ -42,7 +42,7 @@ public class Breakdown implements Runnable {
 
     @Input
     public void input(Object o) {
-        Log.info("a friend ! i'm fine thanks you!");
+        Log.info("a friend ! i'm fine thanks you! "+o);
         current.cancel(true);
         current = service.schedule(this, period, TimeUnit.MILLISECONDS);
     }

@@ -10,7 +10,7 @@ import java.lang.reflect.*;
  */
 public class CallBackCaller {
 
-    public static void call(String result, Callback callback) {
+    public static void call(String result, Callback callback, String portPath) {
         try {
             Type t = callback.getClass().getGenericInterfaces()[0];
             if (t instanceof ParameterizedType) {
@@ -18,6 +18,7 @@ public class CallBackCaller {
             }
 
             CallbackResult resObj = new CallbackResult();
+            resObj.setOriginPortPath(portPath);
             resObj.setPayload(result);
 
             callback.onSuccess(resObj);
@@ -32,7 +33,7 @@ public class CallBackCaller {
 
     public static Object callMethod(Method method, Object target, Object[] values) throws InvocationTargetException, IllegalAccessException {
         Parameter[] params = method.getParameters();
-        for (int i=0; i < params.length; i++) {
+        for (int i = 0; i < params.length; i++) {
             String paramType = params[i].getType().getTypeName();
             if (values[i] instanceof Number) {
                 Number numberedValue = (Number) values[i];

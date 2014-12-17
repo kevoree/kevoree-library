@@ -1,5 +1,6 @@
 package org.kevoree.library.java.wrapper.port;
 
+import org.kevoree.api.CallbackResult;
 import org.kevoree.library.java.wrapper.ChannelWrapper;
 import org.kevoree.api.Port;
 import org.kevoree.api.Callback;
@@ -28,10 +29,21 @@ public class RequiredPortImpl implements Port {
         return delegate.size();
     }
 
-    public void send(String payload, Callback callback) {
+    public void send(String payload, final Callback callback) {
         if (!delegate.isEmpty()) {
-            for (ChannelWrapper wrapper : delegate) {
-                wrapper.call(callback, payload);
+            for (final ChannelWrapper wrapper : delegate) {
+                wrapper.call(new Callback() {
+                    @Override
+                    public void onSuccess(CallbackResult result) {
+                        result.setOriginChannelPath(wrapper.getContext().getChannelPath());
+                        callback.onSuccess(result);
+                    }
+
+                    @Override
+                    public void onError(Throwable exception) {
+                        callback.onError(exception);
+                    }
+                }, payload);
             }
         } else {
             callback.onError(new Exception("Message lost, because port is not bind"));
