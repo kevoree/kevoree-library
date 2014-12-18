@@ -1,7 +1,7 @@
-add node0 : JavaNode/5.1.3-SNAPSHOT
+add node0 : JavaNode/5.2.1-SNAPSHOT
 //add node0.aaa : Ticker
-add sync : WSGroup
+add sync : WSGroup/5.2.1-SNAPSHOT
 
 attach node0 sync
 
-add node0.child : JavaNode
+add node0.child : JavaNode/5.2.1-SNAPSHOT
