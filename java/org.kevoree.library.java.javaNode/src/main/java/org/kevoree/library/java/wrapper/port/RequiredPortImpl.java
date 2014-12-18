@@ -36,12 +36,20 @@ public class RequiredPortImpl implements Port {
                     @Override
                     public void onSuccess(CallbackResult result) {
                         result.setOriginChannelPath(wrapper.getContext().getChannelPath());
-                        callback.onSuccess(result);
+                        if(callback != null) {
+                            callback.onSuccess(result);
+                        }
                     }
 
                     @Override
                     public void onError(Throwable exception) {
-                        callback.onError(exception);
+                        if(callback != null) {
+                            callback.onError(exception);
+                        } else {
+                            if(exception != null) {
+                                exception.printStackTrace();
+                            }
+                        }
                     }
                 }, payload);
             }
