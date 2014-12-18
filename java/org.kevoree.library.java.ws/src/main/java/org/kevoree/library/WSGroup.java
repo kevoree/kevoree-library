@@ -13,6 +13,7 @@ import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
+import org.kevoree.api.protocol.Protocol;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.log.Log;
 import org.kevoree.pmodeling.api.compare.ModelCompare;
@@ -29,7 +30,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.kevoree.library.Protocol.*;
+import static org.kevoree.api.protocol.Protocol.*;
 
 /**
  * Created with IntelliJ IDEA.
