@@ -13,7 +13,7 @@
     </parent>
 
     <properties>
-        <undertow.version>1.0.15.Final</undertow.version>
+        <undertow.version>1.0.16.Final</undertow.version>
     </properties>
 
     <dependencies>
