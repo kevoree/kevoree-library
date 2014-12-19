@@ -65,10 +65,15 @@ public class RestServer {
                             Future<String> future = dispatcher.submit(new ExternalMessageInjection(readBytesFromExchange(exchange), path, registry, modelService));
                             exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
                             exchange.getResponseSender().send(future.get());
+                        } else {
+                            String path = exchange.getRequestPath();
+                            Future<String> future = dispatcher.submit(new ExternalMessageInjection(readBytesFromExchange(exchange), path, registry, modelService));
+                            exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+                            exchange.getResponseSender().send(future.get());
                         }
-                        exchange.getResponseHeaders().add(HttpString.tryFromString(ACCESS_CONTROL_ALLOW_ORIGIN),"*");
-                        exchange.getResponseHeaders().add(HttpString.tryFromString(ACCESS_CONTROL_ALLOW_HEADERS),"*");
-                        exchange.getResponseHeaders().add(HttpString.tryFromString(ACCESS_CONTROL_ALLOW_METHODS),"*");
+                        exchange.getResponseHeaders().add(HttpString.tryFromString(ACCESS_CONTROL_ALLOW_ORIGIN), "*");
+                        exchange.getResponseHeaders().add(HttpString.tryFromString(ACCESS_CONTROL_ALLOW_HEADERS), "*");
+                        exchange.getResponseHeaders().add(HttpString.tryFromString(ACCESS_CONTROL_ALLOW_METHODS), "*");
                         exchange.endExchange();
                     }
                 }).build();
