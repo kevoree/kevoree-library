@@ -25,6 +25,10 @@ import java.util.concurrent.Future;
 @ComponentType
 public class RestServer {
 
+    public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+    public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
+    public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+
     private Integer port;
 
     @Param(defaultValue = "8090")
@@ -48,7 +52,7 @@ public class RestServer {
             registry = ModelRegistry.current.get();
         }
         server = Undertow.builder()
-                .addHttpListener(port, "localhost")
+                .addHttpListener(port, "0.0.0.0")
                 .setHandler(new HttpHandler() {
                     @Override
                     public void handleRequest(final HttpServerExchange exchange) throws Exception {
@@ -62,6 +66,9 @@ public class RestServer {
                             exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
                             exchange.getResponseSender().send(future.get());
                         }
+                        exchange.getResponseHeaders().add(HttpString.tryFromString(ACCESS_CONTROL_ALLOW_ORIGIN),"*");
+                        exchange.getResponseHeaders().add(HttpString.tryFromString(ACCESS_CONTROL_ALLOW_HEADERS),"*");
+                        exchange.getResponseHeaders().add(HttpString.tryFromString(ACCESS_CONTROL_ALLOW_METHODS),"*");
                         exchange.endExchange();
                     }
                 }).build();
