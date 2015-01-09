@@ -28,10 +28,10 @@ public class MQTTChannel implements ChannelDispatch, Listener {
     @KevoreeInject
     private ChannelContext channelContext;
 
-    @Param(defaultValue = "mqtt.kevoree.org")
+    @Param(defaultValue = "mqtt.kevoree.org", optional = false)
     private String host;
 
-    @Param(defaultValue = "81")
+    @Param(defaultValue = "81", optional = false)
     private int port;
 
     private MQTT mqtt;
