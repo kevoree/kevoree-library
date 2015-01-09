@@ -45,6 +45,7 @@ public class MQTTChannel implements ChannelDispatch, Listener {
         connection = mqtt.callbackConnection();
         connection.listener(this);
 
+        Log.info("{} is trying to connect to {}:{} ...", context.getInstanceName(), host, port);
         connection.connect(new org.fusesource.mqtt.client.Callback<Void>() {
             public void onFailure(Throwable value) {
                 Log.error("{} unable to connect to {}:{}", context.getInstanceName(), host, port);
@@ -58,15 +59,17 @@ public class MQTTChannel implements ChannelDispatch, Listener {
 
     @Stop
     public void stop() {
-        connection.kill(new org.fusesource.mqtt.client.Callback<Void>() {
-            @Override
-            public void onSuccess(Void value) {
-            }
+        if (connection != null) {
+            connection.kill(new org.fusesource.mqtt.client.Callback<Void>() {
+                @Override
+                public void onSuccess(Void value) {
+                }
 
-            @Override
-            public void onFailure(Throwable value) {
-            }
-        });
+                @Override
+                public void onFailure(Throwable value) {
+                }
+            });
+        }
         connection = null;
         mqtt = null;
     }

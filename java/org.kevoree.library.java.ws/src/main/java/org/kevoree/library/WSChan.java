@@ -85,7 +85,7 @@ public class WSChan implements ChannelDispatch {
         String[] dest = new String[channelContext.getRemotePortPaths().size()];
         channelContext.getRemotePortPaths().toArray(dest);
 
-        for (String outputPath : outputPaths) {
+        for (final String outputPath : outputPaths) {
             WSMsgBrokerClient client = this.clients.get(outputPath);
             if (client != null) {
                 try {
@@ -95,6 +95,8 @@ public class WSChan implements ChannelDispatch {
                             public void execute(String from, Object o) {
                                 CallbackResult result = new CallbackResult();
                                 result.setPayload(o.toString());
+                                result.setOriginChannelPath(context.getPath());
+                                result.setOriginPortPath(outputPath);
                                 callback.onSuccess(result);
                             }
                         });
@@ -194,7 +196,7 @@ public class WSChan implements ChannelDispatch {
                     && binding.getPort().getRefInParent().equals(type)) {
                 ContainerNode node = (ContainerNode) binding.getPort().eContainer().eContainer();
                 if (node.getName().equals(context.getNodeName())) {
-                    paths.add(binding.getPort().path());
+                    paths.add(binding.getPort().path()+"_"+context.getInstanceName());
                 }
             }
         }

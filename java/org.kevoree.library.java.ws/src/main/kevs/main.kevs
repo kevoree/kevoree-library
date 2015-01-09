@@ -1,6 +1,5 @@
-add node0 : JavaNode/5.2.1-SNAPSHOT
-add sync : WSGroup/5.2.1-SNAPSHOT
-set sync.master = 'node0'
+add node0 : JavaNode
+add sync : WSGroup
 attach node0 sync
 
 //network node0.ip.eth0 127.0.0.1
