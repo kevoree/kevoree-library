@@ -1,7 +1,8 @@
-add node0, node1 : JavaNode/5.1.1-SNAPSHOT
-add sync : WSGroup/5.1.1-SNAPSHOT
+add node0, node1 : JavaNode
+add sync : WSGroup/5.2.3-SNAPSHOT
 
 attach node0, node1 sync
+set sync.master = "node0"
 
 set node0.log = "DEBUG"
 set node1.log = "DEBUG"

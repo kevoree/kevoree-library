@@ -1,5 +1,5 @@
 add node0 : JavaNode
-add sync : WSGroup
+add sync : WSGroup/5.2.3-SNAPSHOT
 attach node0 sync
 
 //network node0.ip.eth0 127.0.0.1
