@@ -82,8 +82,19 @@ public class WSChan implements ChannelDispatch {
         Channel thisChan = (Channel) model.findByPath(context.getPath());
         List<String> outputPaths = getPortsPath(thisChan, "required");
 
-        String[] dest = new String[channelContext.getRemotePortPaths().size()];
-        channelContext.getRemotePortPaths().toArray(dest);
+        // create a list of destination paths
+        Set<String> destPaths = new HashSet<String>();
+        // process remote paths in order to add _<chanName> to the paths (WsMsgBroker protocol)
+        for (String remotePath : channelContext.getRemotePortPaths()) {
+            // add processed remote path to dest
+            destPaths.add(remotePath + "_" + context.getInstanceName());
+        }
+        // add local connected inputs to dest
+        destPaths.addAll(getPortsPath(thisChan, "provided"));
+        // create the array that will store the dest
+        String[] dest = new String[destPaths.size()];
+        // convert list to array
+        destPaths.toArray(dest);
 
         for (final String outputPath : outputPaths) {
             WSMsgBrokerClient client = this.clients.get(outputPath);
