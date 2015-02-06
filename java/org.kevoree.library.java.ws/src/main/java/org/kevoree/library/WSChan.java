@@ -49,12 +49,12 @@ public class WSChan implements ChannelDispatch {
 
         for (String path : inputPaths) {
             // create input WSMsgBroker clients
-            createInputClient(path);
+            this.clients.put(path, createInputClient(path));
         }
 
         for (String path : outputPaths) {
             // create output WSMsgBroker clients
-            createOutputClient(path);
+            this.clients.put(path, createOutputClient(path));
         }
     }
 
@@ -117,12 +117,14 @@ public class WSChan implements ChannelDispatch {
                 } catch (WebsocketNotConnectedException e) {
                     Log.warn("Unable to send message, no connection established for {}", outputPath);
                 }
+            } else {
+                this.clients.put(outputPath, createInputClient(outputPath));
             }
         }
     }
 
-    private void createInputClient(final String id) {
-        this.clients.put(id, new WSMsgBrokerClient(id, host, port, path, true) {
+    private WSMsgBrokerClient createInputClient(final String id) {
+        return new WSMsgBrokerClient(id, host, port, path, true) {
             @Override
             public void onUnregistered(String s) {
                 Log.info("{} unregistered from remote server", id);
@@ -168,11 +170,11 @@ public class WSChan implements ChannelDispatch {
             public void onClose(int code, String reason, boolean remote) {
                 Log.error("Connection closed by remote server for {}", id);
             }
-        });
+        };
     }
 
-    private void createOutputClient(final String id) {
-        this.clients.put(id, new WSMsgBrokerClient(id, host, port, path, true) {
+    private WSMsgBrokerClient createOutputClient(final String id) {
+        return new WSMsgBrokerClient(id, host, port, path, true) {
             @Override
             public void onUnregistered(String s) {
                 Log.debug("{} unregistered from remote server", id);
@@ -196,18 +198,20 @@ public class WSChan implements ChannelDispatch {
             public void onClose(int code, String reason, boolean remote) {
                 Log.debug("Connection closed by remote server for {}", id);
             }
-        });
+        };
     }
 
     private List<String> getPortsPath(Channel chan, String type) {
         List<String> paths = new ArrayList<String>();
-        for (MBinding binding : chan.getBindings()) {
-            if (binding.getPort() != null
-                    && binding.getPort().getRefInParent() != null
-                    && binding.getPort().getRefInParent().equals(type)) {
-                ContainerNode node = (ContainerNode) binding.getPort().eContainer().eContainer();
-                if (node.getName().equals(context.getNodeName())) {
-                    paths.add(binding.getPort().path()+"_"+context.getInstanceName());
+        if (chan != null) {
+            for (MBinding binding : chan.getBindings()) {
+                if (binding.getPort() != null
+                        && binding.getPort().getRefInParent() != null
+                        && binding.getPort().getRefInParent().equals(type)) {
+                    ContainerNode node = (ContainerNode) binding.getPort().eContainer().eContainer();
+                    if (node.getName().equals(context.getNodeName())) {
+                        paths.add(binding.getPort().path()+"_"+context.getInstanceName());
+                    }
                 }
             }
         }

@@ -1,0 +1,15 @@
+add node0 : JavaNode
+add sync : WSGroup
+
+add node0.printer : ConsolePrinter
+add node0.ticker : Ticker
+
+add chan : WSChan
+
+attach node0 sync
+
+set chan.host = "localhost"
+set chan.port = "9050"
+
+//bind node0.ticker.tick chan
+bind node0.printer.input chan
