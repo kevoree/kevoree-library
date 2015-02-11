@@ -15,7 +15,9 @@ import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.api.protocol.Protocol;
 import org.kevoree.factory.DefaultKevoreeFactory;
+import org.kevoree.factory.KevoreeFactory;
 import org.kevoree.log.Log;
+import org.kevoree.pmodeling.api.KMFContainer;
 import org.kevoree.pmodeling.api.compare.ModelCompare;
 import org.kevoree.pmodeling.api.json.JSONModelLoader;
 import org.kevoree.pmodeling.api.json.JSONModelSerializer;
@@ -110,6 +112,17 @@ public class WSGroup implements ModelListener, Runnable {
                                             ContainerRoot recModel = (ContainerRoot) jsonModelLoader.loadModelFromString(rm.getModel()).get(0);
                                             TraceSequence tseq = compare.merge(modelService.getCurrentModel().getModel(), recModel);
                                             Log.info("New client registered \"{}\". Merging his model with mine...", ((RegisterMessage) parsedMsg).getNodeName());
+                                            KevoreeFactory factory = new DefaultKevoreeFactory();
+                                            ContainerRoot currentModel = factory.createModelCloner().clone(modelService.getCurrentModel().getModel());
+                                            tseq.applyOn(currentModel);
+                                            String recModelStr = factory.createJSONSerializer().serialize(currentModel);
+                                            PushMessage pushMessage = new PushMessage(recModelStr);
+                                            Log.info("Broadcasting merged model to all connected clients");
+                                            for (WebSocketChannel client : cache.values()) {
+                                                if (client.isOpen()) {
+                                                    WebSockets.sendText(pushMessage.toRaw(), client, null);
+                                                }
+                                            }
                                             modelService.submitSequence(tseq, new UpdateCallback() {
                                                 @Override
                                                 public void run(Boolean applied) {
@@ -408,11 +421,7 @@ public class WSGroup implements ModelListener, Runnable {
         client[0].resumeReceives();
 
         // sending current model
-        String currentModel = null;
-        if (diverge.get()) {
-            ContainerRoot model = modelService.getCurrentModel().getModel();
-            currentModel = jsonModelSaver.serialize(model);
-        }
+        String currentModel = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
         WebSockets.sendText(new RegisterMessage(currentNodeName, currentModel).toRaw(), client[0], null);
         return client[0];
     }

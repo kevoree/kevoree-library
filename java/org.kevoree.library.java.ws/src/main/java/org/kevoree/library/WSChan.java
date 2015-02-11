@@ -49,12 +49,12 @@ public class WSChan implements ChannelDispatch {
 
         for (String path : inputPaths) {
             // create input WSMsgBroker clients
-            this.clients.put(path, createInputClient(path));
+            createInputClient(path);
         }
 
         for (String path : outputPaths) {
             // create output WSMsgBroker clients
-            this.clients.put(path, createOutputClient(path));
+            createOutputClient(path);
         }
     }
 
@@ -118,13 +118,13 @@ public class WSChan implements ChannelDispatch {
                     Log.warn("Unable to send message, no connection established for {}", outputPath);
                 }
             } else {
-                this.clients.put(outputPath, createInputClient(outputPath));
+                createInputClient(outputPath);
             }
         }
     }
 
-    private WSMsgBrokerClient createInputClient(final String id) {
-        return new WSMsgBrokerClient(id, host, port, path, true) {
+    private void createInputClient(final String id) {
+        WSMsgBrokerClient client = new WSMsgBrokerClient(id, host, port, path, true) {
             @Override
             public void onUnregistered(String s) {
                 Log.info("{} unregistered from remote server", id);
@@ -162,19 +162,19 @@ public class WSChan implements ChannelDispatch {
             }
 
             @Override
-            public void onError(Exception e) {
-//                Log.error("Something went wrong with the connection of {} (reason: {})", id, e.getMessage());
-            }
-
-            @Override
             public void onClose(int code, String reason, boolean remote) {
                 Log.error("Connection closed by remote server for {}", id);
             }
+
+            @Override
+            public void onError(Exception e) {}
         };
+
+        this.clients.put(id, client);
     }
 
-    private WSMsgBrokerClient createOutputClient(final String id) {
-        return new WSMsgBrokerClient(id, host, port, path, true) {
+    private void createOutputClient(final String id) {
+        WSMsgBrokerClient client = new WSMsgBrokerClient(id, host, port, path, true) {
             @Override
             public void onUnregistered(String s) {
                 Log.debug("{} unregistered from remote server", id);
@@ -190,15 +190,15 @@ public class WSChan implements ChannelDispatch {
             }
 
             @Override
-            public void onError(Exception e) {
-                Log.debug("Something went wrong with the connection of {} (reason: {})", id, e.getMessage());
-            }
-
-            @Override
             public void onClose(int code, String reason, boolean remote) {
                 Log.debug("Connection closed by remote server for {}", id);
             }
+
+            @Override
+            public void onError(Exception e) {}
         };
+
+        this.clients.put(id, client);
     }
 
     private List<String> getPortsPath(Channel chan, String type) {
