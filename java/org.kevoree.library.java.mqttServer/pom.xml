@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.java.mqttServer</artifactId>
     <name>Kevoree :: Library :: Java :: MQTTServer</name>
-    <version>5.2.4-SNAPSHOT</version>
+    <version>5.2.4</version>
 
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
         <groupId>org.kevoree.library.java</groupId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>5.2.4</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
