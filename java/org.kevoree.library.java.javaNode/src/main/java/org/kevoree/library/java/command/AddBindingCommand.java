@@ -38,9 +38,11 @@ public class AddBindingCommand implements PrimitiveCommand {
                 Log.info("Port instance {} not found in component", portName);
                 return false;
             }
+
             if (foundNeedPort != null) {
-                foundNeedPort.getDelegate().add((ChannelWrapper) kevoreeChannelFound);
+                foundNeedPort.addChannelWrapper(c, (ChannelWrapper) kevoreeChannelFound);
                 Log.info("Bind {} {}", c.getPort().path(), c.getHub().path());
+
                 return true;
             }
             //Seems useless

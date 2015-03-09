@@ -44,6 +44,7 @@ public class UpdateDictionary implements PrimitiveCommand {
 
     public boolean execute() {
 
+
         //protection for default value injection
         ContainerRoot previousModel = modelService.getCurrentModel().getModel();
         KMFContainer previousValue = previousModel.findByPath(dicValue.path());

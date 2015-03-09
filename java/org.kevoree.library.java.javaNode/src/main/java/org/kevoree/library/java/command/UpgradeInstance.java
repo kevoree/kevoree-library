@@ -20,6 +20,9 @@ public class UpgradeInstance implements PrimitiveCommand {
     private BootstrapService bs;
     private ModelService modelService;
 
+    private RemoveInstance remove_cmd = new RemoveInstance(wrapperFactory, c, nodeName, registry, bs, modelService);
+    private AddInstance add_cmd       = new AddInstance(wrapperFactory, c, nodeName, registry, bs, modelService);
+
     public UpgradeInstance(WrapperFactory wrapperFactory, Instance c, String nodeName, ModelRegistry registry, BootstrapService bs, ModelService modelService) {
         this.wrapperFactory = wrapperFactory;
         this.c = c;
@@ -29,21 +32,12 @@ public class UpgradeInstance implements PrimitiveCommand {
         this.modelService = modelService;
     }
 
-    RemoveInstance remove_cmd = new RemoveInstance(wrapperFactory, c, nodeName, registry, bs, modelService);
-    AddInstance add_cmd = new AddInstance(wrapperFactory, c, nodeName, registry, bs, modelService);
-
     public boolean execute() {
-        if (remove_cmd.execute()) {
-            return add_cmd.execute();
-        } else {
-            return false;
-        }
+        return remove_cmd.execute() && add_cmd.execute();
     }
 
     public void undo() {
         add_cmd.undo();
         remove_cmd.undo();
     }
-
-
 }

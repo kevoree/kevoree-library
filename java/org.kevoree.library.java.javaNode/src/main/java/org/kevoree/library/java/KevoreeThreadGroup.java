@@ -17,6 +17,4 @@ public class KevoreeThreadGroup extends ThreadGroup{
     public void uncaughtException(Thread t, Throwable e) {
         Log.error("Uncatched exception into Kevoree component {}", e, n);
     }
-
-
 }

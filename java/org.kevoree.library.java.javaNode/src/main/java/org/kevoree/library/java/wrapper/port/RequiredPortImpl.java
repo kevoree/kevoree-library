@@ -1,13 +1,13 @@
 package org.kevoree.library.java.wrapper.port;
 
+import org.kevoree.MBinding;
 import org.kevoree.api.CallbackResult;
 import org.kevoree.library.java.wrapper.ChannelWrapper;
 import org.kevoree.api.Port;
 import org.kevoree.api.Callback;
 import org.kevoree.log.Log;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +19,7 @@ import java.util.List;
 public class RequiredPortImpl implements Port {
 
     private String portPath;
-    private List<ChannelWrapper> delegate = new ArrayList<ChannelWrapper>();
+    private final Map<String, ChannelWrapper> delegate = Collections.synchronizedMap(new HashMap<String, ChannelWrapper>());
 
     public RequiredPortImpl(String portPath) {
         this.portPath = portPath;
@@ -30,32 +30,34 @@ public class RequiredPortImpl implements Port {
     }
 
     public void send(String payload, final Callback callback) {
-        if (!delegate.isEmpty()) {
-            for (final ChannelWrapper wrapper : delegate) {
-                wrapper.call(new Callback() {
-                    @Override
-                    public void onSuccess(CallbackResult result) {
-                        result.setOriginChannelPath(wrapper.getContext().getChannelPath());
-                        if(callback != null) {
-                            callback.onSuccess(result);
-                        }
-                    }
-
-                    @Override
-                    public void onError(Throwable exception) {
-                        if(callback != null) {
-                            callback.onError(exception);
-                        } else {
-                            if(exception != null) {
-                                exception.printStackTrace();
+        synchronized (delegate) {
+            if (!delegate.isEmpty()) {
+                for (final ChannelWrapper wrapper : delegate.values()) {
+                    wrapper.call(new Callback() {
+                        @Override
+                        public void onSuccess(CallbackResult result) {
+                            result.setOriginChannelPath(wrapper.getContext().getChannelPath());
+                            if(callback != null) {
+                                callback.onSuccess(result);
                             }
                         }
-                    }
-                }, payload);
+
+                        @Override
+                        public void onError(Throwable exception) {
+                            if(callback != null) {
+                                callback.onError(exception);
+                            } else {
+                                if(exception != null) {
+                                    exception.printStackTrace();
+                                }
+                            }
+                        }
+                    }, payload);
+                }
+            } else {
+                callback.onError(new Exception("Message lost, because port is not bind"));
+                Log.warn("Message lost, because no binding found : {}", payload);
             }
-        } else {
-            callback.onError(new Exception("Message lost, because port is not bind"));
-            Log.warn("Message lost, because no binding found : {}", payload);
         }
     }
 
@@ -63,7 +65,15 @@ public class RequiredPortImpl implements Port {
         return portPath;
     }
 
-    public List<ChannelWrapper> getDelegate() {
-        return delegate;
+    public void addChannelWrapper(MBinding binding, ChannelWrapper chan) {
+        delegate.put(binding.getHub().path()+"_"+binding.getPort().path(), chan);
     }
+
+    public void removeChannelWrapper(MBinding binding) {
+        delegate.remove(binding.getHub().path()+"_"+binding.getPort().path());
+    }
+
+//    public Set<ChannelWrapper> getDelegate() {
+//        return delegate;
+//    }
 }

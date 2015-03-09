@@ -42,7 +42,11 @@ public class RemoveInstance implements PrimitiveCommand {
 
     public void undo() {
         try {
-            KInstanceWrapper previouslyCreatedWrapper = (KInstanceWrapper)registry.lookup(c);
+            KInstanceWrapper previouslyCreatedWrapper = null;
+            if (registry != null) {
+                previouslyCreatedWrapper = (KInstanceWrapper) registry.lookup(c);
+            }
+
             if(previouslyCreatedWrapper != null) {
                 Thread.currentThread().setContextClassLoader(previouslyCreatedWrapper.getKcl());
             } else {

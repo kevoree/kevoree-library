@@ -44,6 +44,9 @@ public class AddInstance implements PrimitiveCommand, Runnable {
     private BootstrapService bs;
     private ModelService modelService;
 
+    private ThreadGroup tg = null;
+    private boolean resultSub = false;
+
     public AddInstance(WrapperFactory wrapperFactory, Instance c, String nodeName, ModelRegistry registry, BootstrapService bs, ModelService modelService) {
         this.wrapperFactory = wrapperFactory;
         this.c = c;
@@ -52,11 +55,6 @@ public class AddInstance implements PrimitiveCommand, Runnable {
         this.bs = bs;
         this.modelService = modelService;
     }
-
-    private String nodeTypeName = null;
-    private ThreadGroup tg = null;
-
-    private boolean resultSub = false;
 
     public boolean execute() {
         Thread subThread = null;
