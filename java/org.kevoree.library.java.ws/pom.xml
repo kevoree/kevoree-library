@@ -13,8 +13,7 @@
     </parent>
 
     <properties>
-        <undertow.version>1.2.0.Beta8</undertow.version>
-        <wsmsgbroker.version>1.0.2</wsmsgbroker.version>
+        <wsmsgbroker.version>1.0.5</wsmsgbroker.version>
     </properties>
 
     <dependencies>
@@ -22,11 +21,6 @@
             <groupId>org.kevoree</groupId>
             <artifactId>org.kevoree.api</artifactId>
             <version>${kevoree.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.undertow</groupId>
-            <artifactId>undertow-core</artifactId>
-            <version>${undertow.version}</version>
         </dependency>
         <dependency>
             <groupId>fr.braindead</groupId>

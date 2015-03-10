@@ -3,7 +3,6 @@ package org.kevoree.library;
 import fr.braindead.wsmsgbroker.Response;
 import fr.braindead.wsmsgbroker.WSMsgBrokerClient;
 import fr.braindead.wsmsgbroker.callback.AnswerCallback;
-import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.kevoree.*;
 import org.kevoree.annotation.*;
 import org.kevoree.annotation.ChannelType;
@@ -44,8 +43,8 @@ public class WSChan implements ChannelDispatch {
             model = modelService.getCurrentModel().getModel();
         }
         Channel thisChan = (Channel) model.findByPath(context.getPath());
-        List<String> inputPaths = getPortsPath(thisChan, "provided");
-        List<String> outputPaths = getPortsPath(thisChan, "required");
+        Set<String> inputPaths = getPortsPath(thisChan, "provided");
+        Set<String> outputPaths = getPortsPath(thisChan, "required");
 
         for (String path : inputPaths) {
             // create input WSMsgBroker clients
@@ -80,7 +79,7 @@ public class WSChan implements ChannelDispatch {
     public void dispatch(String o, final Callback callback) {
         ContainerRoot model = modelService.getCurrentModel().getModel();
         Channel thisChan = (Channel) model.findByPath(context.getPath());
-        List<String> outputPaths = getPortsPath(thisChan, "required");
+        Set<String> outputPaths = getPortsPath(thisChan, "required");
 
         // create a list of destination paths
         Set<String> destPaths = new HashSet<String>();
@@ -99,23 +98,19 @@ public class WSChan implements ChannelDispatch {
         for (final String outputPath : outputPaths) {
             WSMsgBrokerClient client = this.clients.get(outputPath);
             if (client != null) {
-                try {
-                    if (callback != null) {
-                        client.send(o, dest, new AnswerCallback() {
-                            @Override
-                            public void execute(String from, Object o) {
-                                CallbackResult result = new CallbackResult();
-                                result.setPayload(o.toString());
-                                result.setOriginChannelPath(context.getPath());
-                                result.setOriginPortPath(outputPath);
-                                callback.onSuccess(result);
-                            }
-                        });
-                    } else {
-                        client.send(o, dest);
-                    }
-                } catch (WebsocketNotConnectedException e) {
-                    Log.warn("Unable to send message, no connection established for {}", outputPath);
+                if (callback != null) {
+                    client.send(o, dest, new AnswerCallback() {
+                        @Override
+                        public void execute(String from, Object o) {
+                            CallbackResult result = new CallbackResult();
+                            result.setPayload(o.toString());
+                            result.setOriginChannelPath(context.getPath());
+                            result.setOriginPortPath(outputPath);
+                            callback.onSuccess(result);
+                        }
+                    });
+                } else {
+                    client.send(o, dest);
                 }
             } else {
                 createInputClient(outputPath);
@@ -124,7 +119,7 @@ public class WSChan implements ChannelDispatch {
     }
 
     private void createInputClient(final String id) {
-        WSMsgBrokerClient client = new WSMsgBrokerClient(id, host, port, path, true) {
+        this.clients.put(id, new WSMsgBrokerClient(id, host, port, path, true) {
             @Override
             public void onUnregistered(String s) {
                 Log.info("{} unregistered from remote server", id);
@@ -162,19 +157,17 @@ public class WSChan implements ChannelDispatch {
             }
 
             @Override
-            public void onClose(int code, String reason, boolean remote) {
+            public void onClose(int code, String reason) {
                 Log.error("Connection closed by remote server for {}", id);
             }
 
             @Override
             public void onError(Exception e) {}
-        };
-
-        this.clients.put(id, client);
+        });
     }
 
     private void createOutputClient(final String id) {
-        WSMsgBrokerClient client = new WSMsgBrokerClient(id, host, port, path, true) {
+        this.clients.put(id, new WSMsgBrokerClient(id, host, port, path, true) {
             @Override
             public void onUnregistered(String s) {
                 Log.debug("{} unregistered from remote server", id);
@@ -190,19 +183,17 @@ public class WSChan implements ChannelDispatch {
             }
 
             @Override
-            public void onClose(int code, String reason, boolean remote) {
+            public void onClose(int code, String reason) {
                 Log.debug("Connection closed by remote server for {}", id);
             }
 
             @Override
             public void onError(Exception e) {}
-        };
-
-        this.clients.put(id, client);
+        });
     }
 
-    private List<String> getPortsPath(Channel chan, String type) {
-        List<String> paths = new ArrayList<String>();
+    private Set<String> getPortsPath(Channel chan, String type) {
+        Set<String> paths = new HashSet<String>();
         if (chan != null) {
             for (MBinding binding : chan.getBindings()) {
                 if (binding.getPort() != null

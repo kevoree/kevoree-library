@@ -72,8 +72,4 @@ public class RequiredPortImpl implements Port {
     public void removeChannelWrapper(MBinding binding) {
         delegate.remove(binding.getHub().path()+"_"+binding.getPort().path());
     }
-
-//    public Set<ChannelWrapper> getDelegate() {
-//        return delegate;
-//    }
 }
