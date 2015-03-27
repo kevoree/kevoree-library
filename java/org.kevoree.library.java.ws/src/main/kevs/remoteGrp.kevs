@@ -1,0 +1,8 @@
+add node0: JavaNode
+add node1: JavascriptNode
+add sync: RemoteWSGroup
+
+set sync.host = 'ws.kevoree.org'
+set sync.path = 'foo'
+
+attach node0, node1 sync
