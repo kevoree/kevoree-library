@@ -3,7 +3,7 @@
     <parent>
         <artifactId>org.kevoree.library.cloud.root</artifactId>
         <groupId>org.kevoree.library.cloud</groupId>
-        <version>5.2.7</version>
+        <version>5.2.8-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
