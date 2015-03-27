@@ -4,3 +4,6 @@ add sync : WSGroup
 attach node0, node1, node2 sync
 
 set sync.master = "node0"
+set sync.onConnect = "
+this is going to be ugly
+"

@@ -113,36 +113,41 @@ public class WSGroup implements ModelListener, Runnable {
                                     cache.put(rm.getNodeName(), webSocket);
                                     rcache.put(webSocket, rm.getNodeName());
                                     if (isMaster()) {
+                                        Log.info("New client registered \"{}\"", rm.getNodeName());
                                         KevoreeFactory factory = new DefaultKevoreeFactory();
                                         JSONModelSerializer serializer = factory.createJSONSerializer();
                                         ModelCloner cloner = factory.createModelCloner();
-                                        ContainerRoot modelToApply = null;
+                                        ContainerRoot modelToApply = cloner.clone(modelService.getCurrentModel().getModel());
                                         if (rm.getModel() != null && !rm.getModel().equals("null")) {
                                             // new registered model has a model to share: merging it locally
                                             ContainerRoot recModel = (ContainerRoot) jsonModelLoader.loadModelFromString(rm.getModel()).get(0);
-                                            TraceSequence tseq = compare.merge(modelService.getCurrentModel().getModel(), recModel);
-                                            Log.info("New client registered \"{}\". Merging his model with mine...", ((RegisterMessage) parsedMsg).getNodeName());
-                                            modelToApply = cloner.clone(modelService.getCurrentModel().getModel());
+                                            TraceSequence tseq = compare.merge(modelToApply, recModel);
+                                            Log.info("Merging his model with mine...", ((RegisterMessage) parsedMsg).getNodeName());
                                             tseq.applyOn(modelToApply);
                                         }
                                         // add onConnect logic
-                                        kevsService.execute(tpl(rm.getNodeName()), modelToApply);
-                                        String recModelStr = serializer.serialize(modelToApply);
-                                        PushMessage pushMessage = new PushMessage(recModelStr);
+                                        try {
+                                            kevsService.execute(tpl(rm.getNodeName()), modelToApply);
+                                        } catch (Exception e) {
+                                            Log.error("Unable to parse onConnect KevScript. Broadcasting model without onConnect process.");
+                                        } finally {
+                                            String recModelStr = serializer.serialize(modelToApply);
+                                            PushMessage pushMessage = new PushMessage(recModelStr);
 
-                                        // update locally
-                                        modelService.update(modelToApply, new UpdateCallback() {
-                                            @Override
-                                            public void run(Boolean applied) {
-                                                Log.info("Merge model result: {}", applied);
-                                            }
-                                        });
+                                            // update locally
+                                            modelService.update(modelToApply, new UpdateCallback() {
+                                                @Override
+                                                public void run(Boolean applied) {
+                                                    Log.info("Merge model result: {}", applied);
+                                                }
+                                            });
 
-                                        // broadcast changings
-                                        Log.info("Broadcasting merged model to all connected clients");
-                                        for (WebSocketChannel client : cache.values()) {
-                                            if (client.isOpen()) {
-                                                WebSockets.sendText(pushMessage.toRaw(), client, null);
+                                            // broadcast changes
+                                            Log.info("Broadcasting merged model to all connected clients");
+                                            for (WebSocketChannel client : cache.values()) {
+                                                if (client.isOpen()) {
+                                                    WebSockets.sendText(pushMessage.toRaw(), client, null);
+                                                }
                                             }
                                         }
                                     }
