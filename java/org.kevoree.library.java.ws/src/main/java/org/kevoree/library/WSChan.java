@@ -11,6 +11,7 @@ import org.kevoree.api.Port;
 import org.kevoree.log.Log;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @ChannelType
 public class WSChan implements ChannelDispatch {
@@ -33,7 +34,7 @@ public class WSChan implements ChannelDispatch {
 
     @Start
     public void start() {
-        clients = new HashMap<String, WSMsgBrokerClient>();
+        clients = new HashMap<>();
         if (path == null) {
             path = "";
         }
@@ -43,28 +44,27 @@ public class WSChan implements ChannelDispatch {
             model = modelService.getCurrentModel().getModel();
         }
         Channel thisChan = (Channel) model.findByPath(context.getPath());
-        Set<String> inputPaths = getPortsPath(thisChan, "provided");
-        Set<String> outputPaths = getPortsPath(thisChan, "required");
+        Set<String> inputPaths = Util.getProvidedPortsPath(thisChan, context.getNodeName());
+        Set<String> outputPaths = Util.getRequiredPortsPath(thisChan, context.getNodeName());
 
         for (String path : inputPaths) {
             // create input WSMsgBroker clients
-            createInputClient(path);
+            createInputClient(path+"_"+context.getInstanceName());
         }
 
         for (String path : outputPaths) {
             // create output WSMsgBroker clients
-            createOutputClient(path);
+            createOutputClient(path+"_"+context.getInstanceName());
         }
     }
 
     @Stop
     public void stop() {
         if (this.clients != null) {
-            for (WSMsgBrokerClient client : clients.values()) {
-                if (client != null) {
-                    client.close();
-                }
-            }
+            clients.values()
+                .stream()
+                .filter(client -> client != null)
+                .forEach(fr.braindead.wsmsgbroker.WSMsgBrokerClient::close);
             this.clients = null;
         }
     }
@@ -79,41 +79,44 @@ public class WSChan implements ChannelDispatch {
     public void dispatch(String o, final Callback callback) {
         ContainerRoot model = modelService.getCurrentModel().getModel();
         Channel thisChan = (Channel) model.findByPath(context.getPath());
-        Set<String> outputPaths = getPortsPath(thisChan, "required");
+        Set<String> outputPaths = Util.getRequiredPortsPath(thisChan, context.getNodeName());
 
         // create a list of destination paths
-        Set<String> destPaths = new HashSet<String>();
+        Set<String> destPaths = new HashSet<>();
         // process remote paths in order to add _<chanName> to the paths (WsMsgBroker protocol)
-        for (String remotePath : channelContext.getRemotePortPaths()) {
-            // add processed remote path to dest
-            destPaths.add(remotePath + "_" + context.getInstanceName());
-        }
+        // add processed remote path to dest
+        destPaths.addAll(channelContext.getRemotePortPaths()
+                .stream()
+                .map(remotePath -> remotePath + "_" + context.getInstanceName())
+                .collect(Collectors.toList()));
         // add local connected inputs to dest
-        destPaths.addAll(getPortsPath(thisChan, "provided"));
+        Set<String> providedPaths = Util.getProvidedPortsPath(thisChan, context.getNodeName())
+                .stream()
+                .map(s -> s + "_" + context.getInstanceName())
+                .collect(Collectors.toSet());
+
+        destPaths.addAll(providedPaths);
         // create the array that will store the dest
         String[] dest = new String[destPaths.size()];
         // convert list to array
         destPaths.toArray(dest);
 
         for (final String outputPath : outputPaths) {
-            WSMsgBrokerClient client = this.clients.get(outputPath);
+            WSMsgBrokerClient client = this.clients.get(outputPath+"_"+context.getInstanceName());
             if (client != null) {
                 if (callback != null) {
-                    client.send(o, dest, new AnswerCallback() {
-                        @Override
-                        public void execute(String from, Object o) {
-                            CallbackResult result = new CallbackResult();
-                            result.setPayload(o.toString());
-                            result.setOriginChannelPath(context.getPath());
-                            result.setOriginPortPath(outputPath);
-                            callback.onSuccess(result);
-                        }
+                    client.send(o, dest, (from, o1) -> {
+                        CallbackResult result = new CallbackResult();
+                        result.setPayload(o1.toString());
+                        result.setOriginChannelPath(context.getPath());
+                        result.setOriginPortPath(outputPath);
+                        callback.onSuccess(result);
                     });
                 } else {
                     client.send(o, dest);
                 }
             } else {
-                createInputClient(outputPath);
+                createInputClient(outputPath+"_"+context.getInstanceName());
             }
         }
     }
@@ -190,22 +193,5 @@ public class WSChan implements ChannelDispatch {
             @Override
             public void onError(Exception e) {}
         });
-    }
-
-    private Set<String> getPortsPath(Channel chan, String type) {
-        Set<String> paths = new HashSet<String>();
-        if (chan != null) {
-            for (MBinding binding : chan.getBindings()) {
-                if (binding.getPort() != null
-                        && binding.getPort().getRefInParent() != null
-                        && binding.getPort().getRefInParent().equals(type)) {
-                    ContainerNode node = (ContainerNode) binding.getPort().eContainer().eContainer();
-                    if (node.getName().equals(context.getNodeName())) {
-                        paths.add(binding.getPort().path()+"_"+context.getInstanceName());
-                    }
-                }
-            }
-        }
-        return paths;
     }
 }
