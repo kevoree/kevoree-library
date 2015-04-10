@@ -5,5 +5,8 @@ attach node0, node1, node2 sync
 
 set sync.master = "node0"
 set sync.onConnect = "
-this is going to be ugly
+add {nodeName}.ticker: Ticker
+"
+set sync.onDisconnect = "
+remove {nodeName}
 "

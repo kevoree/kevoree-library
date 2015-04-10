@@ -1,12 +1,10 @@
 package org.kevoree.library;
 
 import fr.braindead.websocket.client.WebSocketClient;
-import fr.braindead.wsmsgbroker.WSMsgBrokerClient;
-import org.kevoree.*;
+import org.kevoree.Channel;
+import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.*;
-import org.kevoree.annotation.ChannelType;
 import org.kevoree.api.*;
-import org.kevoree.api.Port;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.pmodeling.api.json.JSONModelLoader;
 import org.kevoree.pmodeling.api.json.JSONModelSerializer;
@@ -15,7 +13,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

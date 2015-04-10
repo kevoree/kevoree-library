@@ -73,6 +73,9 @@ public class WSGroup implements ModelListener, Runnable {
     @Param(defaultValue = "")
     private String onConnect = "";
 
+    @Param(defaultValue = "")
+    private String onDisconnect = "";
+
 
     public void setPort(Integer port) throws IOException, InterruptedException {
         this.port = port;
@@ -91,6 +94,9 @@ public class WSGroup implements ModelListener, Runnable {
     private boolean running = false;
     private ScheduledExecutorService scheduledThreadPool;
     private Undertow serverHandler;
+    private KevoreeFactory factory = new DefaultKevoreeFactory();
+    private JSONModelSerializer serializer = factory.createJSONSerializer();
+    private ModelCloner cloner = factory.createModelCloner();
 
 
     private class InternalWebSocketServer implements WebSocketConnectionCallback {
@@ -114,9 +120,6 @@ public class WSGroup implements ModelListener, Runnable {
                                     rcache.put(webSocket, rm.getNodeName());
                                     if (isMaster()) {
                                         Log.info("New client registered \"{}\"", rm.getNodeName());
-                                        KevoreeFactory factory = new DefaultKevoreeFactory();
-                                        JSONModelSerializer serializer = factory.createJSONSerializer();
-                                        ModelCloner cloner = factory.createModelCloner();
                                         ContainerRoot modelToApply = cloner.clone(modelService.getCurrentModel().getModel());
                                         if (rm.getModel() != null && !rm.getModel().equals("null")) {
                                             // new registered model has a model to share: merging it locally
@@ -127,7 +130,7 @@ public class WSGroup implements ModelListener, Runnable {
                                         }
                                         // add onConnect logic
                                         try {
-                                            kevsService.execute(tpl(rm.getNodeName()), modelToApply);
+                                            kevsService.execute(tpl(onConnect, rm.getNodeName()), modelToApply);
                                         } catch (Exception e) {
                                             Log.error("Unable to parse onConnect KevScript. Broadcasting model without onConnect process.");
                                         } finally {
@@ -235,10 +238,27 @@ public class WSGroup implements ModelListener, Runnable {
             });
 
             channel.resumeReceives();
+            channel.addCloseTask(ws -> {
+                String nodeName = rcache.get(ws);
+                if (nodeName != null) {
+                    System.out.println("Disconnected remote node "+nodeName);
+                    ContainerRoot modelToApply = cloner.clone(modelService.getCurrentModel().getModel());
+                    try {
+                        kevsService.execute(tpl(onDisconnect, nodeName), modelToApply);
+                        modelService.update(modelToApply, null);
+                    } catch (Exception e) {
+                        Log.error("Unable to parse onDisconnect KevScript. No changes made after the disconnection of "+nodeName);
+                    }
+                    cache.remove(nodeName);
+                }
+                rcache.remove(ws);
+            });
         }
 
-        private String tpl(String nodeName) {
-            return onConnect
+
+
+        private String tpl(String tpl, String nodeName) {
+            return tpl
                     .replaceAll("\\{nodeName\\}", nodeName)
                     .replaceAll("\\{groupName\\}", context.getInstanceName());
         }
