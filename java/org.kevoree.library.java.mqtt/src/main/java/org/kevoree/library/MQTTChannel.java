@@ -3,13 +3,19 @@ package org.kevoree.library;
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.hawtbuf.UTF8Buffer;
 import org.fusesource.mqtt.client.*;
+import org.kevoree.Channel;
 import org.kevoree.ContainerNode;
 import org.kevoree.ContainerRoot;
+import org.kevoree.MBinding;
 import org.kevoree.annotation.*;
 import org.kevoree.api.*;
 import org.kevoree.log.Log;
 
 import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Created by leiko on 6/3/14.
@@ -34,11 +40,19 @@ public class MQTTChannel implements ChannelDispatch, Listener {
     @Param(defaultValue = "81", optional = false)
     private int port;
 
+    @Param(optional = false)
+    private String uuid;
+
     private MQTT mqtt;
     private CallbackConnection connection;
 
     @Start
-    public void start() throws URISyntaxException {
+    public void start() throws Exception {
+        if (this.uuid == null || this.uuid.trim().isEmpty()) {
+            throw new Exception("\"uuid\" attribute must be set");
+        }
+        this.uuid = uuid.replace("(/)*$", "");
+
         mqtt = new MQTT();
         mqtt.setHost(host, port);
 
@@ -75,15 +89,15 @@ public class MQTTChannel implements ChannelDispatch, Listener {
     }
 
     @Update
-    public void update() throws URISyntaxException {
+    public void update() throws Exception {
         stop();
         start();
     }
 
     @Override
     public void onConnected() {
-        final String topicName = KEVOREE_PREFIX + context.getInstanceName() + "_" + context.getNodeName();
-        Topic[] topics = {new Topic(topicName, QoS.AT_LEAST_ONCE)};
+        final String topicName = this.uuid + "/#";
+        Topic[] topics = { new Topic(topicName, QoS.AT_LEAST_ONCE) };
         connection.subscribe(topics, new org.fusesource.mqtt.client.Callback<byte[]>() {
             public void onSuccess(byte[] qoses) {
                 Log.info("{} subscribed to topic {}", context.getInstanceName(), topicName);
@@ -100,11 +114,42 @@ public class MQTTChannel implements ChannelDispatch, Listener {
     }
 
     @Override
-    public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack) {
-        for (Port p : channelContext.getLocalPorts()) {
-            p.send(body.utf8().toString(), null);
+    public void onPublish(final UTF8Buffer topic, final Buffer body, final Runnable ack) {
+        ContainerRoot model = modelService.getCurrentModel().getModel();
+        if (model != null) {
+            Channel chan = model.findHubsByID(context.getInstanceName());
+            if (chan != null) {
+                final Set<String> paths = new HashSet<String>();
+                chan.getBindings().stream().filter(new Predicate<MBinding>() {
+                    @Override
+                    public boolean test(MBinding binding) {
+                        return binding.getPort() != null
+                                && binding.getPort().getRefInParent() != null
+                                && binding.getPort().getRefInParent().equals("provided");
+                    }
+                }).forEach(new Consumer<MBinding>() {
+                    @Override
+                    public void accept(MBinding binding) {
+                        ContainerNode node = (ContainerNode) binding.getPort().eContainer().eContainer();
+                        if (node.getName().equals(context.getNodeName())) {
+                            paths.add(binding.getPort().path());
+                        }
+                    }
+                });
+                paths.forEach(new Consumer<String>() {
+                    @Override
+                    public void accept(String path) {
+                        String t = uuid+path;
+                        if (t.equals(topic.toString())) {
+                            for (Port p : channelContext.getLocalPorts()) {
+                                p.send(body.utf8().toString(), null);
+                                ack.run();
+                            }
+                        }
+                    }
+                });
+            }
         }
-        ack.run();
     }
 
     @Override
@@ -113,32 +158,41 @@ public class MQTTChannel implements ChannelDispatch, Listener {
     }
 
     @Override
-    public void dispatch(String payload, org.kevoree.api.Callback callback) {
-        ContainerRoot model = modelService.getPendingModel();
-        if (model == null) {
-            model = modelService.getCurrentModel().getModel();
-        }
-
-        if (connection != null) {
-            // remote dispatch
-            for (String portPath : channelContext.getRemotePortPaths()) {
-                String targetNodeName = ((ContainerNode) model.findByPath(portPath).eContainer().eContainer()).getName();
-
-                // publish message over the different topics
-                final String topicName = KEVOREE_PREFIX + context.getInstanceName() + "_" + targetNodeName;
-                try {
-                    connection.publish(topicName, payload.toString().getBytes(), QoS.AT_LEAST_ONCE, false, null);
-                } catch (Exception e) {
-                    Log.error("Something went wrong while {} published a message. (reason: {})", context.getInstanceName(), e.getMessage());
+    public void dispatch(final String payload, org.kevoree.api.Callback callback) {
+        final ContainerRoot model = modelService.getCurrentModel().getModel();
+        if (model != null && connection != null) {
+            final Set<String> destPaths = new HashSet<String>();
+            channelContext.getLocalPorts().forEach(new Consumer<Port>() {
+                @Override
+                public void accept(Port p) {
+                    org.kevoree.Port port = (org.kevoree.Port) model.findByPath(p.getPath());
+                    if (port != null && port.getRefInParent().equals("provided")) {
+                        destPaths.add(port.path());
+                    }
                 }
-            }
+            });
+            channelContext.getRemotePortPaths().forEach(new Consumer<String>() {
+                @Override
+                public void accept(String p) {
+                    org.kevoree.Port port = (org.kevoree.Port) model.findByPath(p);
+                    if (port != null && port.getRefInParent().equals("provided")) {
+                        destPaths.add(port.path());
+                    }
+                }
+            });
 
-            // local dispatch
-            for (Port p : channelContext.getLocalPorts()) {
-                p.send(payload, callback);
-            }
-        } else {
-            Log.debug("Cannot dispatch message. Channel {} appears to be stopped.", context.getInstanceName());
+            destPaths.forEach(new Consumer<String>() {
+                @Override
+                public void accept(String path) {
+                    connection.publish(uuid+path, payload.getBytes(), QoS.AT_LEAST_ONCE, false, null);
+                }
+            });
         }
+
+        // local dispatch
+        for (Port p : channelContext.getLocalPorts()) {
+            p.send(payload, callback);
+        }
+
     }
 }

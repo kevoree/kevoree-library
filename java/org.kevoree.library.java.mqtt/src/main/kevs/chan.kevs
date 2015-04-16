@@ -1,0 +1,12 @@
+add node0, node1 : JavaNode
+add node0.ticker : Ticker
+add node1.printer : ConsolePrinter
+add sync : WSGroup
+add chan : MQTTChannel
+set chan.uuid = 'test/kevoree'
+
+attach node0, node1 sync
+set sync.master = 'node0'
+
+bind node0.ticker.tick chan
+bind node1.printer.input chan
