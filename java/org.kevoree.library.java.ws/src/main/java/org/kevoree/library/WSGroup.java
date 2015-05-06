@@ -241,7 +241,7 @@ public class WSGroup implements ModelListener, Runnable {
             channel.addCloseTask(ws -> {
                 String nodeName = rcache.get(ws);
                 if (nodeName != null) {
-                    System.out.println("Disconnected remote node "+nodeName);
+                    Log.info("Client node '{}' disconnected", nodeName);
                     ContainerRoot modelToApply = cloner.clone(modelService.getCurrentModel().getModel());
                     try {
                         kevsService.execute(tpl(onDisconnect, nodeName), modelToApply);

@@ -1,22 +1,22 @@
-add node0, node1, node2 : JavaNode
+add node0, node1 : JavaNode
+add node0.ticker : Ticker
 add sync : WSGroup
+add chan : RemoteWSChan
 
 set sync.master = 'node0'
+set sync.onConnect = '
+add {nodeName}.printer : ConsolePrinter
+bind {nodeName}.printer.input chan
+'
+set sync.onDisconnect = '
+remove {nodeName}
+'
 
-attach node0, node1, node2 sync
+set chan.host = 'ws.kevoree.org'
+set chan.uuid = 'wsgroup-test'
 
-network node0.ip.eth0 127.0.0.1
-network node1.ip.eth0 127.0.0.1
-network node2.ip.eth0 127.0.0.1
+attach node0, node1 sync
 
-add node0.printer : ConsolePrinter
-add chan : WSChan
-set chan.host = '0.0.0.0'
-set chan.port = '9050'
-bind node0.printer.input chan
+bind node0.ticker.tick chan
 
-add node1.ticker : Ticker
-add chan : WSChan
-set chan.host = '0.0.0.0'
-set chan.port = '9050'
-bind node1.ticker.tick chan
+network node0.ip.eth0 kevtop.irisa.fr
