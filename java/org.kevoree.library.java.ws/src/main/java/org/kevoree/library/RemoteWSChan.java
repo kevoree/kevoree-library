@@ -88,11 +88,14 @@ public class RemoteWSChan implements ChannelDispatch {
             scheduledThreadPool.shutdownNow();
         }
         if (this.clients != null) {
-            for (WebSocketClient client : clients.values()) {
-                if (client != null) {
-                    client.close();
-                }
-            }
+            clients.values()
+                    .stream()
+                    .filter(client -> client != null)
+                    .forEach(client -> {
+                        try {
+                            client.close();
+                        } catch (IOException e) { /* ignore */ }
+                    });
             this.clients = null;
         }
     }
@@ -146,6 +149,7 @@ public class RemoteWSChan implements ChannelDispatch {
                             public void onError(Exception e) {
                             }
                         };
+                        clients.put(path, client);
 
                     } catch (Exception e) { e.printStackTrace(); }
                 }

@@ -138,12 +138,7 @@ public class WSGroup implements ModelListener, Runnable {
                                             PushMessage pushMessage = new PushMessage(recModelStr);
 
                                             // update locally
-                                            modelService.update(modelToApply, new UpdateCallback() {
-                                                @Override
-                                                public void run(Boolean applied) {
-                                                    Log.info("Merge model result: {}", applied);
-                                                }
-                                            });
+                                            modelService.update(modelToApply, applied -> Log.info("Merge model result: {}", applied));
 
                                             // broadcast changes
                                             Log.info("Broadcasting merged model to all connected clients");

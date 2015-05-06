@@ -1,16 +1,15 @@
-add node0, node1 : JavaNode
+add node0, node1 : JavaNode/5.2.9-SNAPSHOT
 add node0.ticker : Ticker
 add sync : WSGroup
 add chan : RemoteWSChan
 
 set sync.master = 'node0'
 set sync.onConnect = '
-add {nodeName}.printer : ConsolePrinter
+add {nodeName}.printer: ConsolePrinter
 bind {nodeName}.printer.input chan
 '
-set sync.onDisconnect = '
-remove {nodeName}
-'
+
+set sync.onDisconnect = 'remove {nodeName}'
 
 set chan.host = 'ws.kevoree.org'
 set chan.uuid = 'wsgroup-test'

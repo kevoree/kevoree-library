@@ -1,8 +1,6 @@
-add node0, node1 : JavaNode
+add node0, node1 : JavaNode/5.2.9-SNAPSHOT
 add sync : WSGroup
 add node0.ticker : Ticker
-add node0.printer: ConsolePrinter
-add node1.ticker : Ticker
 add node1.printer : ConsolePrinter
 add chan : RemoteWSChan
 
@@ -12,8 +10,6 @@ set sync.master = 'node0'
 
 bind node0.ticker.tick chan
 bind node1.printer.input chan
-bind node1.ticker.tick chan
-bind node0.printer.input chan
 
 set chan.host = 'ws.kevoree.org'
 set chan.uuid = '123'
