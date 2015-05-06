@@ -232,6 +232,39 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                                     adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, channel));
                                     elementAlreadyProcessed.put(newTuple.getKey(), newTuple);
                                 }
+
+                                if (channel.getDictionary() != null) {
+                                    for (Value val : channel.getDictionary().getValues()) {
+                                        TupleObjPrim updateVal = new TupleObjPrim(val, AdaptationType.UpdateDictionaryInstance);
+                                        if (!elementAlreadyProcessed.containsKey(updateVal)) {
+                                            Object[] values = new Object[] { val.eContainer().eContainer(), val };
+                                            adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateDictionaryInstance, values));
+                                            elementAlreadyProcessed.put(updateVal.getKey(), updateVal);
+                                        }
+                                    }
+
+                                }
+
+                                for (FragmentDictionary fragDic : channel.getFragmentDictionary()) {
+                                    if (fragDic.getName().equals(nodeName)) {
+                                        for (Value val : fragDic.getValues()) {
+                                            TupleObjPrim updateVal = new TupleObjPrim(val, AdaptationType.UpdateDictionaryInstance);
+                                            if (!elementAlreadyProcessed.containsKey(updateVal)) {
+                                                Object[] values = new Object[] { val.eContainer().eContainer(), val };
+                                                adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateDictionaryInstance, values));
+                                                elementAlreadyProcessed.put(updateVal.getKey(), updateVal);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (channel.getStarted()) {
+                                    TupleObjPrim start = new TupleObjPrim(channel, AdaptationType.StartInstance);
+                                    if (!elementAlreadyProcessed.containsKey(start.getKey())) {
+                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.StartInstance, channel));
+                                        elementAlreadyProcessed.put(start.getKey(), start);
+                                    }
+                                }
                             }
                         }
                         if (trace instanceof ModelRemoveTrace) {
@@ -241,7 +274,7 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                             Channel oldChannel = previousBinding.getHub();
                             //check if not no current usage of this channel
                             boolean stillUsed = channel != null;
-                            if (channel != null) {
+                            if (stillUsed) {
                                 for (MBinding loopBinding : channel.getBindings()) {
                                     if (loopBinding.getPort() != null) {
                                         if (loopBinding.getPort().eContainer().equals(targetNode)) {
