@@ -158,6 +158,7 @@ public class WSGroup implements ModelListener, Runnable {
                                 case PUSH_TYPE:
                                     PushMessage pm = (PushMessage) parsedMsg;
                                     try {
+                                        Log.info("{} \"{}\": push received, applying locally...", WSGroup.this.getClass().getSimpleName(), context.getInstanceName());
                                         ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
                                         if (hasMaster()) {
                                             if (isMaster()) {
@@ -177,7 +178,6 @@ public class WSGroup implements ModelListener, Runnable {
                                             Log.info("No master specified, model will NOT be send to all other nodes");
                                         }
 
-                                        Log.info("{} \"{}\": push received, applying locally...", WSGroup.this.getClass().getSimpleName(), context.getInstanceName());
                                         modelService.update(model, new UpdateCallback() {
                                             @Override
                                             public void run(Boolean applied) {
@@ -214,7 +214,7 @@ public class WSGroup implements ModelListener, Runnable {
 
                 @Override
                 protected void onError(WebSocketChannel webSocket, Throwable error) {
-                    Log.error(WSGroup.this.getClass().getSimpleName() + " \"{}\": {}", context.getInstanceName(), error.getMessage());
+                    Log.error("{} \"{}\": {}", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), error.getMessage());
                     try {
                         if (webSocket != null) {
                             webSocket.close();
@@ -234,13 +234,16 @@ public class WSGroup implements ModelListener, Runnable {
 
             channel.resumeReceives();
             channel.addCloseTask(ws -> {
-                String nodeName = rcache.get(ws);
+                final String nodeName = rcache.get(ws);
                 if (nodeName != null) {
                     Log.info("Client node '{}' disconnected", nodeName);
-                    ContainerRoot modelToApply = cloner.clone(modelService.getCurrentModel().getModel());
                     try {
-                        kevsService.execute(tpl(onDisconnect, nodeName), modelToApply);
-                        modelService.update(modelToApply, null);
+                        modelService.submitScript(tpl(onDisconnect, nodeName), new UpdateCallback() {
+                            @Override
+                            public void run(Boolean applied) {
+                                Log.info("{} \"{}\" onDisconnect result from {}: {}", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), nodeName, applied);
+                            }
+                        });
                     } catch (Exception e) {
                         Log.error("Unable to parse onDisconnect KevScript. No changes made after the disconnection of "+nodeName);
                     }

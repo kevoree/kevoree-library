@@ -1,0 +1,11 @@
+add node0 : JavaNode
+add node1 : JavaNode
+
+add sync : WSGroup
+
+attach node0, node1 sync
+
+set sync.master = 'node0'
+set sync.onDisconnect = '
+remove {nodeName}
+'

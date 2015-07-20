@@ -1,0 +1,5 @@
+add node0 : JavaNode
+add node0.broadcaster : WSBroadcaster
+add sync : WSGroup
+
+attach node0 sync
