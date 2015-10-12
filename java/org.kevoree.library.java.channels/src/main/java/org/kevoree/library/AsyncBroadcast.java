@@ -15,7 +15,9 @@ import java.util.concurrent.Executors;
  * Date: 28/11/2013
  * Time: 10:05
  */
-@ChannelType
+@ChannelType(description = "<strong>This channel only works locally</strong>"+
+"<br/>Sends messages <strong>asynchronously</strong> using a new Thread "+
+"for each dispatch")
 public class AsyncBroadcast implements ChannelDispatch {
 
     @KevoreeInject

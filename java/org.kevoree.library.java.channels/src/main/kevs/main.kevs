@@ -1,9 +1,3 @@
-include mvn:org.kevoree.library.java:org.kevoree.library.java.javaNode:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.helloworld:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.channels:latest
-include mvn:org.kevoree.library.java:org.kevoree.library.java.toys:latest
-
-
 add node0 : JavaNode
 add node0.ticker : Ticker
 set node0.ticker.period = "500"

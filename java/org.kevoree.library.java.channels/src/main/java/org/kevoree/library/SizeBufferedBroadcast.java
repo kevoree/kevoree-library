@@ -12,7 +12,10 @@ import java.util.concurrent.*;
  * Waits until the buffer is full to send the messages.
  * The size of the buffer can be customized with the bufferSize property.
  */
-@ChannelType
+@ChannelType(description = "<strong>This channel only works locally</strong>" +
+        "<br/>When this channel receives a message it will add it in a queue and will send it when the queue size " +
+        "reaches the given <strong>bufferSize</strong> dictionary attribute value" +
+        "<br/><br/><em>NB: when the channel stops, the queue is cleared (which means that restarting this channel will lost all queued messages)</em>")
 public class SizeBufferedBroadcast implements ChannelDispatch, Runnable {
 
     class QueuedElement {
@@ -27,10 +30,7 @@ public class SizeBufferedBroadcast implements ChannelDispatch, Runnable {
     ChannelContext channelContext;
 
     private ExecutorService executor;
-    private ArrayBlockingQueue<QueuedElement> queue = new ArrayBlockingQueue<QueuedElement>(bufferSize + 3);
-
-    public SizeBufferedBroadcast() {
-    }
+    private ArrayBlockingQueue<QueuedElement> queue = new ArrayBlockingQueue<QueuedElement>(bufferSize);
 
     @Start
     public void channelStart() {
@@ -53,7 +53,7 @@ public class SizeBufferedBroadcast implements ChannelDispatch, Runnable {
             e.payload = payload;
             queue.put(e);
         } catch (InterruptedException e1) {
-            e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e1.printStackTrace();
         }
         if (queue.size() >= bufferSize) {
             executor.submit(this);

@@ -13,7 +13,8 @@ import org.kevoree.api.Port;
  * Date: 28/11/2013
  * Time: 10:05
  */
-@ChannelType
+@ChannelType(description = "<strong>This channel only works locally</strong>"+
+"<br/>Sends messages <strong>synchronously</strong> for each dispatch")
 public class SyncBroadcast implements ChannelDispatch {
 
     @KevoreeInject

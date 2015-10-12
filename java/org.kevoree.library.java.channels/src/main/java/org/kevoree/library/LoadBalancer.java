@@ -15,7 +15,10 @@ import java.util.concurrent.Executors;
  * Created by duke on 05/12/2013.
  */
 
-@ChannelType
+@ChannelType(description = "<strong>This channel only works locally</strong>"+
+"<br/>Sends message synchronously <strong>to only one</strong> of the input. "+
+"The input port that will receive the message is selected randomly for each "+
+"messages")
 public class LoadBalancer implements ChannelDispatch {
 
     @KevoreeInject

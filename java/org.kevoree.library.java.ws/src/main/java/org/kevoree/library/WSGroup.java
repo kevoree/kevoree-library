@@ -46,7 +46,22 @@ import static org.kevoree.api.protocol.Protocol.*;
  * Time: 12:07
  */
 
-@GroupType
+@GroupType(description = "This group uses <strong>WebSockets</strong> to propagate models over the connected nodes."+
+"<br/>If the attribute <strong>master</strong> is specified (using the instance "+
+"name of one of the connected nodes) then a WebSocket server will be listening "+
+"on that node using the <strong>port</strong> attribute specified in the fragment "+
+"dictionary of that particular node and every other nodes connected to that group "+
+"will try to connect to that <strong>master</strong> node."+
+"</br>If <strong>master</strong> is empty, then every connected node will try to "+
+"start a WebSocket server using their <strong>port</strong> fragment attribute."+
+"<br/><br/>The attributes <strong>onConnect</strong> and <strong>onDisconnect</strong> "+
+"expects KevScript strings to be given to them optionally. If set, "+
+"<strong>onConnect</strong> KevScript will be executed on the <strong>master</strong> node "+
+"when a new client connects to the master server (and <strong>onDisconnect</strong> "+
+"will be executed when a node disconnects from the master server)"+
+"<br/><br/><em>NB: onConnect & onDisconnect can reference the current node that "+
+"triggered the process by using this notation: {nodeName}</em>"+
+"<br/><em>NB2: {groupName} is also available and resolves to the current WSGroup instance name</em>")
 public class WSGroup implements ModelListener, Runnable {
 
     private AtomicBoolean diverge = new AtomicBoolean(false);

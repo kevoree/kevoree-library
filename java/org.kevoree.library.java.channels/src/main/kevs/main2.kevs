@@ -1,0 +1,5 @@
+add node0: JavaNode
+add sync: WSGroup
+
+attach node0 sync
+set sync.master = "node0"

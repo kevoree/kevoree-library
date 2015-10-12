@@ -14,7 +14,10 @@ import java.util.concurrent.*;
  * Date: 28/11/2013
  * Time: 10:05
  */
-@ChannelType
+@ChannelType(description = "<strong>This channel only works locally</strong>"+
+"<br/>When this channel receives a message it will add it in a queue and will send it later." +
+"<br/>The sending process is triggered once every <strong>period</strong> milliseconds." +
+"<br/><br/><em>NB: when the channel stops, the queue is cleared (which means that restarting this channel will lost all queued messages)</em>")
 public class DelayBufferedBroadcast implements ChannelDispatch, Runnable {
 
     class QueuedElement {
@@ -23,7 +26,7 @@ public class DelayBufferedBroadcast implements ChannelDispatch, Runnable {
     }
 
     @Param(optional = true)
-    long delay = 5000;
+    long period = 5000;
 
     @KevoreeInject
     ChannelContext channelContext;
@@ -34,7 +37,7 @@ public class DelayBufferedBroadcast implements ChannelDispatch, Runnable {
     @Start
     public void channelStart() {
         executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(this, delay, delay, TimeUnit.MILLISECONDS);
+        executor.scheduleAtFixedRate(this, period, period, TimeUnit.MILLISECONDS);
     }
 
     @Stop
@@ -58,7 +61,7 @@ public class DelayBufferedBroadcast implements ChannelDispatch, Runnable {
             e.payload = payload;
             queue.put(e);
         } catch (InterruptedException e1) {
-            e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e1.printStackTrace();
         }
 
     }
