@@ -55,8 +55,7 @@ public class RequiredPortImpl implements Port {
                     }, payload);
                 }
             } else {
-                callback.onError(new Exception("Message lost, because port is not bind"));
-                Log.warn("Message lost, because no binding found : {}", payload);
+                callback.onError(new Exception("Message lost because the port is not connected to any channel"));
             }
         }
     }
