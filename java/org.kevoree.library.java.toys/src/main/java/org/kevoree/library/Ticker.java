@@ -3,6 +3,8 @@ package org.kevoree.library;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
 import org.kevoree.api.CallbackResult;
+import org.kevoree.api.ModelService;
+import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.log.Log;
 
 import java.util.Random;
@@ -15,6 +17,9 @@ import java.util.Random;
  */
 @ComponentType
 public class Ticker implements Runnable {
+
+    @KevoreeInject
+    private ModelService modelService;
 
     private boolean running;
     private Random rand = new Random();
@@ -38,6 +43,12 @@ public class Ticker implements Runnable {
     @Stop
     public void stop() {
         running = false;
+        modelService.update(null, new UpdateCallback() {
+            @Override
+            public void run(Boolean aBoolean) {
+
+            }
+        });
     }
 
     @Override

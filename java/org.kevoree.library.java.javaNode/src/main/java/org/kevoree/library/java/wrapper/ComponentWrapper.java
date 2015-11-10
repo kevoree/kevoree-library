@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by duke on 9/26/14.
@@ -118,7 +119,9 @@ public class ComponentWrapper extends KInstanceWrapper {
 
     @Override
     public void create() {
-
+        for (RequiredPortImpl p: this.getRequiredPorts().values()) {
+            System.out.println(p.getPath());
+        }
     }
 
     @Override
