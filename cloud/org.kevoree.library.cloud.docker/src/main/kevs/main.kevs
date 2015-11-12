@@ -9,7 +9,7 @@ attach node0 sync
 set node0.nodeCont.image = 'busybox:latest'
 set node0.nodeCont.cmd = 'ls -lArth'
 set node0.nodeCont.removeOnStop = 'true'
-set node0.nodeCont.links = 'foo:bar foo:wallou'
+set node0.nodeCont.dns = '8.8.8.8 8.8.4.4'
 
 bind node0.nodeCont.stdout chan
 bind node0.printer.input chan

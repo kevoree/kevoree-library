@@ -56,6 +56,9 @@ public class DockerContainer {
     @Param
     private String links;
 
+    @Param
+    private String dns;
+
     @Param(defaultValue = "true")
     private boolean removeOnStop = true;
 
@@ -84,6 +87,7 @@ public class DockerContainer {
         HostConfig hostConfig = HostConfig.builder()
                 .portBindings(computePorts())
                 .links(computeLinks())
+                .dns(computeDNS())
                 .build();
 
         ContainerConfig containerConfig = ContainerConfig.builder()
@@ -111,6 +115,14 @@ public class DockerContainer {
         } catch (DockerException e) {
             Log.error("'{}' had a problem creating the container (are you sure your attributes are ok?)", context.getInstanceName());
         }
+    }
+
+    private List<String> computeDNS() {
+        List<String> dnsList = new ArrayList<>();
+        if (dns != null && !dns.isEmpty()) {
+            dnsList = Arrays.asList(dns.split(" "));
+        }
+        return dnsList;
     }
 
     @Stop
