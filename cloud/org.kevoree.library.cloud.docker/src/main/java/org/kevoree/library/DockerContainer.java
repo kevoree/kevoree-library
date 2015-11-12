@@ -1,13 +1,11 @@
 package org.kevoree.library;
 
 import com.spotify.docker.client.*;
-import com.spotify.docker.client.messages.*;
-import org.glassfish.hk2.extension.ServiceLocatorGenerator;
-import org.glassfish.hk2.osgiresourcelocator.*;
-import org.glassfish.hk2.osgiresourcelocator.ServiceLoader;
+import com.spotify.docker.client.messages.ContainerConfig;
+import com.spotify.docker.client.messages.ContainerCreation;
+import com.spotify.docker.client.messages.HostConfig;
+import com.spotify.docker.client.messages.PortBinding;
 import org.jetbrains.annotations.NotNull;
-import org.jvnet.hk2.external.generator.*;
-import org.jvnet.hk2.external.generator.ServiceLocatorGeneratorImpl;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
 import org.kevoree.api.Context;
@@ -15,8 +13,7 @@ import org.kevoree.api.Port;
 import org.kevoree.library.util.PortStreamer;
 import org.kevoree.log.Log;
 
-import java.io.*;
-import java.net.URI;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -59,6 +56,12 @@ public class DockerContainer {
     @Param
     private String dns;
 
+    @Param
+    private String volumesFrom;
+
+    @Param
+    private String binds;
+
     @Param(defaultValue = "true")
     private boolean removeOnStop = true;
 
@@ -86,8 +89,10 @@ public class DockerContainer {
 
         HostConfig hostConfig = HostConfig.builder()
                 .portBindings(computePorts())
-                .links(computeLinks())
+                .links(computeParamToList(links))
                 .dns(computeDNS())
+                .volumesFrom(computeParamToList(volumesFrom))
+                .binds(computeParamToList(binds))
                 .build();
 
         ContainerConfig containerConfig = ContainerConfig.builder()
@@ -96,7 +101,7 @@ public class DockerContainer {
                 .attachStdout(true)
                 .attachStdin(true)
                 .image(this.image)
-                .cmd(computeCommands())
+                .cmd(computeParamToList(cmd))
                 .build();
 
         try {
@@ -132,15 +137,18 @@ public class DockerContainer {
 
         try {
             docker.stopContainer(containerId, stopTimeout);
+            Log.info("'{}' has stopped container '{}'", context.getInstanceName(), containerId);
         } catch (Exception ignored) {}
 
         try {
             docker.killContainer(containerId);
+            Log.info("'{}' has killed container '{}'", context.getInstanceName(), containerId);
         } catch (Exception ignored) {}
 
         if (removeOnStop) {
             try {
                 docker.removeContainer(containerId, removeVolumes);
+                Log.info("'{}' has removed container '{}'", context.getInstanceName(), containerId);
             } catch (Exception ignored) {}
         }
     }
@@ -152,20 +160,18 @@ public class DockerContainer {
     }
 
     @NotNull
-    private List<String> computeCommands() {
-        List<String> cmdList = new ArrayList<>();
-        if (cmd != null && !cmd.isEmpty()) {
-            cmdList = Arrays.asList(cmd.split(" "));
+    private List<String> computeParamToList(String param) {
+        List<String> list = new ArrayList<>();
+        if (param != null && !param.isEmpty()) {
+            list = Arrays.asList(param.split(" "));
         }
-        return cmdList;
+        return list;
     }
 
     @NotNull
     private Map<String, List<PortBinding>> computePorts() {
-        List<String> portsList = new ArrayList<>();
-        if (ports != null && !ports.isEmpty()) {
-            portsList = Arrays.asList(ports.split(" "));
-        }
+        List<String> portsList = computeParamToList(ports);
+
         final Map<String, List<PortBinding>> portBindings = new HashMap<>();
         for (String port : portsList) {
             String hostPort = port,
@@ -181,14 +187,6 @@ public class DockerContainer {
             portBindings.put(hostPort, hostPorts);
         }
         return portBindings;
-    }
-
-    private List<String> computeLinks() {
-        List<String> linksList = new ArrayList<>();
-        if (links != null && !links.isEmpty()) {
-            linksList = Arrays.asList(links.split(" "));
-        }
-        return linksList;
     }
 
     private void computeAttach() throws IOException {
