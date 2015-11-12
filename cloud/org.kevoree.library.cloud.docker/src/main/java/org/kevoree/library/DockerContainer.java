@@ -53,6 +53,9 @@ public class DockerContainer {
     @Param
     private String ports;
 
+    @Param
+    private String links;
+
     @Param(defaultValue = "true")
     private boolean removeOnStop = true;
 
@@ -80,6 +83,7 @@ public class DockerContainer {
 
         HostConfig hostConfig = HostConfig.builder()
                 .portBindings(computePorts())
+                .links(computeLinks())
                 .build();
 
         ContainerConfig containerConfig = ContainerConfig.builder()
@@ -91,13 +95,22 @@ public class DockerContainer {
                 .cmd(computeCommands())
                 .build();
 
-        ContainerCreation creation = docker.createContainer(containerConfig);
-        containerId = creation.id();
+        try {
+            ContainerCreation creation = docker.createContainer(containerConfig);
+            containerId = creation.id();
 
-        computeAttach();
+            computeAttach();
 
-        docker.startContainer(containerId);
-        Log.info("'{}' has started a new container '{}'", context.getInstanceName(), containerId);
+            try {
+                docker.startContainer(containerId);
+                Log.info("'{}' has started a new container '{}'", context.getInstanceName(), containerId);
+            } catch (DockerException err) {
+                Log.error("'{}' had a problem starting the container (are you sure your attributes are ok?)", context.getInstanceName());
+            }
+
+        } catch (DockerException e) {
+            Log.error("'{}' had a problem creating the container (are you sure your attributes are ok?)", context.getInstanceName());
+        }
     }
 
     @Stop
@@ -156,6 +169,14 @@ public class DockerContainer {
             portBindings.put(hostPort, hostPorts);
         }
         return portBindings;
+    }
+
+    private List<String> computeLinks() {
+        List<String> linksList = new ArrayList<>();
+        if (links != null && !links.isEmpty()) {
+            linksList = Arrays.asList(links.split(" "));
+        }
+        return linksList;
     }
 
     private void computeAttach() throws IOException {
