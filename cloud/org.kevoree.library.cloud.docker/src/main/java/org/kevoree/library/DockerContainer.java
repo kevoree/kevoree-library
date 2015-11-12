@@ -45,6 +45,9 @@ public class DockerContainer {
     private String image;
 
     @Param
+    private String name;
+
+    @Param
     private String cmd;
 
     @Param
@@ -105,7 +108,12 @@ public class DockerContainer {
                 .build();
 
         try {
-            ContainerCreation creation = docker.createContainer(containerConfig);
+            ContainerCreation creation;
+            if (name != null && !name.isEmpty()) {
+                creation = docker.createContainer(containerConfig, name);
+            } else {
+                creation = docker.createContainer(containerConfig);
+            }
             containerId = creation.id();
 
             computeAttach();
