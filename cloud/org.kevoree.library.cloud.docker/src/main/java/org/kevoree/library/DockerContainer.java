@@ -31,10 +31,10 @@ import static com.spotify.docker.client.DockerClient.AttachParameter;
 @ComponentType(description = "Runs a Docker container based on provided <strong>image</strong> name and the set of " +
         "options in the attributes: <strong>cmd</strong>, <strong>ports</strong>, <strong>removeOnClose</strong> " +
         "etc." +
-        "<br/><br/>The <strong>cmd</strong> and <strong>ports</strong> attributes can specify several values by using" +
-        "a <em>space</em> separator (ie. cmd: <em>ls -lArth</em>, ports: <em>80 9001:9000</em>)" +
-        "<br/>By default, <strong>ports</strong> will forward the same port number from host to container. If you want" +
-        "to differenciate ports, use the <em>hostPort:containerPort</em> syntax.")
+        "<br/><br/>Most of the \"multivalued\" attributes can specify several values by using " +
+        "a <em>space</em> separator (ie. cmd: <em>ls -lArth</em>, ports: <em>80 9001:9000</em>, links: <em>foo:bar baz:bar</em>)" +
+        "<br/>By default, <strong>ports</strong> will forward the same port number from host to container. If you want " +
+        "to differentiate ports, use the <em>hostPort:containerPort</em> syntax.")
 public class DockerContainer {
 
     private String containerId;
