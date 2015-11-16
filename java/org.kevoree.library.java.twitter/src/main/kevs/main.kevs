@@ -1,0 +1,18 @@
+add node0: JavaNode
+add node0.twitter: Twitter
+add node0.printer: ConsolePrinter
+add sync: WSGroup
+add chan: SyncBroadcast
+
+attach node0 sync
+
+// check out https://apps.twitter.com/app
+set node0.twitter.consumerKey = "your_consumer_key"
+set node0.twitter.consumerSecret = "your_consumer_secret"
+set node0.twitter.token = "your_app_token"
+set node0.twitter.secret = "your_app_secret"
+// filtering params
+set node0.twitter.trackTerms = "kevoree"
+
+bind node0.twitter.out chan
+bind node0.printer.input chan
