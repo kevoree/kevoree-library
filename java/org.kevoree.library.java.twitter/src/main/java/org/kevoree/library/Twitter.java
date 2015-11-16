@@ -23,7 +23,11 @@ import java.util.concurrent.*;
  *
  * Created by leiko on 16/11/15.
  */
-@ComponentType
+@ComponentType(description = "Outputs tweets on the <strong>out</strong> port (JSON-encoded strings) based on the "+
+"given <strong>followingIDs</strong> and <strong>trackTerms</strong>."+
+"<br/>"+
+"In order to access the Twitter API, you have to provide valid auths for <strong>consumerKey</strong>, "+
+"<strong>consumerSecret</strong>, <strong>token</strong> and <strong>secret</strong>")
 public class Twitter {
 
     private Client client;
