@@ -1,7 +1,6 @@
 package org.kevoree.library;
 
 
-
 import java.util.Date;
 
 import org.antlr.v4.runtime.misc.Triple;
@@ -17,7 +16,7 @@ import org.kevoree.api.Callback;
 import org.kevoree.api.CallbackResult;
 
 import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPAdministrator; 
+import com.espertech.esper.client.EPAdministrator;
 import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
@@ -25,11 +24,12 @@ import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
 import org.kevoree.library.data.StreamDoubleValue;
+import org.kevoree.log.Log;
 
 @ComponentType
 public class KevoreeComponent implements UpdateListener {
 
-	@Param(defaultValue = "select * from StreamDoubleValue(portId='input1').win:length(2) having avg(value) > 6.0")
+    @Param(defaultValue = "select * from StreamDoubleValue(portId='input1').win:length(2) having avg(value) > 6.0")
     public String cepStatement;
 
     @Param(defaultValue = "Event Occured")
@@ -41,74 +41,77 @@ public class KevoreeComponent implements UpdateListener {
     @Output
     org.kevoree.api.Port out;
 
-	private EPRuntime cepRT;
+    private EPRuntime cepRT;
 
-	private EPServiceProvider cep;
+    private EPServiceProvider cep;
 
-	private EPStatement cepStat;
+    private EPStatement cepStat;
 
     @Input
     public void input1(Object i) {
-    	System.out.println("receive " + i);
 
-        StreamDoubleValue val = new StreamDoubleValue("input1",Double.parseDouble(""+i),new Date().getTime());
+        Log.debug("receive " + i);
 
-    	cepRT.sendEvent(val);
-    	
+        StreamDoubleValue val = new StreamDoubleValue("input1", Double.parseDouble("" + i), new Date().getTime());
+
+        cepRT.sendEvent(val);
+
     }
+
     @Input
     public void input2(Object i) {
-    	StreamDoubleValue val = new StreamDoubleValue("input2",Double.parseDouble(""+i),new Date().getTime());
-    	cepRT.sendEvent(val);
-    
+        StreamDoubleValue val = new StreamDoubleValue("input2", Double.parseDouble("" + i), new Date().getTime());
+        cepRT.sendEvent(val);
+
     }
+
     @Input
     public void input3(Object i) {
-    	StreamDoubleValue val = new StreamDoubleValue("input3",Double.parseDouble(""+i),new Date().getTime());
-    	cepRT.sendEvent(val);
-    
+        StreamDoubleValue val = new StreamDoubleValue("input3", Double.parseDouble("" + i), new Date().getTime());
+        cepRT.sendEvent(val);
+
     }
 
 
     @Start
     public void start() {
-		Configuration cepConfig = new Configuration();
+        Configuration cepConfig = new Configuration();
         cepConfig.addEventType("StreamDoubleValue", StreamDoubleValue.class.getName());
         cep = EPServiceProviderManager.getProvider("myCEPEngine", cepConfig);
         cepRT = cep.getEPRuntime();
 
         EPAdministrator cepAdm = cep.getEPAdministrator();
-        cepStat = cepAdm.createEPL(cepStatement);        
+        cepStat = cepAdm.createEPL(cepStatement);
         cepStat.addListener(this);
 
-    	
+
     }
 
     @Stop
     public void stop() {
-    	cep.destroy();
-    	
+        cep.destroy();
+
     }
 
     @Update
     public void update() {
-    	EPAdministrator cepAdm = cep.getEPAdministrator();
+        EPAdministrator cepAdm = cep.getEPAdministrator();
         cepStat.removeAllListeners();
         cepStat.destroy();
-        cepStat = cepAdm.createEPL(cepStatement);        
+        cepStat = cepAdm.createEPL(cepStatement);
         cepStat.addListener(this);
     }
 
     @Override
-	public void update(EventBean[] arg0, EventBean[] arg1) {
-		out.send(message,new Callback() {
-			public void onError(Throwable arg0) {
-			}
+    public void update(EventBean[] arg0, EventBean[] arg1) {
+        out.send(message, new Callback() {
+            public void onError(Throwable arg0) {
+            }
 
-			public void onSuccess(CallbackResult arg0) {
-			}
-		});
-	}
+            public void onSuccess(CallbackResult arg0) {
+            }
+        });
+    }
 
 }
 

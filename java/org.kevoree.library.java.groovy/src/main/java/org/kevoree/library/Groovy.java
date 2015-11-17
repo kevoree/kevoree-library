@@ -1,4 +1,4 @@
-package fr.kevoree.library;
+package org.kevoree.library;
 
 import groovy.util.Eval;
 import org.kevoree.annotation.ComponentType;
