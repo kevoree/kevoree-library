@@ -4,6 +4,9 @@ package org.kevoree.library;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.Input;
@@ -23,6 +26,7 @@ import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.FeedException;
 import org.kevoree.api.Context;
 import org.kevoree.api.Port;
+import org.kevoree.log.Log;
 
 
 @ComponentType
@@ -31,55 +35,31 @@ public class RSSFetcher {
     @Param(defaultValue = "https://news.google.com/news?q=apple&output=rss", optional = false)
     public String url;
 
-    @KevoreeInject
-    private Context context;
-
     @Output
     public Port out;
 
-    private FeedFetcher feedFetcher;
 
-    @Input
-    public void in(final Object inputValue) {
-        try {
-            final SyndFeed feed = feedFetcher.retrieveFeed(new URL(url));
-            out.send(feed.toString(), null);
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (FeedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (FetcherException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
+    private ScheduledExecutorService service;
 
     @Start
     public void start() {
-        final FeedFetcherCache feedInfoCache = HashMapFeedInfoCache.getInstance();
-        feedFetcher = new HttpURLFeedFetcher(feedInfoCache);
-
-
-    }
-
-    @Stop
-    public void stop() {
-
-
+        this.service = Executors.newScheduledThreadPool(1);
+        try {
+            service.scheduleWithFixedDelay(new RSSFetcherRunner(this.url, this.out), 0, 15, TimeUnit.MINUTES);
+        } catch (MalformedURLException e) {
+            Log.error(e.getMessage());
+        }
     }
 
     @Update
     public void update() {
+        this.stop();
+        this.start();
     }
 
+    @Stop
+    private void stop() {
+        this.service.shutdown();
+    }
 }
 
