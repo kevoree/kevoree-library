@@ -20,7 +20,7 @@ public class FacebookStreamClient {
     public String accessToken;
 
     @Param(optional = false)
-    public String page;
+    public String ressourceId;
 
     private ScheduledExecutorService service;
 
@@ -31,7 +31,7 @@ public class FacebookStreamClient {
 
     private void createExecutor() {
         this.service = Executors.newScheduledThreadPool(1);
-        final FacebookClientThread fbt = new FacebookClientThread(accessToken, page, stream);
+        final FacebookClientThread fbt = new FacebookClientThread(accessToken, ressourceId, stream);
         service.scheduleWithFixedDelay(fbt, 1, 3, TimeUnit.SECONDS);
     }
 
