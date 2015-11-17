@@ -26,6 +26,10 @@
         <module>org.kevoree.library.java.mqtt</module>
         <module>org.kevoree.library.java.mqttServer</module>
         <module>org.kevoree.library.java.rest</module>
+        <module>org.kevoree.library.java.rss</module>
+        <module>org.kevoree.library.java.esper</module>
+        <module>org.kevoree.library.java.facebook</module>
+        <module>org.kevoree.library.java.twitter</module>
     </modules>
 
     <dependencies>

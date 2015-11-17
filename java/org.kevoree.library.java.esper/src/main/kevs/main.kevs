@@ -1,0 +1,17 @@
+//sample of KevScript configuration
+add node0 : JavaNode
+add node0.comp144 : EsperTickerTest
+add node0.comp390 : ConsolePrinter
+add node0.cmp1 : esper.KevoreeComponent
+add chan373, chan988 : AsyncBroadcast
+
+
+add sync : WSGroup
+attach node0 sync
+
+bind node0.cmp1.input1 chan988
+bind node0.comp144.out chan988
+bind node0.cmp1.out chan373
+bind node0.comp390.input chan373
+
+

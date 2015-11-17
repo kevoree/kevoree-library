@@ -1,0 +1,17 @@
+//sample of KevScript configuration
+
+add node0 : JavaNode
+add node0.comp2 : ConsolePrinter
+add node0.comp1 : org.kevoree.rome.RomeFetcherComponent
+add node0.comp885 : Ticker
+add sync : WSGroup
+add chan1, chan0 : AsyncBroadcast
+
+attach node0 sync
+
+bind node0.comp2.input chan0
+bind node0.comp1.out chan0
+bind node0.comp1.in chan1
+bind node0.comp885.tick chan1
+
+
