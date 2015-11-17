@@ -1,4 +1,4 @@
-package fr.kevoree.library;
+package org.kevoree.library;
 
 import groovy.util.Eval;
 import org.kevoree.annotation.ComponentType;
@@ -8,6 +8,7 @@ import org.kevoree.annotation.Param;
 import org.kevoree.api.Port;
 
 /**
+ *
  * Created by mleduc on 17/11/15.
  */
 @ComponentType
