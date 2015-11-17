@@ -5,6 +5,7 @@ import com.restfb.types.Post;
 import org.kevoree.api.Port;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,29 +15,24 @@ import java.util.stream.Stream;
  */
 public class FacebookClientThread extends Thread {
 
-    private final String accessToken;
-    private final String page;
+    private final String ressourceId;
     private final Port stream;
-    private boolean stop = false;
+    private final DefaultFacebookClient facebookClient;
     public static final JsonMapper JSON_MAPPER = new DefaultJsonMapper();
+    private long latestTime = System.currentTimeMillis();
 
-    public FacebookClientThread(final String accessToken, final String page, final Port stream) {
-        this.accessToken = accessToken;
-        this.page = page;
+    public FacebookClientThread(final String accessToken, final String ressourceId, final Port stream) {
+        this.ressourceId = ressourceId;
         this.stream = stream;
+        this.facebookClient = new DefaultFacebookClient(accessToken, Version.VERSION_2_5);
     }
 
     @Override
     public void run() {
-        final FacebookClient facebookClient = new DefaultFacebookClient(accessToken, Version.VERSION_2_5);
-
-        long latestTime = System.currentTimeMillis();
-
-        while(!stop) {
-            final List<Post> sortedPosts = getPosts(page, facebookClient, getParamSince(latestTime));
-            send(sortedPosts);
-            final Post latest = sortedPosts.get(sortedPosts.size()-1);
-            latestTime = latest.getCreatedTime().getTime();
+        final List<Post> sortedPosts = getPosts(ressourceId, facebookClient, getParamSince(latestTime));
+        send(sortedPosts);
+        if(!sortedPosts.isEmpty()) {
+            latestTime = sortedPosts.get(sortedPosts.size() - 1).getCreatedTime().getTime();
         }
     }
 
@@ -45,19 +41,12 @@ public class FacebookClientThread extends Thread {
     }
 
     private List<Post> getPosts(final String page, final FacebookClient facebookClient, final Parameter... params) {
-        List<Post> sortedPosts;
-        while (true) {
-            final Connection<Post> posts = query(page, facebookClient, params);
-            if (posts.getData().isEmpty()) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-
-                }
-            } else {
-                sortedPosts = sortStreamByCreationTime(listToStream(posts)).collect(Collectors.toList());
-                break;
-            }
+        final List<Post> sortedPosts;
+        final Connection<Post> posts = query(page, facebookClient, params);
+        if (posts.getData().isEmpty()) {
+            sortedPosts = Collections.emptyList();
+        } else {
+            sortedPosts = sortStreamByCreationTime(listToStream(posts)).collect(Collectors.toList());
         }
         return sortedPosts;
     }
@@ -86,9 +75,5 @@ public class FacebookClientThread extends Thread {
             ret.addAll(page.stream().collect(Collectors.toList()));
         }
         return ret;
-    }
-
-    public void askStop() {
-        this.stop = true;
     }
 }

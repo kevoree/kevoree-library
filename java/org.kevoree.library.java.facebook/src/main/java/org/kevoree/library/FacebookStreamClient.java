@@ -3,6 +3,10 @@ package org.kevoree.library;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Port;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by mleduc on 16/11/15.
  */
@@ -10,20 +14,25 @@ import org.kevoree.api.Port;
 public class FacebookStreamClient {
 
     @Output
-    private Port stream;
+    public Port stream;
 
     @Param(optional = false)
-    private String accessToken;
+    public String accessToken;
 
     @Param(optional = false)
-    private String page;
+    public String page;
 
-    private FacebookClientThread thread;
+    private ScheduledExecutorService service;
 
     @Start
     public void start() {
-        this.thread = new FacebookClientThread(accessToken, page, stream);
-        this.thread.start();
+        createExecutor();
+    }
+
+    private void createExecutor() {
+        this.service = Executors.newScheduledThreadPool(1);
+        final FacebookClientThread fbt = new FacebookClientThread(accessToken, page, stream);
+        service.scheduleWithFixedDelay(fbt, 1, 3, TimeUnit.SECONDS);
     }
 
     @Update
@@ -34,6 +43,6 @@ public class FacebookStreamClient {
 
     @Stop
     private void stop() {
-        this.thread.askStop();
+        this.service.shutdown();
     }
 }
