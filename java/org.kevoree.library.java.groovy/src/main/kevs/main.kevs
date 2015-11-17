@@ -1,0 +1,15 @@
+add node0 : JavaNode
+add sync : WSGroup
+attach node0 sync
+
+add chan0, chan1 : AsyncBroadcast
+
+add node0.groovy : Groovy
+add node0.console : ConsolePrinter
+add node0.ticker : Ticker
+
+bind node0.ticker.tick chan0
+bind node0.groovy.eval chan0
+
+bind node0.groovy.result chan1
+bind node0.console.input chan1

@@ -1,10 +1,9 @@
-package esper;
+package org.kevoree.library;
 
 
 
 import java.util.Date;
 
-import esper.data.StreamDoubleValue;
 import org.antlr.v4.runtime.misc.Triple;
 import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.Input;
@@ -25,15 +24,17 @@ import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
+import org.kevoree.library.data.StreamDoubleValue;
 
 @ComponentType
 public class KevoreeComponent implements UpdateListener {
 
 	@Param(defaultValue = "select * from StreamDoubleValue(portId='input1').win:length(2) having avg(value) > 6.0")
-    String cepStatement;
+    public String cepStatement;
 
     @Param(defaultValue = "Event Occured")
-    String message;
+    public String message;
+
     @KevoreeInject
     org.kevoree.api.Context context;
 
@@ -50,9 +51,8 @@ public class KevoreeComponent implements UpdateListener {
     public void input1(Object i) {
     	System.out.println("receive " + i);
 
-        Triple<String,Double,Long> val = new Triple<String, Double, Long>("input1",Double.parseDouble(""+i),new Date().getTime());
-    	
-    	//StreamDoubleValue val = new StreamDoubleValue();
+        StreamDoubleValue val = new StreamDoubleValue("input1",Double.parseDouble(""+i),new Date().getTime());
+
     	cepRT.sendEvent(val);
     	
     }
@@ -99,6 +99,7 @@ public class KevoreeComponent implements UpdateListener {
         cepStat.addListener(this);
     }
 
+    @Override
 	public void update(EventBean[] arg0, EventBean[] arg1) {
 		out.send(message,new Callback() {
 			public void onError(Throwable arg0) {
@@ -107,7 +108,6 @@ public class KevoreeComponent implements UpdateListener {
 			public void onSuccess(CallbackResult arg0) {
 			}
 		});
-		
 	}
 
 }

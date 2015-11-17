@@ -64,7 +64,7 @@ public class Ticker implements Runnable {
                     @Override
                     public void onSuccess(CallbackResult result) {
                         if (result != null) {
-                            System.out.println("ticker return : " + result.getPayload());
+                            Log.debug("ticker return : " +  result.getPayload());
                         }
                     }
 
