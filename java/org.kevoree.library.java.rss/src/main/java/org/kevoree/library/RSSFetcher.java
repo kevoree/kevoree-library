@@ -26,7 +26,7 @@ import org.kevoree.api.Port;
 
 
 @ComponentType
-public class RomeFetcherComponent {
+public class RSSFetcher {
 
     @Param(defaultValue = "https://news.google.com/news?q=apple&output=rss", optional = false)
     public String url;
