@@ -3,6 +3,7 @@ package org.kevoree.library;
 
 import java.util.Date;
 
+import com.espertech.esper.client.*;
 import org.antlr.v4.runtime.misc.Triple;
 import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.Input;
@@ -15,19 +16,11 @@ import org.kevoree.annotation.Update;
 import org.kevoree.api.Callback;
 import org.kevoree.api.CallbackResult;
 
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPAdministrator;
-import com.espertech.esper.client.EPRuntime;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.UpdateListener;
 import org.kevoree.library.data.StreamDoubleValue;
 import org.kevoree.log.Log;
 
 @ComponentType
-public class KevoreeComponent implements UpdateListener {
+public class EsperMonitor implements UpdateListener {
 
     @Param(defaultValue = "select * from StreamDoubleValue(portId='input1').win:length(2) having avg(value) > 6.0")
     public String cepStatement;
@@ -48,7 +41,7 @@ public class KevoreeComponent implements UpdateListener {
     private EPStatement cepStat;
 
     @Input
-    public void input1(Object i) {
+    public void in1(Object i) {
 
         Log.debug("receive " + i);
 
@@ -59,14 +52,14 @@ public class KevoreeComponent implements UpdateListener {
     }
 
     @Input
-    public void input2(Object i) {
+    public void in2(Object i) {
         StreamDoubleValue val = new StreamDoubleValue("input2", Double.parseDouble("" + i), new Date().getTime());
         cepRT.sendEvent(val);
 
     }
 
     @Input
-    public void input3(Object i) {
+    public void in3(Object i) {
         StreamDoubleValue val = new StreamDoubleValue("input3", Double.parseDouble("" + i), new Date().getTime());
         cepRT.sendEvent(val);
 
@@ -83,7 +76,6 @@ public class KevoreeComponent implements UpdateListener {
         EPAdministrator cepAdm = cep.getEPAdministrator();
         cepStat = cepAdm.createEPL(cepStatement);
         cepStat.addListener(this);
-
 
     }
 
