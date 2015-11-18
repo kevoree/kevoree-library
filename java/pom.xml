@@ -30,6 +30,7 @@
         <module>org.kevoree.library.java.esper</module>
         <module>org.kevoree.library.java.facebook</module>
         <module>org.kevoree.library.java.twitter</module>
+        <module>org.kevoree.library.java.groovy</module>
     </modules>
 
     <dependencies>
