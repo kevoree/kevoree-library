@@ -32,7 +32,7 @@
         <module>org.kevoree.library.java.twitter</module>
         <module>org.kevoree.library.java.groovy</module>
         <module>org.kevoree.library.java.jython</module>
-        <module>org.kevoree.library.java.avatarjs</module>
+        <!--<module>org.kevoree.library.java.avatarjs</module>-->
         <module>org.kevoree.library.java.imagga</module>
     </modules>
 
