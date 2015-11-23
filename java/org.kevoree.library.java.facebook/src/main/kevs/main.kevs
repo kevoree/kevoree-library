@@ -9,5 +9,5 @@ attach node0 sync
 bind node0.fb.stream hub
 bind node0.comp632.input hub
 
-set node0.fb.page = 'kevoree.test'
+set node0.fb.ressourceId = 'kevoree.test'
 set node0.fb.accessToken = 'PLEASE UPDATE ME'

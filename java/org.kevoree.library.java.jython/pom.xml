@@ -2,8 +2,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.kevoree.library.java.groovy</artifactId>
-    <name>Kevoree :: Library :: Java :: Groovy</name>
+    <artifactId>org.kevoree.library.java.jython</artifactId>
+    <name>Kevoree :: Library :: Java :: Jython</name>
     <version>5.2.11-SNAPSHOT</version>
 
     <parent>
@@ -19,9 +19,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>2.4.5</version>
+            <groupId>org.python</groupId>
+            <artifactId>jython-standalone</artifactId>
+            <version>2.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

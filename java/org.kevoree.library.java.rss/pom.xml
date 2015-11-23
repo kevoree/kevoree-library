@@ -14,19 +14,35 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <rome.version>1.5.1</rome.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.rometools</groupId>
             <artifactId>rome</artifactId>
-            <version>1.5.1</version>
+            <version>${rome.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rometools</groupId>
             <artifactId>rome-fetcher</artifactId>
-            <version>1.5.1</version>
+            <version>${rome.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.4</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.4</version>
+        </dependency>
+
+
 
         <dependency>
             <groupId>junit</groupId>

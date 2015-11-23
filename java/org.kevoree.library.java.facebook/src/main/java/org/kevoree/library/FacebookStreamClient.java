@@ -26,10 +26,6 @@ public class FacebookStreamClient {
 
     @Start
     public void start() {
-        createExecutor();
-    }
-
-    private void createExecutor() {
         this.service = Executors.newScheduledThreadPool(1);
         final FacebookClientThread fbt = new FacebookClientThread(accessToken, ressourceId, stream);
         service.scheduleWithFixedDelay(fbt, 1, 3, TimeUnit.SECONDS);
