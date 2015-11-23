@@ -29,6 +29,11 @@ public class RequiredPortImpl implements Port {
         return delegate.size();
     }
 
+    @Override
+    public void send(String payload) {
+        this.send(payload, null);
+    }
+
     public void send(String payload, final Callback callback) {
         synchronized (delegate) {
             if (!delegate.isEmpty()) {

@@ -220,6 +220,11 @@ public class DockerContainer {
         c.removeOnStop = true;
         c.stdout = new Port() {
             @Override
+            public void send(String payload) {
+                this.send(payload, null);
+            }
+
+            @Override
             public void send(String s, Callback callback) {
                 System.out.println("stdout>"+s);
             }

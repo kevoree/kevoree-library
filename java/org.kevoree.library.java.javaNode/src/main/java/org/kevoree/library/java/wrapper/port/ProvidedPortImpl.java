@@ -79,6 +79,11 @@ public class ProvidedPortImpl implements Port {
         }
     }
 
+    @Override
+    public void send(String payload) {
+        this.send(payload, null);
+    }
+
     public void send(String payload, Callback callback) {
         try {
             if (componentWrapper.getIsStarted()) {
