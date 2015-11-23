@@ -85,7 +85,7 @@
             <plugin>
                 <groupId>org.kevoree.tools</groupId>
                 <artifactId>org.kevoree.tools.mavenplugin</artifactId>
-                <version>5.2.9-SNAPSHOT</version>
+                <version>${kevoree.version}</version>
                 <extensions>true</extensions>
                 <executions>
                     <execution>

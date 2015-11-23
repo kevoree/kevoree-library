@@ -1,4 +1,4 @@
-add node0, node1 : JavaNode/5.2.9-SNAPSHOT
+add node0, node1 : JavaNode
 add sync : WSGroup
 add node0.ticker : Ticker
 add node1.printer : ConsolePrinter
