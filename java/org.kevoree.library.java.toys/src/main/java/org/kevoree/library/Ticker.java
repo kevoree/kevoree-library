@@ -43,12 +43,6 @@ public class Ticker implements Runnable {
     @Stop
     public void stop() {
         running = false;
-        modelService.update(null, new UpdateCallback() {
-            @Override
-            public void run(Boolean aBoolean) {
-
-            }
-        });
     }
 
     @Override
