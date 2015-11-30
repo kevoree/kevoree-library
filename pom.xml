@@ -5,7 +5,7 @@
     <artifactId>org.kevoree.library</artifactId>
     <packaging>pom</packaging>
     <name>Kevoree :: Library</name>
-    <version>5.3.1-SNAPSHOT</version>
+    <version>5.3.1</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
