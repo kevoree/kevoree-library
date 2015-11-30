@@ -1,0 +1,12 @@
+add node0 : JavaNode
+add node0.ticker : Ticker
+add node0.mongo : MongoDB
+add chan: SyncBroadcast
+add sync : WSGroup
+
+attach node0 sync
+
+set node0.mongo.host = "localhost"
+
+bind node0.ticker.tick chan
+bind node0.mongo.in chan
