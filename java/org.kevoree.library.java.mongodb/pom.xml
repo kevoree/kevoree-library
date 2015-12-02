@@ -1,55 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.kevoree.library.java.rss</artifactId>
+    <artifactId>org.kevoree.library.java.mongodb</artifactId>
     <version>5.3.2-SNAPSHOT</version>
-    <name>Kevoree :: Library :: Java :: RSS</name>
+    <name>Kevoree :: Library :: Java :: MongoDB</name>
 
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
         <groupId>org.kevoree.library.java</groupId>
         <version>5.3.2-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <rome.version>1.5.1</rome.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>com.rometools</groupId>
-            <artifactId>rome</artifactId>
-            <version>${rome.version}</version>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver</artifactId>
+            <version>3.1.1</version>
         </dependency>
-        <dependency>
-            <groupId>com.rometools</groupId>
-            <artifactId>rome-fetcher</artifactId>
-            <version>${rome.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.4</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
-        </dependency>
-
-
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.10</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -65,4 +38,3 @@
         </plugins>
     </build>
 </project>
-		
