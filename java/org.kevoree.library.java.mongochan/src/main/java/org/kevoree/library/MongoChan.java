@@ -85,26 +85,22 @@ public class MongoChan implements ChannelDispatch {
 
     @Start
     public void start() {
-        ClusterSettings clusterSettings = ClusterSettings.builder().hosts(asList(new ServerAddress(host, port))).build();
-        MongoClientSettings settings = MongoClientSettings.builder().clusterSettings(clusterSettings).build();
-        try {
-            mongoClient = MongoClients.create(settings);
-            db = mongoClient.getDatabase(this.database);
-            launchConsumers();
-        } catch (java.security.AccessControlException e) {
-            launchConsumers();
-        }
+        final ClusterSettings clusterSettings = ClusterSettings.builder().hosts(asList(new ServerAddress(host, port))).build();
+        final MongoClientSettings settings = MongoClientSettings.builder().clusterSettings(clusterSettings).build();
+        mongoClient = MongoClients.create(settings);
+        db = mongoClient.getDatabase(this.database);
+        launchConsumers();
     }
 
     private void launchConsumers() {
-        Set<String> localInputs = inputPaths();
+        final Set<String> localInputs = inputPaths();
         this.service = Executors.newScheduledThreadPool(1);
-       service.scheduleWithFixedDelay(new MongoChanFetcher(localInputs, mongoClient, database, collection, channelContext.getLocalPorts()), 0, 1, TimeUnit.SECONDS);
+        service.scheduleWithFixedDelay(new MongoChanFetcher(localInputs, mongoClient, database, collection, channelContext.getLocalPorts()), 0, 1, TimeUnit.SECONDS);
 
     }
 
     @Update
-    private void update() {
+    public void update() {
         this.stop();
         this.start();
     }
@@ -120,7 +116,7 @@ public class MongoChan implements ChannelDispatch {
         final Stream<Document> inputPortStream = Stream.concat(localInputPortStream, remoteInputPortStream);
         final List<Document> fullList = inputPortStream.collect(Collectors.toList());
         db.getCollection(collection).insertMany(fullList, (aVoid, throwable) -> {
-            if(throwable != null) {
+            if (throwable != null) {
                 Log.error(throwable.getMessage());
             }
         });
@@ -159,7 +155,7 @@ public class MongoChan implements ChannelDispatch {
     }
 
     @Stop
-    private void stop() {
+    public void stop() {
         mongoClient.close();
     }
 }

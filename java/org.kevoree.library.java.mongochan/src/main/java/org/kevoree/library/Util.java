@@ -18,10 +18,6 @@ public class Util {
         return getPortsPath(chan, nodeName, "provided");
     }
 
-    public static Set<String> getOutputPath(Channel chan, String nodeName) {
-        return getPortsPath(chan, nodeName, "required");
-    }
-
     private static Set<String> getPortsPath(Channel chan, String nodeName, String type) {
         Set<String> paths = new HashSet<String>();
         if (chan != null) {
@@ -36,13 +32,4 @@ public class Util {
         }
         return paths;
     }
-
-   /* private static MBinding findPortByName(Channel chan, String nodeName, String path, String type) {
-            return chan.getBindings().stream().filter(binding -> binding.getPort() != null
-                    && binding.getPort().getRefInParent() != null
-                    && binding.getPort().getRefInParent().equals(type)).filter(binding -> {
-                        ContainerNode node = (ContainerNode) binding.getPort().eContainer().eContainer();
-                        return node.getName().equals(nodeName) && binding.getPort().path().equals(path);
-                    }).findFirst().orElseGet(null);
-    }*/
 }
