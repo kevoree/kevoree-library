@@ -1,0 +1,12 @@
+add node0 : JavaNode
+add node0.tick : Ticker
+add node0.console : ConsolePrinter
+add sync : WSGroup
+add chan : RedisChan
+
+attach node0 sync
+
+bind node0.console.input chan
+bind node0.tick.tick chan
+
+set chan.prefix="test"
