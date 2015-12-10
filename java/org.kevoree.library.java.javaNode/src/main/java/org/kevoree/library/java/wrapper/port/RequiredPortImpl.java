@@ -36,31 +36,27 @@ public class RequiredPortImpl implements Port {
 
     public void send(String payload, final Callback callback) {
         synchronized (delegate) {
-            if (!delegate.isEmpty()) {
-                for (final ChannelWrapper wrapper : delegate.values()) {
-                    wrapper.call(new Callback() {
-                        @Override
-                        public void onSuccess(CallbackResult result) {
-                            result.setOriginChannelPath(wrapper.getContext().getChannelPath());
-                            if(callback != null) {
-                                callback.onSuccess(result);
-                            }
+            for (final ChannelWrapper wrapper : delegate.values()) {
+                wrapper.call(new Callback() {
+                    @Override
+                    public void onSuccess(CallbackResult result) {
+                        result.setOriginChannelPath(wrapper.getContext().getChannelPath());
+                        if(callback != null) {
+                            callback.onSuccess(result);
                         }
+                    }
 
-                        @Override
-                        public void onError(Throwable exception) {
-                            if(callback != null) {
-                                callback.onError(exception);
-                            } else {
-                                if(exception != null) {
-                                    exception.printStackTrace();
-                                }
+                    @Override
+                    public void onError(Throwable exception) {
+                        if(callback != null) {
+                            callback.onError(exception);
+                        } else {
+                            if(exception != null) {
+                                exception.printStackTrace();
                             }
                         }
-                    }, payload);
-                }
-            } else {
-                callback.onError(new Exception("Message lost because the port is not connected to any channel"));
+                    }
+                }, payload);
             }
         }
     }

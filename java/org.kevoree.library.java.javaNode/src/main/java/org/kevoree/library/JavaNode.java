@@ -10,6 +10,7 @@ import org.kevoree.api.adaptation.AdaptationModel;
 import org.kevoree.api.adaptation.AdaptationPrimitive;
 import org.kevoree.api.adaptation.AdaptationType;
 import org.kevoree.api.handler.ModelListener;
+import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.library.java.ModelRegistry;
 import org.kevoree.library.java.command.*;
@@ -181,8 +182,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     }
 
     @Override
-    public void modelUpdated() {
-    }
+    public void modelUpdated() {}
 
     @Override
     public void preRollback(UpdateContext context) {

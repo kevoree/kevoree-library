@@ -1,9 +1,7 @@
 add node0 : JavaNode
-//add node0.aaa : Ticker
+add node0.ticker : Ticker
 add sync : WSGroup
 
 attach node0 sync
 
-set node0.log = 'DEBUG'
 set sync.master = 'node0'
-//add node0.child : JavaNode

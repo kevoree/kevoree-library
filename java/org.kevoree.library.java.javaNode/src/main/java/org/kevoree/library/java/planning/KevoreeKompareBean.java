@@ -16,6 +16,7 @@ import org.kevoree.pmodeling.api.util.ModelVisitor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -34,8 +35,7 @@ public class KevoreeKompareBean extends KevoreeScheduler {
 
     public AdaptationModel plan(ContainerRoot actualModel, ContainerRoot targetModel, String nodeName) {
         AdaptationModel adaptationModel = compareModels(actualModel, targetModel, nodeName);
-        AdaptationModel afterPlan = schedule(adaptationModel, nodeName);
-        return afterPlan;
+        return schedule(adaptationModel, nodeName);
     }
 
 
@@ -181,264 +181,268 @@ public class KevoreeKompareBean extends KevoreeScheduler {
         if (traces != null) {
             for (ModelTrace trace : traces.getTraces()) {
                 KMFContainer modelElement = targetModel.findByPath(trace.getSrcPath());
-                if (trace.getRefName().equals("components")) {
-                    if (trace.getSrcPath().equals(targetNode.path())) {
-                        if (trace instanceof ModelAddTrace) {
-                            KMFContainer elemToAdd = targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
-                            adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, elemToAdd));
-                        }
-                        if (trace instanceof ModelRemoveTrace) {
-                            KMFContainer elemToAdd = currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
-                            adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, elemToAdd));
-                            adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, elemToAdd));
-                        }
-                    }
-                }
-                if (trace.getRefName().equals("hosts")) {
-                    if (trace.getSrcPath().equals(targetNode.path())) {
-                        if (trace instanceof ModelAddTrace) {
-                            KMFContainer elemToAdd = targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
-                            adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, elemToAdd));
-                        }
-                        if (trace instanceof ModelRemoveTrace) {
-                            KMFContainer elemToAdd = currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
-                            adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, elemToAdd));
-                            adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, elemToAdd));
+                
+                if (!isVirtual(modelElement)) {
+                    if (trace.getRefName().equals("components")) {
+                        if (trace.getSrcPath().equals(targetNode.path())) {
+                            if (trace instanceof ModelAddTrace) {
+                                KMFContainer elemToAdd = targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
+                                adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, elemToAdd));
+                            }
+                            if (trace instanceof ModelRemoveTrace) {
+                                KMFContainer elemToAdd = currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
+                                adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, elemToAdd));
+                                adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, elemToAdd));
+                            }
                         }
                     }
-                }
-                if (trace.getRefName().equals("groups")) {
-                    if (trace.getSrcPath().equals(targetNode.path())) {
-                        if (trace instanceof ModelAddTrace) {
-                            KMFContainer elemToAdd = targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
-                            adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, elemToAdd));
-                        }
-                        if (trace instanceof ModelRemoveTrace) {
-                            KMFContainer elemToAdd = currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
-                            adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, elemToAdd));
-                            adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, elemToAdd));
+                    if (trace.getRefName().equals("hosts")) {
+                        if (trace.getSrcPath().equals(targetNode.path())) {
+                            if (trace instanceof ModelAddTrace) {
+                                KMFContainer elemToAdd = targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
+                                adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, elemToAdd));
+                            }
+                            if (trace instanceof ModelRemoveTrace) {
+                                KMFContainer elemToAdd = currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
+                                adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, elemToAdd));
+                                adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, elemToAdd));
+                            }
                         }
                     }
-                }
-                if (trace.getRefName().equals("bindings")) {
-                    if (!(targetModel.findByPath(trace.getSrcPath()) instanceof Channel)) {
-                        if (trace instanceof ModelAddTrace) {
-                            MBinding binding = (MBinding) targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
-                            adaptationModel.getAdaptations().add(adapt(AdaptationType.AddBinding, binding));
-                            Channel channel = binding.getHub();
-                            if (channel != null && modelRegistry.lookup(channel) == null) {
-                                TupleObjPrim newTuple = new TupleObjPrim(channel, AdaptationType.AddInstance);
-                                if (!elementAlreadyProcessed.containsKey(newTuple.getKey())) {
-                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, channel));
-                                    elementAlreadyProcessed.put(newTuple.getKey(), newTuple);
-                                }
-
-                                if (channel.getDictionary() != null) {
-                                    for (Value val : channel.getDictionary().getValues()) {
-                                        TupleObjPrim updateVal = new TupleObjPrim(val, AdaptationType.UpdateDictionaryInstance);
-                                        if (!elementAlreadyProcessed.containsKey(updateVal)) {
-                                            Object[] values = new Object[] { val.eContainer().eContainer(), val };
-                                            adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateDictionaryInstance, values));
-                                            elementAlreadyProcessed.put(updateVal.getKey(), updateVal);
+                    if (trace.getRefName().equals("groups")) {
+                        if (trace.getSrcPath().equals(targetNode.path())) {
+                            if (trace instanceof ModelAddTrace) {
+                                KMFContainer elemToAdd = targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
+                                adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, elemToAdd));
+                            }
+                            if (trace instanceof ModelRemoveTrace) {
+                                KMFContainer elemToAdd = currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
+                                adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, elemToAdd));
+                                adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, elemToAdd));
+                            }
+                        }
+                    }
+                    if (trace.getRefName().equals("bindings")) {
+                        if (!(targetModel.findByPath(trace.getSrcPath()) instanceof Channel)) {
+                            if (trace instanceof ModelAddTrace) {
+                                MBinding binding = (MBinding) targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
+                                Channel channel = binding.getHub();
+                                if (!isVirtual(channel.getTypeDefinition())) {
+                                	adaptationModel.getAdaptations().add(adapt(AdaptationType.AddBinding, binding));
+                                    if (channel != null && modelRegistry.lookup(channel) == null) {
+                                        TupleObjPrim newTuple = new TupleObjPrim(channel, AdaptationType.AddInstance);
+                                        if (!elementAlreadyProcessed.containsKey(newTuple.getKey())) {
+                                            adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, channel));
+                                            elementAlreadyProcessed.put(newTuple.getKey(), newTuple);
                                         }
-                                    }
 
-                                }
+                                        if (channel.getDictionary() != null) {
+                                            for (Value val : channel.getDictionary().getValues()) {
+                                                TupleObjPrim updateVal = new TupleObjPrim(val, AdaptationType.UpdateDictionaryInstance);
+                                                if (!elementAlreadyProcessed.containsKey(updateVal)) {
+                                                    Object[] values = new Object[] { val.eContainer().eContainer(), val };
+                                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateDictionaryInstance, values));
+                                                    elementAlreadyProcessed.put(updateVal.getKey(), updateVal);
+                                                }
+                                            }
 
-                                for (FragmentDictionary fragDic : channel.getFragmentDictionary()) {
-                                    if (fragDic.getName().equals(nodeName)) {
-                                        for (Value val : fragDic.getValues()) {
-                                            TupleObjPrim updateVal = new TupleObjPrim(val, AdaptationType.UpdateDictionaryInstance);
-                                            if (!elementAlreadyProcessed.containsKey(updateVal)) {
-                                                Object[] values = new Object[] { val.eContainer().eContainer(), val };
-                                                adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateDictionaryInstance, values));
-                                                elementAlreadyProcessed.put(updateVal.getKey(), updateVal);
+                                        }
+
+                                        for (FragmentDictionary fragDic : channel.getFragmentDictionary()) {
+                                            if (fragDic.getName().equals(nodeName)) {
+                                                for (Value val : fragDic.getValues()) {
+                                                    TupleObjPrim updateVal = new TupleObjPrim(val, AdaptationType.UpdateDictionaryInstance);
+                                                    if (!elementAlreadyProcessed.containsKey(updateVal)) {
+                                                        Object[] values = new Object[] { val.eContainer().eContainer(), val };
+                                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateDictionaryInstance, values));
+                                                        elementAlreadyProcessed.put(updateVal.getKey(), updateVal);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (channel.getStarted()) {
+                                            TupleObjPrim start = new TupleObjPrim(channel, AdaptationType.StartInstance);
+                                            if (!elementAlreadyProcessed.containsKey(start.getKey())) {
+                                                adaptationModel.getAdaptations().add(adapt(AdaptationType.StartInstance, channel));
+                                                elementAlreadyProcessed.put(start.getKey(), start);
                                             }
                                         }
                                     }
                                 }
-
-                                if (channel.getStarted()) {
-                                    TupleObjPrim start = new TupleObjPrim(channel, AdaptationType.StartInstance);
-                                    if (!elementAlreadyProcessed.containsKey(start.getKey())) {
-                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.StartInstance, channel));
-                                        elementAlreadyProcessed.put(start.getKey(), start);
-                                    }
-                                }
                             }
-                        }
-                        if (trace instanceof ModelRemoveTrace) {
-                            org.kevoree.MBinding binding = (org.kevoree.MBinding) currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
-                            org.kevoree.MBinding previousBinding = (org.kevoree.MBinding) currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
-                            Channel channel = binding.getHub();
-                            Channel oldChannel = previousBinding.getHub();
-                            //check if not no current usage of this channel
-                            boolean stillUsed = channel != null;
-                            if (stillUsed) {
-                                for (MBinding loopBinding : channel.getBindings()) {
-                                    if (loopBinding.getPort() != null) {
-                                        if (loopBinding.getPort().eContainer().equals(targetNode)) {
-                                            stillUsed = true;
+                            if (trace instanceof ModelRemoveTrace) {
+                                org.kevoree.MBinding binding = (org.kevoree.MBinding) targetModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
+                                org.kevoree.MBinding previousBinding = (org.kevoree.MBinding) currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
+                                Channel channel = binding.getHub();
+                                Channel oldChannel = previousBinding.getHub();
+                                //check if not no current usage of this channel
+                                boolean stillUsed = channel != null;
+                                if (stillUsed) {
+                                    for (MBinding loopBinding : channel.getBindings()) {
+                                        if (loopBinding.getPort() != null) {
+                                            if (loopBinding.getPort().eContainer().equals(targetNode)) {
+                                                stillUsed = true;
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            if (!stillUsed && modelRegistry.lookup(oldChannel) != null) {
-                                TupleObjPrim removeTuple = new TupleObjPrim(oldChannel, AdaptationType.RemoveInstance);
-                                if (!elementAlreadyProcessed.containsKey(removeTuple.getKey())) {
-                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, oldChannel));
-                                    elementAlreadyProcessed.put(removeTuple.getKey(), removeTuple);
-                                    TupleObjPrim stopTuple = new TupleObjPrim(oldChannel, AdaptationType.StopInstance);
-                                    elementAlreadyProcessed.put(stopTuple.getKey(), stopTuple);
+                                if (!stillUsed && modelRegistry.lookup(oldChannel) != null) {
+                                    TupleObjPrim removeTuple = new TupleObjPrim(oldChannel, AdaptationType.RemoveInstance);
+                                    if (!elementAlreadyProcessed.containsKey(removeTuple.getKey())) {
+                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, oldChannel));
+                                        elementAlreadyProcessed.put(removeTuple.getKey(), removeTuple);
+                                        TupleObjPrim stopTuple = new TupleObjPrim(oldChannel, AdaptationType.StopInstance);
+                                        elementAlreadyProcessed.put(stopTuple.getKey(), stopTuple);
+                                    }
                                 }
+                                adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
                             }
-                            adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
                         }
                     }
-                }
-                if (trace.getRefName().equals("started")) {
-                    if (modelElement instanceof Instance && trace instanceof ModelSetTrace) {
-                        if (modelElement.eContainer() instanceof ContainerNode && !modelElement.eContainer().path().equals(targetNode.path())) {
-                            //ignore it, for another node
-                        } else {
-                            if (trace.getSrcPath().equals(targetNode.path())) {
-                                //HaraKiri case
+                    if (trace.getRefName().equals("started")) {
+                        if (modelElement instanceof Instance && trace instanceof ModelSetTrace) {
+                            if (modelElement.eContainer() instanceof ContainerNode && !modelElement.eContainer().path().equals(targetNode.path())) {
+                                //ignore it, for another node
                             } else {
-                                if (((ModelSetTrace) trace).getContent().toLowerCase().equals("true")) {
-                                    TupleObjPrim sIT = new TupleObjPrim(modelElement, AdaptationType.StartInstance);
-                                    if (!elementAlreadyProcessed.containsKey(sIT.getKey())) {
-                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.StartInstance, modelElement));
-                                        elementAlreadyProcessed.put(sIT.getKey(), sIT);
-                                    }
+                                if (trace.getSrcPath().equals(targetNode.path())) {
+                                    //HaraKiri case
                                 } else {
-                                    TupleObjPrim sit = new TupleObjPrim(modelElement, AdaptationType.StopInstance);
-                                    if (!elementAlreadyProcessed.containsKey(sit.getKey())) {
-                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, modelElement));
-                                        elementAlreadyProcessed.put(sit.getKey(), sit);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if (trace.getRefName().equals("typeDefinition")) {
-                    if (trace instanceof ModelAddTrace) {
-                        if (modelElement instanceof Instance) {
-                            Instance currentModelElement = (Instance) currentModel.findByPath(modelElement.path());
-                            Instance targetModelElement = (Instance) targetModel.findByPath(modelElement.path());
-                            if (currentModelElement != null && targetModelElement != null) {
-                                //HaraKiri upgrade
-                                if (modelElement.path().equals(targetNode.path())) {
-                                    //Serious HaraKiri, should stop the platform and everything .... call the core to rebootstrap
-                                } else {
-                                    //upgrade internally
-                                    if (currentModelElement.getStarted() == true && targetModelElement.getStarted() == true) {
-                                        TupleObjPrim stopIns = new TupleObjPrim(modelElement, AdaptationType.StopInstance);
-                                        if (!elementAlreadyProcessed.containsKey(stopIns.getKey())) {
-                                            adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, modelElement));
-                                            elementAlreadyProcessed.put(stopIns.getKey(), stopIns);
-                                        }
-                                    }
-                                    //unbind
-                                    if (currentModelElement instanceof Channel) {
-                                        for (MBinding binding : ((Channel) currentModelElement).getBindings()) {
-                                            if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
-                                                adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
-                                            }
-                                        }
-                                    } else {
-                                        if (currentModelElement instanceof ComponentInstance) {
-                                            for (Port binding : ((ComponentInstance) currentModelElement).getRequired()) {
-                                                if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
-                                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
-                                                }
-                                            }
-                                            for (Port binding : ((ComponentInstance) currentModelElement).getProvided()) {
-                                                if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
-                                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
-                                                }
-                                            }
-                                        }
-                                    }
-                                    TupleObjPrim upgradeTuple = new TupleObjPrim(modelElement, AdaptationType.UpgradeInstance);
-                                    if (!elementAlreadyProcessed.containsKey(upgradeTuple.getKey())) {
-                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.UpgradeInstance, modelElement));
-                                        elementAlreadyProcessed.put(upgradeTuple.getKey(), upgradeTuple);
-                                    }
-                                    //reinject dictionary
-                                    List<Value> dicValues = targetModelElement.getDictionary().getValues();
-                                    if (dicValues != null) {
-                                        for (Value dicValue : dicValues) {
-                                            Object[] values = new Object[]{modelElement, dicValue};
-                                            adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateDictionaryInstance, values));
-                                            TupleObjPrim updatedicT = new TupleObjPrim(modelElement, AdaptationType.UpdateDictionaryInstance);
-                                            elementAlreadyProcessed.put(updatedicT.getKey(), updatedicT);
-                                        }
-                                    }
-                                    //rebind
-                                    if (targetModelElement instanceof Channel) {
-                                        for (MBinding binding : ((Channel) targetModelElement).getBindings()) {
-                                            if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
-                                                adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
-                                            }
-                                        }
-                                    } else {
-                                        if (targetModelElement instanceof ComponentInstance) {
-                                            for (Port binding : ((ComponentInstance) targetModelElement).getRequired()) {
-                                                if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
-                                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
-                                                }
-                                            }
-                                            for (Port binding : ((ComponentInstance) targetModelElement).getProvided()) {
-                                                if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
-                                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
-                                                }
-                                            }
-                                        }
-                                    }
-                                    //restart
-                                    if (currentModelElement.getStarted() == true && targetModelElement.getStarted() == true) {
-                                        TupleObjPrim startTuple = new TupleObjPrim(modelElement, AdaptationType.StartInstance);
-                                        if (!elementAlreadyProcessed.containsKey(startTuple.getKey())) {
+                                    if (((ModelSetTrace) trace).getContent().toLowerCase().equals("true")) {
+                                        TupleObjPrim sIT = new TupleObjPrim(modelElement, AdaptationType.StartInstance);
+                                        if (!elementAlreadyProcessed.containsKey(sIT.getKey())) {
                                             adaptationModel.getAdaptations().add(adapt(AdaptationType.StartInstance, modelElement));
-                                            elementAlreadyProcessed.put(startTuple.getKey(), startTuple);
+                                            elementAlreadyProcessed.put(sIT.getKey(), sIT);
+                                        }
+                                    } else {
+                                        TupleObjPrim sit = new TupleObjPrim(modelElement, AdaptationType.StopInstance);
+                                        if (!elementAlreadyProcessed.containsKey(sit.getKey())) {
+                                            adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, modelElement));
+                                            elementAlreadyProcessed.put(sit.getKey(), sit);
                                         }
                                     }
                                 }
-
                             }
                         }
                     }
-                }
-                if (trace.getRefName().equals("value")) {
-                    if (modelElement instanceof org.kevoree.Value && modelElement.getRefInParent().equals("values")) {
-                        Instance parentInstance = (Instance) modelElement.eContainer().eContainer();
-                        if (parentInstance != null && parentInstance instanceof ContainerNode && parentInstance.getName().equals(nodeName) && currentNode == null) {
-                            //noop
-                        } else {
-
-                            KMFContainer dictionaryParent = modelElement.eContainer();
-                            if (dictionaryParent != null && dictionaryParent instanceof FragmentDictionary && !((FragmentDictionary) dictionaryParent).getName().equals(nodeName)) {
-
-                            } else {
-                                TupleObjPrim updateDic = new TupleObjPrim(modelElement, AdaptationType.UpdateDictionaryInstance);
-                                if (!elementAlreadyProcessed.containsKey(updateDic)) {
-                                    Object[] values = new Object[]{modelElement.eContainer().eContainer(), modelElement};
-                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateDictionaryInstance, values));
-                                    elementAlreadyProcessed.put(updateDic.getKey(), updateDic);
-                                }
-                                if (parentInstance != null) {
-                                    TupleObjPrim updateTuple = new TupleObjPrim(parentInstance, AdaptationType.UpdateCallMethod);
-                                    if (!elementAlreadyProcessed.containsKey(updateTuple.getKey())) {
-                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateCallMethod, parentInstance));
-                                        elementAlreadyProcessed.put(updateTuple.getKey(), updateTuple);
+                    if (trace.getRefName().equals("typeDefinition")) {
+                        if (trace instanceof ModelAddTrace) {
+                            if (modelElement instanceof Instance) {
+                                Instance currentModelElement = (Instance) currentModel.findByPath(modelElement.path());
+                                Instance targetModelElement = (Instance) targetModel.findByPath(modelElement.path());
+                                if (currentModelElement != null && targetModelElement != null) {
+                                    //HaraKiri upgrade
+                                    if (modelElement.path().equals(targetNode.path())) {
+                                        //Serious HaraKiri, should stop the platform and everything .... call the core to rebootstrap
+                                    } else {
+                                        //upgrade internally
+                                        if (currentModelElement.getStarted() == true && targetModelElement.getStarted() == true) {
+                                            TupleObjPrim stopIns = new TupleObjPrim(modelElement, AdaptationType.StopInstance);
+                                            if (!elementAlreadyProcessed.containsKey(stopIns.getKey())) {
+                                                adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, modelElement));
+                                                elementAlreadyProcessed.put(stopIns.getKey(), stopIns);
+                                            }
+                                        }
+                                        //unbind
+                                        if (currentModelElement instanceof Channel) {
+                                            for (MBinding binding : ((Channel) currentModelElement).getBindings()) {
+                                                if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
+                                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
+                                                }
+                                            }
+                                        } else {
+                                            if (currentModelElement instanceof ComponentInstance) {
+                                                for (Port binding : ((ComponentInstance) currentModelElement).getRequired()) {
+                                                    if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
+                                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
+                                                    }
+                                                }
+                                                for (Port binding : ((ComponentInstance) currentModelElement).getProvided()) {
+                                                    if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
+                                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        TupleObjPrim upgradeTuple = new TupleObjPrim(modelElement, AdaptationType.UpgradeInstance);
+                                        if (!elementAlreadyProcessed.containsKey(upgradeTuple.getKey())) {
+                                            adaptationModel.getAdaptations().add(adapt(AdaptationType.UpgradeInstance, modelElement));
+                                            elementAlreadyProcessed.put(upgradeTuple.getKey(), upgradeTuple);
+                                        }
+                                        //reinject dictionary
+                                        List<Value> dicValues = targetModelElement.getDictionary().getValues();
+                                        if (dicValues != null) {
+                                            for (Value dicValue : dicValues) {
+                                                Object[] values = new Object[]{modelElement, dicValue};
+                                                adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateDictionaryInstance, values));
+                                                TupleObjPrim updatedicT = new TupleObjPrim(modelElement, AdaptationType.UpdateDictionaryInstance);
+                                                elementAlreadyProcessed.put(updatedicT.getKey(), updatedicT);
+                                            }
+                                        }
+                                        //rebind
+                                        if (targetModelElement instanceof Channel) {
+                                            for (MBinding binding : ((Channel) targetModelElement).getBindings()) {
+                                                if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
+                                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
+                                                }
+                                            }
+                                        } else {
+                                            if (targetModelElement instanceof ComponentInstance) {
+                                                for (Port binding : ((ComponentInstance) targetModelElement).getRequired()) {
+                                                    if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
+                                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
+                                                    }
+                                                }
+                                                for (Port binding : ((ComponentInstance) targetModelElement).getProvided()) {
+                                                    if (!elementAlreadyProcessed.containsKey(new TupleObjPrim(binding, AdaptationType.RemoveBinding).getKey())) {
+                                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        //restart
+                                        if (currentModelElement.getStarted() == true && targetModelElement.getStarted() == true) {
+                                            TupleObjPrim startTuple = new TupleObjPrim(modelElement, AdaptationType.StartInstance);
+                                            if (!elementAlreadyProcessed.containsKey(startTuple.getKey())) {
+                                                adaptationModel.getAdaptations().add(adapt(AdaptationType.StartInstance, modelElement));
+                                                elementAlreadyProcessed.put(startTuple.getKey(), startTuple);
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                    if (trace.getRefName().equals("value")) {
+                        if (modelElement instanceof org.kevoree.Value && modelElement.getRefInParent().equals("values")) {
+                            Instance parentInstance = (Instance) modelElement.eContainer().eContainer();
+                            if (parentInstance != null && parentInstance instanceof ContainerNode && parentInstance.getName().equals(nodeName) && currentNode == null) {
+                                //noop
+                            } else {
+
+                                KMFContainer dictionaryParent = modelElement.eContainer();
+                                if (dictionaryParent != null && dictionaryParent instanceof FragmentDictionary && !((FragmentDictionary) dictionaryParent).getName().equals(nodeName)) {
+
+                                } else {
+                                    TupleObjPrim updateDic = new TupleObjPrim(modelElement, AdaptationType.UpdateDictionaryInstance);
+                                    if (!elementAlreadyProcessed.containsKey(updateDic)) {
+                                        Object[] values = new Object[]{modelElement.eContainer().eContainer(), modelElement};
+                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateDictionaryInstance, values));
+                                        elementAlreadyProcessed.put(updateDic.getKey(), updateDic);
+                                    }
+                                    if (parentInstance != null) {
+                                        TupleObjPrim updateTuple = new TupleObjPrim(parentInstance, AdaptationType.UpdateCallMethod);
+                                        if (!elementAlreadyProcessed.containsKey(updateTuple.getKey())) {
+                                            adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateCallMethod, parentInstance));
+                                            elementAlreadyProcessed.put(updateTuple.getKey(), updateTuple);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    processTrace(trace, adaptationModel);
                 }
-                processTrace(trace, adaptationModel);
             }
         }
         final HashSet<String> foundDeployUnitsToRemove = new HashSet<String>();
@@ -484,5 +488,30 @@ public class KevoreeKompareBean extends KevoreeScheduler {
         return adaptationModel;
     }
 
+    private boolean isVirtual(KMFContainer element) {
+        if (element instanceof Instance) {
+            return isVirtual(((Instance) element).getTypeDefinition());
+        } else if (element instanceof TypeDefinition) {
+            Value virtual = ((TypeDefinition) element).findMetaDataByID("virtual");
+            return virtual != null;
+        } else if (element instanceof MBinding) {
+            MBinding binding = (MBinding) element;
+            if (binding.getHub() != null) {
+                return isVirtual(binding.getHub().getTypeDefinition());
+            }
+        }
 
+        return false;
+    }
+
+    private boolean isInstallable(TypeDefinition tdef) {
+        List<DeployUnit> dus = tdef.getDeployUnits();
+        for (DeployUnit du : dus) {
+            Value platform = du.findFiltersByID("platform");
+            if (platform != null && platform.getValue().equals("java")) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
