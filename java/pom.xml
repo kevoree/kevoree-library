@@ -35,6 +35,7 @@
         <!--<module>org.kevoree.library.java.avatarjs</module>-->
         <module>org.kevoree.library.java.mongochan</module>
         <module>org.kevoree.library.java.redischan</module>
+        <module>org.kevoree.library.java.imagga</module>
     </modules>
 
     <dependencies>
