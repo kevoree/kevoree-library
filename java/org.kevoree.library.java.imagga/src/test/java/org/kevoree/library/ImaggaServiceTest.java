@@ -40,10 +40,10 @@ public class ImaggaServiceTest {
         imaggaService.query(username, password, url, false);
     }
 
-    @Test
+    //@Test
     public void testContent() throws Exception {
-        final String username = "acc_c4e0e651f7229ff";
-        final String password = "493f8f3d4309468ded707e04652cab6d";
+        final String username = "";
+        final String password = "";
         final File file = new File("/tmp/test2.jpg");
         final FileInputStream fileInputStream = new FileInputStream(file);
         final byte[] bytes = IOUtils.toByteArray(fileInputStream);

@@ -1,0 +1,13 @@
+add node0 : JavaNode
+add node0.comp325 : Ticker
+add node0.camera : GStreamer
+add node0.console : ConsolePrinter
+add sync : WSGroup
+add chan286, chan0 : AsyncBroadcast
+
+attach node0 sync
+
+bind node0.camera.in chan286
+bind node0.comp325.tick chan286
+bind node0.camera.out chan0
+bind node0.console.input chan0

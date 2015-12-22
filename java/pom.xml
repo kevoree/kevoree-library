@@ -32,10 +32,11 @@
         <module>org.kevoree.library.java.twitter</module>
         <module>org.kevoree.library.java.groovy</module>
         <module>org.kevoree.library.java.jython</module>
-        <!--<module>org.kevoree.library.java.avatarjs</module>-->
+        <module>org.kevoree.library.java.avatarjs</module>
         <module>org.kevoree.library.java.mongochan</module>
         <module>org.kevoree.library.java.redischan</module>
         <module>org.kevoree.library.java.imagga</module>
+        <module>org.kevoree.library.java.gstreamer</module>
     </modules>
 
     <dependencies>
