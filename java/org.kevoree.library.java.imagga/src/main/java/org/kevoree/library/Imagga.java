@@ -1,9 +1,5 @@
 package org.kevoree.library;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.Input;
@@ -13,7 +9,6 @@ import org.kevoree.api.Port;
 import org.kevoree.log.Log;
 
 import java.io.IOException;
-import java.lang.reflect.Modifier;
 
 /**
  * Created by mleduc on 18/11/15.
@@ -31,6 +26,7 @@ public class Imagga {
     private Boolean content;
 
     private final ImaggaService imaggaService = new ImaggaService();
+    private final SerializerService serializerService = new SerializerService();
 
     @Output
     private Port tags;
@@ -39,7 +35,7 @@ public class Imagga {
     public void in(final String payload) {
         try {
             final ImaggaTagSet res = imaggaService.query(username, password, payload, content);
-            tags.send(toJson(res), null);
+            tags.send(serializerService.toJson(res), null);
         } catch (UnirestException e) {
             Log.error(e.getMessage());
         } catch (ImaggaException e) {
@@ -49,11 +45,5 @@ public class Imagga {
         }
     }
 
-    private String toJson(final ImaggaTagSet imaggaTagSet) {
-        final Gson gson = new GsonBuilder()
-                .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.TRANSIENT, Modifier.STATIC)
-                .serializeNulls()
-                .create();
-        return gson.toJson(imaggaTagSet).toString();
-    }
+
 }

@@ -2,9 +2,7 @@ package org.kevoree.library;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
-import sun.nio.ch.IOUtil;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Base64;
@@ -15,6 +13,7 @@ import java.util.Base64;
 public class ImaggaServiceTest {
 
     private final ImaggaService imaggaService = new ImaggaService();
+    private final SerializerService serializerService = new SerializerService();
 
     @Test(expected = ImaggaException.class)
     public void testWrongCreds() throws Exception {
@@ -37,17 +36,21 @@ public class ImaggaServiceTest {
         final String username = "";
         final String password = "";
         final String url = "https://farm1.staticflickr.com/722/23104510232_d96706df46_m_d.jpg";
-        imaggaService.query(username, password, url, false);
+        final ImaggaTagSet query = imaggaService.query(username, password, url, false);
+        final String s1 = serializerService.toJson(query);
+        System.out.println(s1);
     }
 
     //@Test
     public void testContent() throws Exception {
         final String username = "";
         final String password = "";
-        final File file = new File("/tmp/test2.jpg");
+        final File file = new File("/tmp/test.jpg");
         final FileInputStream fileInputStream = new FileInputStream(file);
         final byte[] bytes = IOUtils.toByteArray(fileInputStream);
         final String s = Base64.getEncoder().encodeToString(bytes);
-        imaggaService.query(username, password, s, true);
+        final ImaggaTagSet query = imaggaService.query(username, password, s, true);
+        final String s1 = serializerService.toJson(query);
+        System.out.println(s1);
     }
 }

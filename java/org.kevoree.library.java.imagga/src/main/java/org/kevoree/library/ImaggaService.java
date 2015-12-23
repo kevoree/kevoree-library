@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.Future;
 
 /**
  * Created by mleduc on 18/11/15.
@@ -39,7 +38,7 @@ public class ImaggaService {
             throw new ImaggaException(body.toString());
         }
 
-        return parse(object);
+        return parse(object, content, payload);
     }
 
     private HttpResponse<JsonNode> contentMode(final String username, final String password, final String b64Image) throws UnirestException, IOException {
@@ -93,10 +92,9 @@ public class ImaggaService {
                 .asJson();
     }
 
-    private ImaggaTagSet parse(JSONObject object) {
+    private ImaggaTagSet parse(final JSONObject object, final Boolean content, String payload) {
         final JSONArray results = object.getJSONArray("results");
         final JSONObject result = results.getJSONObject(0);
-        final String image = result.getString("image");
         final JSONArray tagsJson = result.getJSONArray("tags");
         final Set<ImaggaTag> tags = new HashSet<>();
         for (int i = 0; i < tagsJson.length(); i++) {
@@ -106,6 +104,6 @@ public class ImaggaService {
             tags.add(new ImaggaTag(confidence, tag));
         }
 
-        return new ImaggaTagSet(image, tags);
+        return new ImaggaTagSet(payload, content, tags);
     }
 }

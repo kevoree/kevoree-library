@@ -9,10 +9,12 @@ import java.util.Set;
 public class ImaggaTagSet {
     private final String image;
     private final Set<ImaggaTag> tags;
+    private final Boolean content;
 
-    public ImaggaTagSet(final String image, final Set<ImaggaTag> tags) {
+    public ImaggaTagSet(final String image, final Boolean content, final Set<ImaggaTag> tags) {
         this.image = image;
         this.tags = tags;
+        this.content = content;
     }
 
     public String getImage() {
@@ -21,5 +23,9 @@ public class ImaggaTagSet {
 
     public Set<ImaggaTag> getTags() {
         return tags;
+    }
+
+    public Boolean getContent() {
+        return content;
     }
 }
