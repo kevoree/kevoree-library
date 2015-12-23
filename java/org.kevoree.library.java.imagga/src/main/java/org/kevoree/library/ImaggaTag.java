@@ -1,8 +1,5 @@
 package org.kevoree.library;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * Created by mleduc on 18/11/15.
  */
@@ -29,10 +26,10 @@ public class ImaggaTag implements Comparable<ImaggaTag> {
         if(o == null) {
             return 1;
         }
-        if(ObjectUtils.compare(confidence, o.confidence) != 0) {
-           return ObjectUtils.compare(confidence, o.confidence);
+        if(ObjectUtilz.compare(confidence, o.confidence) != 0) {
+           return ObjectUtilz.compare(confidence, o.confidence);
         }
 
-        return  ObjectUtils.compare(tag, o.tag);
+        return  ObjectUtilz.compare(tag, o.tag);
     }
 }

@@ -4,7 +4,6 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -80,7 +79,7 @@ public class ImaggaService {
         File tempFile;
         tempFile = File.createTempFile("immaga", ".jpg");
         final FileOutputStream fileOutputStream = new FileOutputStream(tempFile);
-        IOUtils.write(Base64.getDecoder().decode(b64Image), fileOutputStream);
+        fileOutputStream.write(Base64.getDecoder().decode(b64Image));
         return tempFile;
     }
 
@@ -96,7 +95,7 @@ public class ImaggaService {
         final JSONArray results = object.getJSONArray("results");
         final JSONObject result = results.getJSONObject(0);
         final JSONArray tagsJson = result.getJSONArray("tags");
-        final Set<ImaggaTag> tags = new HashSet<>();
+        final Set<ImaggaTag> tags = new HashSet<ImaggaTag>();
         for (int i = 0; i < tagsJson.length(); i++) {
             final JSONObject tagJson = tagsJson.getJSONObject(i);
             final Double confidence = tagJson.getDouble("confidence");
