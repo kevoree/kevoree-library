@@ -5,12 +5,13 @@ import com.spotify.docker.client.messages.ContainerConfig;
 import com.spotify.docker.client.messages.ContainerCreation;
 import com.spotify.docker.client.messages.HostConfig;
 import com.spotify.docker.client.messages.PortBinding;
-import org.jetbrains.annotations.NotNull;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
 import org.kevoree.api.Context;
 import org.kevoree.api.Port;
+import org.kevoree.library.util.ParamService;
 import org.kevoree.library.util.PortStreamer;
+import org.kevoree.library.util.PortsService;
 import org.kevoree.log.Log;
 
 import java.io.IOException;
@@ -34,6 +35,8 @@ import static com.spotify.docker.client.DockerClient.AttachParameter;
         "to differentiate ports, use the <em>hostPort:containerPort</em> syntax.")
 public class DockerContainer {
 
+    private final ParamService paramService = new ParamService();
+    private final PortsService portsService = new PortsService();
     private String containerId;
     private DockerClient docker;
     private ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -62,14 +65,17 @@ public class DockerContainer {
     @Param
     private String volumesFrom;
 
+    /**
+     * Binds is also named Volume in the public API.
+     */
     @Param
     private String binds;
 
     @Param(defaultValue = "true")
     private boolean removeOnStop = true;
 
-    @Param
-    private int stopTimeout = 5;
+    @Param(defaultValue = "5", optional = false)
+    private Integer stopTimeout = 5;
 
     @Param(defaultValue = "false")
     private boolean removeVolumes = false;
@@ -90,25 +96,27 @@ public class DockerContainer {
             docker.pull(this.image);
         }
 
-        HostConfig hostConfig = HostConfig.builder()
-                .portBindings(computePorts())
-                .links(computeParamToList(links))
+        final Map<String, List<PortBinding>> portBindings = portsService.computePorts(ports);
+        final HostConfig hostConfig = HostConfig.builder()
+                .portBindings(portBindings)
+                .links(paramService.computeParamToList(links))
                 .dns(computeDNS())
-                .volumesFrom(computeParamToList(volumesFrom))
-                .binds(computeParamToList(binds))
+                .volumesFrom(paramService.computeParamToList(volumesFrom))
+                .binds(paramService.computeParamToList(binds))
                 .build();
 
-        ContainerConfig containerConfig = ContainerConfig.builder()
+        final ContainerConfig containerConfig = ContainerConfig.builder()
                 .hostConfig(hostConfig)
                 .attachStderr(true)
                 .attachStdout(true)
                 .attachStdin(true)
                 .image(this.image)
-                .cmd(computeParamToList(cmd))
+                .cmd(paramService.computeParamToList(cmd))
+                .exposedPorts(portBindings.keySet())
                 .build();
 
         try {
-            ContainerCreation creation;
+            final ContainerCreation creation;
             if (name != null && !name.isEmpty()) {
                 creation = docker.createContainer(containerConfig, name);
             } else {
@@ -167,36 +175,6 @@ public class DockerContainer {
         this.start();
     }
 
-    @NotNull
-    private List<String> computeParamToList(String param) {
-        List<String> list = new ArrayList<>();
-        if (param != null && !param.isEmpty()) {
-            list = Arrays.asList(param.split(" "));
-        }
-        return list;
-    }
-
-    @NotNull
-    private Map<String, List<PortBinding>> computePorts() {
-        List<String> portsList = computeParamToList(ports);
-
-        final Map<String, List<PortBinding>> portBindings = new HashMap<>();
-        for (String port : portsList) {
-            String hostPort = port,
-                    containerPort = port;
-            if (port.contains(":")) {
-                String[] splitted = port.split(":");
-                hostPort = splitted[0];
-                containerPort = splitted[1];
-            }
-
-            List<PortBinding> hostPorts = new ArrayList<>();
-            hostPorts.add(PortBinding.of("0.0.0.0", containerPort));
-            portBindings.put(hostPort, hostPorts);
-        }
-        return portBindings;
-    }
-
     private void computeAttach() throws IOException {
         executor.submit(new Callable<Void>() {
             @Override
@@ -213,7 +191,7 @@ public class DockerContainer {
     }
 
     public static void main(String[] args) throws DockerCertificateException, DockerException, InterruptedException, IOException {
-        DockerContainer c = new DockerContainer();
+        final DockerContainer c = new DockerContainer();
         c.image = "busybox:latest";
         c.cmd = "ls -lArth";
         c.ports = "80 22 9001:9000";
