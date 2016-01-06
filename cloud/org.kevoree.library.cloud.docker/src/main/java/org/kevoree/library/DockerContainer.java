@@ -65,6 +65,9 @@ public class DockerContainer {
     @Param
     private String volumesFrom;
 
+    @Param
+    private String environment;
+
     /**
      * Binds is also named Volume in the public API.
      */
@@ -113,6 +116,7 @@ public class DockerContainer {
                 .image(this.image)
                 .cmd(paramService.computeParamToList(cmd))
                 .exposedPorts(portBindings.keySet())
+                .env(paramService.computeEnvs(environment))
                 .build();
 
         try {
