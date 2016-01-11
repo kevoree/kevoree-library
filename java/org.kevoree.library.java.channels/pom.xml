@@ -12,4 +12,30 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <properties>
+      <publish.registry.url>http://registry.kevoree.org</publish.registry.url>
+    </properties>
+
+    <build>
+        <plugins>
+          <plugin>
+                <groupId>org.kevoree.tools</groupId>
+                <artifactId>org.kevoree.tools.mavenplugin</artifactId>
+                <version>${kevoree.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <registry>${publish.registry.url}</registry>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

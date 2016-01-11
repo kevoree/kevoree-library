@@ -9,7 +9,6 @@ import org.kevoree.api.Port;
 import org.kevoree.log.Log;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Created by mleduc on 11/01/16.

@@ -1,0 +1,13 @@
+add node0 : JavaNode
+add node0.comp137 : Ticker
+add node0.comp348 : org.kevoree.library.docker.killer.DockerKiller/5.3.2-SNAPSHOT
+add group35 : WSGroup
+add chan955 : AsyncBroadcast
+
+attach node0 group35
+
+bind node0.comp137.tick chan955
+bind node0.comp348.trigger chan955
+
+set node0.comp348.key = 'KILL_ME'
+set node0.comp348.value = 'yes'
