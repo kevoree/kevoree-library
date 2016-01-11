@@ -5,10 +5,7 @@ import com.spotify.docker.client.DockerException;
 import com.spotify.docker.client.messages.Container;
 import com.spotify.docker.client.messages.ContainerInfo;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -28,21 +25,19 @@ public class DockerKillerService {
 
     public Optional<Container> randomlyPickOneMatchingElement(final DefaultDockerClient dockerClient, final String key, final String value) throws DockerException, InterruptedException {
         final List<Container> containers = dockerClient.listContainers();
-        final List<Container> collect = containers.stream().filter(container -> {
-            boolean res;
-            try {
-                final ContainerInfo containerInfo = dockerClient.inspectContainer(container.id());
-                res = containsKeyAndValue(containerInfo.config().env(), key, value);
-            } catch (DockerException e) {
-                res = false;
-            } catch (InterruptedException e) {
-                res = false;
-            }
-            return res;
-        }).collect(Collectors.toList());
 
+        final List<Container> collect = new ArrayList<>();
+        for (Container container : containers) {
+            final ContainerInfo containerInfo = dockerClient.inspectContainer(container.id());
+            boolean res;
+            res = containsKeyAndValue(containerInfo.config().env(), key, value);
+            if (res) {
+                collect.add(container);
+            }
+
+        }
         final Optional<Container> ret;
-        if(collect.isEmpty()) {
+        if (collect.isEmpty()) {
             ret = Optional.empty();
         } else {
             ret = Optional.of(collect.get(random.nextInt(collect.size())));
@@ -51,9 +46,12 @@ public class DockerKillerService {
     }
 
     private <T extends String> boolean containsKeyAndValue(List<T> lst, final T key, final T value) {
-        return lst.stream()
-                .filter(s -> Objects.equals(s.split("=")[0], key))
-                .filter(s -> Objects.equals(s.split("=")[1], value))
-                .count() > 0;
+        for (T s : lst) {
+            final String[] split = s.split("=");
+            if (Objects.equals(split[0], key) || Objects.equals(split[1], value)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

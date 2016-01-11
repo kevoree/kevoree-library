@@ -47,18 +47,11 @@ public class DockerKiller {
         if (dockerClient != null) {
             try {
                 final Optional<Container> container = dockerKiller.randomlyPickOneMatchingElement(dockerClient, key, value);
-                container.map(container1 -> {
-                    try {
-                        final String containerId = container1.id();
-                        dockerClient.stopContainer(containerId, secondsToWaitBeforeKilling);
-                        killedContainer.send(containerId);
-                    } catch (DockerException e) {
-                        Log.error(e.getMessage());
-                    } catch (InterruptedException e) {
-                        Log.error(e.getMessage());
-                    }
-                    return null;
-                });
+                if(container.isPresent()) {
+                    final String containerId = container.get().id();
+                    dockerClient.stopContainer(containerId, secondsToWaitBeforeKilling);
+                    killedContainer.send(containerId);
+                }
             } catch (DockerException e) {
                 Log.error(e.getMessage());
             } catch (InterruptedException e) {
