@@ -1,4 +1,4 @@
-package org.kevoree.library.docker.killer;
+package org.kevoree.library;
 
 import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerCertificateException;
