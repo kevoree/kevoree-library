@@ -17,7 +17,7 @@ import java.net.URISyntaxException;
  *
  * Created by leiko on 1/21/16.
  */
-@ComponentType
+@ComponentType(description = "Subscribes to the specified MQTT <strong>host</strong>:<strong>port</strong> and <strong>topic</strong> and broadcasts the published messages to its output ports")
 public class MQTTSubClient implements Listener {
 
     @KevoreeInject
