@@ -20,7 +20,6 @@ import java.util.List;
 public class ProvidedPortImpl implements Port {
 
     private Object targetObj;
-    private String name;
     private String portPath;
     private ComponentWrapper componentWrapper;
 
@@ -32,14 +31,13 @@ public class ProvidedPortImpl implements Port {
 
     public ProvidedPortImpl(Object targetObj, String name, String portPath, ComponentWrapper componentWrapper) {
         this.targetObj = targetObj;
-        this.name = name;
         this.portPath = portPath;
         this.componentWrapper = componentWrapper;
 
         targetMethod = MethodResolver.resolve(name, targetObj.getClass());
         targetMethod.setAccessible(true);
         if (targetMethod == null) {
-            Log.error("Warning Provided port is not binded ... for name " + name);
+            Log.error("Warning @Input port \"{}\" is not bound", name);
         } else {
             paramSize = targetMethod.getParameterTypes().length;
         }

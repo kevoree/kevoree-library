@@ -43,26 +43,32 @@ public class RemoveBindingCommand implements PrimitiveCommand {
     }
 
     public boolean execute() {
-        Object kevoreeChannelFound = registry.lookup(c.getHub());
-        Object kevoreeComponentFound = registry.lookup(c.getPort().eContainer());
-        if(kevoreeChannelFound != null && kevoreeComponentFound != null && kevoreeComponentFound instanceof ComponentWrapper && kevoreeChannelFound instanceof ChannelWrapper){
-            String portName = c.getPort().getPortTypeRef().getName();
-            RequiredPortImpl foundNeedPort = ((ComponentWrapper) kevoreeComponentFound).getRequiredPorts().get(portName);
-            ProvidedPortImpl foundHostedPort = ((ComponentWrapper) kevoreeComponentFound).getProvidedPorts().get(portName);
-            if(foundNeedPort == null && foundHostedPort == null){
-                Log.info("Port instance not found in component");
+        try {
+            Object kevoreeChannelFound = registry.lookup(c.getHub());
+            Object kevoreeComponentFound = registry.lookup(c.getPort().eContainer());
+            if(kevoreeChannelFound != null && kevoreeComponentFound != null && kevoreeComponentFound instanceof ComponentWrapper && kevoreeChannelFound instanceof ChannelWrapper){
+                String portName = c.getPort().getPortTypeRef().getName();
+                RequiredPortImpl foundNeedPort = ((ComponentWrapper) kevoreeComponentFound).getRequiredPorts().get(portName);
+                ProvidedPortImpl foundHostedPort = ((ComponentWrapper) kevoreeComponentFound).getProvidedPorts().get(portName);
+                if(foundNeedPort == null && foundHostedPort == null){
+                    Log.info("Port instance not found in component");
+                    return false;
+                }
+                if (foundNeedPort != null) {
+                    foundNeedPort.removeChannelWrapper(c);
+                    return true;
+                }
+
+                ((ChannelWrapper) kevoreeChannelFound).getContext().getPortsBinded().remove(foundHostedPort.getPath());
+                return true;
+            } else {
                 return false;
             }
-            if (foundNeedPort != null) {
-                foundNeedPort.removeChannelWrapper(c);
-                return true;
-            }
-
-            ((ChannelWrapper) kevoreeChannelFound).getContext().getPortsBinded().remove(foundHostedPort.getPath());
-            return true;
-        } else {
-            return false;
+        } catch (Exception e) {
+            System.err.println("REMOVE BINDING FAILED");
+            e.printStackTrace();
         }
+        return false;
     }
 
     public String toString() {

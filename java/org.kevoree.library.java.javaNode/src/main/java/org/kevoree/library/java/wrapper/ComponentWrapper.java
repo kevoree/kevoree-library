@@ -119,9 +119,9 @@ public class ComponentWrapper extends KInstanceWrapper {
 
     @Override
     public void create() {
-        for (RequiredPortImpl p: this.getRequiredPorts().values()) {
-            System.out.println(p.getPath());
-        }
+//        for (RequiredPortImpl p: this.getRequiredPorts().values()) {
+//            System.out.println(p.getPath());
+//        }
     }
 
     @Override

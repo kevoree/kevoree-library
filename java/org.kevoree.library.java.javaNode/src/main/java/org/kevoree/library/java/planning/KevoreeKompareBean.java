@@ -181,7 +181,7 @@ public class KevoreeKompareBean extends KevoreeScheduler {
         if (traces != null) {
             for (ModelTrace trace : traces.getTraces()) {
                 KMFContainer modelElement = targetModel.findByPath(trace.getSrcPath());
-                
+
                 if (!isVirtual(modelElement)) {
                     if (trace.getRefName().equals("components")) {
                         if (trace.getSrcPath().equals(targetNode.path())) {
@@ -228,7 +228,7 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                                 MBinding binding = (MBinding) targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
                                 Channel channel = binding.getHub();
                                 if (!isVirtual(channel.getTypeDefinition())) {
-                                	adaptationModel.getAdaptations().add(adapt(AdaptationType.AddBinding, binding));
+                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.AddBinding, binding));
                                     if (channel != null && modelRegistry.lookup(channel) == null) {
                                         TupleObjPrim newTuple = new TupleObjPrim(channel, AdaptationType.AddInstance);
                                         if (!elementAlreadyProcessed.containsKey(newTuple.getKey())) {
@@ -272,31 +272,31 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                                 }
                             }
                             if (trace instanceof ModelRemoveTrace) {
-                                org.kevoree.MBinding binding = (org.kevoree.MBinding) targetModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
-                                org.kevoree.MBinding previousBinding = (org.kevoree.MBinding) currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
-                                Channel channel = binding.getHub();
-                                Channel oldChannel = previousBinding.getHub();
-                                //check if not no current usage of this channel
-                                boolean stillUsed = channel != null;
-                                if (stillUsed) {
-                                    for (MBinding loopBinding : channel.getBindings()) {
-                                        if (loopBinding.getPort() != null) {
-                                            if (loopBinding.getPort().eContainer().equals(targetNode)) {
-                                                stillUsed = true;
+                                try {
+                                    org.kevoree.MBinding binding = (org.kevoree.MBinding) currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
+                                    if (binding != null) {
+                                        //check if there will be a usage of this channel
+                                        Channel chan = (Channel) targetModel.findByPath(binding.getHub().path());
+                                        boolean stillUsed = false;
+                                        if (chan != null) {
+                                            stillUsed = isRelatedToPlatform(nodeName, chan);
+                                        }
+
+                                        Channel oldChannel = binding.getHub();
+                                        if (!stillUsed && modelRegistry.lookup(oldChannel) != null) {
+                                            TupleObjPrim removeTuple = new TupleObjPrim(oldChannel, AdaptationType.RemoveInstance);
+                                            if (!elementAlreadyProcessed.containsKey(removeTuple.getKey())) {
+                                                adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, oldChannel));
+                                                elementAlreadyProcessed.put(removeTuple.getKey(), removeTuple);
+                                                TupleObjPrim stopTuple = new TupleObjPrim(oldChannel, AdaptationType.StopInstance);
+                                                elementAlreadyProcessed.put(stopTuple.getKey(), stopTuple);
                                             }
                                         }
                                     }
+                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
-                                if (!stillUsed && modelRegistry.lookup(oldChannel) != null) {
-                                    TupleObjPrim removeTuple = new TupleObjPrim(oldChannel, AdaptationType.RemoveInstance);
-                                    if (!elementAlreadyProcessed.containsKey(removeTuple.getKey())) {
-                                        adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, oldChannel));
-                                        elementAlreadyProcessed.put(removeTuple.getKey(), removeTuple);
-                                        TupleObjPrim stopTuple = new TupleObjPrim(oldChannel, AdaptationType.StopInstance);
-                                        elementAlreadyProcessed.put(stopTuple.getKey(), stopTuple);
-                                    }
-                                }
-                                adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveBinding, binding));
                             }
                         }
                     }
@@ -499,6 +499,9 @@ public class KevoreeKompareBean extends KevoreeScheduler {
             if (binding.getHub() != null) {
                 return isVirtual(binding.getHub().getTypeDefinition());
             }
+            if (binding.getPort() != null) {
+                return isVirtual(binding.getPort().eContainer());
+            }
         }
 
         return false;
@@ -512,6 +515,41 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                 return true;
             }
         }
+        return false;
+    }
+
+    private boolean isRelatedToPlatform(String nodeName, KMFContainer elem) {
+        if (elem instanceof MBinding) {
+            MBinding binding = (MBinding) elem;
+            if (isRelatedToPlatform(nodeName, binding.getPort())) {
+                return true;
+            }
+            if (binding.getHub() != null) {
+                return isRelatedToPlatform(nodeName, binding.getHub());
+            }
+
+        } else if (elem instanceof Channel) {
+            // if this channel has bindings with components hosted on this node platform: it's ok
+            Channel chan = (Channel) elem;
+            for (MBinding binding : chan.getBindings()) {
+                if (isRelatedToPlatform(nodeName, binding.getPort())) {
+                    return true;
+                }
+            }
+
+        } else if (elem instanceof ComponentInstance) {
+            ComponentInstance comp = (ComponentInstance) elem;
+            return ((NamedElement) comp.eContainer()).getName().equals(nodeName);
+
+        } else if (elem instanceof Port) {
+            if (elem != null && elem.eContainer() != null) {
+                if (isRelatedToPlatform(nodeName, elem.eContainer())) {
+                    return true;
+                }
+            }
+        }
+        // TODO add every check
+
         return false;
     }
 }
