@@ -86,8 +86,8 @@ public class MQTTPubClient {
     @Input
     public void pub(String msg) {
         if (this.connection != null) {
-            this.connection.publish(topic, msg.getBytes(), QoS.AT_LEAST_ONCE, false, null);
-            Log.info("{} publishing \"{}\" to \"{}\"", context.getInstanceName(), msg, topic);
+            this.connection.publish(topic, msg.getBytes(), QoS.EXACTLY_ONCE, false, null);
+            Log.debug("{} publishing \"{}\" to \"{}\"", context.getInstanceName(), msg, topic);
         }
     }
 
@@ -97,8 +97,8 @@ public class MQTTPubClient {
             Gson gson = new Gson();
             try {
                 Message msg = gson.fromJson(jsonMsg, Message.class);
-                this.connection.publish(msg.topic, msg.message.getBytes(), QoS.AT_LEAST_ONCE, false, null);
-                Log.info("{} publishing \"{}\" to \"{}\"", context.getInstanceName(), msg.message, msg.topic);
+                this.connection.publish(msg.topic, msg.message.getBytes(), QoS.EXACTLY_ONCE, false, null);
+                Log.debug("{} publishing \"{}\" to \"{}\"", context.getInstanceName(), msg.message, msg.topic);
             } catch (Exception e) {
                 Log.error("{} unable to parse incoming JSON message, message will not be published", context.getInstanceName());
             }

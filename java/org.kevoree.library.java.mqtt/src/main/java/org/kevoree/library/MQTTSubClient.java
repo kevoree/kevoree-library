@@ -59,7 +59,7 @@ public class MQTTSubClient implements Listener {
 
                 public void onSuccess(Void v) {
                     Log.info("{} connected to {}:{}", context.getInstanceName(), host, port);
-                    Topic[] topics = new Topic[] { new Topic(topic, QoS.AT_LEAST_ONCE) };
+                    Topic[] topics = new Topic[] { new Topic(topic, QoS.EXACTLY_ONCE) };
                     connection.subscribe(topics, new Callback<byte[]>() {
                         @Override
                         public void onSuccess(byte[] bytes) {
@@ -106,6 +106,7 @@ public class MQTTSubClient implements Listener {
     public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack) {
         String message = body.utf8().toString();
         this.onMsg.send(message);
+        ack.run();
         Message msg = new Message();
         msg.topic = topic.toString();
         msg.message = message;
