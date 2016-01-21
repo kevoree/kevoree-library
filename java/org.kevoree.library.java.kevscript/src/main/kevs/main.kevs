@@ -1,0 +1,13 @@
+add node0 : JavaNode
+add node0.comp31 : Ticker
+add node0.kev : KevScript
+add sync : WSGroup
+add chan556 : AsyncBroadcast
+
+attach node0 sync
+
+bind node0.kev.trigger chan556
+bind node0.comp31.tick chan556
+
+set node0.log = 'DEBUG'
+set node0.kev.kevScript = 'add node0.{nodename}: Ticker'

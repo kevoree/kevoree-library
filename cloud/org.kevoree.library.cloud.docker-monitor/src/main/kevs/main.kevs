@@ -1,0 +1,17 @@
+add node0: JavaNode
+add node0.nodeCont : DockerContainer
+add node0.printer: ConsolePrinter
+add sync : WSGroup
+add chan: SyncBroadcast
+
+attach node0 sync
+
+set node0.nodeCont.image = 'busybox:latest'
+set node0.nodeCont.name = 'myContainer'
+set node0.nodeCont.cmd = 'ls -lArth'
+set node0.nodeCont.removeOnStop = 'true'
+set node0.nodeCont.dns = '8.8.8.8 8.8.4.4'
+set node0.nodeCont.binds = '/tmp:/yolo'
+
+bind node0.nodeCont.stdout chan
+bind node0.printer.input chan

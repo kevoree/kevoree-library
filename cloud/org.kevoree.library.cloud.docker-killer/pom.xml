@@ -8,8 +8,8 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.kevoree.library.cloud.docker</artifactId>
-    <name>Kevoree :: Library :: Cloud :: Docker</name>
+    <artifactId>org.kevoree.library.cloud.docker-killer</artifactId>
+    <name>Kevoree :: Library :: Cloud :: DockerKiller</name>
 
     <properties>
         <hk2.version>2.3.0-b10</hk2.version>
