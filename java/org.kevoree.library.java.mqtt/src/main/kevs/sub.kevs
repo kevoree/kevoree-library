@@ -1,0 +1,15 @@
+add node0: JavaNode/5.3.2-SNAPSHOT
+add node0.mqttSub: MQTTSubClient
+add node0.console: ConsolePrinter
+add sync: WSGroup
+add chan: SyncBroadcast
+
+attach node0 sync
+set sync.master = 'node0'
+
+set node0.mqttSub.host = 'mqtt.kevoree.org'
+set node0.mqttSub.port = '1883'
+set node0.mqttSub.topic = '/sub/test'
+
+bind node0.mqttSub.onMsg chan
+bind node0.console.input chan

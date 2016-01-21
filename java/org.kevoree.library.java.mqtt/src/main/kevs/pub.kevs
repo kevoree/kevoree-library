@@ -1,0 +1,15 @@
+add node0: JavaNode
+add node0.mqttPub: MQTTPubClient
+add node0.console: ToyConsole
+add sync: WSGroup
+add chan: SyncBroadcast
+
+attach node0 sync
+set sync.master = 'node0'
+
+set node0.mqttPub.host = 'mqtt.kevoree.org'
+set node0.mqttPub.port = '1883'
+set node0.mqttPub.topic = '/pub/test'
+
+bind node0.console.textEntered chan
+bind node0.mqttPub.pub chan

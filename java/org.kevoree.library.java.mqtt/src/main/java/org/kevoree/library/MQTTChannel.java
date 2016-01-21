@@ -77,10 +77,12 @@ public class MQTTChannel implements ChannelDispatch, Listener {
             connection.kill(new org.fusesource.mqtt.client.Callback<Void>() {
                 @Override
                 public void onSuccess(Void value) {
+                    Log.info("{} closed connection with {}:{}", context.getInstanceName(), host, port);
                 }
 
                 @Override
                 public void onFailure(Throwable value) {
+                    Log.warn("{} failed to close connection with {}:{}", context.getInstanceName(), host, port);
                 }
             });
         }

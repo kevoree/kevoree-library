@@ -21,9 +21,26 @@
         <dependency>
             <groupId>org.fusesource.mqtt-client</groupId>
             <artifactId>mqtt-client</artifactId>
-            <version>1.10</version>
+            <version>1.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.5</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.kevoree.tools</groupId>
+                <artifactId>org.kevoree.tools.mavenplugin</artifactId>
+                <!--<configuration>-->
+                    <!--<model>src/main/kevs/sub.kevs</model>-->
+                <!--</configuration>-->
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
 
