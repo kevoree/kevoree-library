@@ -35,6 +35,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.undertow.Handlers.websocket;
 import static org.kevoree.api.protocol.Protocol.*;
@@ -61,7 +63,8 @@ import static org.kevoree.api.protocol.Protocol.*;
 "will be executed when a node disconnects from the master server)"+
 "<br/><br/><em>NB: onConnect & onDisconnect can reference the current node that "+
 "triggered the process by using this notation: {nodeName}</em>"+
-"<br/><em>NB2: {groupName} is also available and resolves to the current WSGroup instance name</em>")
+"<br/><em>NB2: {groupName} is also available and resolves to the current WSGroup instance name</em>"+
+"<br/><em>NB3: onConnect & onDisconnect are not triggered if the client nodeName does not match the regex given in the <strong>filter</strong> parameter</em>")
 public class WSGroup implements ModelListener, Runnable {
 
     private AtomicBoolean diverge = new AtomicBoolean(false);
@@ -84,6 +87,9 @@ public class WSGroup implements ModelListener, Runnable {
 
     @Param(optional = true)
     String master;
+
+    @Param(optional = true)
+    String filter;
 
     @Param(defaultValue = "")
     private String onConnect = "";
@@ -139,29 +145,27 @@ public class WSGroup implements ModelListener, Runnable {
                                         if (rm.getModel() != null && !rm.getModel().equals("null")) {
                                             // new registered model has a model to share: merging it locally
                                             ContainerRoot recModel = (ContainerRoot) jsonModelLoader.loadModelFromString(rm.getModel()).get(0);
-                                            TraceSequence tseq = compare.merge(modelToApply, recModel);
+                                            TraceSequence tseq = compare.merge(recModel, modelToApply);
                                             Log.info("Merging his model with mine...", ((RegisterMessage) parsedMsg).getNodeName());
-                                            tseq.applyOn(modelToApply);
+                                            tseq.applyOn(recModel);
+                                            modelToApply = recModel;
                                         }
-                                        // add onConnect logic
-                                        try {
-                                            kevsService.execute(tpl(onConnect, rm.getNodeName()), modelToApply);
-                                        } catch (Exception e) {
-                                            Log.error("Unable to parse onConnect KevScript. Broadcasting model without onConnect process.");
-                                        } finally {
-                                            String recModelStr = serializer.serialize(modelToApply);
-                                            PushMessage pushMessage = new PushMessage(recModelStr);
-
-                                            // update locally
-                                            modelService.update(modelToApply, applied -> Log.info("Merge model result: {}", applied));
-
-                                            // broadcast changes
-                                            Log.info("Broadcasting merged model to all connected clients");
-                                            for (WebSocketChannel client : cache.values()) {
-                                                if (client.isOpen()) {
-                                                    WebSockets.sendText(pushMessage.toRaw(), client, null);
-                                                }
+                                        if (checkFilter(((RegisterMessage) parsedMsg).getNodeName())) {
+                                            // add onConnect logic
+                                            try {
+                                                Log.debug("onConnect KevScript to process:");
+                                                final String onConnectKevs = tpl(onConnect, rm.getNodeName());
+                                                System.out.println("===== onConnect KevScript =====");
+                                                System.out.println(onConnectKevs);
+                                                System.out.println("===============================");
+                                                kevsService.execute(onConnectKevs, modelToApply);
+                                            } catch (Exception e) {
+                                                Log.error("Unable to parse onConnect KevScript. Broadcasting model without onConnect process.", e);
+                                            } finally {
+                                                applyAndBroadcast(modelToApply);
                                             }
+                                        } else {
+                                            applyAndBroadcast(modelToApply);
                                         }
                                     }
                                     break;
@@ -213,6 +217,22 @@ public class WSGroup implements ModelListener, Runnable {
                     }
                 }
 
+                private void applyAndBroadcast(ContainerRoot modelToApply) {
+                    String recModelStr = serializer.serialize(modelToApply);
+                    PushMessage pushMessage = new PushMessage(recModelStr);
+
+                    // update locally
+                    modelService.update(modelToApply, applied -> Log.info("Merge model result: {}", applied));
+
+                    // broadcast changes
+                    Log.info("Broadcasting merged model to all connected clients");
+                    for (WebSocketChannel client : cache.values()) {
+                        if (client.isOpen()) {
+                            WebSockets.sendText(pushMessage.toRaw(), client, null);
+                        }
+                    }
+                }
+
                 @Override
                 protected void onFullCloseMessage(WebSocketChannel channel, BufferedBinaryMessage message) throws IOException {
                     // Overriding onFullCloseMessage so that onFullTextMessage is called even though the data were sent by fragments
@@ -252,15 +272,18 @@ public class WSGroup implements ModelListener, Runnable {
                 final String nodeName = rcache.get(ws);
                 if (nodeName != null) {
                     Log.info("Client node '{}' disconnected", nodeName);
-                    try {
-                        modelService.submitScript(tpl(onDisconnect, nodeName), new UpdateCallback() {
-                            @Override
-                            public void run(Boolean applied) {
-                                Log.info("{} \"{}\" onDisconnect result from {}: {}", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), nodeName, applied);
-                            }
-                        });
-                    } catch (Exception e) {
-                        Log.error("Unable to parse onDisconnect KevScript. No changes made after the disconnection of "+nodeName);
+                    if (checkFilter(nodeName)) {
+                        // add onDisconnect logic
+                        try {
+                            final String onDisconnectKevs = tpl(onDisconnect, nodeName);
+                            System.out.println("===== onDisconnect KevScript =====");
+                            System.out.println(onDisconnectKevs);
+                            System.out.println("==================================");
+                            modelService.submitScript(onDisconnectKevs,
+                                    applied -> Log.info("{} \"{}\" onDisconnect result from {}: {}", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), nodeName, applied));
+                        } catch (Exception e) {
+                            Log.error("Unable to parse onDisconnect KevScript. No changes made after the disconnection of "+nodeName, e);
+                        }
                     }
                     cache.remove(nodeName);
                 }
@@ -339,6 +362,14 @@ public class WSGroup implements ModelListener, Runnable {
 
     private boolean hasMaster() {
         return (master != null && master.length() > 0);
+    }
+
+    private boolean checkFilter(String nodeName) {
+        if (this.filter != null && !this.filter.isEmpty()) {
+            Pattern pattern = Pattern.compile(this.filter);
+            return pattern.matcher(nodeName).matches();
+        }
+        return true;
     }
 
     @Override

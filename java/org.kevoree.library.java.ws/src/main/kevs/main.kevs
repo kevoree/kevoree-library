@@ -1,4 +1,4 @@
-add node0, node1 : JavaNode
+add node0 : JavaNode
 add node0.ticker : Ticker
 add sync : WSGroup
 add chan : RemoteWSChan
@@ -12,8 +12,8 @@ set sync.onDisconnect = 'remove {nodeName}'
 set chan.host = 'ws.kevoree.org'
 set chan.uuid = 'wsgroup-test'
 
-attach node0, node1 sync
+attach node0 sync
 
 bind node0.ticker.tick chan
 
-network node0.ip.eth0 kevtop.irisa.fr
+set node0.log = 'debug'
