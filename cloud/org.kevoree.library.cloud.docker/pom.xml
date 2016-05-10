@@ -104,6 +104,8 @@
                 </executions>
                 <configuration>
                     <registry>${publish.registry.url}</registry>
+                    <nodename>nodeDocker</nodename>
+                    <model>src/main/kevs/main.kevs</model>
                 </configuration>
             </plugin>
             <plugin>
