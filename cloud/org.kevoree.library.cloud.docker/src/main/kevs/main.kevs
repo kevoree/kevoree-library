@@ -1,162 +1,17 @@
-add web3, web2, web1, edison2, edison3, edison1, edison4, edison5, node0 : JavascriptNode/5.3.3
-add nodeDocker : JavaNode/5.3.2-SNAPSHOT
-add edison1.lcd_0, edison2.lcd_0, edison3.lcd_0, edison4.lcd_0, edison5.lcd_0 : eu.heads.HeadsLCDDisplayComp/0.1.0
-add edison2.led_0, edison3.led_0, edison1.led, edison4.led_0, edison5.led_0 : eu.heads.HeadsDigitalWriteComp/0.1.0
-add edison2.noise_0, edison2.temp_0, edison2.light_0, edison3.noise_0, edison3.temp_0, edison3.light_0, edison1.noise, edison1.temp, edison1.light, edison4.noise_0, edison4.temp_0, edison4.light_0, edison5.noise_0, edison5.temp_0, edison5.light_0 : eu.heads.HeadsAnalogSensorComp/0.1.0
-add nodeDocker.master, nodeDocker.redis : DockerContainer/5.3.2-SNAPSHOT
-add node0.comp989 : KevScript/5.3.2-SNAPSHOT
-add node0.comp464 : Ticker/5.3.1
-add node0.comp722 : InstanceMonitor/1.0.0
-add edisonGroup : RemoteWSGroup/5.3.1
-add chan4, chan3, chan2, chan1, chan, chan_0, chan_1, chan_2, chan_3, chan_4, chan_5, chan_6, chan_7, chan_8, chan_9, chan_9_0, chan_8_0, chan_5_0, chan_6_0, chan_7_0, chan_9_0_0, chan_8_0_0, chan_5_0_0, chan_7_0_0, chan_6_0_0 : RemoteWSChan/5.3.1
-add chan191, chan931 : LocalChannel/5.0.2
+add node0: JavaNode
+add node0.nodeCont : DockerContainer
+add node0.printer: ConsolePrinter
+add sync : WSGroup
+add chan: SyncBroadcast
 
-attach edison1, edison2, edison3, edison4, edison5, web1, web2, web3, nodeDocker, node0 edisonGroup
+attach node0 sync
 
-bind edison1.lcd_0.getValue chan4
-bind edison1.led.getValue chan3
-bind edison1.noise.out chan2
-bind edison1.light.out chan1
-bind edison1.temp.out chan
-bind edison2.lcd_0.getValue chan4
-bind edison2.led_0.getValue chan_3
-bind edison2.noise_0.out chan_0
-bind edison2.temp_0.out chan_1
-bind edison2.light_0.out chan_2
-bind edison3.lcd_0.getValue chan4
-bind edison3.led_0.getValue chan_8
-bind edison3.noise_0.out chan_5
-bind edison3.temp_0.out chan_6
-bind edison3.light_0.out chan_7
-bind edison4.lcd_0.getValue chan4
-bind edison4.led_0.getValue chan_8_0
-bind edison4.noise_0.out chan_5_0
-bind edison4.temp_0.out chan_6_0
-bind edison4.light_0.out chan_7_0
-bind edison5.lcd_0.getValue chan4
-bind edison5.led_0.getValue chan_8_0_0
-bind edison5.noise_0.out chan_5_0_0
-bind edison5.light_0.out chan_7_0_0
-bind edison5.temp_0.out chan_6_0_0
-bind node0.comp464.tick chan191
-bind node0.comp722.trigger chan191
-bind node0.comp722.signal chan931
-bind node0.comp989.trigger chan931
+set node0.nodeCont.image = 'busybox:latest'
+set node0.nodeCont.name = 'myContainer'
+set node0.nodeCont.cmd = 'ls -lArth'
+set node0.nodeCont.removeOnStop = 'true'
+set node0.nodeCont.dns = '8.8.8.8 8.8.4.4'
+set node0.nodeCont.binds = '/tmp:/yolo'
 
-set edison2.lcd_0.test = 'false'
-set edison2.led_0.pin = '7'
-set edison2.led_0.test = 'false'
-set edison2.noise_0.test = 'false'
-set edison2.temp_0.pin = '1'
-set edison2.temp_0.test = 'false'
-set edison2.light_0.pin = '2'
-set edison2.light_0.test = 'false'
-set edison3.lcd_0.test = 'false'
-set edison3.led_0.pin = '7'
-set edison3.led_0.test = 'false'
-set edison3.noise_0.test = 'false'
-set edison3.temp_0.pin = '1'
-set edison3.temp_0.test = 'false'
-set edison3.light_0.pin = '2'
-set edison3.light_0.test = 'false'
-set edison1.led.pin = '7'
-set edison1.led.test = 'false'
-set edison1.noise.test = 'false'
-set edison1.temp.pin = '1'
-set edison1.temp.test = 'false'
-set edison1.light.pin = '2'
-set edison1.light.test = 'false'
-set edison4.lcd_0.test = 'false'
-set edison4.led_0.pin = '7'
-set edison4.led_0.test = 'false'
-set edison4.noise_0.test = 'false'
-set edison4.temp_0.pin = '1'
-set edison4.temp_0.test = 'false'
-set edison4.light_0.pin = '2'
-set edison4.light_0.test = 'false'
-set edison5.lcd_0.test = 'false'
-set edison5.led_0.pin = '7'
-set edison5.led_0.test = 'false'
-set edison5.noise_0.test = 'false'
-set edison5.temp_0.pin = '1'
-set edison5.temp_0.test = 'false'
-set edison5.light_0.pin = '2'
-set edison5.light_0.test = 'false'
-set nodeDocker.master.image = 'barais/nginx-proxy'
-set nodeDocker.master.binds = '/var/run/docker.sock:/tmp/docker.sock'
-set nodeDocker.master.cmd = 'forego start'
-set nodeDocker.master.ports = '8092:80'
-set nodeDocker.redis.image = 'barais/mdmsredis'
-set nodeDocker.redis.name = 'redis'
-set nodeDocker.redis.cmd = '/usr/bin/redis-server'
-set node0.comp989.kevScript = "add nodeDocker.{nn}: DockerContainer
-set nodeDocker.{nn}.image = 'barais/mdmssosies'
-set nodeDocker.{nn}.stopTimeout = '10'
-set nodeDocker.{nn}.environment = 'VIRTUAL_HOST=myapp.taa.fr'
-set nodeDocker.{nn}.cmd = '/opt/sosies/factory_and_indirection_on_RhinoEnginerhino5/bin/ringo /opt/mdms-ringojs/main.js'
-set nodeDocker.{nn}.links = 'redis'
-set nodeDocker.{nn}.ports = '8080'"
-set node0.comp722.key = 'image'
-set node0.comp722.value = 'barais/mdmssosies'
-set node0.comp722.limit = '5'
-set edisonGroup.host = 'ws.kevoree.org'
-set edisonGroup.path = 'edisons'
-set edisonGroup.answerPull/edison2 = 'false'
-set edisonGroup.answerPull/edison3 = 'false'
-set edisonGroup.answerPull/edison4 = 'false'
-set edisonGroup.answerPull/edison5 = 'false'
-set edisonGroup.answerPull/web1 = 'false'
-set edisonGroup.answerPull/web2 = 'false'
-set edisonGroup.answerPull/web3 = 'false'
-set edisonGroup.answerPull/nodeDocker = 'false'
-set chan4.uuid = 'edison1LCD'
-set chan4.host = 'ws.kevoree.org'
-set chan3.uuid = 'edison1Led'
-set chan3.host = 'ws.kevoree.org'
-set chan2.uuid = 'edison1Noise'
-set chan2.host = 'ws.kevoree.org'
-set chan1.uuid = 'edison1Light'
-set chan1.host = 'ws.kevoree.org'
-set chan.uuid = 'edison1Temp'
-set chan.host = 'ws.kevoree.org'
-set chan_0.uuid = 'edison2Noise'
-set chan_0.host = 'ws.kevoree.org'
-set chan_1.uuid = 'edison2Temp'
-set chan_1.host = 'ws.kevoree.org'
-set chan_2.uuid = 'edison2Light'
-set chan_2.host = 'ws.kevoree.org'
-set chan_3.uuid = 'edison2Led'
-set chan_3.host = 'ws.kevoree.org'
-set chan_4.uuid = 'edison2LCD'
-set chan_4.host = 'ws.kevoree.org'
-set chan_5.uuid = 'edison3Noise'
-set chan_5.host = 'ws.kevoree.org'
-set chan_6.uuid = 'edison3Temp'
-set chan_6.host = 'ws.kevoree.org'
-set chan_7.uuid = 'edison3Light'
-set chan_7.host = 'ws.kevoree.org'
-set chan_8.uuid = 'edison3Led'
-set chan_8.host = 'ws.kevoree.org'
-set chan_9.uuid = 'edison3LCD'
-set chan_9.host = 'ws.kevoree.org'
-set chan_9_0.uuid = 'edison4LCD'
-set chan_9_0.host = 'ws.kevoree.org'
-set chan_8_0.uuid = 'edison4Led'
-set chan_8_0.host = 'ws.kevoree.org'
-set chan_5_0.uuid = 'edison4Noise'
-set chan_5_0.host = 'ws.kevoree.org'
-set chan_6_0.uuid = 'edison4Temp'
-set chan_6_0.host = 'ws.kevoree.org'
-set chan_7_0.uuid = 'edison4Light'
-set chan_7_0.host = 'ws.kevoree.org'
-set chan_9_0_0.uuid = 'edison5LCD'
-set chan_9_0_0.host = 'ws.kevoree.org'
-set chan_8_0_0.uuid = 'edison5Led'
-set chan_8_0_0.host = 'ws.kevoree.org'
-set chan_5_0_0.uuid = 'edison5Noise'
-set chan_5_0_0.host = 'ws.kevoree.org'
-set chan_7_0_0.uuid = 'edison5Light'
-set chan_7_0_0.host = 'ws.kevoree.org'
-set chan_6_0_0.uuid = 'edison5Temp'
-set chan_6_0_0.host = 'ws.kevoree.org'
-
+bind node0.nodeCont.stdout chan
+bind node0.printer.input chan
