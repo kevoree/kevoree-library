@@ -1,11 +1,11 @@
 add node0: JavaNode
-add node0.nodeCont : DockerContainer
-add node0.printer: ConsolePrinter
 add sync : WSGroup
-add chan: SyncBroadcast
 
 attach node0 sync
 
+add chan: SyncBroadcast
+add node0.nodeCont : DockerContainer
+add node0.printer: ConsolePrinter
 set node0.nodeCont.image = 'busybox:latest'
 set node0.nodeCont.name = 'myContainer'
 set node0.nodeCont.cmd = 'ls -lArth'
