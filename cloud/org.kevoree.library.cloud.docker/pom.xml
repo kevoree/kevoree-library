@@ -10,10 +10,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.cloud.docker</artifactId>
     <name>Kevoree :: Library :: Cloud :: Docker</name>
+    <version>1.3.2-SNAPSHOT</version>
 
     <properties>
         <hk2.version>2.3.0-b10</hk2.version>
-        <publish.registry.url>http://registry.kevoree.org</publish.registry.url>
+<!--        <publish.registry.url>http://registry.kevoree.org</publish.registry.url>-->
+        <publish.registry.url>http://localhost</publish.registry.url>
     </properties>
 
     <dependencies>
@@ -62,8 +64,18 @@
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.datatype</groupId>
+                    <artifactId>jackson-datatype-guava</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-guava</artifactId>
+            <version>2.7.4</version>
+        </dependency>
+
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>

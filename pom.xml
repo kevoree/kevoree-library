@@ -11,12 +11,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>0.8.11</kotlin.version>
         <kevoree.version>5.3.2-SNAPSHOT</kevoree.version>
+        <publish.registry.url>http://localhost</publish.registry.url>
     </properties>
 
     <organization>
         <name>Kevoree Project</name>
         <url>http://kevoree.org</url>
     </organization>
+
 
     <parent>
         <groupId>org.sonatype.oss</groupId>
@@ -155,6 +157,26 @@
                     </execution>
                 </executions>
             </plugin>
+	    <plugin>
+                <groupId>org.kevoree.tools</groupId>
+                <artifactId>org.kevoree.tools.mavenplugin</artifactId>
+                <version>${kevoree.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+
+                </executions>
+		 <configuration>
+                    <registry>${publish.registry.url}</registry>
+                </configuration>
+
+            </plugin>
+
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
