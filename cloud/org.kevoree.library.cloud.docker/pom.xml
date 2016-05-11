@@ -14,8 +14,6 @@
 
     <properties>
         <hk2.version>2.3.0-b10</hk2.version>
-<!--        <publish.registry.url>http://registry.kevoree.org</publish.registry.url>-->
-        <publish.registry.url>http://localhost</publish.registry.url>
     </properties>
 
     <dependencies>
@@ -135,23 +133,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.kevoree.tools</groupId>
-                <artifactId>org.kevoree.tools.mavenplugin</artifactId>
-                <version>${kevoree.version}</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                            <goal>deploy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <registry>${publish.registry.url}</registry>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
