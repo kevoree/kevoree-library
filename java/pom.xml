@@ -20,6 +20,7 @@
 
 	</properties>
     <modules>
+        <module>org.kevoree.library.java.control-flow</module>
         <module>org.kevoree.library.java.javaNode</module>
         <module>org.kevoree.library.java.channels</module>
         <module>org.kevoree.library.java.toys</module>
