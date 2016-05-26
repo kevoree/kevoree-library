@@ -1,0 +1,34 @@
+add master, nodeA, nodeB, nodeC, nodeD : JavaNode
+add master.comp412 : GameOfLifeEngine
+add master.comp729 : Ticker
+add nodeA.comp191, nodeA.comp191_0, nodeA.comp191_0_0, nodeA.comp191_0_0_0, nodeA.comp191_0_0_1, nodeB.comp191_1, nodeB.comp191_1_0, nodeB.comp191_1_1, nodeB.comp191_1_2, nodeB.comp191_1_3 : GameOfLifeCell
+add group : WSGroup
+add chan790 : AsyncBroadcast
+
+attach master, nodeA, nodeB, nodeC, nodeD group
+
+bind master.comp412.tick chan790
+bind master.comp729.tick chan790
+
+set master.comp729.period = '30000'
+set nodeA.comp191.x = '0'
+set nodeA.comp191.y = '0'
+set nodeA.comp191_0.x = '-1'
+set nodeA.comp191_0.y = '0'
+set nodeA.comp191_0_0.x = '-2'
+set nodeA.comp191_0_0.y = '0'
+set nodeA.comp191_0_0_0.x = '-3'
+set nodeA.comp191_0_0_0.y = '0'
+set nodeA.comp191_0_0_1.x = '-4'
+set nodeA.comp191_0_0_1.y = '0'
+set nodeB.comp191_1.x = '1'
+set nodeB.comp191_1.y = '0'
+set nodeB.comp191_1_0.x = '2'
+set nodeB.comp191_1_0.y = '0'
+set nodeB.comp191_1_1.x = '3'
+set nodeB.comp191_1_1.y = '0'
+set nodeB.comp191_1_2.x = '4'
+set nodeB.comp191_1_2.y = '0'
+set nodeB.comp191_1_3.x = '5'
+set nodeB.comp191_1_3.y = '0'
+set group.master = 'master'

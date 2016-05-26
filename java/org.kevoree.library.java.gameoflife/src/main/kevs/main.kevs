@@ -1,0 +1,21 @@
+add node0 : JavaNode
+add node0.comp412 : GameOfLifeEngine
+add node0.comp952, node0.comp597, node0.comp94 : GameOfLifeCell
+add node0.comp729 : Ticker
+add group625 : RemoteWSGroup
+add chan790 : AsyncBroadcast
+
+attach node0 group625
+
+bind node0.comp412.tick chan790
+bind node0.comp729.tick chan790
+
+set node0.comp952.x = '1'
+set node0.comp952.y = '0'
+set node0.comp597.x = '3'
+set node0.comp597.y = '0'
+set node0.comp94.x = '2'
+set node0.comp94.y = '0'
+set node0.comp729.period = '30000'
+set group625.host = 'ws.kevoree.org'
+set group625.path = '/gol'

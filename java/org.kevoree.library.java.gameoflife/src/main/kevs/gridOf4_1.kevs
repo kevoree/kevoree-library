@@ -1,0 +1,38 @@
+add master, nodeA, nodeC, nodeB, nodeD : JavaNode/5.3.2-SNAPSHOT
+add master.comp728 : Ticker/5.3.2-SNAPSHOT
+add master.comp412 : GameOfLifeEngine/5.3.2-SNAPSHOT
+add master.comp302 : ConsolePrinter/5.3.2-SNAPSHOT
+add nodeA.comp191, nodeA.comp191_0_0, nodeA.comp191_0, nodeA.comp191_0_0_0, nodeA.comp191_0_0_1, nodeB.comp191_1_2, nodeB.comp191_1_1, nodeB.comp191_1_0, nodeB.comp191_1_3, nodeB.comp191_1 : GameOfLifeCell/5.3.2-SNAPSHOT
+add group : WSGroup/5.3.3-SNAPSHOT
+add chan415 : RemoteWSChan/5.3.3-SNAPSHOT
+add chan557 : AsyncBroadcast/5.3.2-SNAPSHOT
+
+attach master, nodeA, nodeC, nodeB, nodeD group
+
+bind master.comp728.tick chan415
+bind master.comp728.tick chan557
+bind master.comp302.input chan557
+bind master.comp412.tick chan415
+
+set master.log = 'DEBUG'
+set master.comp728.period = '30000'
+set nodeA.log = 'DEBUG'
+set nodeA.comp191.y = '1'
+set nodeA.comp191.x = '1'
+set nodeA.comp191_0_0.x = '-1'
+set nodeA.comp191_0_0.y = '1'
+set nodeA.comp191_0.x = '-1'
+set nodeA.comp191_0_0_0.x = '-3'
+set nodeA.comp191_0_0_1.x = '-4'
+set nodeC.log = 'DEBUG'
+set nodeB.log = 'DEBUG'
+set nodeB.comp191_1_2.x = '4'
+set nodeB.comp191_1_1.x = '3'
+set nodeB.comp191_1_0.x = '2'
+set nodeB.comp191_1_3.x = '5'
+set nodeB.comp191_1.x = '1'
+set nodeD.log = 'DEBUG'
+set group.master = 'master'
+set chan415.uuid = 'test2'
+set chan415.host = 'ws.kevoree.org'
+set chan415.path = '/gol'
