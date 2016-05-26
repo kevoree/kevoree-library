@@ -1,4 +1,4 @@
-package org.kevoree.library.java.controlflow;
+package org.kevoree.library;
 
 import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.Input;
@@ -8,8 +8,8 @@ import org.kevoree.api.Port;
 /**
  * Created by mleduc on 19/05/16.
  */
-@ComponentType(description = "receives two inputs and send them to the same output")
-public class Merge2 {
+@ComponentType(description = "receives three inputs and send them to the same output")
+public class Merge3 {
 
     @Output
     public Port output;
@@ -21,6 +21,11 @@ public class Merge2 {
 
     @Input
     public void input1(String i) {
+        output.send(i);
+    }
+
+    @Input
+    public void input2(String i) {
         output.send(i);
     }
 }

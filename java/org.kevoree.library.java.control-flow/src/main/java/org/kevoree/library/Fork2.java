@@ -1,4 +1,4 @@
-package org.kevoree.library.java.controlflow;
+package org.kevoree.library;
 
 import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.Input;
