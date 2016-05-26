@@ -12,6 +12,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <properties>
+        <publish.registry.url>http://registry.kevoree.org</publish.registry.url>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -42,7 +46,7 @@
 <version>${kevoree.version}</version>
 <extensions>true</extensions>
 <configuration>
-<registry>http://localhost</registry>
+<registry>${publish.registry.url}</registry>
 </configuration>
 <executions>
 <execution>
@@ -57,4 +61,3 @@
     </build>
 
 </project>
-
