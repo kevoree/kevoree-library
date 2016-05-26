@@ -13,7 +13,7 @@
     </parent>
 
     <properties>
-        <wsmsgbroker.version>1.0.5</wsmsgbroker.version>
+        <wsmsgbroker.version>1.0.6-SNAPSHOT</wsmsgbroker.version>
         <publish.registry.url>http://registry.kevoree.org</publish.registry.url>
     </properties>
 

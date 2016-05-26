@@ -84,17 +84,17 @@ public class RemoteWSGroup implements Runnable {
         url = getURL();
     }
 
-    private String getURL() throws Exception {
-        if (host == null || host.trim().length() == 0) {
-            throw new Exception("'host' attribute is not specified");
-        }
+	private String getURL() throws Exception {
+		if (host == null || host.trim().length() == 0) {
+			throw new Exception("'host' attribute is not specified");
+		}
 
-        if (path.startsWith("/")) {
-            path = path.substring(1, path.length()-1);
-        }
+		if (path.startsWith("/")) {
+			path = path.substring(1, path.length());
+		}
 
-        return "ws://"+host+":"+port+"/"+path;
-    }
+		return "ws://" + host + ":" + port + "/" + path;
+	}
 
     public void run() {
         try {

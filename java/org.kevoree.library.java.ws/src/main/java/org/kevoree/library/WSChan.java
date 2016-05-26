@@ -2,7 +2,6 @@ package org.kevoree.library;
 
 import fr.braindead.wsmsgbroker.Response;
 import fr.braindead.wsmsgbroker.WSMsgBrokerClient;
-import fr.braindead.wsmsgbroker.callback.AnswerCallback;
 import org.kevoree.*;
 import org.kevoree.annotation.*;
 import org.kevoree.annotation.ChannelType;
@@ -34,6 +33,7 @@ public class WSChan implements ChannelDispatch {
 
     @Start
     public void start() {
+		Log.debug("Start WSChan");
         clients = new HashMap<>();
         if (path == null) {
             path = "";
@@ -60,6 +60,7 @@ public class WSChan implements ChannelDispatch {
 
     @Stop
     public void stop() {
+		Log.debug("Stop WSChan");
         if (this.clients != null) {
             clients.values()
                 .stream()
@@ -122,6 +123,7 @@ public class WSChan implements ChannelDispatch {
     }
 
     private void createInputClient(final String id) {
+		Log.debug("createInputClient : " + id);
         this.clients.put(id, new WSMsgBrokerClient(id, host, port, path, true) {
             @Override
             public void onUnregistered(String s) {
@@ -170,6 +172,7 @@ public class WSChan implements ChannelDispatch {
     }
 
     private void createOutputClient(final String id) {
+		Log.debug("createOutputClient : " + id);
         this.clients.put(id, new WSMsgBrokerClient(id, host, port, path, true) {
             @Override
             public void onUnregistered(String s) {

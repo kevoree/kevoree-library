@@ -155,10 +155,14 @@ public class WSGroup implements ModelListener, Runnable {
                                             try {
                                                 Log.debug("onConnect KevScript to process:");
                                                 final String onConnectKevs = tpl(onConnect, rm.getNodeName());
-                                                System.out.println("===== onConnect KevScript =====");
-                                                System.out.println(onConnectKevs);
-                                                System.out.println("===============================");
-                                                kevsService.execute(onConnectKevs, modelToApply);
+												if (!onConnectKevs.trim().isEmpty()) {
+													Log.debug("===== onConnect KevScript =====");
+													Log.debug(onConnectKevs);
+													Log.debug("===============================");
+													kevsService.execute(onConnectKevs, modelToApply);
+												} else {
+													Log.debug("onConnect KevScript empty");
+												}
                                             } catch (Exception e) {
                                                 Log.error("Unable to parse onConnect KevScript. Broadcasting model without onConnect process.", e);
                                             } finally {
@@ -268,27 +272,36 @@ public class WSGroup implements ModelListener, Runnable {
             });
 
             channel.resumeReceives();
-            channel.addCloseTask(ws -> {
-                final String nodeName = rcache.get(ws);
-                if (nodeName != null) {
-                    Log.info("Client node '{}' disconnected", nodeName);
-                    if (checkFilter(nodeName)) {
-                        // add onDisconnect logic
-                        try {
-                            final String onDisconnectKevs = tpl(onDisconnect, nodeName);
-                            System.out.println("===== onDisconnect KevScript =====");
-                            System.out.println(onDisconnectKevs);
-                            System.out.println("==================================");
-                            modelService.submitScript(onDisconnectKevs,
-                                    applied -> Log.info("{} \"{}\" onDisconnect result from {}: {}", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), nodeName, applied));
-                        } catch (Exception e) {
-                            Log.error("Unable to parse onDisconnect KevScript. No changes made after the disconnection of "+nodeName, e);
-                        }
-                    }
-                    cache.remove(nodeName);
-                }
-                rcache.remove(ws);
-            });
+			channel.addCloseTask(ws -> {
+				final String nodeName = rcache.get(ws);
+				if (nodeName != null) {
+					Log.info("Client node '{}' disconnected", nodeName);
+					if (checkFilter(nodeName)) {
+						// add onDisconnect logic
+						try {
+							final String onDisconnectKevs = tpl(onDisconnect, nodeName);
+							if (!onDisconnectKevs.trim().isEmpty()) {
+								Log.debug("===== onDisconnect KevScript =====");
+								Log.debug(onDisconnectKevs);
+								Log.debug("==================================");
+								modelService.submitScript(onDisconnectKevs,
+										applied -> Log.info("{} \"{}\" onDisconnect result from {}: {}",
+												WSGroup.this.getClass().getSimpleName(), context.getInstanceName(),
+												nodeName, applied));
+							} else {
+								Log.debug("onDisconnect KevScript empty");
+							}
+						} catch (Exception e) {
+							Log.error(
+									"Unable to parse onDisconnect KevScript. No changes made after the disconnection of "
+											+ nodeName,
+									e);
+						}
+					}
+					cache.remove(nodeName);
+				}
+				rcache.remove(ws);
+			});
         }
 
 
