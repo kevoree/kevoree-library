@@ -64,7 +64,7 @@ import static org.kevoree.api.protocol.Protocol.*;
 "triggered the process by using this notation: {nodeName}</em>"+
 "<br/><em>NB2: {groupName} is also available and resolves to the current WSGroup instance name</em>"+
 "<br/><em>NB3: onConnect & onDisconnect are not triggered if the client nodeName does not match the regex given in the <strong>filter</strong> parameter</em>")
-public class WSGroup implements ModelListener, Runnable {
+public class WSFeedbackGroup implements ModelListener, Runnable {
 
     private AtomicBoolean diverge = new AtomicBoolean(false);
 
@@ -116,7 +116,7 @@ public class WSGroup implements ModelListener, Runnable {
                     try {
                         Message parsedMsg = Protocol.parse(msg);
                         if (parsedMsg == null) {
-                            Log.warn(WSGroup.this.getClass().getSimpleName() + "  \"{}\" received an unknown message '{}'", context.getInstanceName(), msg);
+                            Log.warn(WSFeedbackGroup.this.getClass().getSimpleName() + "  \"{}\" received an unknown message '{}'", context.getInstanceName(), msg);
                         } else {
                             switch (parsedMsg.getType()) {
                                 case REGISTER_TYPE:
@@ -139,14 +139,14 @@ public class WSGroup implements ModelListener, Runnable {
                                             try {
                                                 Log.debug("onConnect KevScript to process:");
                                                 final String onConnectKevs = tpl(onConnect, rm.getNodeName());
-												if (!onConnectKevs.trim().isEmpty()) {
-													Log.debug("===== onConnect KevScript =====");
-													Log.debug(onConnectKevs);
-													Log.debug("===============================");
-													kevsService.execute(onConnectKevs, modelToApply);
-												} else {
-													Log.debug("onConnect KevScript empty");
-												}
+                                                if (!onConnectKevs.trim().isEmpty()) {
+                                                    Log.debug("===== onConnect KevScript =====");
+                                                    Log.debug(onConnectKevs);
+                                                    Log.debug("===============================");
+                                                    kevsService.execute(onConnectKevs, modelToApply);
+                                                } else {
+                                                    Log.debug("onConnect KevScript empty");
+                                                }
                                             } catch (Exception e) {
                                                 Log.error("Unable to parse onConnect KevScript. Broadcasting model without onConnect process.", e);
                                             } finally {
@@ -159,13 +159,13 @@ public class WSGroup implements ModelListener, Runnable {
                                     break;
                                 case PULL_TYPE:
                                     String modelReturn = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
-                                    Log.info("{} \"{}\": pull requested", WSGroup.this.getClass().getSimpleName(), context.getInstanceName());
+                                    Log.info("{} \"{}\": pull requested", WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName());
                                     WebSockets.sendText(modelReturn, webSocket, null);
                                     break;
                                 case PUSH_TYPE:
                                     PushMessage pm = (PushMessage) parsedMsg;
                                     try {
-                                        Log.info("{} \"{}\": push received, applying locally...", WSGroup.this.getClass().getSimpleName(), context.getInstanceName());
+                                        Log.info("{} \"{}\": push received, applying locally...", WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName());
                                         ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
                                         if (hasMaster()) {
                                             if (isMaster()) {
@@ -188,15 +188,15 @@ public class WSGroup implements ModelListener, Runnable {
                                         modelService.update(model, new UpdateCallback() {
                                             @Override
                                             public void run(Boolean applied) {
-                                                Log.info("{} \"{}\" update result: {}", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), applied);
+                                                Log.info("{} \"{}\" update result: {}", WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName(), applied);
                                             }
                                         });
                                     } catch (Exception e) {
-                                        Log.warn("{} \"{}\" received a malformed push message '{}'", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), msg);
+                                        Log.warn("{} \"{}\" received a malformed push message '{}'", WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName(), msg);
                                     }
                                     break;
                                 default:
-                                    Log.warn("{} \"{}\" unhandled message '{}'", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), msg);
+                                    Log.warn("{} \"{}\" unhandled message '{}'", WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName(), msg);
                                     break;
                             }
                         }
@@ -237,7 +237,7 @@ public class WSGroup implements ModelListener, Runnable {
 
                 @Override
                 protected void onError(WebSocketChannel webSocket, Throwable error) {
-                    Log.error("{} \"{}\": {}", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), error.getMessage());
+                    Log.error("{} \"{}\": {}", WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName(), error.getMessage());
                     try {
                         if (webSocket != null) {
                             webSocket.close();
@@ -256,36 +256,36 @@ public class WSGroup implements ModelListener, Runnable {
             });
 
             channel.resumeReceives();
-			channel.addCloseTask(ws -> {
-				final String nodeName = rcache.get(ws);
-				if (nodeName != null) {
-					Log.info("Client node '{}' disconnected", nodeName);
-					if (checkFilter(nodeName)) {
-						// add onDisconnect logic
-						try {
-							final String onDisconnectKevs = tpl(onDisconnect, nodeName);
-							if (!onDisconnectKevs.trim().isEmpty()) {
-								Log.debug("===== onDisconnect KevScript =====");
-								Log.debug(onDisconnectKevs);
-								Log.debug("==================================");
-								modelService.submitScript(onDisconnectKevs,
-										applied -> Log.info("{} \"{}\" onDisconnect result from {}: {}",
-												WSGroup.this.getClass().getSimpleName(), context.getInstanceName(),
-												nodeName, applied));
-							} else {
-								Log.debug("onDisconnect KevScript empty");
-							}
-						} catch (Exception e) {
-							Log.error(
-									"Unable to parse onDisconnect KevScript. No changes made after the disconnection of "
-											+ nodeName,
-									e);
-						}
-					}
-					cache.remove(nodeName);
-				}
-				rcache.remove(ws);
-			});
+            channel.addCloseTask(ws -> {
+                final String nodeName = rcache.get(ws);
+                if (nodeName != null) {
+                    Log.info("Client node '{}' disconnected", nodeName);
+                    if (checkFilter(nodeName)) {
+                        // add onDisconnect logic
+                        try {
+                            final String onDisconnectKevs = tpl(onDisconnect, nodeName);
+                            if (!onDisconnectKevs.trim().isEmpty()) {
+                                Log.debug("===== onDisconnect KevScript =====");
+                                Log.debug(onDisconnectKevs);
+                                Log.debug("==================================");
+                                modelService.submitScript(onDisconnectKevs,
+                                        applied -> Log.info("{} \"{}\" onDisconnect result from {}: {}",
+                                                WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName(),
+                                                nodeName, applied));
+                            } else {
+                                Log.debug("onDisconnect KevScript empty");
+                            }
+                        } catch (Exception e) {
+                            Log.error(
+                                    "Unable to parse onDisconnect KevScript. No changes made after the disconnection of "
+                                            + nodeName,
+                                    e);
+                        }
+                    }
+                    cache.remove(nodeName);
+                }
+                rcache.remove(ws);
+            });
         }
 
 
@@ -307,7 +307,7 @@ public class WSGroup implements ModelListener, Runnable {
                         .setHandler(websocket(new InternalWebSocketServer()))
                         .build();
                 serverHandler.start();
-                Log.info(WSGroup.this.getClass().getSimpleName()+" \"{}\" listen on {}", context.getInstanceName(), port);
+                Log.info(WSFeedbackGroup.this.getClass().getSimpleName()+" \"{}\" listen on {}", context.getInstanceName(), port);
             } else {
                 scheduledThreadPool = Executors.newScheduledThreadPool(1);
                 scheduledThreadPool.scheduleAtFixedRate(this, 0, 3000, TimeUnit.MILLISECONDS);
@@ -318,7 +318,7 @@ public class WSGroup implements ModelListener, Runnable {
                     .setHandler(websocket(new InternalWebSocketServer()))
                     .build();
             serverHandler.start();
-            Log.info(WSGroup.this.getClass().getSimpleName()+" \"{}\" listen on {}", context.getInstanceName(), port);
+            Log.info(WSFeedbackGroup.this.getClass().getSimpleName()+" \"{}\" listen on {}", context.getInstanceName(), port);
         }
     }
 
@@ -478,7 +478,7 @@ public class WSGroup implements ModelListener, Runnable {
                 String msg = message.getData();
                 Protocol.Message parsedMsg = Protocol.parse(msg);
                 if (parsedMsg == null) {
-                    Log.warn(WSGroup.this.getClass().getSimpleName() + " \"{}\" unknown message '{}'", context.getInstanceName(), msg);
+                    Log.warn(WSFeedbackGroup.this.getClass().getSimpleName() + " \"{}\" unknown message '{}'", context.getInstanceName(), msg);
                 } else {
                     switch (parsedMsg.getType()) {
                         case PUSH_TYPE:
@@ -489,12 +489,12 @@ public class WSGroup implements ModelListener, Runnable {
                             modelService.update(model, new UpdateCallback() {
                                 @Override
                                 public void run(Boolean applied) {
-                                    Log.info(WSGroup.this.getClass().getSimpleName()+" \"{}\" update result: {}", context.getInstanceName(), applied);
+                                    Log.info(WSFeedbackGroup.this.getClass().getSimpleName()+" \"{}\" update result: {}", context.getInstanceName(), applied);
                                 }
                             });
                             break;
                         default:
-                            Log.warn(WSGroup.this.getClass().getSimpleName() + " \"{}\" unhandled message '{}'", context.getInstanceName(), msg);
+                            Log.warn(WSFeedbackGroup.this.getClass().getSimpleName() + " \"{}\" unhandled message '{}'", context.getInstanceName(), msg);
                             break;
                     }
                 }
