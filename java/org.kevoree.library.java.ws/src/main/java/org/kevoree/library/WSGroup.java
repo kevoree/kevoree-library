@@ -98,7 +98,7 @@ public class WSGroup implements ModelListener, Runnable {
     private String onDisconnect = "";
 
 
-    public void setPort(Integer port) throws IOException, InterruptedException {
+    /*public void setPort(Integer port) throws IOException, InterruptedException {
         this.port = port;
         if (running) {
             serverHandler.stop();
@@ -110,9 +110,9 @@ public class WSGroup implements ModelListener, Runnable {
             modelService.registerModelListener(this);
             serverHandler.start();
         }
-    }
+    }*/
 
-    private boolean running = false;
+    //private boolean running = false;
     private ScheduledExecutorService scheduledThreadPool;
     private Undertow serverHandler;
     private KevoreeFactory factory = new DefaultKevoreeFactory();
@@ -315,6 +315,7 @@ public class WSGroup implements ModelListener, Runnable {
 
     @Start
     public void startWSGroup() {
+        modelService.registerModelListener(this);
         if (this.hasMaster()) {
             if (this.isMaster()) {
                 serverHandler = Undertow.builder()
@@ -324,8 +325,6 @@ public class WSGroup implements ModelListener, Runnable {
                 serverHandler.start();
                 Log.info(WSGroup.this.getClass().getSimpleName()+" \"{}\" listen on {}", context.getInstanceName(), port);
             } else {
-                modelService.registerModelListener(this);
-                running = true;
                 scheduledThreadPool = Executors.newScheduledThreadPool(1);
                 scheduledThreadPool.scheduleAtFixedRate(this, 0, 3000, TimeUnit.MILLISECONDS);
             }
@@ -361,7 +360,7 @@ public class WSGroup implements ModelListener, Runnable {
             masterClient.close();
             masterClient = null;
         }
-        running = false;
+        //running = false;
 
     }
 
@@ -537,7 +536,8 @@ public class WSGroup implements ModelListener, Runnable {
     }
 
     @Override
-    public void modelUpdated() {}
+    public void modelUpdated() {
+    }
 
     @Override
     public void preRollback(UpdateContext context) {}

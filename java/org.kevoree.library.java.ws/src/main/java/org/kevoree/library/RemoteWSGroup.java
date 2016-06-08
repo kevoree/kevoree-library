@@ -5,24 +5,18 @@ import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
-import org.kevoree.api.handler.UpdateCallback;
-import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.api.protocol.Protocol;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.log.Log;
 import org.kevoree.pmodeling.api.KMFContainer;
 import org.kevoree.pmodeling.api.json.JSONModelLoader;
 import org.kevoree.pmodeling.api.json.JSONModelSerializer;
-import org.xnio.*;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.kevoree.api.protocol.Protocol.*;
 
 /**
@@ -132,16 +126,7 @@ public class RemoteWSGroup implements Runnable {
                                         break;
 
                                     case Protocol.PULL_TYPE:
-                                        if (answerPull) {
-                                            Log.info("\"{}\" received a pull request", context.getInstanceName());
-                                            try {
-                                                this.send(serializer.serialize(modelService.getCurrentModel().getModel()));
-                                            } catch (Exception e) {
-                                                Log.warn("\"{}\" unable to serialize current model, pull aborted", context.getInstanceName());
-                                            }
-                                        } else {
-                                            Log.info("\"{}\" received a pull request, but 'answerPull' mode is false", context.getInstanceName());
-                                        }
+                                        answerPull(this);
                                         break;
 
                                     default:
@@ -175,4 +160,17 @@ public class RemoteWSGroup implements Runnable {
             Log.error("Error while connecting to master server (is server reachable ?)");
         }
     }
+
+    private void answerPull(WebSocketClient webSocketClient) {
+		if (answerPull) {
+		    Log.info("\"{}\" received a pull request", context.getInstanceName());
+		    try {
+		        webSocketClient.send(serializer.serialize(modelService.getCurrentModel().getModel()));
+		    } catch (Exception e) {
+		        Log.warn("\"{}\" unable to serialize current model, pull aborted", context.getInstanceName());
+		    }
+		} else {
+		    Log.info("\"{}\" received a pull request, but 'answerPull' mode is false", context.getInstanceName());
+		}
+	}
 }
