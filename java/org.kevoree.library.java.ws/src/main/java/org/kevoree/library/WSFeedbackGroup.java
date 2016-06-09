@@ -626,6 +626,7 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
                             public void run(Boolean applied) {
                                 Log.info(WSFeedbackGroup.this.getClass().getSimpleName() + " \"{}\" update result: {}",
                                         context.getInstanceName(), applied);
+                                notifyDeploymentSuccess(context.getNodeName(), pm.getUid(), applied);
                             }
                         });
                         break;
