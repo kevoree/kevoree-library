@@ -1,32 +1,15 @@
 package org.kevoree.library;
 
-import io.undertow.Undertow;
-import io.undertow.websockets.WebSocketConnectionCallback;
-import io.undertow.websockets.client.WebSocketClient;
-import io.undertow.websockets.core.*;
-import io.undertow.websockets.spi.WebSocketHttpExchange;
-import org.kevoree.*;
-import org.kevoree.annotation.GroupType;
-import org.kevoree.annotation.*;
-import org.kevoree.api.Context;
-import org.kevoree.api.KevScriptService;
-import org.kevoree.api.ModelService;
-import org.kevoree.api.handler.ModelListener;
-import org.kevoree.api.handler.UpdateCallback;
-import org.kevoree.api.handler.UpdateContext;
-import org.kevoree.api.protocol.Protocol;
-import org.kevoree.factory.DefaultKevoreeFactory;
-import org.kevoree.factory.KevoreeFactory;
-import org.kevoree.log.Log;
-import org.kevoree.pmodeling.api.ModelCloner;
-import org.kevoree.pmodeling.api.compare.ModelCompare;
-import org.kevoree.pmodeling.api.json.JSONModelLoader;
-import org.kevoree.pmodeling.api.json.JSONModelSerializer;
-import org.kevoree.pmodeling.api.trace.TraceSequence;
-import org.xnio.*;
+import static io.undertow.Handlers.websocket;
+import static org.kevoree.library.protocol.Protocol.PULL_TYPE;
+import static org.kevoree.library.protocol.Protocol.PUSH_TYPE;
+import static org.kevoree.library.protocol.Protocol.REGISTER_TYPE;
+import static org.kevoree.library.protocol.Protocol.RESULT_TYPE;
+import static org.kevoree.library.protocol.Protocol.STATUS_TYPE;
 
 import java.io.IOException;
 import java.net.URI;
+import java.rmi.server.UID;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,33 +20,78 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
-import static io.undertow.Handlers.websocket;
-import static org.kevoree.api.protocol.Protocol.*;
+import org.kevoree.ContainerNode;
+import org.kevoree.ContainerRoot;
+import org.kevoree.FragmentDictionary;
+import org.kevoree.Group;
+import org.kevoree.NetworkInfo;
+import org.kevoree.Value;
+import org.kevoree.annotation.GroupType;
+import org.kevoree.annotation.KevoreeInject;
+import org.kevoree.annotation.Param;
+import org.kevoree.annotation.Start;
+import org.kevoree.annotation.Stop;
+import org.kevoree.api.Context;
+import org.kevoree.api.KevScriptService;
+import org.kevoree.api.ModelService;
+import org.kevoree.api.handler.ModelListener;
+import org.kevoree.api.handler.UpdateCallback;
+import org.kevoree.api.handler.UpdateContext;
+import org.kevoree.factory.DefaultKevoreeFactory;
+import org.kevoree.factory.KevoreeFactory;
+import org.kevoree.library.protocol.Protocol;
+import org.kevoree.library.protocol.Protocol.Message;
+import org.kevoree.library.protocol.Protocol.PushMessage;
+import org.kevoree.library.protocol.Protocol.RegisterMessage;
+import org.kevoree.library.protocol.Protocol.ResultMessage;
+import org.kevoree.library.protocol.Protocol.StatusMessage;
+import org.kevoree.log.Log;
+import org.kevoree.pmodeling.api.ModelCloner;
+import org.kevoree.pmodeling.api.compare.ModelCompare;
+import org.kevoree.pmodeling.api.json.JSONModelLoader;
+import org.kevoree.pmodeling.api.json.JSONModelSerializer;
+import org.kevoree.pmodeling.api.trace.TraceSequence;
+import org.xnio.BufferAllocator;
+import org.xnio.ByteBufferSlicePool;
+import org.xnio.OptionMap;
+import org.xnio.Options;
+import org.xnio.Xnio;
+import org.xnio.XnioWorker;
+
+import feedback.ResultTaskService;
+import io.undertow.Undertow;
+import io.undertow.websockets.WebSocketConnectionCallback;
+import io.undertow.websockets.client.WebSocketClient;
+import io.undertow.websockets.core.AbstractReceiveListener;
+import io.undertow.websockets.core.BufferedBinaryMessage;
+import io.undertow.websockets.core.BufferedTextMessage;
+import io.undertow.websockets.core.StreamSourceFrameChannel;
+import io.undertow.websockets.core.WebSocketChannel;
+import io.undertow.websockets.core.WebSocketVersion;
+import io.undertow.websockets.core.WebSockets;
+import io.undertow.websockets.spi.WebSocketHttpExchange;
 
 /**
- * Created with IntelliJ IDEA.
- * User: duke
- * Date: 29/11/2013
- * Time: 12:07
+ * Created with IntelliJ IDEA. User: duke Date: 29/11/2013 Time: 12:07
  */
 
-@GroupType(description = "This group uses <strong>WebSockets</strong> to propagate models over the connected nodes."+
-"<br/>If the attribute <strong>master</strong> is specified (using the instance "+
-"name of one of the connected nodes) then a WebSocket server will be listening "+
-"on that node using the <strong>port</strong> attribute specified in the fragment "+
-"dictionary of that particular node and every other nodes connected to that group "+
-"will try to connect to that <strong>master</strong> node."+
-"</br>If <strong>master</strong> is empty, then every connected node will try to "+
-"start a WebSocket server using their <strong>port</strong> fragment attribute."+
-"<br/><br/>The attributes <strong>onConnect</strong> and <strong>onDisconnect</strong> "+
-"expects KevScript strings to be given to them optionally. If set, "+
-"<strong>onConnect</strong> KevScript will be executed on the <strong>master</strong> node "+
-"when a new client connects to the master server (and <strong>onDisconnect</strong> "+
-"will be executed when a node disconnects from the master server)"+
-"<br/><br/><em>NB: onConnect & onDisconnect can reference the current node that "+
-"triggered the process by using this notation: {nodeName}</em>"+
-"<br/><em>NB2: {groupName} is also available and resolves to the current WSGroup instance name</em>"+
-"<br/><em>NB3: onConnect & onDisconnect are not triggered if the client nodeName does not match the regex given in the <strong>filter</strong> parameter</em>")
+@GroupType(description = "This group uses <strong>WebSockets</strong> to propagate models over the connected nodes."
+        + "<br/>If the attribute <strong>master</strong> is specified (using the instance "
+        + "name of one of the connected nodes) then a WebSocket server will be listening "
+        + "on that node using the <strong>port</strong> attribute specified in the fragment "
+        + "dictionary of that particular node and every other nodes connected to that group "
+        + "will try to connect to that <strong>master</strong> node."
+        + "</br>If <strong>master</strong> is empty, then every connected node will try to "
+        + "start a WebSocket server using their <strong>port</strong> fragment attribute."
+        + "<br/><br/>The attributes <strong>onConnect</strong> and <strong>onDisconnect</strong> "
+        + "expects KevScript strings to be given to them optionally. If set, "
+        + "<strong>onConnect</strong> KevScript will be executed on the <strong>master</strong> node "
+        + "when a new client connects to the master server (and <strong>onDisconnect</strong> "
+        + "will be executed when a node disconnects from the master server)"
+        + "<br/><br/><em>NB: onConnect & onDisconnect can reference the current node that "
+        + "triggered the process by using this notation: {nodeName}</em>"
+        + "<br/><em>NB2: {groupName} is also available and resolves to the current WSGroup instance name</em>"
+        + "<br/><em>NB3: onConnect & onDisconnect are not triggered if the client nodeName does not match the regex given in the <strong>filter</strong> parameter</em>")
 public class WSFeedbackGroup implements ModelListener, Runnable {
 
     private AtomicBoolean diverge = new AtomicBoolean(false);
@@ -96,6 +124,8 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
     @Param(defaultValue = "")
     private String onDisconnect = "";
 
+    @Param(optional = false, defaultValue = "30000")
+    private Long delay;
 
     private ScheduledExecutorService scheduledThreadPool;
     private Undertow serverHandler;
@@ -103,6 +133,7 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
     private JSONModelSerializer serializer = factory.createJSONSerializer();
     private ModelCloner cloner = factory.createModelCloner();
 
+    private ResultTaskService resultTaskService;
 
     private class InternalWebSocketServer implements WebSocketConnectionCallback {
 
@@ -116,88 +147,32 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
                     try {
                         Message parsedMsg = Protocol.parse(msg);
                         if (parsedMsg == null) {
-                            Log.warn(WSFeedbackGroup.this.getClass().getSimpleName() + "  \"{}\" received an unknown message '{}'", context.getInstanceName(), msg);
+                            Log.warn(
+                                    WSFeedbackGroup.this.getClass().getSimpleName()
+                                            + "  \"{}\" received an unknown message '{}'",
+                                    context.getInstanceName(), msg);
                         } else {
                             switch (parsedMsg.getType()) {
-                                case REGISTER_TYPE:
-                                    RegisterMessage rm = (RegisterMessage) parsedMsg;
-                                    cache.put(rm.getNodeName(), webSocket);
-                                    rcache.put(webSocket, rm.getNodeName());
-                                    if (isMaster()) {
-                                        Log.info("New client registered \"{}\"", rm.getNodeName());
-                                        ContainerRoot modelToApply = cloner.clone(modelService.getCurrentModel().getModel());
-                                        if (rm.getModel() != null && !rm.getModel().equals("null")) {
-                                            // new registered model has a model to share: merging it locally
-                                            ContainerRoot recModel = (ContainerRoot) jsonModelLoader.loadModelFromString(rm.getModel()).get(0);
-                                            TraceSequence tseq = compare.merge(recModel, modelToApply);
-                                            Log.info("Merging his model with mine...", ((RegisterMessage) parsedMsg).getNodeName());
-                                            tseq.applyOn(recModel);
-                                            modelToApply = recModel;
-                                        }
-                                        if (checkFilter(((RegisterMessage) parsedMsg).getNodeName())) {
-                                            // add onConnect logic
-                                            try {
-                                                Log.debug("onConnect KevScript to process:");
-                                                final String onConnectKevs = tpl(onConnect, rm.getNodeName());
-                                                if (!onConnectKevs.trim().isEmpty()) {
-                                                    Log.debug("===== onConnect KevScript =====");
-                                                    Log.debug(onConnectKevs);
-                                                    Log.debug("===============================");
-                                                    kevsService.execute(onConnectKevs, modelToApply);
-                                                } else {
-                                                    Log.debug("onConnect KevScript empty");
-                                                }
-                                            } catch (Exception e) {
-                                                Log.error("Unable to parse onConnect KevScript. Broadcasting model without onConnect process.", e);
-                                            } finally {
-                                                applyAndBroadcast(modelToApply);
-                                            }
-                                        } else {
-                                            applyAndBroadcast(modelToApply);
-                                        }
-                                    }
-                                    break;
-                                case PULL_TYPE:
-                                    String modelReturn = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
-                                    Log.info("{} \"{}\": pull requested", WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName());
-                                    WebSockets.sendText(modelReturn, webSocket, null);
-                                    break;
-                                case PUSH_TYPE:
-                                    PushMessage pm = (PushMessage) parsedMsg;
-                                    try {
-                                        Log.info("{} \"{}\": push received, applying locally...", WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName());
-                                        ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
-                                        if (hasMaster()) {
-                                            if (isMaster()) {
-                                                int count = 0;
-                                                for (WebSocketChannel ws : cache.values()) {
-                                                    count++;
-                                                    if (ws.isOpen()) {
-                                                        WebSockets.sendText(pm.toRaw(), ws, null);
-                                                    }
-                                                }
-
-                                                if (count > 0) {
-                                                    Log.info("Broadcast model over {} client{}", count, (count > 1) ? "s" : "");
-                                                }
-                                            }
-                                        } else {
-                                            Log.info("No master specified, model will NOT be send to all other nodes");
-                                        }
-
-                                        modelService.update(model, new UpdateCallback() {
-                                            @Override
-                                            public void run(Boolean applied) {
-                                                Log.info("{} \"{}\" update result: {}", WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName(), applied);
-                                            }
-                                        });
-                                    } catch (Exception e) {
-                                        Log.warn("{} \"{}\" received a malformed push message '{}'", WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName(), msg);
-                                    }
-                                    break;
-                                default:
-                                    Log.warn("{} \"{}\" unhandled message '{}'", WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName(), msg);
-                                    break;
+                            case REGISTER_TYPE:
+                                handleRegister(webSocket, parsedMsg);
+                                break;
+                            case PULL_TYPE:
+                                handlePull(webSocket);
+                                break;
+                            case PUSH_TYPE:
+                                handlePush(msg, parsedMsg);
+                                break;
+                            case RESULT_TYPE:
+                                handleResult(parsedMsg);
+                                break;
+                            case STATUS_TYPE:
+                                handleStatus(webSocket, parsedMsg);
+                                break;
+                            default:
+                                Log.warn("{} \"{}\" unhandled message '{}'",
+                                        WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName(),
+                                        msg);
+                                break;
                             }
                         }
                     } catch (Exception e) {
@@ -205,9 +180,122 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
                     }
                 }
 
+                private void handleStatus(final WebSocketChannel webSocket, final Message parsedMsg) {
+                    final StatusMessage sm = (StatusMessage) parsedMsg;
+                    final String uid = sm.getUid();
+                    final ResultTaskService.Status status = resultTaskService.getStatus(uid);
+                    WebSockets.sendText(String.valueOf(status), webSocket, null);
+                }
+
+                private void handleResult(Message parsedMsg) {
+                    final ResultMessage resMsg = (ResultMessage) parsedMsg;
+                    saveDeploymentResult(resMsg.getNode(), resMsg.getUid(), resMsg.getResult());
+                }
+
+                private void handlePull(WebSocketChannel webSocket) {
+                    String modelReturn = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
+                    Log.info("{} \"{}\": pull requested", WSFeedbackGroup.this.getClass().getSimpleName(),
+                            context.getInstanceName());
+                    WebSockets.sendText(modelReturn, webSocket, null);
+                }
+
+                private void handleRegister(WebSocketChannel webSocket, Message parsedMsg) {
+                    RegisterMessage rm = (RegisterMessage) parsedMsg;
+                    cache.put(rm.getNodeName(), webSocket);
+                    rcache.put(webSocket, rm.getNodeName());
+                    if (isMaster()) {
+                        Log.info("New client registered \"{}\"", rm.getNodeName());
+                        ContainerRoot modelToApply = cloner.clone(modelService.getCurrentModel().getModel());
+                        if (rm.getModel() != null && !rm.getModel().equals("null")) {
+                            // new registered model has a model to
+                            // share: merging it locally
+                            ContainerRoot recModel = (ContainerRoot) jsonModelLoader.loadModelFromString(rm.getModel())
+                                    .get(0);
+                            TraceSequence tseq = compare.merge(recModel, modelToApply);
+                            Log.info("Merging his model with mine...", ((RegisterMessage) parsedMsg).getNodeName());
+                            tseq.applyOn(recModel);
+                            modelToApply = recModel;
+                        }
+                        if (checkFilter(((RegisterMessage) parsedMsg).getNodeName())) {
+                            // add onConnect logic
+                            try {
+                                Log.debug("onConnect KevScript to process:");
+                                final String onConnectKevs = tpl(onConnect, rm.getNodeName());
+                                if (!onConnectKevs.trim().isEmpty()) {
+                                    Log.debug("===== onConnect KevScript =====");
+                                    Log.debug(onConnectKevs);
+                                    Log.debug("===============================");
+                                    kevsService.execute(onConnectKevs, modelToApply);
+                                } else {
+                                    Log.debug("onConnect KevScript empty");
+                                }
+                            } catch (Exception e) {
+                                Log.error(
+                                        "Unable to parse onConnect KevScript. Broadcasting model without onConnect process.",
+                                        e);
+                            } finally {
+                                applyAndBroadcast(modelToApply);
+                            }
+                        } else {
+                            applyAndBroadcast(modelToApply);
+                        }
+                    }
+                }
+
+                private void handlePush(String msg, Message parsedMsg) {
+                    final PushMessage pm = (PushMessage) parsedMsg;
+
+                    if (pm.getUid() == null) {
+                        final String uid = new UID().toString();
+                        Log.info("New push UID generated : " + uid);
+                        pm.setUid(uid);
+                    }
+                    try {
+                        Log.info("{} \"{}\": push received, applying locally...",
+                                WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName());
+                        ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
+                        if (hasMaster()) {
+                            if (isMaster()) {
+                                int count = broadcastModel(pm);
+
+                                if (count > 0) {
+                                    Log.info("Broadcast model over {} client{}", count, (count > 1) ? "s" : "");
+                                    // TODO define timeout
+                                }
+                            }
+                        } else {
+                            Log.info("No master specified, model will NOT be send to all other nodes");
+                        }
+
+                        modelService.update(model, new UpdateCallback() {
+                            @Override
+                            public void run(Boolean applied) {
+                                Log.info("{} \"{}\" update result: {}", WSFeedbackGroup.this.getClass().getSimpleName(),
+                                        context.getInstanceName(), applied);
+                                notifyDeploymentSuccess(context.getNodeName(), pm.getUid(), applied);
+                            }
+
+                        });
+                    } catch (Exception e) {
+                        Log.warn("{} \"{}\" received a malformed push message '{}'",
+                                WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName(), msg);
+                    }
+                }
+
+                private int broadcastModel(PushMessage pm) {
+                    int count = 0;
+                    for (WebSocketChannel ws : cache.values()) {
+                        count++;
+                        if (ws.isOpen()) {
+                            WebSockets.sendText(pm.toRaw(), ws, null);
+                        }
+                    }
+                    return count;
+                }
+
                 private void applyAndBroadcast(ContainerRoot modelToApply) {
                     String recModelStr = serializer.serialize(modelToApply);
-                    PushMessage pushMessage = new PushMessage(recModelStr);
+                    PushMessage pushMessage = new PushMessage(recModelStr, new UID().toString());
 
                     // update locally
                     modelService.update(modelToApply, applied -> Log.info("Merge model result: {}", applied));
@@ -222,12 +310,15 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
                 }
 
                 @Override
-                protected void onFullCloseMessage(WebSocketChannel channel, BufferedBinaryMessage message) throws IOException {
-                    // Overriding onFullCloseMessage so that onFullTextMessage is called even though the data were sent by fragments
+                protected void onFullCloseMessage(WebSocketChannel channel, BufferedBinaryMessage message)
+                        throws IOException {
+                    // Overriding onFullCloseMessage so that onFullTextMessage
+                    // is called even though the data were sent by fragments
                 }
 
                 @Override
-                protected void onClose(WebSocketChannel webSocketChannel, StreamSourceFrameChannel channel) throws IOException {
+                protected void onClose(WebSocketChannel webSocketChannel, StreamSourceFrameChannel channel)
+                        throws IOException {
                     String name = rcache.get(webSocketChannel);
                     if (name != null) {
                         cache.remove(name);
@@ -237,7 +328,8 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
 
                 @Override
                 protected void onError(WebSocketChannel webSocket, Throwable error) {
-                    Log.error("{} \"{}\": {}", WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName(), error.getMessage());
+                    Log.error("{} \"{}\": {}", WSFeedbackGroup.this.getClass().getSimpleName(),
+                            context.getInstanceName(), error.getMessage());
                     try {
                         if (webSocket != null) {
                             webSocket.close();
@@ -270,8 +362,8 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
                                 Log.debug("==================================");
                                 modelService.submitScript(onDisconnectKevs,
                                         applied -> Log.info("{} \"{}\" onDisconnect result from {}: {}",
-                                                WSFeedbackGroup.this.getClass().getSimpleName(), context.getInstanceName(),
-                                                nodeName, applied));
+                                                WSFeedbackGroup.this.getClass().getSimpleName(),
+                                                context.getInstanceName(), nodeName, applied));
                             } else {
                                 Log.debug("onDisconnect KevScript empty");
                             }
@@ -288,13 +380,49 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
             });
         }
 
-
-
         private String tpl(String tpl, String nodeName) {
-            return tpl
-                    .replaceAll("\\{nodeName\\}", nodeName)
-                    .replaceAll("\\{groupName\\}", context.getInstanceName());
+            return tpl.replaceAll("\\{nodeName\\}", nodeName).replaceAll("\\{groupName\\}", context.getInstanceName());
         }
+    }
+
+    /**
+     * Save the deployment status. Either by sending it to the master or by
+     * saving it is the code is runned in the master node.
+     * 
+     * @param node
+     *            the node namde
+     * @param uid
+     *            the uid of the deployed med
+     * @param result
+     *            the result of the deployment.
+     */
+    private void notifyDeploymentSuccess(String node, String uid, Boolean result) {
+        if (this.isMaster()) {
+            this.saveDeploymentResult(node, uid, result);
+        } else {
+            this.sendDeploymentResultToMaster(node, uid, result);
+        }
+
+    }
+
+    private boolean sendDeploymentResultToMaster(String node, String uid, Boolean result) {
+        if (masterClient != null && masterClient.isOpen()) {
+            final ResultMessage pushMessage = new ResultMessage(node, uid, result);
+            WebSockets.sendText(pushMessage.toRaw(), masterClient, null);
+            return true;
+        } else {
+            diverge.set(true);
+            Log.warn("Could not join master node : {}, diverge locally", master);
+            return false;
+        }
+    }
+
+    private void saveDeploymentResult(final String node, final String uid, final Boolean result) {
+        resultTaskService.initUid(uid);
+        // overriding is not controlled yet, a node can submit a result twice
+        // for the same deployment UID.
+        resultTaskService.startTimer(node, uid, result);
+        resultTaskService.checkStatus();
     }
 
     @Start
@@ -302,23 +430,23 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
         modelService.registerModelListener(this);
         if (this.hasMaster()) {
             if (this.isMaster()) {
-                serverHandler = Undertow.builder()
-                        .addHttpListener(port, "0.0.0.0")
-                        .setHandler(websocket(new InternalWebSocketServer()))
-                        .build();
+                this.resultTaskService = new ResultTaskService(this.modelService, this.context, this.delay);
+                serverHandler = Undertow.builder().addHttpListener(port, "0.0.0.0")
+                        .setHandler(websocket(new InternalWebSocketServer())).build();
                 serverHandler.start();
-                Log.info(WSFeedbackGroup.this.getClass().getSimpleName()+" \"{}\" listen on {}", context.getInstanceName(), port);
+                Log.info(WSFeedbackGroup.this.getClass().getSimpleName() + " \"{}\" listen on {}",
+                        context.getInstanceName(), port);
             } else {
                 scheduledThreadPool = Executors.newScheduledThreadPool(1);
                 scheduledThreadPool.scheduleAtFixedRate(this, 0, 3000, TimeUnit.MILLISECONDS);
             }
         } else {
-            serverHandler = Undertow.builder()
-                    .addHttpListener(port, "0.0.0.0")
-                    .setHandler(websocket(new InternalWebSocketServer()))
-                    .build();
+            this.resultTaskService = new ResultTaskService(this.modelService, this.context, this.delay);
+            serverHandler = Undertow.builder().addHttpListener(port, "0.0.0.0")
+                    .setHandler(websocket(new InternalWebSocketServer())).build();
             serverHandler.start();
-            Log.info(WSFeedbackGroup.this.getClass().getSimpleName()+" \"{}\" listen on {}", context.getInstanceName(), port);
+            Log.info(WSFeedbackGroup.this.getClass().getSimpleName() + " \"{}\" listen on {}",
+                    context.getInstanceName(), port);
         }
     }
 
@@ -327,6 +455,12 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
 
     @Stop
     public void stopWSGroup() throws IOException, InterruptedException {
+
+        if (this.resultTaskService != null) {
+            resultTaskService.cleanup();
+            this.resultTaskService = null;
+        }
+
         if (scheduledThreadPool != null) {
             scheduledThreadPool.shutdownNow();
             modelService.unregisterModelListener(this);
@@ -369,13 +503,14 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
 
     @Override
     public boolean initUpdate(UpdateContext context) {
-        return isMaster() || context.getCallerPath().equals(this.context.getPath()) || !pushToMaster(context.getProposedModel());
+        return isMaster() || context.getCallerPath().equals(this.context.getPath())
+                || !pushToMaster(context.getProposedModel());
 
     }
 
     public boolean pushToMaster(ContainerRoot model) {
         if (masterClient != null && masterClient.isOpen()) {
-            PushMessage pushMessage = new PushMessage(jsonModelSaver.serialize(model));
+            final PushMessage pushMessage = new PushMessage(jsonModelSaver.serialize(model), new UID().toString());
             WebSockets.sendText(pushMessage.toRaw(), masterClient, null);
             return true;
         } else {
@@ -388,10 +523,11 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
     @Override
     public boolean afterLocalUpdate(UpdateContext context) {
         if (isMaster()) {
+
             for (WebSocketChannel wsClient : cache.values()) {
                 if (wsClient.isOpen()) {
                     String currentModel = jsonModelSaver.serialize(context.getProposedModel());
-                    PushMessage pushMessage = new PushMessage(currentModel);
+                    PushMessage pushMessage = new PushMessage(currentModel, new UID().toString());
                     WebSockets.sendText(pushMessage.toRaw(), wsClient, null);
                     Log.info("Forward to {}", rcache.get(wsClient));
                 } else {
@@ -410,7 +546,7 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
                 if (masterClient == null || !masterClient.isOpen()) {
                     ContainerRoot lastModel = modelService.getCurrentModel().getModel();
                     Group selfGroup = (Group) lastModel.findByPath(context.getPath());
-                    //localize master node
+                    // localize master node
                     if (selfGroup != null && master != null) {
                         FragmentDictionary masterDico = selfGroup.findFragmentDictionaryByID(master);
                         String defaultIP = "127.0.0.1";
@@ -424,7 +560,8 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
                         if (node != null) {
                             for (NetworkInfo net : node.getNetworkInformation()) {
                                 for (Value prop : net.getValues()) {
-                                    if (net.getName().toLowerCase().contains("ip") || prop.getName().toLowerCase().contains("ip")) {
+                                    if (net.getName().toLowerCase().contains("ip")
+                                            || prop.getName().toLowerCase().contains("ip")) {
                                         addresses.add(prop.getValue());
                                     }
                                 }
@@ -436,7 +573,8 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
                                     return;
                                 }
                             }
-                            masterClient = createWSClient(defaultIP, port, context.getNodeName(), modelService, diverge);
+                            masterClient = createWSClient(defaultIP, port, context.getNodeName(), modelService,
+                                    diverge);
                             if (masterClient != null && masterClient.isOpen()) {
                                 Log.info("Master connection opened on {}:{}", defaultIP, port);
                             }
@@ -451,17 +589,13 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
         }
     }
 
-    public WebSocketChannel createWSClient(final String ip, final String port, String currentNodeName, final ModelService modelService, final AtomicBoolean diverge) throws IOException {
+    public WebSocketChannel createWSClient(final String ip, final String port, String currentNodeName,
+            final ModelService modelService, final AtomicBoolean diverge) throws IOException {
         Xnio xnio = Xnio.getInstance(io.undertow.websockets.client.WebSocketClient.class.getClassLoader());
-        XnioWorker worker = xnio.createWorker(OptionMap.builder()
-                .set(Options.WORKER_IO_THREADS, 2)
-                .set(Options.CONNECTION_HIGH_WATER, 1000000)
-                .set(Options.CONNECTION_LOW_WATER, 1000000)
-                .set(Options.WORKER_TASK_CORE_THREADS, 30)
-                .set(Options.WORKER_TASK_MAX_THREADS, 30)
-                .set(Options.TCP_NODELAY, true)
-                .set(Options.CORK, true)
-                .getMap());
+        XnioWorker worker = xnio.createWorker(OptionMap.builder().set(Options.WORKER_IO_THREADS, 2)
+                .set(Options.CONNECTION_HIGH_WATER, 1000000).set(Options.CONNECTION_LOW_WATER, 1000000)
+                .set(Options.WORKER_TASK_CORE_THREADS, 30).set(Options.WORKER_TASK_MAX_THREADS, 30)
+                .set(Options.TCP_NODELAY, true).set(Options.CORK, true).getMap());
         ByteBufferSlicePool buffer = new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 1024, 1024);
         final WebSocketChannel[] client = new WebSocketChannel[1];
         URI uri;
@@ -478,24 +612,27 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
                 String msg = message.getData();
                 Protocol.Message parsedMsg = Protocol.parse(msg);
                 if (parsedMsg == null) {
-                    Log.warn(WSFeedbackGroup.this.getClass().getSimpleName() + " \"{}\" unknown message '{}'", context.getInstanceName(), msg);
+                    Log.warn(WSFeedbackGroup.this.getClass().getSimpleName() + " \"{}\" unknown message '{}'",
+                            context.getInstanceName(), msg);
                 } else {
                     switch (parsedMsg.getType()) {
-                        case PUSH_TYPE:
-                            //push from master
-                            diverge.set(false);
-                            PushMessage pm = (PushMessage) parsedMsg;
-                            ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
-                            modelService.update(model, new UpdateCallback() {
-                                @Override
-                                public void run(Boolean applied) {
-                                    Log.info(WSFeedbackGroup.this.getClass().getSimpleName()+" \"{}\" update result: {}", context.getInstanceName(), applied);
-                                }
-                            });
-                            break;
-                        default:
-                            Log.warn(WSFeedbackGroup.this.getClass().getSimpleName() + " \"{}\" unhandled message '{}'", context.getInstanceName(), msg);
-                            break;
+                    case PUSH_TYPE:
+                        // push from master
+                        diverge.set(false);
+                        PushMessage pm = (PushMessage) parsedMsg;
+                        ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
+                        modelService.update(model, new UpdateCallback() {
+                            @Override
+                            public void run(Boolean applied) {
+                                Log.info(WSFeedbackGroup.this.getClass().getSimpleName() + " \"{}\" update result: {}",
+                                        context.getInstanceName(), applied);
+                            }
+                        });
+                        break;
+                    default:
+                        Log.warn(WSFeedbackGroup.this.getClass().getSimpleName() + " \"{}\" unhandled message '{}'",
+                                context.getInstanceName(), msg);
+                        break;
                     }
                 }
             }
@@ -523,8 +660,10 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
     }
 
     @Override
-    public void preRollback(UpdateContext context) {}
+    public void preRollback(UpdateContext context) {
+    }
 
     @Override
-    public void postRollback(UpdateContext context) {}
+    public void postRollback(UpdateContext context) {
+    }
 }

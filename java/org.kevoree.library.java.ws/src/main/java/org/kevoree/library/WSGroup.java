@@ -112,9 +112,9 @@ public class WSGroup implements ModelListener, Runnable {
 
                 @Override
                 protected void onFullTextMessage(WebSocketChannel webSocket, BufferedTextMessage message) {
-                    String msg = message.getData();
+                    final String msg = message.getData();
                     try {
-                        Message parsedMsg = Protocol.parse(msg);
+                        final Message parsedMsg = Protocol.parse(msg);
                         if (parsedMsg == null) {
                             Log.warn(WSGroup.this.getClass().getSimpleName() + "  \"{}\" received an unknown message '{}'", context.getInstanceName(), msg);
                         } else {
