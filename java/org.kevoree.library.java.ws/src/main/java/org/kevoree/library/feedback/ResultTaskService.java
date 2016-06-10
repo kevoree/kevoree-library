@@ -1,4 +1,4 @@
-package feedback;
+package org.kevoree.library.feedback;
 
 import java.util.HashMap;
 import java.util.List;

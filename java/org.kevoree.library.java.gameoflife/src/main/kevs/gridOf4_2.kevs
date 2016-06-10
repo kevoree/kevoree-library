@@ -1,0 +1,32 @@
+add browser : JavascriptNode/5.4.0-SNAPSHOT
+add nodeD, nodeC, nodeB, nodeA, leader : JavaNode/5.3.2-SNAPSHOT
+add browser.comp320 : GolViz/1.0.0
+add nodeB.comp191_1, nodeB.comp191_1_3, nodeB.comp191_1_0, nodeB.comp191_1_1, nodeB.comp191_1_2, nodeA.comp191_0_0_1, nodeA.comp191_0_0_0, nodeA.comp191_0, nodeA.comp191_0_0, nodeA.comp191 : GameOfLifeCell/5.3.2-SNAPSHOT
+add leader.comp874 : Ticker/5.3.2-SNAPSHOT
+add leader.comp77 : GameOfLifeEngine/5.3.2-SNAPSHOT
+add sync : WSGroup/5.3.42-SNAPSHOT
+add chan416 : AsyncBroadcast/5.3.2-SNAPSHOT
+
+attach browser, nodeD, nodeC, nodeB, nodeA, leader sync
+
+bind leader.comp874.tick chan416
+bind leader.comp77.tick chan416
+
+set nodeD.log = 'DEBUG'
+set nodeC.log = 'DEBUG'
+set nodeB.log = 'DEBUG'
+set nodeB.comp191_1.x = '1'
+set nodeB.comp191_1_3.x = '5'
+set nodeB.comp191_1_0.x = '2'
+set nodeB.comp191_1_1.x = '3'
+set nodeB.comp191_1_2.x = '4'
+set nodeA.log = 'DEBUG'
+set nodeA.comp191_0_0_1.x = '-4'
+set nodeA.comp191_0_0_0.x = '-3'
+set nodeA.comp191_0.x = '-1'
+set nodeA.comp191_0_0.x = '-1'
+set nodeA.comp191_0_0.y = '1'
+set nodeA.comp191.y = '1'
+set nodeA.comp191.x = '1'
+set leader.log = 'DEBUG'
+set leader.comp874.period = '30000'

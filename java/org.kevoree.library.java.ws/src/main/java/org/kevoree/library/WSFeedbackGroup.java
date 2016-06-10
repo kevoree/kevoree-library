@@ -39,6 +39,7 @@ import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.factory.KevoreeFactory;
+import org.kevoree.library.feedback.ResultTaskService;
 import org.kevoree.library.protocol.Protocol;
 import org.kevoree.library.protocol.Protocol.Message;
 import org.kevoree.library.protocol.Protocol.PushMessage;
@@ -58,7 +59,6 @@ import org.xnio.Options;
 import org.xnio.Xnio;
 import org.xnio.XnioWorker;
 
-import feedback.ResultTaskService;
 import io.undertow.Undertow;
 import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.client.WebSocketClient;
