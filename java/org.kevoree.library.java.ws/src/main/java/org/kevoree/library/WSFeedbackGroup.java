@@ -130,6 +130,9 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
     @Param(optional = false, defaultValue = "30000")
     private Long delay;
 
+    @Param(optional = false, defaultValue = "true")
+    private Boolean strict;
+
     private ScheduledExecutorService scheduledThreadPool;
     private Undertow serverHandler;
     private KevoreeFactory factory = new DefaultKevoreeFactory();
@@ -142,7 +145,7 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
 
         @Override
         public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
-            
+
             allConnectedClients.add(channel);
             channel.getReceiveSetter().set(new AbstractReceiveListener() {
 
@@ -426,11 +429,37 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
     }
 
     private void saveDeploymentResult(final String node, final String uid, final Boolean result) {
-        resultTaskService.initUid(uid);
+        int expectedNumberOfNodes = countExpectedNumberOfNode();
+        resultTaskService.initUid(uid, expectedNumberOfNodes);
         // overriding is not controlled yet, a node can submit a result twice
         // for the same deployment UID.
         resultTaskService.startTimer(node, uid, result);
         resultTaskService.checkStatus();
+    }
+
+    private int countExpectedNumberOfNode() {
+        int ret;
+        if (strict) {
+            final List<Group> lastModel = modelService.getCurrentModel().getModel().getGroups();
+
+            Group current = null;
+            for (Group g : lastModel) {
+                if (g.getName().equals(context.getInstanceName())) {
+                    current = g;
+                    break;
+                }
+            }
+
+            if (current != null && current.getSubNodes() != null) {
+                ret = current.getSubNodes().size();
+            } else {
+                ret = 0;
+            }
+        } else {
+            ret = cache.keySet().size();
+        }
+
+        return ret;
     }
 
     @Start

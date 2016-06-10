@@ -48,25 +48,10 @@ public class ResultTaskService {
         }
     }
 
-    public void initUid(final String uid) {
+    public void initUid(final String uid, int expectedNumberOfNodes) {
         if (!deploymentResultsMap.containsKey(uid)) {
-
-            final List<Group> lastModel = modelService.getCurrentModel().getModel().getGroups();
-
-            Group current = null;
-            for (Group g : lastModel) {
-                if (g.getName().equals(context.getInstanceName())) {
-                    current = g;
-                    break;
-                }
-            }
-
             final ResultTask value = new ResultTask();
-            if (current != null && current.getSubNodes() != null) {
-                value.setExpectedNumberOfNodes(current.getSubNodes().size());
-            } else {
-                value.setExpectedNumberOfNodes(0);
-            }
+            value.setExpectedNumberOfNodes(expectedNumberOfNodes);
             deploymentResultsMap.put(uid, value);
         }
     }
