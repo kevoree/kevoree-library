@@ -28,8 +28,11 @@ import org.xnio.*;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -108,6 +111,8 @@ public class WSGroup implements ModelListener, Runnable {
 
         @Override
         public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
+            
+            allConnectedClients.add(channel);
             channel.getReceiveSetter().set(new AbstractReceiveListener() {
 
                 @Override
@@ -170,7 +175,7 @@ public class WSGroup implements ModelListener, Runnable {
                                         if (hasMaster()) {
                                             if (isMaster()) {
                                                 int count = 0;
-                                                for (WebSocketChannel ws : cache.values()) {
+                                                for (WebSocketChannel ws : new HashSet<WebSocketChannel>(allConnectedClients)) {
                                                     count++;
                                                     if (ws.isOpen()) {
                                                         WebSockets.sendText(pm.toRaw(), ws, null);
@@ -214,7 +219,14 @@ public class WSGroup implements ModelListener, Runnable {
 
                     // broadcast changes
                     Log.info("Broadcasting merged model to all connected clients");
-                    for (WebSocketChannel client : cache.values()) {
+                    /*
+                     * We create a new collection in order to avoid any
+                     * concurrent exception since a client can close it own
+                     * collection while we send data to others (synchronized
+                     * collections does not allow a concurrent thread to remove
+                     * elements during an iteration )
+                     */ 
+                    for (WebSocketChannel client : new HashSet<WebSocketChannel>(allConnectedClients)) {
                         if (client.isOpen()) {
                             WebSockets.sendText(pushMessage.toRaw(), client, null);
                         }
@@ -233,6 +245,7 @@ public class WSGroup implements ModelListener, Runnable {
                         cache.remove(name);
                     }
                     rcache.remove(webSocketChannel);
+                    allConnectedClients.remove(webSocketChannel);
                 }
 
                 @Override
@@ -247,6 +260,7 @@ public class WSGroup implements ModelListener, Runnable {
                                     cache.remove(name);
                                 }
                                 rcache.remove(webSocket);
+                                allConnectedClients.remove(webSocket);
                             }
                         }
                     } catch (Exception e) {
@@ -285,6 +299,7 @@ public class WSGroup implements ModelListener, Runnable {
 					cache.remove(nodeName);
 				}
 				rcache.remove(ws);
+				allConnectedClients.remove(ws);
 			});
         }
 
@@ -322,6 +337,7 @@ public class WSGroup implements ModelListener, Runnable {
         }
     }
 
+    private Set<WebSocketChannel> allConnectedClients = Collections.synchronizedSet(new HashSet<>());
     private Map<String, WebSocketChannel> cache = new ConcurrentHashMap<String, WebSocketChannel>();
     private Map<WebSocketChannel, String> rcache = new ConcurrentHashMap<WebSocketChannel, String>();
 
