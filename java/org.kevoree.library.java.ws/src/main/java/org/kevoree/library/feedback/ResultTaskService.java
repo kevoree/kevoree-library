@@ -1,21 +1,14 @@
 package org.kevoree.library.feedback;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.kevoree.Group;
-import org.kevoree.api.Context;
-import org.kevoree.api.ModelService;
-
 public class ResultTaskService {
     public final ConcurrentHashMap<String, ResultTask> deploymentResultsMap = new ConcurrentHashMap<>();
-    private final ModelService modelService;
-    private final Context context;
     private final long delay;
 
     public enum Status {
@@ -24,9 +17,7 @@ public class ResultTaskService {
 
     private Map<String, Status> resultMap = new HashMap<>();
 
-    public ResultTaskService(ModelService modelService, Context context, long delay) {
-        this.modelService = modelService;
-        this.context = context;
+    public ResultTaskService(long delay) {
         this.delay = delay;
     }
 
@@ -61,7 +52,7 @@ public class ResultTaskService {
 
         setStatus(uid, Status.RUNNING);
 
-        java.util.Timer timer = new java.util.Timer();
+        Timer timer = new Timer();
         resultTask.setTimer(timer);
         timer.schedule(new TimerTask() {
 
@@ -82,10 +73,10 @@ public class ResultTaskService {
     private void setStatus(final String uid, final Status status) {
         this.resultMap.put(uid, status);
     }
-    
+
     public Status getStatus(final String uid) {
         Status ret;
-        if(resultMap.containsKey(uid)) {
+        if (resultMap.containsKey(uid)) {
             ret = resultMap.get(uid);
         } else {
             ret = Status.NOT_FOUND;

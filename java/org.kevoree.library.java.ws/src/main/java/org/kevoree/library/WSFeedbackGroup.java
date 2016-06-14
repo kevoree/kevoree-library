@@ -467,7 +467,7 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
         modelService.registerModelListener(this);
         if (this.hasMaster()) {
             if (this.isMaster()) {
-                this.resultTaskService = new ResultTaskService(this.modelService, this.context, this.delay);
+                this.resultTaskService = new ResultTaskService(this.delay);
                 serverHandler = Undertow.builder().addHttpListener(port, "0.0.0.0")
                         .setHandler(websocket(new InternalWebSocketServer())).build();
                 serverHandler.start();
@@ -478,7 +478,7 @@ public class WSFeedbackGroup implements ModelListener, Runnable {
                 scheduledThreadPool.scheduleAtFixedRate(this, 0, 3000, TimeUnit.MILLISECONDS);
             }
         } else {
-            this.resultTaskService = new ResultTaskService(this.modelService, this.context, this.delay);
+            this.resultTaskService = new ResultTaskService(this.delay);
             serverHandler = Undertow.builder().addHttpListener(port, "0.0.0.0")
                     .setHandler(websocket(new InternalWebSocketServer())).build();
             serverHandler.start();
