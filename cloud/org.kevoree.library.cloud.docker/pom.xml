@@ -11,10 +11,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <hk2.version>2.3.0-b10</hk2.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.kevoree</groupId>
