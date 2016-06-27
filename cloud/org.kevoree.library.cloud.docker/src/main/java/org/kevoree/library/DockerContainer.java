@@ -18,6 +18,7 @@ import org.kevoree.library.util.PortsService;
 import org.kevoree.log.Log;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;

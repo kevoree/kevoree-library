@@ -12,10 +12,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-      <publish.registry.url>http://registry.kevoree.org</publish.registry.url>
-    </properties>
-
     <build>
         <plugins>
           <plugin>

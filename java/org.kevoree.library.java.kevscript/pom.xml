@@ -14,7 +14,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <publish.registry.url>http://registry.kevoree.org</publish.registry.url>
     </properties>
 
     <dependencies>

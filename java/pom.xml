@@ -15,10 +15,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-	<properties>
-       <publish.registry.url>http://localhost</publish.registry.url>
-
-	</properties>
     <modules>
         <module>org.kevoree.library.java.control-flow</module>
         <module>org.kevoree.library.java.javaNode</module>
