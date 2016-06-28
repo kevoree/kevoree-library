@@ -26,6 +26,7 @@ import org.kevoree.pmodeling.api.trace.TraceSequence;
 import org.xnio.*;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -221,10 +222,10 @@ public class WSGroup implements ModelListener, Runnable {
                     Log.info("Broadcasting merged model to all connected clients");
                     /*
                      * We create a new collection in order to avoid any
-                     * concurrent exception since a client can close it own
-                     * collection while we send data to others (synchronized
-                     * collections does not allow a concurrent thread to remove
-                     * elements during an iteration )
+                     * concurrent exception since a client can close its own
+                     * connection while we send data to others (synchronized
+                     * collections do not allow a concurrent thread to remove
+                     * elements during an iteration)
                      */ 
                     for (WebSocketChannel client : new HashSet<WebSocketChannel>(allConnectedClients)) {
                         if (client.isOpen()) {
@@ -361,6 +362,12 @@ public class WSGroup implements ModelListener, Runnable {
             masterClient = null;
         }
 
+    }
+
+    @Update
+    public void update() throws IOException, InterruptedException {
+        this.stopWSGroup();
+        this.startWSGroup();
     }
 
     private static JSONModelLoader jsonModelLoader = new JSONModelLoader(new DefaultKevoreeFactory());

@@ -41,44 +41,19 @@ public class RemoveInstance implements PrimitiveCommand {
     }
 
     public void undo() {
-        try {
-            KInstanceWrapper previouslyCreatedWrapper = null;
-            if (registry != null) {
-                previouslyCreatedWrapper = (KInstanceWrapper) registry.lookup(c);
-            }
-
-            if(previouslyCreatedWrapper != null) {
-                Thread.currentThread().setContextClassLoader(previouslyCreatedWrapper.getKcl());
-            } else {
-                Thread.currentThread().setContextClassLoader(null);
-            }
-            Thread.currentThread().setName("KevoreeRemoveInstance" + c.getName());
-
-            if (previouslyCreatedWrapper == null) {
-                new AddInstance(wrapperFactory, c, nodeName, registry, bs, modelService).execute();
-                Object newCreatedWrapper = registry.lookup(c);
-                if (newCreatedWrapper instanceof KInstanceWrapper) {
-                    bs.injectDictionary(c, ((KInstanceWrapper) newCreatedWrapper).getTargetObj(), false);
-                }
-            }
-
-            Thread.currentThread().setContextClassLoader(null);
-
-        } catch(Exception e) {
-            Log.error("Error during rollback", e);
-        }
+        new AddInstance(wrapperFactory, c, nodeName, registry, bs, modelService).execute();
     }
 
     public boolean execute() {
         try {
-            Object previousWrapper = registry.lookup(c);
-            if (previousWrapper instanceof KInstanceWrapper) {
-                ((KInstanceWrapper)previousWrapper).destroy();
+            Object ref = registry.lookup(c);
+            if (ref instanceof KInstanceWrapper) {
+                ((KInstanceWrapper) ref).destroy();
             }
             registry.drop(c);
             Log.info("Remove instance {}", c.path());
             return true;
-        } catch(Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }

@@ -3,7 +3,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.java.ws</artifactId>
     <name>Kevoree :: Library :: Java :: WebSocket</name>
-    <version>5.3.2-SNAPSHOT</version>
 
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
@@ -12,20 +11,11 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <wsmsgbroker.version>1.0.6-SNAPSHOT</wsmsgbroker.version>
-    </properties>
-
     <dependencies>
-        <dependency>
-            <groupId>org.kevoree</groupId>
-            <artifactId>org.kevoree.api</artifactId>
-            <version>${kevoree.version}</version>
-        </dependency>
         <dependency>
             <groupId>fr.braindead</groupId>
             <artifactId>wsmsgbroker-client</artifactId>
-            <version>${wsmsgbroker.version}</version>
+            <version>1.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.kevoree.tools</groupId>
@@ -37,27 +27,13 @@
 
     <build>
         <plugins>
-          <plugin>
-                <groupId>org.kevoree.tools</groupId>
-                <artifactId>org.kevoree.tools.mavenplugin</artifactId>
-                <version>${kevoree.version}</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                            <goal>deploy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                	<source>1.8</source>
-                	<target>1.8</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
                 <executions>
                     <execution>
@@ -84,24 +60,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.kevoree.tools</groupId>
-                <artifactId>org.kevoree.tools.mavenplugin</artifactId>
-                <version>${kevoree.version}</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                            <goal>deploy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <registry>${publish.registry.url}</registry>
-                </configuration>
-            </plugin>
-
         </plugins>
     </build>
 </project>

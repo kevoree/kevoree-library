@@ -58,35 +58,32 @@ public class UpdateCallMethod implements PrimitiveCommand {
                             e.printStackTrace();
                         }
                     } else {
-                        Log.debug("Method not resolved org.kevoree.annotation.Update.class");
+                        Log.debug("No Update() method found for {}", c.getName());
                     }
                     Thread.currentThread().setContextClassLoader(previousCL);
                 }
             } else {
                 //case node type
-                try {
-                    ClassLoader previousCL = Thread.currentThread().getContextClassLoader();
-                    Thread.currentThread().setContextClassLoader(reffound.getClass().getClassLoader());
-                    MethodAnnotationResolver resolver = new MethodAnnotationResolver(reffound.getClass());
-                    Method met = resolver.resolve(org.kevoree.annotation.Update.class);
-                    if(met != null) {
+                ClassLoader previousCL = Thread.currentThread().getContextClassLoader();
+                Thread.currentThread().setContextClassLoader(reffound.getClass().getClassLoader());
+                MethodAnnotationResolver resolver = new MethodAnnotationResolver(reffound.getClass());
+                Method met = resolver.resolve(org.kevoree.annotation.Update.class);
+                if(met != null) {
+                    try {
                         met.invoke(reffound);
-                    } else {
-                        Log.debug("Method not resolved org.kevoree.annotation.Update.class");
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
                     }
-                    Thread.currentThread().setContextClassLoader(previousCL);
-                    return true;
-                } catch(InvocationTargetException e){
-                    Log.error("Kevoree NodeType Instance Update Error !", e.getCause());
-                    return false;
-                } catch(Exception e) {
-                    Log.error("Kevoree NodeType Instance Update Error !", e);
-                    return false;
+                } else {
+                    Log.debug("No Update() method found for {}", c.getName());
                 }
+                Thread.currentThread().setContextClassLoader(previousCL);
             }
             return true;
         } else {
-            Log.error("Can update dictionary of " + c.getName());
+            Log.error("Unable to find instance: " + c.getName());
             return false;
         }
     }

@@ -10,6 +10,8 @@ import org.kevoree.library.java.wrapper.KInstanceWrapper;
 import org.kevoree.log.Log;
 import org.kevoree.pmodeling.api.KMFContainer;
 
+import java.lang.reflect.Field;
+
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
  * you may not use this file except in compliance with the License.
@@ -32,10 +34,12 @@ public class UpdateDictionary implements PrimitiveCommand {
     private ModelRegistry registry;
     private org.kevoree.api.BootstrapService bs;
     private ModelService modelService;
+    private boolean forceInject;
 
-    public UpdateDictionary(Instance c, Value dicValue, String nodeName, ModelRegistry registry, BootstrapService bs, ModelService modelService) {
+    public UpdateDictionary(Instance c, Value dicValue, boolean forceInject, String nodeName, ModelRegistry registry, BootstrapService bs, ModelService modelService) {
         this.c = c;
         this.dicValue = dicValue;
+        this.forceInject = false;
         this.nodeName = nodeName;
         this.registry = registry;
         this.bs = bs;
@@ -43,49 +47,41 @@ public class UpdateDictionary implements PrimitiveCommand {
     }
 
     public boolean execute() {
-
-
-        //protection for default value injection
-        ContainerRoot previousModel = modelService.getCurrentModel().getModel();
-        KMFContainer previousValue = previousModel.findByPath(dicValue.path());
-        if (previousValue == null) {
-            Instance parentDictionary = (Instance) dicValue.eContainer().eContainer();
-            if (parentDictionary != null) {
-                KMFContainer previousInstance = previousModel.findByPath(c.path());
-                if (previousInstance != null) {
-                    DictionaryType dt = parentDictionary.getTypeDefinition().getDictionaryType();
-                    DictionaryAttribute dicAtt = dt.findAttributesByID(dicValue.getName());
-                    if (dicAtt != null && dicAtt.getDefaultValue() != null && dicAtt.getDefaultValue().equals(dicValue.getValue())) {
-                        Log.debug("Do not reinject default {}", dicValue.getValue());
-                        return true;
+        if (!forceInject) {
+            ContainerRoot previousModel = modelService.getCurrentModel().getModel();
+            KMFContainer previousValue = previousModel.findByPath(dicValue.path());
+            if (previousValue == null) {
+                Instance instance = (Instance) dicValue.eContainer().eContainer();
+                if (instance != null) {
+                    KMFContainer previousInstance = previousModel.findByPath(c.path());
+                    if (previousInstance != null) {
+                        DictionaryType dt = instance.getTypeDefinition().getDictionaryType();
+                        DictionaryAttribute dicAtt = dt.findAttributesByID(dicValue.getName());
+                        if (dicAtt != null && dicAtt.getDefaultValue() != null
+                                && dicAtt.getDefaultValue().equals(dicValue.getValue())) {
+                            return true;
+                        }
                     }
                 }
             }
         }
 
-        Object reffound = registry.lookup(c);
-        if (reffound != null) {
-            if (reffound instanceof KInstanceWrapper) {
-                ClassLoader previousCL = Thread.currentThread().getContextClassLoader();
-                Thread.currentThread().setContextClassLoader(((KInstanceWrapper) reffound).getTargetObj().getClass().getClassLoader());
-                bs.injectDictionaryValue(dicValue, ((KInstanceWrapper) reffound).getTargetObj());
-                Thread.currentThread().setContextClassLoader(previousCL);
+        Object ref = registry.lookup(c);
+        if (ref != null) {
+            if (ref instanceof KInstanceWrapper) {
+                doInject(((KInstanceWrapper) ref).getTargetObj());
             } else {
-                //case node type
                 try {
-                    ClassLoader previousCL = Thread.currentThread().getContextClassLoader();
-                    Thread.currentThread().setContextClassLoader(reffound.getClass().getClassLoader());
-                    bs.injectDictionaryValue(dicValue, reffound);
-                    Thread.currentThread().setContextClassLoader(previousCL);
+                    doInject(ref);
                     return true;
                 } catch (Exception e) {
-                    Log.error("Kevoree NodeType Instance Update Error !", e);
+                    Log.error("Kevoree NodeType Instance Update Error!", e);
                     return false;
                 }
             }
             return true;
         } else {
-            Log.error("Can't update dictionary of " + c.getName());
+            Log.error("Unable to find instance: " + c.getName());
             return false;
         }
     }
@@ -127,6 +123,51 @@ public class UpdateDictionary implements PrimitiveCommand {
         } catch (Throwable e) {
             Log.debug("Error during rollback ", e);
         }
+    }
+
+    private void doInject(Object target) {
+        ClassLoader previousCL = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(target.getClass().getClassLoader());
+        bs.injectDictionaryValue(dicValue, target);
+        debug(dicValue);
+        Thread.currentThread().setContextClassLoader(previousCL);
+    }
+
+    private void debug(Value value) {
+        Instance instance = (Instance) value.eContainer().eContainer();
+        DictionaryAttribute attr = instance.getTypeDefinition().getDictionaryType().findAttributesByID(value.getName());
+        if (attr.getFragmentDependant()) {
+            Log.debug("Update param for {}.{}/{} = '{}'", instance.getName(), value.getName(),
+                    ((NamedElement) value.eContainer()).getName(), value.getValue());
+        } else {
+            Log.debug("Update param for {}.{} = '{}'", instance.getName(), value.getName(), value.getValue());
+        }
+    }
+
+    private Field lookup(String name, Class clazz) {
+        Field f = null;
+        for (Field loopf : clazz.getDeclaredFields()) {
+            if (name.equals(loopf.getName())) {
+                f = loopf;
+            }
+        }
+        if (f != null) {
+            return f;
+        } else {
+            for (Class loopClazz : clazz.getInterfaces()) {
+                f = lookup(name, loopClazz);
+                if (f != null) {
+                    return f;
+                }
+            }
+            if (clazz.getSuperclass() != null) {
+                f = lookup(name, clazz.getSuperclass());
+                if (f != null) {
+                    return f;
+                }
+            }
+        }
+        return f;
     }
 
     public String toString() {

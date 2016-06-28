@@ -4,7 +4,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.java.avatarjs</artifactId>
     <name>Kevoree :: Library :: Java :: AvatarJS</name>
-    <version>5.3.2-SNAPSHOT</version>
 
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
@@ -12,10 +11,6 @@
         <version>5.3.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <dependencies>
         <dependency>

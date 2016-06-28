@@ -4,7 +4,6 @@ package org.kevoree.library;
 import java.util.Date;
 
 import com.espertech.esper.client.*;
-import org.antlr.v4.runtime.misc.Triple;
 import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.Input;
 import org.kevoree.annotation.KevoreeInject;

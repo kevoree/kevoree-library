@@ -4,7 +4,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.java.chan.mongo</artifactId>
     <name>Kevoree :: Library :: Java :: Chan :: MongoDB</name>
-    <version>5.3.2-SNAPSHOT</version>
 
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
@@ -18,11 +17,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.kevoree</groupId>
-            <artifactId>org.kevoree.api</artifactId>
-            <version>5.3.0</version>
-        </dependency>
        <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-async</artifactId>

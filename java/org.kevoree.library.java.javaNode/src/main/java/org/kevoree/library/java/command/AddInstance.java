@@ -64,16 +64,16 @@ public class AddInstance implements PrimitiveCommand, Runnable {
             subThread.start();
             subThread.join();
             return resultSub;
-        } catch(Throwable e) {
+        } catch (Throwable e) {
             if (subThread != null) {
                 try {
                     //subThread.stop(); //kill sub thread
                     subThread.interrupt();
-                } catch(Throwable t) {
+                } catch (Throwable t) {
                     //ignore killing thread
                 }
             }
-            Log.error("Could not add the instance {}:{}",c.getName(), c.getTypeDefinition().getName(), e);
+            Log.error("Could not add the instance {}:{}", c.getName(), c.getTypeDefinition().getName(), e);
             return false;
         }
     }

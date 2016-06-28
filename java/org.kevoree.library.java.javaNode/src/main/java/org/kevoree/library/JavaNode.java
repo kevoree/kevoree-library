@@ -122,7 +122,11 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
         String nodeName = modelService.getNodeName();
         if (pTypeName.equals(AdaptationType.UpdateDictionaryInstance.name())) {
             Object[] values = (Object[]) adaptationPrimitive.getRef();
-            return new UpdateDictionary((Instance) values[0], (Value) values[1], nodeName, modelRegistry, bootstrapService, modelService);
+            if (values.length > 2) {
+                return new UpdateDictionary((Instance) values[0], (Value) values[1], (Boolean) values[2], nodeName, modelRegistry, bootstrapService, modelService);
+            } else {
+                return new UpdateDictionary((Instance) values[0], (Value) values[1], false, nodeName, modelRegistry, bootstrapService, modelService);
+            }
         }
         if (pTypeName.equals(AdaptationType.UpdateCallMethod.name())) {
             return new UpdateCallMethod((Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService);
@@ -146,17 +150,13 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
             return new LinkDeployUnit((DeployUnit) adaptationPrimitive.getRef(), bootstrapService, modelRegistry);
         }
         if (pTypeName.equals(AdaptationType.RemoveDeployUnit.name())) {
-            RemoveDeployUnit res = new RemoveDeployUnit((DeployUnit) adaptationPrimitive.getRef(), bootstrapService);
-            return res;
+            return new RemoveDeployUnit((DeployUnit) adaptationPrimitive.getRef(), bootstrapService);
         }
         if (pTypeName.equals(AdaptationType.AddInstance.name())) {
             return new AddInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService, modelService);
         }
         if (pTypeName.equals(AdaptationType.RemoveInstance.name())) {
             return new RemoveInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService, modelService);
-        }
-        if (pTypeName.equals(AdaptationType.UpgradeInstance.name())) {
-            return new UpgradeInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService, modelService);
         }
         return null;
     }

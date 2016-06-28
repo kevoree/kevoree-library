@@ -4,7 +4,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.java.gstreamer</artifactId>
     <name>Kevoree :: Library :: Java :: GStreamer</name>
-    <version>5.3.2-SNAPSHOT</version>
 
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>

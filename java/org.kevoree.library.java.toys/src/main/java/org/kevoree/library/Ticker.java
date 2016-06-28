@@ -25,16 +25,17 @@ public class Ticker implements Runnable {
     private Random rand = new Random();
 
     @Param(defaultValue = "3000")
-    Long period = 3000l;
+    private long period = 3000l;
 
     @Output
     org.kevoree.api.Port tick;
 
-    @Param(optional = true, defaultValue = "false")
-    Boolean random;
+    @Param(defaultValue = "false")
+    private boolean random = false;
 
     @Start
     public void start() {
+        System.out.println("NEW TICKER START!");
         Thread t = new Thread(this);
         running = true;
         t.start();

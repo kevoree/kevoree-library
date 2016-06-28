@@ -19,7 +19,6 @@
         <url>http://kevoree.org</url>
     </organization>
 
-
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
@@ -79,6 +78,33 @@
             </roles>
             <timezone>+2</timezone>
         </developer>
+        <developer>
+            <name>Olivier Barais</name>
+            <id>barais</id>
+            <email>olivier.barais@gmail.com</email>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <name>Maxime Tricoire</name>
+            <id>maxleiko</id>
+            <email>max.tricoire@gmail.com</email>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <name>Manuel Leduc</name>
+            <id>manuelleduc</id>
+            <email>manuel.leduc@gmail.com</email>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>+2</timezone>
+        </developer>
     </developers>
 
     <modules>
@@ -110,7 +136,6 @@
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </pluginRepository>
     </pluginRepositories>
-
 
     <build>
         <plugins>
@@ -157,7 +182,7 @@
                     </execution>
                 </executions>
             </plugin>
-	    <plugin>
+            <plugin>
                 <groupId>org.kevoree.tools</groupId>
                 <artifactId>org.kevoree.tools.mavenplugin</artifactId>
                 <version>${kevoree.version}</version>
@@ -171,13 +196,10 @@
                     </execution>
 
                 </executions>
-		 <configuration>
+                <configuration>
                     <registry>${publish.registry.url}</registry>
                 </configuration>
-
             </plugin>
-
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
