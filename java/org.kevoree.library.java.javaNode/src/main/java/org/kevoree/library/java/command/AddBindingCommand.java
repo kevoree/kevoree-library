@@ -28,29 +28,30 @@ public class AddBindingCommand implements PrimitiveCommand {
 
     @Override
     public boolean execute() {
-        Object kevoreeChannelFound = registry.lookup(c.getHub());
-        Object kevoreeComponentFound = registry.lookup(c.getPort().eContainer());
-        if (kevoreeChannelFound != null && kevoreeComponentFound != null && kevoreeComponentFound instanceof ComponentWrapper && kevoreeChannelFound instanceof ChannelWrapper) {
+        Object chan = registry.lookup(c.getHub());
+        Object comp = registry.lookup(c.getPort().eContainer());
+        if (chan != null && comp != null && comp instanceof ComponentWrapper && chan instanceof ChannelWrapper) {
             String portName = c.getPort().getPortTypeRef().getName();
-            RequiredPortImpl foundNeedPort = ((ComponentWrapper) kevoreeComponentFound).getRequiredPorts().get(portName);
-            ProvidedPortImpl foundHostedPort = ((ComponentWrapper) kevoreeComponentFound).getProvidedPorts().get(portName);
-            if (foundNeedPort == null && foundHostedPort == null) {
+            RequiredPortImpl output = ((ComponentWrapper) comp).getRequiredPorts().get(portName);
+            ProvidedPortImpl input = ((ComponentWrapper) comp).getProvidedPorts().get(portName);
+
+            if (output == null && input == null) {
                 Log.info("Port instance {} not found in component", portName);
                 return false;
             }
 
-            if (foundNeedPort != null) {
-                foundNeedPort.addChannelWrapper(c, (ChannelWrapper) kevoreeChannelFound);
+            if (output != null) {
+                output.addChannelWrapper(c, (ChannelWrapper) chan);
                 Log.info("Bind {} {}", c.getPort().path(), c.getHub().path());
-
                 return true;
             }
-            //Seems useless
-            ((ChannelWrapper) kevoreeChannelFound).getContext().getPortsBinded().put(foundHostedPort.getPath(), foundHostedPort);
+
+            // Seems useless
+            ((ChannelWrapper) chan).getContext().getBoundPorts().put(input.getPath(), input);
             Log.info("Bind {} {}", c.getPort().path(), c.getHub().path());
             return true;
         } else {
-            Log.error("Error while apply binding , channelFound=" + kevoreeChannelFound + ", componentFound=" + kevoreeComponentFound);
+            Log.error("Error while apply binding , channelFound=" + chan + ", componentFound=" + comp);
             return false;
         }
     }

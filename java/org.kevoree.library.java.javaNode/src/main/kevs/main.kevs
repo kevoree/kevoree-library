@@ -1,7 +1,13 @@
-add node0 : JavaNode
-add sync : WSGroup/5.3.2-SNAPSHOT
+add node0: JavaNode
+add node0.ticker: Ticker
+add node0.printer: ConsolePrinter
+add sync: WSGroup
+add chan: SyncBroadcast
 
 attach node0 sync
+
+bind node0.ticker.tick chan
+bind node0.printer.input chan
 
 set sync.master = 'node0'
 set node0.log = 'DEBUG'

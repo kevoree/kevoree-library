@@ -35,7 +35,6 @@ public class Ticker implements Runnable {
 
     @Start
     public void start() {
-        System.out.println("NEW TICKER START!");
         Thread t = new Thread(this);
         running = true;
         t.start();

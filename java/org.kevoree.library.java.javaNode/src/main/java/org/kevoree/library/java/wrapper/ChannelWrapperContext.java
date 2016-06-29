@@ -12,14 +12,13 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Created by duke on 9/26/14.
+ *
+ *
  */
 public class ChannelWrapperContext implements ChannelContext {
 
-    public String getChannelPath() {
-        return channelPath;
-    }
-
+    private HashMap<String, Port> boundPorts = new HashMap<String, Port>();
+    private ModelService modelService;
     private String channelPath;
     private String localNodePath;
 
@@ -29,22 +28,27 @@ public class ChannelWrapperContext implements ChannelContext {
         this.modelService = modelService;
     }
 
-    private ModelService modelService;
-
     @Override
     public List<Port> getLocalPorts() {
-        return new ArrayList(portsBinded.values());
+        return new ArrayList(boundPorts.values());
     }
 
+    @Deprecated
     public HashMap<String, Port> getPortsBinded() {
-        return portsBinded;
+        return this.getBoundPorts();
+    }
+
+    public HashMap<String, Port> getBoundPorts() {
+        return boundPorts;
     }
 
     public void setPortsBinded(HashMap<String, Port> portsBinded) {
-        this.portsBinded = portsBinded;
+        this.boundPorts = portsBinded;
     }
 
-    HashMap<String, Port> portsBinded = new HashMap<String, Port>();
+    public String getChannelPath() {
+        return channelPath;
+    }
 
     @Override
     public List<String> getRemotePortPaths() {

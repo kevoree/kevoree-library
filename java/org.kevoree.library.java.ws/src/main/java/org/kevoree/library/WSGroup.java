@@ -26,7 +26,6 @@ import org.kevoree.pmodeling.api.trace.TraceSequence;
 import org.xnio.*;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,25 +51,25 @@ import static org.kevoree.api.protocol.Protocol.*;
  */
 
 @GroupType(description = "This group uses <strong>WebSockets</strong> to propagate models over the connected nodes."+
-"<br/>If the attribute <strong>master</strong> is specified (using the instance "+
-"name of one of the connected nodes) then a WebSocket server will be listening "+
-"on that node using the <strong>port</strong> attribute specified in the fragment "+
-"dictionary of that particular node and every other nodes connected to that group "+
-"will try to connect to that <strong>master</strong> node."+
-"</br>If <strong>master</strong> is empty, then every connected node will try to "+
-"start a WebSocket server using their <strong>port</strong> fragment attribute."+
-"<br/><br/>The attributes <strong>onConnect</strong> and <strong>onDisconnect</strong> "+
-"expects KevScript strings to be given to them optionally. If set, "+
-"<strong>onConnect</strong> KevScript will be executed on the <strong>master</strong> node "+
-"when a new client connects to the master server (and <strong>onDisconnect</strong> "+
-"will be executed when a node disconnects from the master server)"+
-"<br/><br/><em>NB: onConnect & onDisconnect can reference the current node that "+
-"triggered the process by using this notation: {nodeName}</em>"+
-"<br/><em>NB2: {groupName} is also available and resolves to the current WSGroup instance name</em>"+
-"<br/><em>NB3: onConnect & onDisconnect are not triggered if the client nodeName does not match the regex given in the <strong>filter</strong> parameter</em>")
+        "<br/>If the attribute <strong>master</strong> is specified (using the instance "+
+        "name of one of the connected nodes) then a WebSocket server will be listening "+
+        "on that node using the <strong>port</strong> attribute specified in the fragment "+
+        "dictionary of that particular node and every other nodes connected to that group "+
+        "will try to connect to that <strong>master</strong> node."+
+        "</br>If <strong>master</strong> is empty, then every connected node will try to "+
+        "start a WebSocket server using their <strong>port</strong> fragment attribute."+
+        "<br/><br/>The attributes <strong>onConnect</strong> and <strong>onDisconnect</strong> "+
+        "expects KevScript strings to be given to them optionally. If set, "+
+        "<strong>onConnect</strong> KevScript will be executed on the <strong>master</strong> node "+
+        "when a new client connects to the master server (and <strong>onDisconnect</strong> "+
+        "will be executed when a node disconnects from the master server)"+
+        "<br/><br/><em>NB: onConnect & onDisconnect can reference the current node that "+
+        "triggered the process by using this notation: {nodeName}</em>"+
+        "<br/><em>NB2: {groupName} is also available and resolves to the current WSGroup instance name</em>"+
+        "<br/><em>NB3: onConnect & onDisconnect are not triggered if the client nodeName does not match the regex given in the <strong>filter</strong> parameter</em>")
 public class WSGroup implements ModelListener, Runnable {
 
-    private AtomicBoolean diverge = new AtomicBoolean(false);
+    private AtomicBoolean lock = new AtomicBoolean(false);
 
     @KevoreeInject
     public Context context;
@@ -82,17 +81,13 @@ public class WSGroup implements ModelListener, Runnable {
     private KevScriptService kevsService;
 
     @Param(optional = true, fragmentDependent = true, defaultValue = "9000")
-    Integer port;
-
-    public void setMaster(String master) {
-        this.master = master;
-    }
+    private int port;
 
     @Param(optional = true)
-    String master;
+    private String master;
 
     @Param(optional = true)
-    String filter;
+    private String filter;
 
     @Param(defaultValue = "")
     private String onConnect = "";
@@ -100,19 +95,19 @@ public class WSGroup implements ModelListener, Runnable {
     @Param(defaultValue = "")
     private String onDisconnect = "";
 
-
+    private String currentMaster;
+    private int currentPort;
     private ScheduledExecutorService scheduledThreadPool;
     private Undertow serverHandler;
     private KevoreeFactory factory = new DefaultKevoreeFactory();
     private JSONModelSerializer serializer = factory.createJSONSerializer();
     private ModelCloner cloner = factory.createModelCloner();
 
-
     private class InternalWebSocketServer implements WebSocketConnectionCallback {
 
         @Override
         public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
-            
+
             allConnectedClients.add(channel);
             channel.getReceiveSetter().set(new AbstractReceiveListener() {
 
@@ -145,21 +140,23 @@ public class WSGroup implements ModelListener, Runnable {
                                             try {
                                                 Log.debug("onConnect KevScript to process:");
                                                 final String onConnectKevs = tpl(onConnect, rm.getNodeName());
-												if (!onConnectKevs.trim().isEmpty()) {
-													Log.debug("===== onConnect KevScript =====");
-													Log.debug(onConnectKevs);
-													Log.debug("===============================");
-													kevsService.execute(onConnectKevs, modelToApply);
-												} else {
-													Log.debug("onConnect KevScript empty");
-												}
+                                                if (!onConnectKevs.isEmpty()) {
+                                                    Log.debug("===== onConnect KevScript =====");
+                                                    Log.debug(onConnectKevs);
+                                                    Log.debug("===============================");
+                                                    kevsService.execute(onConnectKevs, modelToApply);
+                                                } else {
+                                                    Log.debug("onConnect KevScript empty");
+                                                }
                                             } catch (Exception e) {
                                                 Log.error("Unable to parse onConnect KevScript. Broadcasting model without onConnect process.", e);
                                             } finally {
-                                                applyAndBroadcast(modelToApply);
+                                                // update locally
+                                                modelService.update(modelToApply, null);
                                             }
                                         } else {
-                                            applyAndBroadcast(modelToApply);
+                                            // update locally
+                                            modelService.update(modelToApply, null);
                                         }
                                     }
                                     break;
@@ -173,30 +170,7 @@ public class WSGroup implements ModelListener, Runnable {
                                     try {
                                         Log.info("{} \"{}\": push received, applying locally...", WSGroup.this.getClass().getSimpleName(), context.getInstanceName());
                                         ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
-                                        if (hasMaster()) {
-                                            if (isMaster()) {
-                                                int count = 0;
-                                                for (WebSocketChannel ws : new HashSet<WebSocketChannel>(allConnectedClients)) {
-                                                    count++;
-                                                    if (ws.isOpen()) {
-                                                        WebSockets.sendText(pm.toRaw(), ws, null);
-                                                    }
-                                                }
-
-                                                if (count > 0) {
-                                                    Log.info("Broadcast model over {} client{}", count, (count > 1) ? "s" : "");
-                                                }
-                                            }
-                                        } else {
-                                            Log.info("No master specified, model will NOT be send to all other nodes");
-                                        }
-
-                                        modelService.update(model, new UpdateCallback() {
-                                            @Override
-                                            public void run(Boolean applied) {
-                                                Log.info("{} \"{}\" update result: {}", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), applied);
-                                            }
-                                        });
+                                        modelService.update(model, null);
                                     } catch (Exception e) {
                                         Log.warn("{} \"{}\" received a malformed push message '{}'", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), msg);
                                     }
@@ -208,29 +182,6 @@ public class WSGroup implements ModelListener, Runnable {
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                    }
-                }
-
-                private void applyAndBroadcast(ContainerRoot modelToApply) {
-                    String recModelStr = serializer.serialize(modelToApply);
-                    PushMessage pushMessage = new PushMessage(recModelStr);
-
-                    // update locally
-                    modelService.update(modelToApply, applied -> Log.info("Merge model result: {}", applied));
-
-                    // broadcast changes
-                    Log.info("Broadcasting merged model to all connected clients");
-                    /*
-                     * We create a new collection in order to avoid any
-                     * concurrent exception since a client can close its own
-                     * connection while we send data to others (synchronized
-                     * collections do not allow a concurrent thread to remove
-                     * elements during an iteration)
-                     */ 
-                    for (WebSocketChannel client : new HashSet<WebSocketChannel>(allConnectedClients)) {
-                        if (client.isOpen()) {
-                            WebSockets.sendText(pushMessage.toRaw(), client, null);
-                        }
                     }
                 }
 
@@ -271,37 +222,34 @@ public class WSGroup implements ModelListener, Runnable {
             });
 
             channel.resumeReceives();
-			channel.addCloseTask(ws -> {
-				final String nodeName = rcache.get(ws);
-				if (nodeName != null) {
-					Log.info("Client node '{}' disconnected", nodeName);
-					if (checkFilter(nodeName)) {
-						// add onDisconnect logic
-						try {
-							final String onDisconnectKevs = tpl(onDisconnect, nodeName);
-							if (!onDisconnectKevs.trim().isEmpty()) {
-								Log.debug("===== onDisconnect KevScript =====");
-								Log.debug(onDisconnectKevs);
-								Log.debug("==================================");
-								modelService.submitScript(onDisconnectKevs,
-										applied -> Log.info("{} \"{}\" onDisconnect result from {}: {}",
-												WSGroup.this.getClass().getSimpleName(), context.getInstanceName(),
-												nodeName, applied));
-							} else {
-								Log.debug("onDisconnect KevScript empty");
-							}
-						} catch (Exception e) {
-							Log.error(
-									"Unable to parse onDisconnect KevScript. No changes made after the disconnection of "
-											+ nodeName,
-									e);
-						}
-					}
-					cache.remove(nodeName);
-				}
-				rcache.remove(ws);
-				allConnectedClients.remove(ws);
-			});
+            channel.addCloseTask(ws -> {
+                final String nodeName = rcache.get(ws);
+                if (nodeName != null) {
+                    Log.info("Client node '{}' disconnected", nodeName);
+                    if (checkFilter(nodeName)) {
+                        // add onDisconnect logic
+                        try {
+                            final String onDisconnectKevs = tpl(onDisconnect, nodeName);
+                            if (!onDisconnectKevs.isEmpty()) {
+                                Log.debug("===== onDisconnect KevScript =====");
+                                Log.debug(onDisconnectKevs);
+                                Log.debug("==================================");
+                                modelService.submitScript(onDisconnectKevs,
+                                        applied -> Log.info("{} \"{}\" onDisconnect result from {}: {}",
+                                                WSGroup.this.getClass().getSimpleName(), context.getInstanceName(),
+                                                nodeName, applied));
+                            } else {
+                                Log.debug("onDisconnect KevScript empty");
+                            }
+                        } catch (Exception e) {
+                            Log.error("Unable to parse onDisconnect KevScript. No changes made after the disconnection of " + nodeName, e);
+                        }
+                    }
+                    cache.remove(nodeName);
+                }
+                rcache.remove(ws);
+                allConnectedClients.remove(ws);
+            });
         }
 
 
@@ -309,12 +257,15 @@ public class WSGroup implements ModelListener, Runnable {
         private String tpl(String tpl, String nodeName) {
             return tpl
                     .replaceAll("\\{nodeName\\}", nodeName)
-                    .replaceAll("\\{groupName\\}", context.getInstanceName());
+                    .replaceAll("\\{groupName\\}", context.getInstanceName())
+                    .trim();
         }
     }
 
     @Start
     public void startWSGroup() {
+        this.currentMaster = master;
+        this.currentPort = port;
         modelService.registerModelListener(this);
         if (this.hasMaster()) {
             if (this.isMaster()) {
@@ -366,8 +317,10 @@ public class WSGroup implements ModelListener, Runnable {
 
     @Update
     public void update() throws IOException, InterruptedException {
-        this.stopWSGroup();
-        this.startWSGroup();
+        if (!this.currentMaster.equals(this.master) || this.currentPort != this.port) {
+            this.stopWSGroup();
+            this.startWSGroup();
+        }
     }
 
     private static JSONModelLoader jsonModelLoader = new JSONModelLoader(new DefaultKevoreeFactory());
@@ -392,36 +345,11 @@ public class WSGroup implements ModelListener, Runnable {
 
     @Override
     public boolean initUpdate(UpdateContext context) {
-        return isMaster() || context.getCallerPath().equals(this.context.getPath()) || !pushToMaster(context.getProposedModel());
-
-    }
-
-    public boolean pushToMaster(ContainerRoot model) {
-        if (masterClient != null && masterClient.isOpen()) {
-            PushMessage pushMessage = new PushMessage(jsonModelSaver.serialize(model));
-            WebSockets.sendText(pushMessage.toRaw(), masterClient, null);
-            return true;
-        } else {
-            diverge.set(true);
-            Log.warn("Could not join master node : {}, diverge locally", master);
-            return false;
-        }
+        return true;
     }
 
     @Override
     public boolean afterLocalUpdate(UpdateContext context) {
-        if (isMaster()) {
-            for (WebSocketChannel wsClient : cache.values()) {
-                if (wsClient.isOpen()) {
-                    String currentModel = jsonModelSaver.serialize(context.getProposedModel());
-                    PushMessage pushMessage = new PushMessage(currentModel);
-                    WebSockets.sendText(pushMessage.toRaw(), wsClient, null);
-                    Log.info("Forward to {}", rcache.get(wsClient));
-                } else {
-                    Log.error("Disconnected Client " + rcache.get(wsClient));
-                }
-            }
-        }
         return true;
     }
 
@@ -431,6 +359,7 @@ public class WSGroup implements ModelListener, Runnable {
         try {
             if (!isMaster() && context != null) {
                 if (masterClient == null || !masterClient.isOpen()) {
+                    System.out.println("________________ creating WS client to reach master");
                     ContainerRoot lastModel = modelService.getCurrentModel().getModel();
                     Group selfGroup = (Group) lastModel.findByPath(context.getPath());
                     //localize master node
@@ -453,13 +382,13 @@ public class WSGroup implements ModelListener, Runnable {
                                 }
                             }
                             for (String ip : addresses) {
-                                masterClient = createWSClient(ip, port, context.getNodeName(), modelService, diverge);
+                                masterClient = createWSClient(ip, port, context.getNodeName(), modelService);
                                 if (masterClient != null && masterClient.isOpen()) {
                                     Log.info("Master connection opened on {}:{}", ip, port);
                                     return;
                                 }
                             }
-                            masterClient = createWSClient(defaultIP, port, context.getNodeName(), modelService, diverge);
+                            masterClient = createWSClient(defaultIP, port, context.getNodeName(), modelService);
                             if (masterClient != null && masterClient.isOpen()) {
                                 Log.info("Master connection opened on {}:{}", defaultIP, port);
                             }
@@ -470,11 +399,11 @@ public class WSGroup implements ModelListener, Runnable {
                 }
             }
         } catch (Exception e) {
-            Log.error("Error while connecting to master server (is server reachable ?)");
+            Log.warn("Unable to connect to master server (is server reachable ?)");
         }
     }
 
-    public WebSocketChannel createWSClient(final String ip, final String port, String currentNodeName, final ModelService modelService, final AtomicBoolean diverge) throws IOException {
+    public WebSocketChannel createWSClient(final String ip, final String port, String currentNodeName, final ModelService modelService) throws IOException {
         Xnio xnio = Xnio.getInstance(io.undertow.websockets.client.WebSocketClient.class.getClassLoader());
         XnioWorker worker = xnio.createWorker(OptionMap.builder()
                 .set(Options.WORKER_IO_THREADS, 2)
@@ -506,12 +435,13 @@ public class WSGroup implements ModelListener, Runnable {
                     switch (parsedMsg.getType()) {
                         case PUSH_TYPE:
                             //push from master
-                            diverge.set(false);
+                            lock.set(true);
                             PushMessage pm = (PushMessage) parsedMsg;
                             ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
                             modelService.update(model, new UpdateCallback() {
                                 @Override
                                 public void run(Boolean applied) {
+                                    lock.set(false);
                                     Log.info(WSGroup.this.getClass().getSimpleName()+" \"{}\" update result: {}", context.getInstanceName(), applied);
                                 }
                             });
@@ -530,7 +460,7 @@ public class WSGroup implements ModelListener, Runnable {
         });
         client[0].resumeReceives();
 
-        // sending current model
+        // register on master
         String currentModel = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
         WebSockets.sendText(new RegisterMessage(currentNodeName, currentModel).toRaw(), client[0], null);
         return client[0];
@@ -543,6 +473,35 @@ public class WSGroup implements ModelListener, Runnable {
 
     @Override
     public void modelUpdated() {
+        if (!lock.get()) {
+            String modelStr = serializer.serialize(this.modelService.getCurrentModel().getModel());
+            PushMessage pushMessage = new PushMessage(modelStr);
+            if (isMaster()) {
+                // broadcast changes
+                /*
+                 * We create a new collection in order to avoid any
+                 * concurrent exception since a client can close its own
+                 * connection while we send data to others (synchronized
+                 * collections do not allow a concurrent thread to remove
+                 * elements during an iteration)
+                 */
+                if (allConnectedClients.size() > 0) {
+                    Log.info("Broadcasting new model to all clients ("+this.allConnectedClients.size()+")");
+                }
+                for (WebSocketChannel client : new HashSet<WebSocketChannel>(allConnectedClients)) {
+                    if (client != null && client.isOpen()) {
+                        WebSockets.sendText(pushMessage.toRaw(), client, null);
+                    }
+                }
+            } else {
+                if (this.masterClient != null && this.masterClient.isOpen()) {
+                    Log.info(">>>>>>>>>>>>>>>>>>>>>>>>> Notifying master \""+this.master+"\" to update model");
+                    WebSockets.sendText(pushMessage.toRaw(), this.masterClient, null);
+                } else {
+                    Log.debug("Unable to notify master server. No connection.");
+                }
+            }
+        }
     }
 
     @Override

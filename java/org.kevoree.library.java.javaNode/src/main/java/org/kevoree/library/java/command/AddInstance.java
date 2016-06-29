@@ -4,6 +4,7 @@ import org.kevoree.kcl.api.FlexyClassLoader;
 import org.kevoree.library.java.wrapper.KInstanceWrapper;
 import org.kevoree.library.java.ModelRegistry;
 import org.kevoree.Instance;
+import org.kevoree.pmodeling.api.KMFContainer;
 import org.kevoree.api.BootstrapService;
 import org.kevoree.api.PrimitiveCommand;
 import org.kevoree.log.Log;
@@ -11,6 +12,8 @@ import org.kevoree.library.java.wrapper.WrapperFactory;
 import org.kevoree.api.ModelService;
 import org.kevoree.ContainerNode;
 import org.kevoree.library.java.KevoreeThreadGroup;
+
+import java.util.List;
 
 /**
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
@@ -57,6 +60,13 @@ public class AddInstance implements PrimitiveCommand, Runnable {
     }
 
     public boolean execute() {
+        List<KMFContainer> metas = c.getTypeDefinition().select("deployUnits[]/filters[name=platform,value=java]");
+        if (metas.isEmpty()) {
+            Log.error("No DeployUnit found for '" + c.getName() + ": " + c.getTypeDefinition().getName() + "/"
+                    + c.getTypeDefinition().getVersion() + "' that matches the 'java' platform");
+            return false;
+        }
+
         Thread subThread = null;
         try {
             tg = new KevoreeThreadGroup("kev/" + c.path());

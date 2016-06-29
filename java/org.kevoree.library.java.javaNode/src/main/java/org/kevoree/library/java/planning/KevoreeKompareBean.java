@@ -183,37 +183,17 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                 KMFContainer modelElement = targetModel.findByPath(trace.getSrcPath());
 
                 if (!isVirtual(modelElement)) {
-                    if (trace.getRefName().equals("components")) {
+                    if (trace.getRefName().equals("components")
+                            || trace.getRefName().equals("groups")
+                            || trace.getRefName().equals("hosts")) {
                         if (trace.getSrcPath().equals(targetNode.path())) {
                             if (trace instanceof ModelAddTrace) {
                                 KMFContainer elemToAdd = targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
-                                adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, elemToAdd));
-                            }
-                            if (trace instanceof ModelRemoveTrace) {
-                                KMFContainer elemToAdd = currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
-                                adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, elemToAdd));
-                                adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, elemToAdd));
-                            }
-                        }
-                    }
-                    if (trace.getRefName().equals("hosts")) {
-                        if (trace.getSrcPath().equals(targetNode.path())) {
-                            if (trace instanceof ModelAddTrace) {
-                                KMFContainer elemToAdd = targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
-                                adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, elemToAdd));
-                            }
-                            if (trace instanceof ModelRemoveTrace) {
-                                KMFContainer elemToAdd = currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
-                                adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, elemToAdd));
-                                adaptationModel.getAdaptations().add(adapt(AdaptationType.StopInstance, elemToAdd));
-                            }
-                        }
-                    }
-                    if (trace.getRefName().equals("groups")) {
-                        if (trace.getSrcPath().equals(targetNode.path())) {
-                            if (trace instanceof ModelAddTrace) {
-                                KMFContainer elemToAdd = targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
-                                adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, elemToAdd));
+                                TupleObjPrim addTuple = new TupleObjPrim(elemToAdd, AdaptationType.AddInstance);
+                                if (!elementAlreadyProcessed.containsKey(addTuple.getKey())) {
+                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, elemToAdd));
+                                    elementAlreadyProcessed.put(addTuple.getKey(), addTuple);
+                                }
                             }
                             if (trace instanceof ModelRemoveTrace) {
                                 KMFContainer elemToAdd = currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
