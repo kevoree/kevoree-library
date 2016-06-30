@@ -1,6 +1,13 @@
 add node0: JavaNode/5.3.2-SNAPSHOT
 add sync: WSGroup/5.3.2-SNAPSHOT
+add chan: RemoteWSChan/5.3.2-SNAPSHOT
 
 attach node0 sync
 
 set sync.master = 'node0'
+set sync.onConnect = "add {nodeName}.printer: ConsolePrinter
+bind {nodeName}.printer.input chan"
+set sync.onDisconnect = "remove {nodeName}"
+
+set chan.host = 'ws.kevoree.org'
+set chan.uuid = '123546548'

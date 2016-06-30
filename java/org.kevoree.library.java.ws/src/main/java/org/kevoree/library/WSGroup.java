@@ -343,23 +343,12 @@ public class WSGroup implements ModelListener, Runnable {
         return true;
     }
 
-    @Override
-    public boolean initUpdate(UpdateContext context) {
-        return true;
-    }
-
-    @Override
-    public boolean afterLocalUpdate(UpdateContext context) {
-        return true;
-    }
-
     private WebSocketChannel masterClient;
 
     public void run() {
         try {
             if (!isMaster() && context != null) {
                 if (masterClient == null || !masterClient.isOpen()) {
-                    System.out.println("________________ creating WS client to reach master");
                     ContainerRoot lastModel = modelService.getCurrentModel().getModel();
                     Group selfGroup = (Group) lastModel.findByPath(context.getPath());
                     //localize master node
@@ -434,17 +423,19 @@ public class WSGroup implements ModelListener, Runnable {
                 } else {
                     switch (parsedMsg.getType()) {
                         case PUSH_TYPE:
-                            //push from master
-                            lock.set(true);
-                            PushMessage pm = (PushMessage) parsedMsg;
-                            ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
-                            modelService.update(model, new UpdateCallback() {
-                                @Override
-                                public void run(Boolean applied) {
-                                    lock.set(false);
-                                    Log.info(WSGroup.this.getClass().getSimpleName()+" \"{}\" update result: {}", context.getInstanceName(), applied);
-                                }
-                            });
+                            try {
+                                PushMessage pm = (PushMessage) parsedMsg;
+                                ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
+                                lock.set(true);
+                                modelService.update(model, new UpdateCallback() {
+                                    @Override
+                                    public void run(Boolean applied) {
+                                        lock.set(false);
+                                    }
+                                });
+                            } catch (Exception err) {
+                                lock.set(false);
+                            }
                             break;
                         default:
                             Log.warn(WSGroup.this.getClass().getSimpleName() + " \"{}\" unhandled message '{}'", context.getInstanceName(), msg);
@@ -472,7 +463,12 @@ public class WSGroup implements ModelListener, Runnable {
     }
 
     @Override
-    public void modelUpdated() {
+    public boolean initUpdate(UpdateContext context) {
+        return true;
+    }
+
+    @Override
+    public boolean afterLocalUpdate(UpdateContext context) {
         if (!lock.get()) {
             String modelStr = serializer.serialize(this.modelService.getCurrentModel().getModel());
             PushMessage pushMessage = new PushMessage(modelStr);
@@ -495,14 +491,17 @@ public class WSGroup implements ModelListener, Runnable {
                 }
             } else {
                 if (this.masterClient != null && this.masterClient.isOpen()) {
-                    Log.info(">>>>>>>>>>>>>>>>>>>>>>>>> Notifying master \""+this.master+"\" to update model");
                     WebSockets.sendText(pushMessage.toRaw(), this.masterClient, null);
                 } else {
                     Log.debug("Unable to notify master server. No connection.");
                 }
             }
         }
+        return true;
     }
+
+    @Override
+    public void modelUpdated() {}
 
     @Override
     public void preRollback(UpdateContext context) {}

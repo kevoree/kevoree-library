@@ -1,20 +1,9 @@
-add node0, node1, node2 : JavaNode
-add sync : WSGroup
-
-set sync.master = 'node0'
+add node0, node1, node2: JavaNode/5.3.2-SNAPSHOT
+add sync: WSGroup/5.3.2-SNAPSHOT
 
 attach node0, node1, node2 sync
 
-network node0.ip.eth0 127.0.0.1
-network node1.ip.eth0 127.0.0.1
-network node2.ip.eth0 127.0.0.1
-
-add node1.ticker : Ticker
-add chan : WSChan/5.2.4-SNAPSHOT
-set chan.host = '0.0.0.0'
-set chan.port = '9050'
-bind node1.ticker.tick chan
-
-add grp1 : WSGroup
-set grp1.port/node1 = '9001'
-attach node1 grp1
+set sync.master = 'node0'
+set sync.onConnect = "add {nodeName}.printer: ConsolePrinter
+bind {nodeName}.printer.input chan"
+set sync.onDisconnect = "remove {nodeName}"
