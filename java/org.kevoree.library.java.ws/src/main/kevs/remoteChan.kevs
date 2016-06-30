@@ -1,8 +1,8 @@
 add node0, node1 : JavaNode
-add sync : WSGroup
+add sync : WSGroup/5.3.3-SNAPSHOT
 add node0.ticker : Ticker
 add node1.printer : ConsolePrinter
-add chan : RemoteWSChan
+add chan : RemoteWSChan/5.3.3-SNAPSHOT
 
 attach node0, node1 sync
 

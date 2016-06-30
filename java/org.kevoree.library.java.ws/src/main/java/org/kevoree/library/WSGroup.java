@@ -312,7 +312,6 @@ public class WSGroup implements ModelListener, Runnable {
             masterClient.close();
             masterClient = null;
         }
-
     }
 
     @Update
