@@ -317,7 +317,9 @@ public class WSGroup implements ModelListener, Runnable {
 
     @Update
     public void update() throws IOException, InterruptedException {
-        if (!this.currentMaster.equals(this.master) || this.currentPort != this.port) {
+        if ((this.currentMaster == null && this.master != null)
+                || (this.currentMaster != null && this.master == null)
+                || (this.currentMaster != null && (!this.currentMaster.equals(this.master) || this.currentPort != this.port))) {
             this.stopWSGroup();
             this.startWSGroup();
         }
