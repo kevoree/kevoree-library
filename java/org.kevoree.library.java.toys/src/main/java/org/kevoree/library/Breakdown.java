@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * Date: 06/12/2013
  * Time: 10:00
  */
-@ComponentType
+@ComponentType(version="5.3.3-SNAPSHOT")
 public class Breakdown implements Runnable {
 
     @Param(defaultValue = "3000")

@@ -17,7 +17,7 @@ import javax.swing.*;
  * Date: 02/12/2013
  * Time: 10:47
  */
-@ComponentType
+@ComponentType(version="5.3.3-SNAPSHOT")
 public class ToyConsole {
 
 

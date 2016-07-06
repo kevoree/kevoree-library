@@ -1,13 +1,17 @@
 package org.kevoree.library;
 
-import org.kevoree.annotation.*;
+import java.util.Random;
+
+import org.kevoree.annotation.ComponentType;
+import org.kevoree.annotation.KevoreeInject;
+import org.kevoree.annotation.Output;
+import org.kevoree.annotation.Param;
+import org.kevoree.annotation.Start;
+import org.kevoree.annotation.Stop;
 import org.kevoree.api.Callback;
 import org.kevoree.api.CallbackResult;
 import org.kevoree.api.ModelService;
-import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.log.Log;
-
-import java.util.Random;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,7 +19,7 @@ import java.util.Random;
  * Date: 02/12/2013
  * Time: 15:10
  */
-@ComponentType
+@ComponentType(version="5.3.33-SNAPSHOT")
 public class Ticker implements Runnable {
 
     @KevoreeInject
