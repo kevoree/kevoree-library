@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  * Time: 12:07
  */
 
-@ChannelType
+@ChannelType(version=1)
 public class RemoteWSChan implements ChannelDispatch {
 
     private static final int LOOP_BREAK = 3000;

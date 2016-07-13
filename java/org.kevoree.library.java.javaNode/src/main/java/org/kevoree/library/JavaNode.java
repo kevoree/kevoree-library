@@ -1,8 +1,17 @@
 package org.kevoree.library;
 
-import org.kevoree.*;
-import org.kevoree.annotation.*;
+import java.net.SocketException;
+
+import org.kevoree.ContainerRoot;
+import org.kevoree.DeployUnit;
+import org.kevoree.Instance;
+import org.kevoree.MBinding;
+import org.kevoree.Value;
+import org.kevoree.annotation.KevoreeInject;
 import org.kevoree.annotation.NodeType;
+import org.kevoree.annotation.Param;
+import org.kevoree.annotation.Start;
+import org.kevoree.annotation.Stop;
 import org.kevoree.api.BootstrapService;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
@@ -10,22 +19,28 @@ import org.kevoree.api.adaptation.AdaptationModel;
 import org.kevoree.api.adaptation.AdaptationPrimitive;
 import org.kevoree.api.adaptation.AdaptationType;
 import org.kevoree.api.handler.ModelListener;
-import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.library.java.ModelRegistry;
-import org.kevoree.library.java.command.*;
+import org.kevoree.library.java.command.AddBindingCommand;
+import org.kevoree.library.java.command.AddDeployUnit;
+import org.kevoree.library.java.command.AddInstance;
+import org.kevoree.library.java.command.LinkDeployUnit;
+import org.kevoree.library.java.command.RemoveBindingCommand;
+import org.kevoree.library.java.command.RemoveDeployUnit;
+import org.kevoree.library.java.command.RemoveInstance;
+import org.kevoree.library.java.command.StartStopInstance;
+import org.kevoree.library.java.command.UpdateCallMethod;
+import org.kevoree.library.java.command.UpdateDictionary;
 import org.kevoree.library.java.network.UDPWrapper;
 import org.kevoree.library.java.planning.KevoreeKompareBean;
 import org.kevoree.library.java.wrapper.WrapperFactory;
 import org.kevoree.log.Log;
 
-import java.net.SocketException;
-
 
 /**
  * @author ffouquet
  */
-@NodeType
+@NodeType(version=1)
 public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
 
     protected KevoreeKompareBean kompareBean = null;
@@ -61,12 +76,18 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Param(optional = true, defaultValue = "INFO")
     public String log;
 
+    @Param(optional = true, defaultValue = "INFO")
+    public String lol;
+
 
     /**
      * java VM properties used when this node is hosted by a parent node (parent can be also the watchdog)
      */
     @Param(optional = true)
     public String jvmArgs;
+
+//    @Param
+//    public String test;
 
     protected WrapperFactory wrapperFactory = null;
 

@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@ChannelType(description = "Kevoree channel that only sends messages to components in the same node")
+@ChannelType(version = 1, description = "Kevoree channel that only sends messages to components in the same node")
 public class LocalChannel implements ChannelDispatch {
 
     @Param(optional = false, defaultValue = "0")

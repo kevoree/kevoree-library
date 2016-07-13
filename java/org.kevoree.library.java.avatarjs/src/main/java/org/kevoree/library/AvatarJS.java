@@ -12,7 +12,7 @@ import javax.script.ScriptException;
 /**
  * Created by mleduc on 18/11/15.
  */
-@ComponentType
+@ComponentType(version = 1)
 public class AvatarJS {
 
     @Output

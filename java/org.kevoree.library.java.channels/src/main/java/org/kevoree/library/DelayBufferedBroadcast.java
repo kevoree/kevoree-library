@@ -14,7 +14,7 @@ import java.util.concurrent.*;
  * Date: 28/11/2013
  * Time: 10:05
  */
-@ChannelType(description = "<strong>This channel only works locally</strong>"+
+@ChannelType(version = 1, description = "<strong>This channel only works locally</strong>"+
 "<br/>When this channel receives a message it will add it in a queue and will send it later." +
 "<br/>The sending process is triggered once every <strong>period</strong> milliseconds." +
 "<br/><br/><em>NB: when the channel stops, the queue is cleared (which means that restarting this channel will lost all queued messages)</em>")

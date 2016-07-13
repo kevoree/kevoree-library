@@ -12,7 +12,7 @@ import org.kevoree.library.JavaNode;
  * @author Erwan Daubert
  * @version 1.0
  */
-@NodeType
+@NodeType(version = 1)
 public class PlatformJavaNode extends JavaNode implements PlatformNode {
 
 

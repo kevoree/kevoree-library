@@ -32,7 +32,7 @@ import static org.kevoree.api.protocol.Protocol.*;
  * Time: 12:07
  */
 
-@GroupType
+@GroupType(version=1)
 public class RemoteWSGroup implements Runnable, ModelListener {
 
     private static final int LOOP_BREAK = 5000;

@@ -10,7 +10,7 @@ import org.kevoree.annotation.NodeType;
  * @author Erwan Daubert
  * @version 1.0
  */
-@NodeType(description = "Represents basic node information (Infrastructure or Platform node)")
+@NodeType(version = 1, description = "Represents basic node information (Infrastructure or Platform node)")
 public interface PlatformNode {
 
     /**

@@ -29,7 +29,7 @@ import org.kevoree.api.Port;
 import org.kevoree.log.Log;
 
 
-@ComponentType
+@ComponentType(version = 1)
 public class RSSFetcher {
 
     @Param(defaultValue = "https://news.google.com/news?q=apple&output=rss", optional = false)

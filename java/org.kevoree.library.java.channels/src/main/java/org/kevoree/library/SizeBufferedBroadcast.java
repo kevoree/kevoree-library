@@ -12,7 +12,7 @@ import java.util.concurrent.*;
  * Waits until the buffer is full to send the messages.
  * The size of the buffer can be customized with the bufferSize property.
  */
-@ChannelType(description = "<strong>This channel only works locally</strong>" +
+@ChannelType(version = 1, description = "<strong>This channel only works locally</strong>" +
         "<br/>When this channel receives a message it will add it in a queue and will send it when the queue size " +
         "reaches the given <strong>bufferSize</strong> dictionary attribute value" +
         "<br/><br/><em>NB: when the channel stops, the queue is cleared (which means that restarting this channel will lost all queued messages)</em>")

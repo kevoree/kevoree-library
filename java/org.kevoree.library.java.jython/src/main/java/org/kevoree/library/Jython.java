@@ -13,7 +13,7 @@ import org.python.util.PythonInterpreter;
 /**
  * Created by mleduc on 18/11/15.
  */
-@ComponentType
+@ComponentType(version = 1)
 public class Jython {
     @Output
     private Port result;

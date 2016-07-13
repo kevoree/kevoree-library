@@ -8,7 +8,7 @@ import org.kevoree.log.Log;
 /**
  * Created by mleduc on 23/05/16.
  */
-@ComponentType(description = "A game of life cell")
+@ComponentType(version = 1, description = "A game of life cell")
 public class GameOfLifeCell {
     @Param(optional = true, defaultValue = "0")
     public Long x;

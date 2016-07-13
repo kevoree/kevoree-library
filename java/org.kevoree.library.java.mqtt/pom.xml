@@ -29,18 +29,5 @@
             <version>2.5</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.kevoree.tools</groupId>
-                <artifactId>org.kevoree.tools.mavenplugin</artifactId>
-                <!--<configuration>-->
-                    <!--<model>src/main/kevs/sub.kevs</model>-->
-                <!--</configuration>-->
-            </plugin>
-        </plugins>
-    </build>
-
 </project>
 

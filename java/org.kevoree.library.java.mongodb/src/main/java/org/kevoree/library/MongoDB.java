@@ -7,7 +7,7 @@ import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.log.Log;
 
-@ComponentType(description = "TODO")
+@ComponentType(version = 1, description = "TODO")
 public class MongoDB {
 
     @KevoreeInject

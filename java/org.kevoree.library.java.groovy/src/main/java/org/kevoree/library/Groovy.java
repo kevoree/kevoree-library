@@ -11,7 +11,7 @@ import org.kevoree.api.Port;
  *
  * Created by mleduc on 17/11/15.
  */
-@ComponentType
+@ComponentType(version = 1)
 public class Groovy {
 
     @Output

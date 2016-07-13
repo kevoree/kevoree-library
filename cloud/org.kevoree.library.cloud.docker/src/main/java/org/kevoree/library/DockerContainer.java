@@ -30,7 +30,7 @@ import static com.spotify.docker.client.DockerClient.AttachParameter;
  *
  * Created by leiko on 16/10/15.
  */
-@ComponentType(description = "Runs a Docker container based on provided <strong>image</strong> name and the set of " +
+@ComponentType(version = 1, description = "Runs a Docker container based on provided <strong>image</strong> name and the set of " +
         "options in the attributes: <strong>cmd</strong>, <strong>ports</strong>, <strong>removeOnClose</strong> " +
         "etc." +
         "<br/><br/>Most of the \"multivalued\" attributes can specify several values by using " +

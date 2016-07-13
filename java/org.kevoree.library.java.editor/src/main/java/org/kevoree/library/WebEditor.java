@@ -23,7 +23,7 @@ import java.util.ServiceLoader;
  * Date: 25/11/13
  * Time: 12:37
  */
-@ComponentType
+@ComponentType(version = 1)
 public class WebEditor {
 
     @Param(optional = false, defaultValue = "3042")

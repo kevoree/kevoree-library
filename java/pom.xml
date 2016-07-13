@@ -37,6 +37,11 @@
         <module>org.kevoree.library.java.redischan</module>
         <module>org.kevoree.library.java.imagga</module>
         <module>org.kevoree.library.java.gstreamer</module>
+        <module>org.kevoree.library.java.gameoflife</module>
+        <module>org.kevoree.library.java.kevscript</module>
+        <module>org.kevoree.library.java.mongodb</module>
+        <module>org.kevoree.library.java.xmpp</module>
+        
     </modules>
 
     <dependencies>

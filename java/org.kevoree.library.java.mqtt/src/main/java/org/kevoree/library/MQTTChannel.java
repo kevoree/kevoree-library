@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 /**
  * Created by leiko on 6/3/14.
  */
-@ChannelType
+@ChannelType(version = 1)
 public class MQTTChannel implements ChannelDispatch, Listener {
 
     private static final String KEVOREE_PREFIX = "kev/";

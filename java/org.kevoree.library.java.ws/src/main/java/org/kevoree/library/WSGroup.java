@@ -50,7 +50,7 @@ import static org.kevoree.api.protocol.Protocol.*;
  * Time: 12:07
  */
 
-@GroupType(description = "This group uses <strong>WebSockets</strong> to propagate models over the connected nodes."+
+@GroupType(version=1, description = "This group uses <strong>WebSockets</strong> to propagate models over the connected nodes."+
         "<br/>If the attribute <strong>master</strong> is specified (using the instance "+
         "name of one of the connected nodes) then a WebSocket server will be listening "+
         "on that node using the <strong>port</strong> attribute specified in the fragment "+

@@ -19,7 +19,7 @@ import org.kevoree.log.Log;
  * Date: 02/12/2013
  * Time: 15:10
  */
-@ComponentType(version="5.3.33-SNAPSHOT")
+@ComponentType(version=1)
 public class Ticker implements Runnable {
 
     @KevoreeInject

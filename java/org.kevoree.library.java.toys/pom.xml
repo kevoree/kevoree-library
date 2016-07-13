@@ -41,25 +41,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                  <groupId>org.kevoree.tools</groupId>
-                  <artifactId>org.kevoree.tools.mavenplugin</artifactId>
-                  <version>${kevoree.version}</version>
-                  <extensions>true</extensions>
-                  <executions>
-                      <execution>
-                          <goals>
-                              <goal>generate</goal>
-                              <goal>deploy</goal>
-                          </goals>
-                      </execution>
-                  </executions>
-                  <configuration>
-                      <registry>${publish.registry.url}</registry>
-                      <login>${publish.registry.login}</login>
-                      <password>${publish.registry.password}</password>
-                  </configuration>
-              </plugin>
         </plugins>
     </build>
 

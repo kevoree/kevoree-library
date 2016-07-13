@@ -25,7 +25,7 @@ import java.util.HashMap;
  * Date: 04/12/2013
  * Time: 18:43
  */
-@ComponentType
+@ComponentType(version = 1)
 public class HAProxy implements ModelListener {
 
     @Param

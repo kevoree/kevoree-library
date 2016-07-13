@@ -12,7 +12,7 @@ import org.kevoree.annotation.Param;
  * Time: 10:50
  */
 
-@ComponentType
+@ComponentType(version=1)
 public class HelloJava {
 
     @Param

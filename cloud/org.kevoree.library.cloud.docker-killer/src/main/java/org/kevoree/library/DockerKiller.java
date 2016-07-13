@@ -13,7 +13,7 @@ import java.util.Optional;
 /**
  * Created by mleduc on 11/01/16.
  */
-@ComponentType(description = "Randomly kill a container when a input is done. A container can be kill only is one of its environment " +
+@ComponentType(version = 1, description = "Randomly kill a container when a input is done. A container can be kill only is one of its environment " +
         "variable match the key and value defined in the dictionary.")
 public class DockerKiller {
 

@@ -18,7 +18,7 @@ import org.kevoree.api.CallbackResult;
 import org.kevoree.library.data.StreamDoubleValue;
 import org.kevoree.log.Log;
 
-@ComponentType
+@ComponentType(version = 1)
 public class EsperMonitor implements UpdateListener {
 
     @Param(defaultValue = "select * from StreamDoubleValue(portId='input1').win:length(2) having avg(value) > 6.0")

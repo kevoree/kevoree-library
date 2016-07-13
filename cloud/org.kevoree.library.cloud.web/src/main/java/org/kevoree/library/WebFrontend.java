@@ -15,7 +15,7 @@ import java.nio.charset.Charset;
  * Date: 09/07/13
  * Time: 11:52
  */
-@ComponentType
+@ComponentType(version = 1)
 public class WebFrontend implements HttpHandler {
 
     @Param

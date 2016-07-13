@@ -36,23 +36,6 @@
                     </execution>
                 </executions>
             </plugin>
-<plugin>
-<groupId>org.kevoree.tools</groupId>
-<artifactId>org.kevoree.tools.mavenplugin</artifactId>
-<version>${kevoree.version}</version>
-<extensions>true</extensions>
-<configuration>
-<registry>${publish.registry.url}</registry>
-</configuration>
-<executions>
-<execution>
-<goals>
-<goal>generate</goal>
-<goal>deploy</goal>
-</goals>
-</execution>
-</executions>
-</plugin>
         </plugins>
     </build>
 

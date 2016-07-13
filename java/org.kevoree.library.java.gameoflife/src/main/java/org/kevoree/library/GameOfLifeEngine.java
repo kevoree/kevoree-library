@@ -26,7 +26,7 @@ import org.kevoree.pmodeling.api.ModelCloner;
 /**
  * Created by mleduc on 23/05/16.
  */
-@ComponentType(description = "analyse the model and update it to a new cell generation")
+@ComponentType(version = 1, description = "analyse the model and update it to a new cell generation")
 public class GameOfLifeEngine {
 
 	@KevoreeInject

@@ -12,7 +12,7 @@ import org.kevoree.factory.KevoreeFactory;
 import org.kevoree.log.Log;
 import org.kevoree.pmodeling.api.ModelCloner;
 
-@ComponentType(description = "Execute the defined kevscript when the trigger is called. You can use {name} to generate a unique identifier. For example \"add node0.{compname}: Ticker\" will add a Ticker to node0 with a random name.")
+@ComponentType(version = 1, description = "Execute the defined kevscript when the trigger is called. You can use {name} to generate a unique identifier. For example \"add node0.{compname}: Ticker\" will add a Ticker to node0 with a random name.")
 public class KevScript {
 
 	@Param(optional = false)

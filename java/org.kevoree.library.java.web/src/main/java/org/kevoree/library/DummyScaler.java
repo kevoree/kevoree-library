@@ -20,7 +20,7 @@ import java.util.Random;
 /**
  * Created by duke on 05/12/2013.
  */
-@ComponentType
+@ComponentType(version = 1)
 public class DummyScaler implements Runnable {
 
     private Thread current = null;

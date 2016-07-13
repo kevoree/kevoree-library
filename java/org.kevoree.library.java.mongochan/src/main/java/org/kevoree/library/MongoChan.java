@@ -54,7 +54,7 @@ import static java.util.Arrays.asList;
 /**
  * Created by mleduc on 25/11/15.
  */
-@org.kevoree.annotation.ChannelType
+@org.kevoree.annotation.ChannelType(version = 1)
 public class MongoChan implements ChannelDispatch {
 
     @Param(defaultValue = "localhost", optional = false)

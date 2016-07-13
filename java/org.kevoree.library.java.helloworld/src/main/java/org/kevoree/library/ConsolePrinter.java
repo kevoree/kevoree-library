@@ -8,7 +8,7 @@ import org.kevoree.api.Context;
 /**
  * Created by duke on 05/12/2013.
  */
-@ComponentType
+@ComponentType(version=1)
 public class ConsolePrinter {
 
     @KevoreeInject

@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by duke on 6/3/14.
  */
-@GroupType
+@GroupType(version = 1)
 public class MQTTGroup implements ModelListener, Listener {
 
     @KevoreeInject

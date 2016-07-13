@@ -13,7 +13,7 @@ import java.io.IOException;
 /**
  * Created by mleduc on 18/11/15.
  */
-@ComponentType(description = "Return a list of tags from an image")
+@ComponentType(version = 1, description = "Return a list of tags from an image")
 public class Imagga {
 
     @Param(optional = false)

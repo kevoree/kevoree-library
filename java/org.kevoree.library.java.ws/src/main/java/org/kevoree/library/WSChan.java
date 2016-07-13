@@ -12,7 +12,7 @@ import org.kevoree.log.Log;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@ChannelType
+@ChannelType(version=1)
 public class WSChan implements ChannelDispatch {
 
     @KevoreeInject

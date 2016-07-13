@@ -13,7 +13,7 @@ import java.io.IOException;
 /**
  * Created by mleduc on 22/12/15.
  */
-@ComponentType
+@ComponentType(version = 1)
 public class GStreamer {
     @Output
     private Port out;

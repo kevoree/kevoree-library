@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * Created by duke on 6/17/14.
  */
-@ComponentType
+@ComponentType(version = 1)
 public class MQTTServer {
 
     ExServer server;

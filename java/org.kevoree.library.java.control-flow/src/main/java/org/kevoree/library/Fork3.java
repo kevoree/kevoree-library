@@ -8,7 +8,7 @@ import org.kevoree.api.Port;
 /**
  * Created by mleduc on 19/05/16.
  */
-@ComponentType(description = "Take an input and send it to three outputs")
+@ComponentType(version = 1, description = "Take an input and send it to three outputs")
 public class Fork3 {
 
     @Output

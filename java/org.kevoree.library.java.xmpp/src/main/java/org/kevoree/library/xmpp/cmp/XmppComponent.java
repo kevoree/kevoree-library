@@ -16,8 +16,7 @@ import java.util.Properties;
  * @author gnain
  */
 
-@Library(name="Java :: XMPP")
-@ComponentType
+@ComponentType(version = 1)
 public class XmppComponent {
 
     private ConnectionManager client;

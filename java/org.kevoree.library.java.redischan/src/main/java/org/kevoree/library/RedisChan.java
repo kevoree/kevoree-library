@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 /**
  * Created by mleduc on 02/12/15.
  */
-@ChannelType
+@ChannelType(version = 1)
 public class RedisChan implements ChannelDispatch {
     @Param(defaultValue = "localhost", optional = false)
     private String host;

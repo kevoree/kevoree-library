@@ -22,7 +22,7 @@ import java.util.concurrent.Future;
  * Created by duke on 8/26/14.
  */
 
-@ComponentType
+@ComponentType(version = 1)
 public class RestServer {
 
     public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";

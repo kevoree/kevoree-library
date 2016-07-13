@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by mleduc on 16/11/15.
  */
-@ComponentType
+@ComponentType(version = 1)
 public class FacebookStreamClient {
 
     @Output
