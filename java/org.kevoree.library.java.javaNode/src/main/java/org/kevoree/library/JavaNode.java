@@ -76,18 +76,11 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     @Param(optional = true, defaultValue = "INFO")
     public String log;
 
-    @Param(optional = true, defaultValue = "INFO")
-    public String lol;
-
-
     /**
      * java VM properties used when this node is hosted by a parent node (parent can be also the watchdog)
      */
     @Param(optional = true)
     public String jvmArgs;
-
-//    @Param
-//    public String test;
 
     protected WrapperFactory wrapperFactory = null;
 
