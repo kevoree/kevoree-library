@@ -12,6 +12,7 @@
         <kotlin.version>0.8.11</kotlin.version>
         <kevoree.version>5.3.3-SNAPSHOT</kevoree.version>
         <publish.registry.url>http://registry.kevoree.org</publish.registry.url>
+        <publish.registry.namespace>kevoree</publish.registry.namespace>
     </properties>
 
     <organization>
@@ -207,6 +208,7 @@
 					<registry>${publish.registry.url}</registry>
 					<login>${publish.registry.login}</login>
 					<password>${publish.registry.password}</password>
+          <namespace>${publish.registry.namespace}</namespace>
 				</configuration>
 			</plugin>
 
