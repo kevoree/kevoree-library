@@ -1,17 +1,28 @@
 package org.kevoree.library;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
+import java.net.URISyntaxException;
+
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.hawtbuf.UTF8Buffer;
-import org.fusesource.mqtt.client.*;
-import org.kevoree.annotation.*;
+import org.fusesource.mqtt.client.Callback;
+import org.fusesource.mqtt.client.CallbackConnection;
+import org.fusesource.mqtt.client.Listener;
+import org.fusesource.mqtt.client.MQTT;
+import org.fusesource.mqtt.client.QoS;
+import org.fusesource.mqtt.client.Topic;
+import org.kevoree.annotation.ComponentType;
+import org.kevoree.annotation.KevoreeInject;
+import org.kevoree.annotation.Output;
+import org.kevoree.annotation.Param;
+import org.kevoree.annotation.Start;
+import org.kevoree.annotation.Stop;
+import org.kevoree.annotation.Update;
 import org.kevoree.api.Context;
 import org.kevoree.api.Port;
 import org.kevoree.library.mqtt.message.Message;
 import org.kevoree.log.Log;
 
-import java.net.URISyntaxException;
+import com.google.gson.Gson;
 
 /**
  *

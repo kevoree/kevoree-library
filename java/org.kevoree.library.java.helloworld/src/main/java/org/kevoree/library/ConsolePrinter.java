@@ -8,15 +8,15 @@ import org.kevoree.api.Context;
 /**
  * Created by duke on 05/12/2013.
  */
-@ComponentType(version=1)
+@ComponentType(version = 1, description = "Prints incoming message to the console stdout")
 public class ConsolePrinter {
 
-    @KevoreeInject
-    Context context;
+	@KevoreeInject
+	Context context;
 
-    @Input
-    public void input(Object msg) {
-        System.out.println(context.getInstanceName()+">"+msg);
-    }
+	@Input
+	public void input(Object msg) {
+		System.out.println(context.getInstanceName() + ">" + msg);
+	}
 
 }

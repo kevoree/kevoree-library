@@ -14,64 +14,62 @@ import org.kevoree.api.ModelService;
 import org.kevoree.log.Log;
 
 /**
- * Created with IntelliJ IDEA.
- * User: duke
- * Date: 02/12/2013
- * Time: 15:10
+ * Created with IntelliJ IDEA. User: duke Date: 02/12/2013 Time: 15:10
  */
-@ComponentType(version=1)
+@ComponentType(version = 1, description = "A Kevoree component that sends a 'tick' message at user-defined intervals")
 public class Ticker implements Runnable {
 
-    @KevoreeInject
-    private ModelService modelService;
+	@KevoreeInject
+	private ModelService modelService;
 
-    private boolean running;
-    private Random rand = new Random();
+	private boolean running;
+	private Random rand = new Random();
 
-    @Param(defaultValue = "3000")
-    private long period = 3000l;
+	@Param(defaultValue = "3000", optional = true)
+	private long period = 3000l;
 
-    @Output
-    org.kevoree.api.Port tick;
+	@Output
+	org.kevoree.api.Port tick;
 
-    @Param(defaultValue = "false")
-    private boolean random = false;
+	@Param(defaultValue = "false", optional = true)
+	private boolean random = false;
 
-    @Start
-    public void start() {
-        Thread t = new Thread(this);
-        running = true;
-        t.start();
-    }
+	@Start
+	public void start() {
+		Thread t = new Thread(this);
+		running = true;
+		t.start();
+	}
 
-    @Stop
-    public void stop() {
-        running = false;
-    }
+	@Stop
+	public void stop() {
+		running = false;
+	}
 
-    @Override
-    public void run() {
-        while (running) {
-            try {
-                Thread.sleep(period);
-                String value = System.currentTimeMillis() + "";
-                if (random) {
-                    value = rand.nextInt(100) + "";
-                }
-                tick.send(value, new Callback() {
-                    @Override
-                    public void onSuccess(CallbackResult result) {
-                        if (result != null) {
-                            Log.debug("ticker return : " +  result.getPayload());
-                        }
-                    }
+	@Override
+	public void run() {
+		while (running) {
+			try {
+				Thread.sleep(period);
+				String value = System.currentTimeMillis() + "";
+				if (random) {
+					value = rand.nextInt(100) + "";
+				}
+				tick.send(value, new Callback() {
+					@Override
+					public void onSuccess(CallbackResult result) {
+						if (result != null) {
+							Log.debug("ticker return : " + result.getPayload());
+						}
+					}
 
-                    @Override
-                    public void onError(Throwable exception) {
-                        Log.warn(exception.getMessage());
-                    }
-                });
-            } catch (InterruptedException e) { /* ignore */ }
-        }
-    }
+					@Override
+					public void onError(Throwable exception) {
+						Log.warn(exception.getMessage());
+					}
+				});
+			} catch (InterruptedException e) {
+				/* ignore */ }
+		}
+	}
 }
