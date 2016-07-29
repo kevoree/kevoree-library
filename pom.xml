@@ -11,8 +11,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>0.8.11</kotlin.version>
         <kevoree.version>5.3.3-SNAPSHOT</kevoree.version>
-        <publish.registry.url>http://registry.kevoree.org</publish.registry.url>
-        <publish.registry.namespace>kevoree</publish.registry.namespace>
+        <kevoree.registry.url>http://localhost:8080</kevoree.registry.url>
+        <kevoree.registry.namespace>kevoree</kevoree.registry.namespace>
     </properties>
 
     <organization>
@@ -139,6 +139,30 @@
     </pluginRepositories>
 
     <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+                <groupId>org.kevoree.tools</groupId>
+                <artifactId>org.kevoree.tools.mavenplugin</artifactId>
+                <version>${kevoree.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <registry>${kevoree.registry.url}</registry>
+                    <namespace>${kevoree.registry.namespace}</namespace>
+                    <login>${kevoree.registry.login}</login>
+                    <password>${kevoree.registry.password}</password>
+                </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -191,27 +215,6 @@
                     <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
             </plugin>
-            <plugin>
-				<groupId>org.kevoree.tools</groupId>
-				<artifactId>org.kevoree.tools.mavenplugin</artifactId>
-				<version>${kevoree.version}</version>
-				<extensions>true</extensions>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate</goal>
-							<goal>deploy</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<registry>${publish.registry.url}</registry>
-					<login>${publish.registry.login}</login>
-					<password>${publish.registry.password}</password>
-          <namespace>${publish.registry.namespace}</namespace>
-				</configuration>
-			</plugin>
-
         </plugins>
     </build>
 

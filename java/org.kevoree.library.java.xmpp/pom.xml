@@ -3,7 +3,6 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.java.xmpp</artifactId>
-    <version>3.5.2</version>
     <name>Kevoree :: Library :: Java :: XMPP</name>
 
     <parent>
@@ -12,39 +11,6 @@
         <version>5.3.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>1.4</version>
-                <configuration>
-                    <verbose>false</verbose>
-                    <addSvnKeyWords>true</addSvnKeyWords>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>first</id>
-                        <goals>
-                            <goal>update-file-header</goal>
-                        </goals>
-                        <phase>process-sources</phase>
-                        <configuration>
-                            <licenseName>lgpl_v3</licenseName>
-                            <organizationName>org.kevoree</organizationName>
-                            <inceptionYear>2013</inceptionYear>
-                            <includes>
-                                <include>*.java</include>
-                                <include>*.kt</include>
-                                <include>*.scala</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
     <dependencies>
         <dependency>
@@ -71,5 +37,14 @@
             <version>3.2.1</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+          <plugin>
+              <groupId>org.kevoree.tools</groupId>
+              <artifactId>org.kevoree.tools.mavenplugin</artifactId>
+          </plugin>
+        </plugins>
+    </build>
 
 </project>

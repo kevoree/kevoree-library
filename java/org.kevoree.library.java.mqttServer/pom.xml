@@ -78,6 +78,15 @@
 
     </dependencies>
 
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.kevoree.tools</groupId>
+          <artifactId>org.kevoree.tools.mavenplugin</artifactId>
+        </plugin>
+      </plugins>
+    </build>
+
     <repositories>
         <repository>
             <id>bintray</id>
@@ -92,4 +101,3 @@
     </repositories>
 
 </project>
-

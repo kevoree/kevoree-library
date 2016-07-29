@@ -14,7 +14,7 @@
     </parent>
 
     <modules>
-        <module>org.kevoree.library.cloud.api</module>
+        <!-- <module>org.kevoree.library.cloud.api</module> -->
         <!--<module>org.kevoree.library.cloud.web</module>-->
         <module>org.kevoree.library.cloud.docker</module>
         <module>org.kevoree.library.cloud.docker-killer</module>

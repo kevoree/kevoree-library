@@ -1,8 +1,8 @@
 add node0: JavaNode
 add node0.ticker: Ticker
 add node0.printer: ConsolePrinter
+add chan: RemoteWSChan
 add sync: WSGroup
-add chan: SyncBroadcast
 
 attach node0 sync
 
@@ -11,3 +11,6 @@ bind node0.printer.input chan
 
 set sync.master = 'node0'
 set node0.log = 'DEBUG'
+
+set chan.host = 'ws.kevoree.org'
+set chan.uuid = '42aAbBcC42'

@@ -10,7 +10,7 @@
         <version>5.3.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    
+
     <dependencies>
     	<dependency>
             <groupId>org.kevoree</groupId>
@@ -18,8 +18,8 @@
             <version>${kevoree.version}</version>
         </dependency>
     </dependencies>
-    
-    
+
+
     <build>
         <plugins>
             <plugin>
@@ -30,6 +30,10 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+              <groupId>org.kevoree.tools</groupId>
+              <artifactId>org.kevoree.tools.mavenplugin</artifactId>
             </plugin>
         </plugins>
     </build>

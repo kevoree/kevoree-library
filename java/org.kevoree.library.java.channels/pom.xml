@@ -12,4 +12,13 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.kevoree.tools</groupId>
+          <artifactId>org.kevoree.tools.mavenplugin</artifactId>
+        </plugin>
+      </plugins>
+    </build>
+    
 </project>

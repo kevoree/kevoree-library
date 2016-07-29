@@ -36,8 +36,13 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <plugin>
+              <groupId>org.kevoree.tools</groupId>
+              <artifactId>org.kevoree.tools.mavenplugin</artifactId>
+            </plugin>
         </plugins>
     </build>
+
     <repositories>
         <repository>
             <id>maven.java.net</id>
