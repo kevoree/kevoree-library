@@ -7,11 +7,16 @@
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
         <groupId>org.kevoree.library.java</groupId>
-        <version>5.3.3-SNAPSHOT</version>
+        <version>5.4.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <dependencies>
+	    <dependency>
+	    	<groupId>fr.braindead</groupId>
+	    	<artifactId>websocket-client</artifactId>
+	    	<version>1.0.1</version>
+	    </dependency>
         <dependency>
             <groupId>fr.braindead</groupId>
             <artifactId>wsmsgbroker-client</artifactId>

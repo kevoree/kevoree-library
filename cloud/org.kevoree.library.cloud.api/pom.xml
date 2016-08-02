@@ -7,7 +7,7 @@
     <parent>
         <artifactId>org.kevoree.library.cloud.root</artifactId>
         <groupId>org.kevoree.library.cloud</groupId>
-        <version>5.3.3-SNAPSHOT</version>
+        <version>5.4.0-SNAPSHOT</version>
     </parent>
 
     <dependencies>

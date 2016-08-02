@@ -1,33 +1,21 @@
 package org.kevoree.library.java.command;
 
-import org.kevoree.kcl.api.FlexyClassLoader;
-import org.kevoree.library.java.wrapper.KInstanceWrapper;
-import org.kevoree.library.java.ModelRegistry;
-import org.kevoree.Instance;
-import org.kevoree.pmodeling.api.KMFContainer;
-import org.kevoree.api.BootstrapService;
-import org.kevoree.api.PrimitiveCommand;
-import org.kevoree.log.Log;
-import org.kevoree.library.java.wrapper.WrapperFactory;
-import org.kevoree.api.ModelService;
+import org.kevoree.Channel;
 import org.kevoree.ContainerNode;
+import org.kevoree.Instance;
+import org.kevoree.api.BootstrapService;
+import org.kevoree.api.ChannelContext;
+import org.kevoree.api.ModelService;
+import org.kevoree.api.PrimitiveCommand;
+import org.kevoree.kcl.api.FlexyClassLoader;
+import org.kevoree.kcl.api.FlexyClassLoaderFactory;
 import org.kevoree.library.java.KevoreeThreadGroup;
-
-import java.util.List;
-
-/**
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * 	http://www.gnu.org/licenses/lgpl-3.0.txt
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import org.kevoree.library.java.ModelRegistry;
+import org.kevoree.library.java.wrapper.ChannelWrapper;
+import org.kevoree.library.java.wrapper.ChannelWrapperContext;
+import org.kevoree.library.java.wrapper.KInstanceWrapper;
+import org.kevoree.library.java.wrapper.WrapperFactory;
+import org.kevoree.log.Log;
 
 
 /**
@@ -36,8 +24,6 @@ import java.util.List;
  * Date: 26/01/12
  * Time: 17:53
  */
-
-
 public class AddInstance implements PrimitiveCommand, Runnable {
 
     private WrapperFactory wrapperFactory;
@@ -60,13 +46,6 @@ public class AddInstance implements PrimitiveCommand, Runnable {
     }
 
     public boolean execute() {
-        List<KMFContainer> metas = c.getTypeDefinition().select("deployUnits[]/filters[name=platform,value=java]");
-        if (metas.isEmpty()) {
-            Log.error("No DeployUnit found for '" + c.getName() + ": " + c.getTypeDefinition().getName() + "/"
-                    + c.getTypeDefinition().getVersion() + "' that matches the 'java' platform");
-            return false;
-        }
-
         Thread subThread = null;
         try {
             tg = new KevoreeThreadGroup("kev/" + c.path());
@@ -94,22 +73,41 @@ public class AddInstance implements PrimitiveCommand, Runnable {
 
     public void run() {
         try {
-            FlexyClassLoader newKCL = ClassLoaderHelper.createInstanceClassLoader(c, nodeName, bs);
-            Thread.currentThread().setContextClassLoader(newKCL);
-            Thread.currentThread().setName("KevoreeAddInstance" + c.getName());
-            KInstanceWrapper newBeanKInstanceWrapper;
+            FlexyClassLoader fcl = FlexyClassLoaderFactory.INSTANCE.create();
+            fcl.setKey(c.path());
+
+            FlexyClassLoader tdefClassLoader = bs.get(c.getTypeDefinition().path());
+            if (tdefClassLoader == null) {
+                tdefClassLoader = bs.installTypeDefinition(c);
+            }
+
+            fcl.attachChild(tdefClassLoader);
+
+            Thread.currentThread().setContextClassLoader(fcl);
+            Thread.currentThread().setName("KevoreeInstance_" + c.path());
+
+            KInstanceWrapper instanceWrapper;
             if (c instanceof ContainerNode) {
-                newBeanKInstanceWrapper = wrapperFactory.wrap(c, this/* nodeInstance is useless because launched as external process */, tg, bs, modelService);
-                newBeanKInstanceWrapper.setKcl(newKCL);
-                registry.register(c, newBeanKInstanceWrapper);
+                instanceWrapper = wrapperFactory.wrap(c, this/* nodeInstance is useless because launched as external process */, tg, bs, modelService);
+                instanceWrapper.setKcl(fcl);
+            } else if (c instanceof Channel) {
+                ContainerNode platformNode = modelService.getPendingModel().findNodesByID(nodeName);
+                ChannelWrapperContext ctx = new ChannelWrapperContext(c.path(), platformNode.path(), modelService);
+                bs.registerService(ChannelContext.class, ctx);
+                Object newBeanInstance = bs.createInstance(c, fcl);
+                bs.unregisterService(ChannelContext.class);
+                instanceWrapper = wrapperFactory.wrap(c, newBeanInstance, tg, bs, modelService);
+                ((ChannelWrapper) instanceWrapper).setContext(ctx);
+                instanceWrapper.setKcl(fcl);
+                bs.injectDictionary(c, newBeanInstance, true);
             } else {
-                Object newBeanInstance = bs.createInstance(c, newKCL);
-                newBeanKInstanceWrapper = wrapperFactory.wrap(c, newBeanInstance, tg, bs, modelService);
-                newBeanKInstanceWrapper.setKcl(newKCL);
-                registry.register(c, newBeanKInstanceWrapper);
+                Object newBeanInstance = bs.createInstance(c, fcl);
+                instanceWrapper = wrapperFactory.wrap(c, newBeanInstance, tg, bs, modelService);
+                instanceWrapper.setKcl(fcl);
                 bs.injectDictionary(c, newBeanInstance, true);
             }
-            newBeanKInstanceWrapper.create();
+            registry.register(c, instanceWrapper);
+            instanceWrapper.create();
             resultSub = true;
             Thread.currentThread().setContextClassLoader(null);
             Log.info("Add instance {}", c.path());

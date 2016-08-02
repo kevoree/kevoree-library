@@ -1,24 +1,34 @@
 package org.kevoree.library.java.wrapper;
 
-import org.kevoree.ContainerRoot;
 import org.kevoree.Instance;
+import org.kevoree.annotation.Start;
+import org.kevoree.annotation.Stop;
+import org.kevoree.annotation.Update;
 import org.kevoree.api.BootstrapService;
 import org.kevoree.api.ModelService;
-import org.kevoree.library.java.reflect.FieldAnnotationResolver;
-import org.kevoree.library.java.reflect.MethodAnnotationResolver;
-import org.kevoree.pmodeling.api.KMFContainer;
+import org.kevoree.api.helper.ReflectUtils;
+import org.kevoree.log.Log;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
- * Created by duke on 9/26/14.
+ *
+ *
  */
 public abstract class KInstanceWrapper {
 
+    private String nodeName;
+    private Instance modelElement;
     private ThreadGroup tg;
     private Boolean isStarted;
     private BootstrapService bs;
     private ClassLoader kcl;
-    private MethodAnnotationResolver resolver;
     private Object targetObj;
+    private ModelService modelService;
+    protected Method startMethod;
+    protected Method stopMethod;
+    protected Method updateMethod;
 
     public ModelService getModelService() {
         return modelService;
@@ -28,18 +38,6 @@ public abstract class KInstanceWrapper {
         this.modelService = modelService;
     }
 
-    private ModelService modelService;
-
-    public FieldAnnotationResolver getFieldResolver() {
-        return fieldResolver;
-    }
-
-    public void setFieldResolver(FieldAnnotationResolver fieldResolver) {
-        this.fieldResolver = fieldResolver;
-    }
-
-    private FieldAnnotationResolver fieldResolver;
-
     public String getNodeName() {
         return nodeName;
     }
@@ -47,8 +45,6 @@ public abstract class KInstanceWrapper {
     public void setNodeName(String nodeName) {
         this.nodeName = nodeName;
     }
-
-    private String nodeName;
 
     public Instance getModelElement() {
         return modelElement;
@@ -58,24 +54,15 @@ public abstract class KInstanceWrapper {
         this.modelElement = modelElement;
     }
 
-    private Instance modelElement;
-
     public Object getTargetObj() {
         return targetObj;
     }
 
     public void setTargetObj(Object targetObj) {
         this.targetObj = targetObj;
-        setResolver(new MethodAnnotationResolver(targetObj.getClass()));
-        setFieldResolver(new FieldAnnotationResolver(targetObj.getClass()));
-    }
-
-    public MethodAnnotationResolver getResolver() {
-        return resolver;
-    }
-
-    public void setResolver(MethodAnnotationResolver resolver) {
-        this.resolver = resolver;
+        this.startMethod = ReflectUtils.findMethodWithAnnotation(targetObj.getClass(), Start.class);
+        this.stopMethod = ReflectUtils.findMethodWithAnnotation(targetObj.getClass(), Stop.class);
+        this.updateMethod = ReflectUtils.findMethodWithAnnotation(targetObj.getClass(), Update.class);
     }
 
     public ClassLoader getKcl() {
@@ -94,11 +81,11 @@ public abstract class KInstanceWrapper {
         this.bs = bs;
     }
 
-    public Boolean getIsStarted() {
+    public Boolean isStarted() {
         return isStarted;
     }
 
-    public void setIsStarted(Boolean isStarted) {
+    public void setStarted(Boolean isStarted) {
         this.isStarted = isStarted;
     }
 
@@ -110,12 +97,61 @@ public abstract class KInstanceWrapper {
         this.tg = tg;
     }
 
-    public abstract boolean kInstanceStart(ContainerRoot model) throws Exception;
+    public void startInstance() throws InvocationTargetException {
+        if (!isStarted()) {
+            if (startMethod != null) {
+                invoke(startMethod, true);
+            } else {
+                setStarted(true);
+                Log.debug("Instance {} has no @Start method", modelElement.path());
+            }
+        } else {
+            Log.debug("Instance {} is already started", modelElement.path());
+        }
+    }
 
-    public abstract boolean kInstanceStop(ContainerRoot model) throws Exception;
+    public void stopInstance() throws InvocationTargetException {
+        if (isStarted()) {
+            if (stopMethod != null) {
+                invoke(stopMethod, true);
+            } else {
+                setStarted(false);
+                Log.debug("Instance {} has no @Stop method", modelElement.path());
+            }
+        } else {
+            Log.debug("Instance {} is already stopped", modelElement.path());
+        }
+    }
 
-    public abstract void create() throws Exception;
+    public void updateInstance() throws InvocationTargetException {
+        if (isStarted()) {
+            if (updateMethod != null) {
+                invoke(updateMethod, false);
+            } else {
+                Log.debug("Instance {} has no @Update method", modelElement.path());
+            }
+        } else {
+            Log.debug("Instance {} is not started: won't update", modelElement.path());
+        }
+    }
 
-    public abstract void destroy() throws Exception;
+    public void create() throws Exception {}
 
+    public void destroy() throws Exception {}
+
+    private void invoke(Method method, boolean updateState) throws InvocationTargetException {
+        method.setAccessible(true);
+
+        try {
+            startMethod.invoke(targetObj);
+            if (updateState) {
+                setStarted(true);
+            }
+        } catch (IllegalAccessException e) {
+            if (updateState) {
+                setStarted(false);
+            }
+            Log.error("Unable to access " + modelElement.path() + " method " + method.getName() + "()");
+        }
+    }
 }

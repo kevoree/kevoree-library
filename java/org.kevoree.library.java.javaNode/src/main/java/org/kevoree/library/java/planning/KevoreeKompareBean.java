@@ -16,26 +16,25 @@ import org.kevoree.pmodeling.api.util.ModelVisitor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 /**
+ *
  * Created by duke on 9/26/14.
  */
 public class KevoreeKompareBean extends KevoreeScheduler {
+
+    private KevoreeFactory adaptationModelFactory = new DefaultKevoreeFactory();
+    private ModelCompare modelCompare = adaptationModelFactory.createModelCompare();
+    private ModelRegistry modelRegistry;
 
     public KevoreeKompareBean(ModelRegistry modelRegistry) {
         this.modelRegistry = modelRegistry;
     }
 
-    private ModelRegistry modelRegistry;
-
-    KevoreeFactory adaptationModelFactory = new DefaultKevoreeFactory();
-    ModelCompare modelCompare = adaptationModelFactory.createModelCompare();
-
     public AdaptationModel plan(ContainerRoot actualModel, ContainerRoot targetModel, String nodeName) {
         AdaptationModel adaptationModel = compareModels(actualModel, targetModel, nodeName);
-        return schedule(adaptationModel, nodeName);
+        return schedule(adaptationModel);
     }
 
 
@@ -89,7 +88,7 @@ public class KevoreeKompareBean extends KevoreeScheduler {
 
     }
 
-    public void processTrace(ModelTrace trace, AdaptationModel adaptationModel) {
+    public void processTrace(ModelTrace trace) {
         if (Log.TRACE) {
             Log.trace(trace.toString());
         }
@@ -188,10 +187,13 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                             || trace.getRefName().equals("hosts")) {
                         if (trace.getSrcPath().equals(targetNode.path())) {
                             if (trace instanceof ModelAddTrace) {
-                                KMFContainer elemToAdd = targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
-                                TupleObjPrim addTuple = new TupleObjPrim(elemToAdd, AdaptationType.AddInstance);
+                                Instance instance = (Instance) targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
+                                // add and link deployUnit
+                                addDeployUnit(adaptationModel, elementAlreadyProcessed, instance);
+
+                                TupleObjPrim addTuple = new TupleObjPrim(instance, AdaptationType.AddInstance);
                                 if (!elementAlreadyProcessed.containsKey(addTuple.getKey())) {
-                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, elemToAdd));
+                                    adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, instance));
                                     elementAlreadyProcessed.put(addTuple.getKey(), addTuple);
                                 }
                             }
@@ -209,7 +211,9 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                                 Channel channel = binding.getHub();
                                 if (!isVirtual(channel.getTypeDefinition())) {
                                     adaptationModel.getAdaptations().add(adapt(AdaptationType.AddBinding, binding));
+
                                     if (channel != null && modelRegistry.lookup(channel) == null) {
+                                        addDeployUnit(adaptationModel, elementAlreadyProcessed, channel);
                                         TupleObjPrim newTuple = new TupleObjPrim(channel, AdaptationType.AddInstance);
                                         if (!elementAlreadyProcessed.containsKey(newTuple.getKey())) {
                                             adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, channel));
@@ -340,6 +344,7 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                                             adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveInstance, currentModelElement));
                                             elementAlreadyProcessed.put(removeTuple.getKey(), removeTuple);
                                         }
+                                        addDeployUnit(adaptationModel, elementAlreadyProcessed, targetModelElement);
                                         TupleObjPrim addTuple = new TupleObjPrim(targetModelElement, AdaptationType.AddInstance);
                                         if (!elementAlreadyProcessed.containsKey(addTuple.getKey())) {
                                             adaptationModel.getAdaptations().add(adapt(AdaptationType.AddInstance, targetModelElement));
@@ -413,10 +418,11 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                             }
                         }
                     }
-                    processTrace(trace, adaptationModel);
+                    processTrace(trace);
                 }
             }
         }
+
         final HashSet<String> foundDeployUnitsToRemove = new HashSet<String>();
         if (currentNode != null) {
             currentNode.visit(new ModelVisitor() {
@@ -434,30 +440,52 @@ public class KevoreeKompareBean extends KevoreeScheduler {
             }, true, true, true);
         }
         if (targetNode != null) {
-            targetNode.visit(new ModelVisitor() {
-                public void visit(KMFContainer elem, String refNameInParent, KMFContainer parent) {
-                    if (elem instanceof DeployUnit) {
-                        DeployUnit elemDU = (DeployUnit) elem;
-                        if (elemDU.findFiltersByID("platform") == null || elemDU.findFiltersByID("platform").getValue().equals("java")) {
-                            if (modelRegistry.lookup(elem) == null) {
-                                adaptationModel.getAdaptations().add(adapt(AdaptationType.AddDeployUnit, elem));
-                                adaptationModel.getAdaptations().add(adapt(AdaptationType.LinkDeployUnit, elem));
-                            }
-                            foundDeployUnitsToRemove.remove(elem.path());
-                        }
-                    }
-                    //optimization purpose
-                    if ((elem instanceof ContainerNode && elem != currentNode)) {
-                        noChildrenVisit();
-                        noReferencesVisit();
-                    }
-                }
-            }, true, true, true);
+//            targetNode.visit(new ModelVisitor() {
+//                public void visit(KMFContainer elem, String refNameInParent, KMFContainer parent) {
+//                    if (elem instanceof DeployUnit) {
+//                        DeployUnit elemDU = (DeployUnit) elem;
+//                        if (elemDU.findFiltersByID("platform") == null || elemDU.findFiltersByID("platform").getValue().equals("java")) {
+//                            if (modelRegistry.lookup(elem) == null) {
+//                                adaptationModel.getAdaptations().add(adapt(AdaptationType.AddDeployUnit, elem));
+//                                adaptationModel.getAdaptations().add(adapt(AdaptationType.LinkDeployUnit, elem));
+//                            }
+//                            foundDeployUnitsToRemove.remove(elem.path());
+//                        }
+//                    }
+//                    //optimization purpose
+//                    if ((elem instanceof ContainerNode && elem != currentNode)) {
+//                        noChildrenVisit();
+//                        noReferencesVisit();
+//                    }
+//                }
+//            }, true, true, true);
         }
-        for (String pathDeployUnitToDrop : foundDeployUnitsToRemove) {
-            adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveDeployUnit, currentModel.findByPath(pathDeployUnitToDrop)));
-        }
+//        for (String pathDeployUnitToDrop : foundDeployUnitsToRemove) {
+//            adaptationModel.getAdaptations().add(adapt(AdaptationType.RemoveDeployUnit, currentModel.findByPath(pathDeployUnitToDrop)));
+//        }
         return adaptationModel;
+    }
+
+    private void addDeployUnit(AdaptationModel adaptationModel, HashMap<String, TupleObjPrim> elementAlreadyProcessed, Instance instance) {
+        DeployUnit du = validateDeployUnit(instance);
+        TupleObjPrim addDuTuple = new TupleObjPrim(du, AdaptationType.AddDeployUnit);
+        if (!elementAlreadyProcessed.containsKey(addDuTuple.getKey())) {
+            adaptationModel.getAdaptations().add(adapt(AdaptationType.AddDeployUnit, new Object[] { instance, du }));
+            elementAlreadyProcessed.put(addDuTuple.getKey(), addDuTuple);
+        }
+    }
+
+    private DeployUnit validateDeployUnit(Instance instance) {
+        List<KMFContainer> metas = instance.getTypeDefinition().select("deployUnits[]/filters[name=platform,value=java]");
+        if (metas.size() > 0) {
+            if (metas.size() == 1) {
+                return (DeployUnit) metas.get(0).eContainer();
+            } else {
+                throw new RuntimeException("More than 1 DeployUnit found for " + instance.path() + " and platform=java (must only be one)");
+            }
+        } else {
+            throw new RuntimeException("No DeployUnit found for " + instance.path() + " and platform=java");
+        }
     }
 
     private void removePortBindings(AdaptationModel adaptationModel, HashMap<String, TupleObjPrim> elementAlreadyProcessed, Port port) {

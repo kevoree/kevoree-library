@@ -1,13 +1,19 @@
 package org.kevoree.library;
 
 import fr.braindead.websocket.client.WebSocketClient;
+import io.undertow.Undertow;
+
 import org.kevoree.Channel;
 import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.*;
 import org.kevoree.api.*;
 import org.kevoree.factory.DefaultKevoreeFactory;
+import org.kevoree.kcl.api.FlexyClassLoader;
 import org.kevoree.pmodeling.api.json.JSONModelLoader;
 import org.kevoree.pmodeling.api.json.JSONModelSerializer;
+import org.xnio.OptionMap;
+import org.xnio.Xnio;
+import org.xnio.XnioWorker;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -125,6 +131,11 @@ public class RemoteWSChan implements ChannelDispatch {
 					client.send(s);
 				} else {
 					try {
+						FlexyClassLoader fcl = (FlexyClassLoader) this.getClass().getClassLoader();
+						System.out.println("RemoteWSChan classLoader: " + fcl.getKey());
+						for (FlexyClassLoader cl : fcl.getSubClassLoaders()) {
+							System.out.println("  - " + cl.getKey());
+						}
 						client = new WebSocketClient(URI.create(url + URLEncoder.encode(path, "utf8"))) {
 							@Override
 							public void onOpen() {

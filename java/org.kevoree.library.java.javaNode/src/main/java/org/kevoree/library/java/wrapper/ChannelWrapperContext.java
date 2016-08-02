@@ -30,7 +30,7 @@ public class ChannelWrapperContext implements ChannelContext {
 
     @Override
     public List<Port> getLocalPorts() {
-        return new ArrayList(boundPorts.values());
+        return new ArrayList<Port>(boundPorts.values());
     }
 
     @Deprecated

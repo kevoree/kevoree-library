@@ -6,7 +6,7 @@ import org.kevoree.api.CallbackResult;
 import java.lang.reflect.*;
 
 /**
- * Created by duke on 10/12/2013.
+ *
  */
 public class CallBackCaller {
 

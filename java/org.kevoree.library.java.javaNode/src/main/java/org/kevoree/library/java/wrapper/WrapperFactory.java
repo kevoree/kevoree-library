@@ -34,14 +34,14 @@ public class WrapperFactory {
         if (wrapper != null) {
             wrapper.setModelService(modelService);
             wrapper.setBs(bs);
-            wrapper.setIsStarted(false);
+            wrapper.setStarted(false);
             wrapper.setTg(tg);
             wrapper.setNodeName(nodeName);
             wrapper.setTargetObj(newBeanInstance);
             wrapper.setModelElement((Instance) modelElement);
             return wrapper;
         } else {
-            throw new Exception("Unknow instance type " + modelElement.metaClassName());
+            throw new Exception("Unknown instance type " + modelElement.metaClassName());
         }
     }
 

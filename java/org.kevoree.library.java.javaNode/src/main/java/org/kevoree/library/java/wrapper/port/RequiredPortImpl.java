@@ -1,13 +1,15 @@
 package org.kevoree.library.java.wrapper.port;
 
 import org.kevoree.MBinding;
-import org.kevoree.api.CallbackResult;
-import org.kevoree.library.java.wrapper.ChannelWrapper;
-import org.kevoree.api.Port;
 import org.kevoree.api.Callback;
+import org.kevoree.api.CallbackResult;
+import org.kevoree.api.Port;
+import org.kevoree.library.java.wrapper.ChannelWrapper;
 import org.kevoree.log.Log;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,20 +37,22 @@ public class RequiredPortImpl implements Port {
     }
 
     public void send(String payload, final Callback callback) {
+        Log.debug("Port {} wanna send \"{}\" to:", portPath, payload);
         synchronized (delegate) {
             for (final ChannelWrapper wrapper : delegate.values()) {
+                Log.debug("  -> {}", wrapper.getModelElement().path());
                 wrapper.call(new Callback() {
                     @Override
                     public void onSuccess(CallbackResult result) {
                         result.setOriginChannelPath(wrapper.getContext().getChannelPath());
-                        if(callback != null) {
+                        if (callback != null) {
                             callback.onSuccess(result);
                         }
                     }
 
                     @Override
                     public void onError(Throwable exception) {
-                        if(callback != null) {
+                        if (callback != null) {
                             callback.onError(exception);
                         } else {
                             if(exception != null) {

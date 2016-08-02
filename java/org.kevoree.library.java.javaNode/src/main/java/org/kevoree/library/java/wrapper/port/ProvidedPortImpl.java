@@ -1,11 +1,12 @@
 package org.kevoree.library.java.wrapper.port;
 
+import org.kevoree.annotation.Input;
 import org.kevoree.api.Callback;
 import org.kevoree.api.Port;
+import org.kevoree.api.helper.ReflectUtils;
 import org.kevoree.library.java.wrapper.ComponentWrapper;
 import org.kevoree.log.Log;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,15 +35,15 @@ public class ProvidedPortImpl implements Port {
         this.portPath = portPath;
         this.componentWrapper = componentWrapper;
 
-        targetMethod = MethodResolver.resolve(name, targetObj.getClass());
-        targetMethod.setAccessible(true);
-        if (targetMethod == null) {
-            Log.error("Warning @Input port \"{}\" is not bound", name);
-        } else {
+        targetMethod = ReflectUtils.findMethodWithAnnotation(targetObj.getClass(), Input.class);
+        if (targetMethod != null) {
+            if (!targetMethod.isAccessible()) {
+                targetMethod.setAccessible(true);
+            }
             paramSize = targetMethod.getParameterTypes().length;
+        } else {
+            throw new RuntimeException("Unable to find @Input method for port \""+name+"\" in " + componentWrapper.getModelElement().getName());
         }
-        // var mt = MethodType.methodType(targetMethod!!.getReturnType()!!,targetMethod!!.getParameterTypes()!!)
-        //  methodHandler = MethodHandles.lookup().findVirtual(targetObj.javaClass, name, mt)
     }
 
     public int getConnectedBindingsSize() {
@@ -84,7 +85,7 @@ public class ProvidedPortImpl implements Port {
 
     public void send(String payload, Callback callback) {
         try {
-            if (componentWrapper.getIsStarted()) {
+            if (componentWrapper.isStarted()) {
                 Object result = null;
                 if (paramSize == 0) {
                     //if (methodHandler != null) {

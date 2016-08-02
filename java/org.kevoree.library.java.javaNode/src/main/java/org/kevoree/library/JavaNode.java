@@ -1,40 +1,25 @@
 package org.kevoree.library;
 
-import java.net.SocketException;
-
-import org.kevoree.ContainerRoot;
-import org.kevoree.DeployUnit;
-import org.kevoree.Instance;
-import org.kevoree.MBinding;
-import org.kevoree.Value;
-import org.kevoree.annotation.KevoreeInject;
+import org.kevoree.*;
+import org.kevoree.annotation.*;
 import org.kevoree.annotation.NodeType;
-import org.kevoree.annotation.Param;
-import org.kevoree.annotation.Start;
-import org.kevoree.annotation.Stop;
 import org.kevoree.api.BootstrapService;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
+import org.kevoree.api.PrimitiveCommand;
 import org.kevoree.api.adaptation.AdaptationModel;
 import org.kevoree.api.adaptation.AdaptationPrimitive;
 import org.kevoree.api.adaptation.AdaptationType;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.library.java.ModelRegistry;
-import org.kevoree.library.java.command.AddBindingCommand;
-import org.kevoree.library.java.command.AddDeployUnit;
-import org.kevoree.library.java.command.AddInstance;
-import org.kevoree.library.java.command.LinkDeployUnit;
-import org.kevoree.library.java.command.RemoveBindingCommand;
-import org.kevoree.library.java.command.RemoveDeployUnit;
-import org.kevoree.library.java.command.RemoveInstance;
-import org.kevoree.library.java.command.StartStopInstance;
-import org.kevoree.library.java.command.UpdateCallMethod;
-import org.kevoree.library.java.command.UpdateDictionary;
+import org.kevoree.library.java.command.*;
 import org.kevoree.library.java.network.UDPWrapper;
 import org.kevoree.library.java.planning.KevoreeKompareBean;
 import org.kevoree.library.java.wrapper.WrapperFactory;
 import org.kevoree.log.Log;
+
+import java.net.SocketException;
 
 
 /**
@@ -47,30 +32,39 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     protected ModelRegistry modelRegistry = new ModelRegistry();
 
     @KevoreeInject
-    public ModelService modelService = null;
+    private ModelService modelService = null;
 
     @KevoreeInject
-    public BootstrapService bootstrapService = null;
+    private BootstrapService bootstrapService = null;
 
     @KevoreeInject
-    Context context;
+    private Context context = null;
 
     public void setLog(String log) {
+        boolean changed = false;
         this.log = log;
-        if ("DEBUG".equalsIgnoreCase(log)) {
+        if ("DEBUG".equalsIgnoreCase(log) && !Log.DEBUG) {
             Log.set(Log.LEVEL_DEBUG);
-        } else if ("WARN".equalsIgnoreCase(log)) {
+            changed = true;
+        } else if ("WARN".equalsIgnoreCase(log) && !Log.WARN) {
             Log.set(Log.LEVEL_WARN);
-        } else if ("INFO".equalsIgnoreCase(log)) {
+            changed = true;
+        } else if ("INFO".equalsIgnoreCase(log) && !Log.INFO) {
             Log.set(Log.LEVEL_INFO);
-        } else if ("ERROR".equalsIgnoreCase(log)) {
+            changed = true;
+        } else if ("ERROR".equalsIgnoreCase(log) && !Log.ERROR) {
             Log.set(Log.LEVEL_ERROR);
-        } else if ("TRACE".equalsIgnoreCase(log)) {
+            changed = true;
+        } else if ("TRACE".equalsIgnoreCase(log) && !Log.TRACE) {
             Log.set(Log.LEVEL_TRACE);
+            changed = true;
         } else if ("NONE".equalsIgnoreCase(log)) {
             Log.set(Log.LEVEL_NONE);
+            changed = true;
         }
-        Log.info("JavaNode, changing LOG level to {}", this.log);
+        if (changed) {
+            Log.info("Node platform \"{}\" changing LOG level to {}", this.context.getInstanceName(), this.log);
+        }
     }
 
     @Param(optional = true, defaultValue = "INFO")
@@ -84,12 +78,13 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
 
     protected WrapperFactory wrapperFactory = null;
 
-    UDPWrapper adminSrv;
-    Thread adminReader;
+    private UDPWrapper adminSrv;
+    private Thread adminReader;
+    private Long preTime = 0L;
 
     @Start
     public void startNode() {
-        Log.info("Starting node type of {}", modelService.getNodeName());
+        Log.info("Starting {}", context.getPath());
         preTime = System.currentTimeMillis();
         modelService.registerModelListener(this);
         kompareBean = new KevoreeKompareBean(modelRegistry);
@@ -119,7 +114,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
                 Log.error("Error while stopping admin thread JavaNode ", e);
             }
         }
-        Log.info("Stopping node type of {}", modelService.getNodeName());
+        Log.info("Stopping {}", context.getPath());
         modelService.unregisterModelListener(this);
         kompareBean = null;
         modelRegistry.clear();
@@ -131,7 +126,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     }
 
     @Override
-    public org.kevoree.api.PrimitiveCommand getPrimitive(AdaptationPrimitive adaptationPrimitive) {
+    public PrimitiveCommand getPrimitive(AdaptationPrimitive adaptationPrimitive) {
         String pTypeName = adaptationPrimitive.getPrimitiveType();
         String nodeName = modelService.getNodeName();
         if (pTypeName.equals(AdaptationType.UpdateDictionaryInstance.name())) {
@@ -143,7 +138,7 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
             }
         }
         if (pTypeName.equals(AdaptationType.UpdateCallMethod.name())) {
-            return new UpdateCallMethod((Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService);
+            return new UpdateCallMethod((Instance) adaptationPrimitive.getRef(), modelRegistry);
         }
         if (pTypeName.equals(AdaptationType.StartInstance.name())) {
             return new StartStopInstance((Instance) adaptationPrimitive.getRef(), nodeName, true, modelRegistry, bootstrapService);
@@ -158,13 +153,12 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
             return new RemoveBindingCommand((MBinding) adaptationPrimitive.getRef(), nodeName, modelRegistry);
         }
         if (pTypeName.equals(AdaptationType.AddDeployUnit.name())) {
-            return new AddDeployUnit((DeployUnit) adaptationPrimitive.getRef(), bootstrapService);
-        }
-        if (pTypeName.equals(AdaptationType.LinkDeployUnit.name())) {
-            return new LinkDeployUnit((DeployUnit) adaptationPrimitive.getRef(), bootstrapService, modelRegistry);
+            Object[] values = (Object[]) adaptationPrimitive.getRef();
+            return new AddDeployUnit((Instance) values[0], (DeployUnit) values[1], bootstrapService);
         }
         if (pTypeName.equals(AdaptationType.RemoveDeployUnit.name())) {
-            return new RemoveDeployUnit((DeployUnit) adaptationPrimitive.getRef(), bootstrapService);
+            Object[] values = (Object[]) adaptationPrimitive.getRef();
+            return new RemoveDeployUnit((Instance) values[0], (DeployUnit) values[1], bootstrapService);
         }
         if (pTypeName.equals(AdaptationType.AddInstance.name())) {
             return new AddInstance(wrapperFactory, (Instance) adaptationPrimitive.getRef(), nodeName, modelRegistry, bootstrapService, modelService);
@@ -174,8 +168,6 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
         }
         return null;
     }
-
-    private Long preTime = 0l;
 
     @Override
     public boolean preUpdate(UpdateContext context) {

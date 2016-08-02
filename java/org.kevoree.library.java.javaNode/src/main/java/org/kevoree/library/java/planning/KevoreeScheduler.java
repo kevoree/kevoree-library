@@ -1,10 +1,13 @@
 package org.kevoree.library.java.planning;
 
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.List;
+import org.kevoree.api.adaptation.AdaptationModel;
+import org.kevoree.api.adaptation.AdaptationPrimitive;
+import org.kevoree.api.adaptation.AdaptationType;
+import org.kevoree.api.adaptation.Step;
 
-import org.kevoree.api.adaptation.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -16,13 +19,12 @@ import org.kevoree.api.adaptation.*;
 
 public abstract class KevoreeScheduler {
 
-    public AdaptationModel schedule(AdaptationModel adaptionModel, String nodeName) {
+    public AdaptationModel schedule(AdaptationModel adaptionModel) {
         if (!adaptionModel.getAdaptations().isEmpty()) {
             HashMap<String, List<AdaptationPrimitive>> classedAdaptations = classify(adaptionModel.getAdaptations());
             adaptionModel.setOrderedPrimitiveSet(createStep(classedAdaptations.get(AdaptationType.AddDeployUnit.name()),AdaptationType.AddDeployUnit));
             Step firstStep = adaptionModel.getOrderedPrimitiveSet();
-            firstStep.next(createStep(classedAdaptations.get(AdaptationType.LinkDeployUnit.name()),AdaptationType.LinkDeployUnit))
-                    .next(createStep(classedAdaptations.get(AdaptationType.StopInstance.name()),AdaptationType.StopInstance))
+            firstStep.next(createStep(classedAdaptations.get(AdaptationType.StopInstance.name()),AdaptationType.StopInstance))
                     .next(createStep(classedAdaptations.get(AdaptationType.RemoveBinding.name()),AdaptationType.RemoveBinding))
                     .next(createStep(classedAdaptations.get(AdaptationType.RemoveInstance.name()),AdaptationType.RemoveInstance))
                     .next(createStep(classedAdaptations.get(AdaptationType.RemoveDeployUnit.name()),AdaptationType.RemoveDeployUnit))
@@ -40,7 +42,7 @@ public abstract class KevoreeScheduler {
     private HashMap<String, List<AdaptationPrimitive>> classify(List<AdaptationPrimitive> inputs) {
         HashMap<String, List<AdaptationPrimitive>> result = new HashMap<String, List<AdaptationPrimitive>>();
         for (AdaptationPrimitive adapt : inputs) {
-            List<AdaptationPrimitive> l = null;
+            List<AdaptationPrimitive> l;
             if (!result.containsKey(adapt.getPrimitiveType())) {
                 l = new ArrayList<AdaptationPrimitive>();
                 result.put(adapt.getPrimitiveType(), l);
@@ -60,6 +62,4 @@ public abstract class KevoreeScheduler {
         }
         return step;
     }
-
-
 }

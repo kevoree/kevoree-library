@@ -5,7 +5,7 @@ import org.kevoree.log.Log;
 /**
  * Created by duke on 9/26/14.
  */
-public class KevoreeThreadGroup extends ThreadGroup{
+public class KevoreeThreadGroup extends ThreadGroup {
 
     private String n;
 

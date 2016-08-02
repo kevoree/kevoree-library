@@ -1,17 +1,13 @@
 package org.kevoree.library;
 
-import java.util.Random;
-
-import org.kevoree.annotation.ComponentType;
-import org.kevoree.annotation.KevoreeInject;
-import org.kevoree.annotation.Output;
-import org.kevoree.annotation.Param;
-import org.kevoree.annotation.Start;
-import org.kevoree.annotation.Stop;
+import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
 import org.kevoree.api.CallbackResult;
-import org.kevoree.api.ModelService;
+import org.kevoree.api.Context;
+import org.kevoree.api.Port;
 import org.kevoree.log.Log;
+
+import java.util.Random;
 
 /**
  * Created with IntelliJ IDEA. User: duke Date: 02/12/2013 Time: 15:10
@@ -20,7 +16,7 @@ import org.kevoree.log.Log;
 public class Ticker implements Runnable {
 
 	@KevoreeInject
-	private ModelService modelService;
+	private Context context;
 
 	private boolean running;
 	private Random rand = new Random();
@@ -29,7 +25,7 @@ public class Ticker implements Runnable {
 	private long period = 3000l;
 
 	@Output
-	org.kevoree.api.Port tick;
+	private Port tick;
 
 	@Param(defaultValue = "false", optional = true)
 	private boolean random = false;
