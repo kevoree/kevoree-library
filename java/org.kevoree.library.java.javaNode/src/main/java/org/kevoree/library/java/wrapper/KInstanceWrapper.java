@@ -143,7 +143,7 @@ public abstract class KInstanceWrapper {
         method.setAccessible(true);
 
         try {
-            startMethod.invoke(targetObj);
+            method.invoke(targetObj);
             if (updateState) {
                 setStarted(true);
             }
