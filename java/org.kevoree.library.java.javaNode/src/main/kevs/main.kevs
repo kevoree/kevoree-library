@@ -1,8 +1,17 @@
-add node0: JavaNode/1
+add node0, node1: JavaNode/1
+//add node1: JavascriptNode/1
 add node0.ticker: Ticker
 add node0.printer: ConsolePrinter
 add chan: LocalChannel
+add sync: WSGroup
+
+attach node0, node1 sync
 
 bind node0.ticker.tick chan
 bind node0.printer.input chan
+
+//set chan.host = "ws.kevoree.org"
+//set chan.uuid = "42aABb42"
+
+network node0.ip.lo 127.0.0.1
 

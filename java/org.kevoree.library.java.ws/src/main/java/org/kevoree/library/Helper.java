@@ -7,9 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by leiko on 10/04/15.
+ *
  */
-public class Util {
+public class Helper {
 
     public static Set<String> getProvidedPortsPath(Channel chan, String nodeName) {
         return getPortsPath(chan, nodeName, "provided");
@@ -20,7 +20,7 @@ public class Util {
     }
 
     private static Set<String> getPortsPath(Channel chan, String nodeName, String type) {
-        Set<String> paths = new HashSet<String>();
+        Set<String> paths = new HashSet<>();
         if (chan != null) {
             chan.getBindings().stream().filter(binding -> binding.getPort() != null
                     && binding.getPort().getRefInParent() != null

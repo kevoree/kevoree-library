@@ -3,8 +3,6 @@ package org.kevoree.library.java.wrapper;
 import org.kevoree.ComponentInstance;
 import org.kevoree.Instance;
 import org.kevoree.Port;
-import org.kevoree.annotation.Output;
-import org.kevoree.api.helper.ReflectUtils;
 import org.kevoree.library.java.wrapper.port.ProvidedPortImpl;
 import org.kevoree.library.java.wrapper.port.RequiredPortImpl;
 
@@ -16,6 +14,9 @@ import java.util.HashMap;
  *
  */
 public class ComponentWrapper extends KInstanceWrapper {
+
+    private HashMap<String, ProvidedPortImpl> providedPorts = new HashMap<String, ProvidedPortImpl>();
+    private HashMap<String, RequiredPortImpl> requiredPorts = new HashMap<String, RequiredPortImpl>();
 
     public HashMap<String, ProvidedPortImpl> getProvidedPorts() {
         return providedPorts;
@@ -33,34 +34,17 @@ public class ComponentWrapper extends KInstanceWrapper {
         this.requiredPorts = requiredPorts;
     }
 
-    public HashMap<String, ProvidedPortImpl> providedPorts = new HashMap<String, ProvidedPortImpl>();
-    public HashMap<String, RequiredPortImpl> requiredPorts = new HashMap<String, RequiredPortImpl>();
-
     public void setModelElement(Instance modelElement) {
         super.setModelElement(modelElement);
         ComponentInstance instance = (ComponentInstance) getModelElement();
 
-        for (Port requiredPort : instance.getRequired()) {
-            Field field = ReflectUtils.findFieldWithAnnotation(
-                    requiredPort.getPortTypeRef().getName(),getTargetObj().getClass(), Output.class);
-            if (field != null) {
-                if (!field.isAccessible()) {
-                    field.setAccessible(true);
-                }
-                RequiredPortImpl portWrapper = new RequiredPortImpl(requiredPort.path());
-                try {
-                    field.set(getTargetObj(), portWrapper);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException("Unable to set @Output field " + requiredPort.getPortTypeRef().getName() + " implementation", e);
-                }
-                requiredPorts.put(requiredPort.getPortTypeRef().getName(), portWrapper);
-            } else {
-                throw new RuntimeException("Unable to find @Output field of type "+ org.kevoree.api.Port.class.getName()+" in \""+requiredPort.getPortTypeRef().getName()+"\" in " + modelElement.getName());
-            }
+        for (Port output : instance.getRequired()) {
+            RequiredPortImpl outputPort = new RequiredPortImpl(getTargetObj(), output, this);
+            requiredPorts.put(output.getPortTypeRef().getName(), outputPort);
         }
-        for (Port providedPort : instance.getProvided()) {
-            ProvidedPortImpl portWrapper = new ProvidedPortImpl(getTargetObj(), providedPort.getPortTypeRef().getName(), providedPort.path(), this);
-            providedPorts.put(providedPort.getPortTypeRef().getName(), portWrapper);
+        for (Port input : instance.getProvided()) {
+            ProvidedPortImpl portWrapper = new ProvidedPortImpl(getTargetObj(), input, this);
+            providedPorts.put(input.getPortTypeRef().getName(), portWrapper);
         }
 
     }
@@ -69,6 +53,11 @@ public class ComponentWrapper extends KInstanceWrapper {
     public void startInstance() throws InvocationTargetException {
         try {
             super.startInstance();
+            for (ProvidedPortImpl input : providedPorts.values()) {
+                if (input != null) {
+                    input.processPending();
+                }
+            }
         } catch (InvocationTargetException e) {
             setStarted(true); //WE PUT COMPONENT IN START STATE TO ALLOW ROLLBACK TO UNSET VARIABLE
             throw e;

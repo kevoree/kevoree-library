@@ -2,6 +2,7 @@ package org.kevoree.library.java.wrapper;
 
 import org.kevoree.api.Callback;
 import org.kevoree.api.ChannelDispatch;
+import org.kevoree.log.Log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -31,8 +32,11 @@ public class ChannelWrapper extends KInstanceWrapper {
 
     public void call(org.kevoree.api.Callback callback, String payload) {
         if (isStarted()) {
-            ((ChannelDispatch) getTargetObj()).dispatch(payload, callback);
+            ChannelDispatch channel = (ChannelDispatch) getTargetObj();
+            Log.debug(" -> {} (dispatch)", getModelElement().path());
+            channel.dispatch(payload, callback);
         } else {
+            Log.debug(" -> {} (store)", getModelElement().path());
             pending.add(new StoredCall(payload, callback));
         }
     }

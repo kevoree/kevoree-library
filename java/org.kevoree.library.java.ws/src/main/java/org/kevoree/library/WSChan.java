@@ -44,8 +44,8 @@ public class WSChan implements ChannelDispatch {
 			model = modelService.getCurrentModel().getModel();
 		}
 		Channel thisChan = (Channel) model.findByPath(context.getPath());
-		Set<String> inputPaths = Util.getProvidedPortsPath(thisChan, context.getNodeName());
-		Set<String> outputPaths = Util.getRequiredPortsPath(thisChan, context.getNodeName());
+		Set<String> inputPaths = Helper.getProvidedPortsPath(thisChan, context.getNodeName());
+		Set<String> outputPaths = Helper.getRequiredPortsPath(thisChan, context.getNodeName());
 
 		for (String path : inputPaths) {
 			// create input WSMsgBroker clients
@@ -78,7 +78,7 @@ public class WSChan implements ChannelDispatch {
 	public void dispatch(String o, final Callback callback) {
 		ContainerRoot model = modelService.getCurrentModel().getModel();
 		Channel thisChan = (Channel) model.findByPath(context.getPath());
-		Set<String> outputPaths = Util.getRequiredPortsPath(thisChan, context.getNodeName());
+		Set<String> outputPaths = Helper.getRequiredPortsPath(thisChan, context.getNodeName());
 
 		// create a list of destination paths
 		Set<String> destPaths = new HashSet<>();
@@ -88,7 +88,7 @@ public class WSChan implements ChannelDispatch {
 		destPaths.addAll(channelContext.getRemotePortPaths().stream()
 				.map(remotePath -> remotePath + "_" + context.getInstanceName()).collect(Collectors.toList()));
 		// add local connected inputs to dest
-		Set<String> providedPaths = Util.getProvidedPortsPath(thisChan, context.getNodeName()).stream()
+		Set<String> providedPaths = Helper.getProvidedPortsPath(thisChan, context.getNodeName()).stream()
 				.map(s -> s + "_" + context.getInstanceName()).collect(Collectors.toSet());
 
 		destPaths.addAll(providedPaths);

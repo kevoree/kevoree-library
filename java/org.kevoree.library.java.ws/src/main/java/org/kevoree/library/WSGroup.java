@@ -14,7 +14,8 @@ import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
-import org.kevoree.api.protocol.Protocol;
+import org.kevoree.library.protocol.Protocol;
+import org.kevoree.library.protocol.Protocol.Message;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.factory.KevoreeFactory;
 import org.kevoree.log.Log;
@@ -115,7 +116,7 @@ public class WSGroup implements ModelListener, Runnable {
                             Log.warn(WSGroup.this.getClass().getSimpleName() + "  \"{}\" received an unknown message '{}'", context.getInstanceName(), msg);
                         } else {
                             switch (parsedMsg.getType()) {
-                                case REGISTER_TYPE:
+                                case Protocol.REGISTER_TYPE:
                                     RegisterMessage rm = (RegisterMessage) parsedMsg;
                                     cache.put(rm.getNodeName(), webSocket);
                                     rcache.put(webSocket, rm.getNodeName());
@@ -155,12 +156,12 @@ public class WSGroup implements ModelListener, Runnable {
                                         }
                                     }
                                     break;
-                                case PULL_TYPE:
+                                case Protocol.PULL_TYPE:
                                     String modelReturn = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
                                     Log.info("{} \"{}\": pull requested", WSGroup.this.getClass().getSimpleName(), context.getInstanceName());
                                     WebSockets.sendText(modelReturn, webSocket, null);
                                     break;
-                                case PUSH_TYPE:
+                                case Protocol.PUSH_TYPE:
                                     PushMessage pm = (PushMessage) parsedMsg;
                                     try {
                                         Log.info("{} \"{}\": push received, applying locally...", WSGroup.this.getClass().getSimpleName(), context.getInstanceName());
@@ -169,6 +170,19 @@ public class WSGroup implements ModelListener, Runnable {
                                     } catch (Exception e) {
                                         Log.warn("{} \"{}\" received a malformed push message '{}'", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), msg);
                                     }
+                                    break;
+
+                                case Protocol.KEVS_TYPE:
+                                    Log.info("{} \"{}\": push received (kevscript), applying KevScript locally...",
+                                            WSGroup.this.getClass().getSimpleName(), context.getInstanceName());
+                                    ContainerRoot clonedModel = cloner.clone(modelService.getCurrentModel().getModel());
+                                    try {
+                                        kevsService.execute(((Protocol.PushKevSMessage) parsedMsg).getKevScript(), clonedModel);
+                                        modelService.update(clonedModel, null);
+                                    } catch (Exception e) {
+                                        Log.error("KevScript error", e);
+                                    }
+
                                     break;
                                 default:
                                     Log.warn("{} \"{}\" unhandled message '{}'", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), msg);

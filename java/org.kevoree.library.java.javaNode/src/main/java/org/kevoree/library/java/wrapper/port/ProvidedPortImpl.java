@@ -20,29 +20,29 @@ import java.util.List;
 
 public class ProvidedPortImpl implements Port {
 
-    private Object targetObj;
+    private Object componentInstance;
     private String portPath;
     private ComponentWrapper componentWrapper;
 
 
-    private Method targetMethod = null;
+    private Method method = null;
     private int paramSize = 0;
-    //private MethodHandle methodHandler = null;
 
 
-    public ProvidedPortImpl(Object targetObj, String name, String portPath, ComponentWrapper componentWrapper) {
-        this.targetObj = targetObj;
-        this.portPath = portPath;
+    public ProvidedPortImpl(Object targetObj, org.kevoree.Port port, ComponentWrapper componentWrapper) {
+        this.componentInstance = targetObj;
+        this.portPath = port.path();
         this.componentWrapper = componentWrapper;
 
-        targetMethod = ReflectUtils.findMethodWithAnnotation(targetObj.getClass(), Input.class);
-        if (targetMethod != null) {
-            if (!targetMethod.isAccessible()) {
-                targetMethod.setAccessible(true);
+        method = ReflectUtils.findMethodWithAnnotation(targetObj.getClass(), Input.class);
+        if (method != null) {
+            if (!method.isAccessible()) {
+                method.setAccessible(true);
             }
-            paramSize = targetMethod.getParameterTypes().length;
+            paramSize = method.getParameterTypes().length;
         } else {
-            throw new RuntimeException("Unable to find @Input method for port \""+name+"\" in " + componentWrapper.getModelElement().getName());
+            throw new RuntimeException("Unable to find @Input method for port \""+port.getName()+"\" in " +
+                    componentWrapper.getModelElement().getName());
         }
     }
 
@@ -86,15 +86,13 @@ public class ProvidedPortImpl implements Port {
     public void send(String payload, Callback callback) {
         try {
             if (componentWrapper.isStarted()) {
+                Log.debug("Input port {} receiving \"{}\"", portPath, payload);
                 Object result = null;
                 if (paramSize == 0) {
-                    //if (methodHandler != null) {
-                    //result = methodHandler.invokeExact(targetObj);
-                    //} else {
-                    result = targetMethod.invoke(targetObj);
+                    result = method.invoke(componentInstance);
                 } else {
                     if (paramSize == 1) {
-                        result = targetMethod.invoke(targetObj, payload);
+                        result = method.invoke(componentInstance, payload);
                     } else {
                         callback.onError(new Exception("Only one parameter is allowed"));
                     }
@@ -109,7 +107,8 @@ public class ProvidedPortImpl implements Port {
                     CallBackCaller.call(stringResult, callback, portPath);
                 }
             } else {
-                //store call somewhere
+                Log.debug("Input port {} storing \"{}\" (component stopped)", portPath, payload);
+                // store call somewhere
                 pending.add(new StoredCall(payload, callback));
             }
         } catch (Throwable e) {
@@ -134,6 +133,4 @@ public class ProvidedPortImpl implements Port {
     public String getPath() {
         return portPath;
     }
-
-
 }

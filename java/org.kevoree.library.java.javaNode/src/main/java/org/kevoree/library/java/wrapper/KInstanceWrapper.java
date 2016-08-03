@@ -100,7 +100,13 @@ public abstract class KInstanceWrapper {
     public void startInstance() throws InvocationTargetException {
         if (!isStarted()) {
             if (startMethod != null) {
-                invoke(startMethod, true);
+                startMethod.setAccessible(true);
+                try {
+                    startMethod.invoke(targetObj);
+                    setStarted(true);
+                } catch (IllegalAccessException e) {
+                    Log.error("Unable to access " + modelElement.path() + " @Start method " + startMethod.getName() + "()");
+                }
             } else {
                 setStarted(true);
                 Log.debug("Instance {} has no @Start method", modelElement.path());
@@ -113,7 +119,13 @@ public abstract class KInstanceWrapper {
     public void stopInstance() throws InvocationTargetException {
         if (isStarted()) {
             if (stopMethod != null) {
-                invoke(stopMethod, true);
+                stopMethod.setAccessible(true);
+                try {
+                    stopMethod.invoke(targetObj);
+                    setStarted(false);
+                } catch (IllegalAccessException e) {
+                    Log.error("Unable to access " + modelElement.path() + " @Stop method " + stopMethod.getName() + "()");
+                }
             } else {
                 setStarted(false);
                 Log.debug("Instance {} has no @Stop method", modelElement.path());
@@ -126,7 +138,12 @@ public abstract class KInstanceWrapper {
     public void updateInstance() throws InvocationTargetException {
         if (isStarted()) {
             if (updateMethod != null) {
-                invoke(updateMethod, false);
+                updateMethod.setAccessible(true);
+                try {
+                    updateMethod.invoke(targetObj);
+                } catch (IllegalAccessException e) {
+                    Log.error("Unable to access " + modelElement.path() + " @Update method " + updateMethod.getName() + "()");
+                }
             } else {
                 Log.debug("Instance {} has no @Update method", modelElement.path());
             }
@@ -138,20 +155,4 @@ public abstract class KInstanceWrapper {
     public void create() throws Exception {}
 
     public void destroy() throws Exception {}
-
-    private void invoke(Method method, boolean updateState) throws InvocationTargetException {
-        method.setAccessible(true);
-
-        try {
-            method.invoke(targetObj);
-            if (updateState) {
-                setStarted(true);
-            }
-        } catch (IllegalAccessException e) {
-            if (updateState) {
-                setStarted(false);
-            }
-            Log.error("Unable to access " + modelElement.path() + " method " + method.getName() + "()");
-        }
-    }
 }

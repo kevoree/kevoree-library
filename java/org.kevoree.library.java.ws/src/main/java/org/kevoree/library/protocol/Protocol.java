@@ -13,17 +13,21 @@ public class Protocol {
     public static final String PULL = "pull";
     public static final int PULL_TYPE = 2;
 
+    public static final String KEVS = "kevs";
+    public static final int KEVS_TYPE = 3;
+
     public static final String RESULT = "result";
-    public static final int RESULT_TYPE = 3;
+    public static final int RESULT_TYPE = 4;
 
     public static final String STATUS = "status";
-    public static final int STATUS_TYPE = 4;
+    public static final int STATUS_TYPE = 5;
 
     public static final String DIFF = "diff";
     public static final String SEP = "/";
 
     private final static Pattern patternPush = Pattern.compile("^push/(([^/{]+)/)?(.*)$",
             Pattern.DOTALL | Pattern.MULTILINE);
+    private final static Pattern patternKevS = Pattern.compile("^kevs/(.*)$", Pattern.DOTALL | Pattern.MULTILINE);
     private final static Pattern patternResult = Pattern.compile("^result/([^/]+)/([^/]+)/(true|false)$");
     private final static Pattern patterStatus = Pattern.compile("^status/(.*)$");
 
@@ -161,7 +165,11 @@ public class Protocol {
 
         @Override
         public String toRaw() {
-            return PUSH + SEP + uid + SEP + model;
+            if (uid != null) {
+                return PUSH + SEP + uid + SEP + model;
+            } else {
+                return PUSH + SEP + model;
+            }
         }
 
         public void setUid(String uid) {
@@ -170,33 +178,59 @@ public class Protocol {
         }
     }
 
-    public static Message parse(final String msg) {
+    public static class PushKevSMessage implements Message {
 
-        final Message ret;
-        if (msg.startsWith(REGISTER)) {
-            ret = parseRegister(msg);
-        } else {
-            final Matcher pushMatcher = patternPush.matcher(msg);
-            if (pushMatcher.matches()) {
-                ret = parsePush(pushMatcher);
-            } else if (msg.startsWith(PULL)) {
-                ret = new PullMessage();
-            } else {
-                final Matcher resultMatcher = patternResult.matcher(msg);
-                if (resultMatcher.matches()) {
-                    ret = parseResult(resultMatcher);
-                } else {
-                    final Matcher statusMatcher = patterStatus.matcher(msg);
-                    if (statusMatcher.matches()) {
-                        ret = new StatusMessage(statusMatcher.group(1));
-                    } else {
-                        ret = null;
-                    }
-                }
-            }
+        private final String script;
+
+        public PushKevSMessage(String script) {
+            this.script = script;
         }
 
-        return ret;
+        public String getKevScript() {
+            return script;
+        }
+
+        @Override
+        public int getType() {
+            return KEVS_TYPE;
+        }
+
+        @Override
+        public String toRaw() {
+            return KEVS + SEP + script;
+        }
+    }
+
+    public static Message parse(final String msg) {
+        if (msg.startsWith(REGISTER)) {
+            return parseRegister(msg);
+        }
+
+        if (msg.startsWith(PULL)) {
+            return new PullMessage();
+        }
+
+        Matcher matcher = patternPush.matcher(msg);
+        if (matcher.matches()) {
+            return parsePush(matcher);
+        }
+
+        matcher = patternKevS.matcher(msg);
+        if (matcher.matches()) {
+            return parseKevSPush(matcher);
+        }
+
+        matcher = patternResult.matcher(msg);
+        if (matcher.matches()) {
+            return parseResult(matcher);
+        }
+
+        matcher = patterStatus.matcher(msg);
+        if (matcher.matches()) {
+            return new StatusMessage(matcher.group(1));
+        }
+
+        return null;
     }
 
     private static Message parseResult(final Matcher resultMatcher) {
@@ -212,6 +246,11 @@ public class Protocol {
         final String uid = pushMatcher.group(2);
         final String model = pushMatcher.group(3);
         return new PushMessage(model, uid);
+    }
+
+    private static Message parseKevSPush(final Matcher matcher) {
+        final String script = matcher.group(1);
+        return new PushKevSMessage(script);
     }
 
     private static Message parseRegister(final String msg) {
