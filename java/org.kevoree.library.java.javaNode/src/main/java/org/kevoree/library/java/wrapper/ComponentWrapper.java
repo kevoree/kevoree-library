@@ -6,7 +6,6 @@ import org.kevoree.Port;
 import org.kevoree.library.java.wrapper.port.ProvidedPortImpl;
 import org.kevoree.library.java.wrapper.port.RequiredPortImpl;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
@@ -61,18 +60,6 @@ public class ComponentWrapper extends KInstanceWrapper {
         } catch (InvocationTargetException e) {
             setStarted(true); //WE PUT COMPONENT IN START STATE TO ALLOW ROLLBACK TO UNSET VARIABLE
             throw e;
-        }
-    }
-
-    private Field recursivelyLookForDeclaredRequiredPort(String name, Class javaClass) {
-        try {
-            return javaClass.getDeclaredField(name);
-        } catch (NoSuchFieldException e) {
-            if (javaClass.getSuperclass() != null) {
-                return recursivelyLookForDeclaredRequiredPort(name, javaClass.getSuperclass());
-            } else {
-                return null;
-            }
         }
     }
 }

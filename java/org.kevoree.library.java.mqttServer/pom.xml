@@ -15,8 +15,18 @@
     <dependencies>
         <dependency>
             <groupId>org.kevoree</groupId>
+            <artifactId>org.kevoree.api</artifactId>
+            <version>${kevoree.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree</groupId>
             <artifactId>org.kevoree.annotation.api</artifactId>
             <version>${kevoree.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree.log</groupId>
+            <artifactId>org.kevoree.log</artifactId>
+            <version>1</version>
         </dependency>
 
         <dependency>
@@ -66,15 +76,6 @@
             <artifactId>hawtdb</artifactId>
             <version>1.6</version>
         </dependency>
-
-        <!--
-        <dependency>
-            <groupId>org.kevoree.log</groupId>
-            <artifactId>org.kevoree.log.compat.slf4j</artifactId>
-            <version>1</version>
-        </dependency>
-
-        -->
 
     </dependencies>
 

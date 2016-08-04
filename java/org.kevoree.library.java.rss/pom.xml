@@ -17,6 +17,21 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.kevoree</groupId>
+            <artifactId>org.kevoree.api</artifactId>
+            <version>${kevoree.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree</groupId>
+            <artifactId>org.kevoree.annotation.api</artifactId>
+            <version>${kevoree.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree.log</groupId>
+            <artifactId>org.kevoree.log</artifactId>
+            <version>1</version>
+        </dependency>
+        <dependency>
             <groupId>com.rometools</groupId>
             <artifactId>rome</artifactId>
             <version>${rome.version}</version>
@@ -33,14 +48,11 @@
             <version>2.4</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
         </dependency>
-
-
 
         <dependency>
             <groupId>junit</groupId>
@@ -48,7 +60,6 @@
             <version>4.10</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>

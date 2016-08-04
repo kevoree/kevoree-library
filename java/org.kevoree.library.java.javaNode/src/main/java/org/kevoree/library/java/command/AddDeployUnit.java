@@ -33,7 +33,7 @@ public class AddDeployUnit implements PrimitiveCommand {
 
     public boolean execute() {
         try {
-            FlexyClassLoader fcl = bs.installDeployUnit(instance, du);
+            FlexyClassLoader fcl = bs.installDeployUnit(du);
             return fcl != null;
         } catch (Exception e) {
             Log.error("Unable to AddDeployUnit for {}", e, instance.path());

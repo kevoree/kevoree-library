@@ -34,7 +34,11 @@ public class ChannelWrapper extends KInstanceWrapper {
         if (isStarted()) {
             ChannelDispatch channel = (ChannelDispatch) getTargetObj();
             Log.debug(" -> {} (dispatch)", getModelElement().path());
-            channel.dispatch(payload, callback);
+            try {
+                channel.dispatch(payload, callback);
+            } catch (Throwable e) {
+                Log.error("Channel \"{}\" dispatch threw an exception", e, getModelElement().getName());
+            }
         } else {
             Log.debug(" -> {} (store)", getModelElement().path());
             pending.add(new StoredCall(payload, callback));

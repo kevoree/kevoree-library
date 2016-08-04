@@ -14,10 +14,10 @@ import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
-import org.kevoree.library.protocol.Protocol;
-import org.kevoree.library.protocol.Protocol.Message;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.factory.KevoreeFactory;
+import org.kevoree.library.protocol.Protocol;
+import org.kevoree.library.protocol.Protocol.Message;
 import org.kevoree.log.Log;
 import org.kevoree.pmodeling.api.ModelCloner;
 import org.kevoree.pmodeling.api.compare.ModelCompare;
@@ -403,16 +403,16 @@ public class WSGroup implements ModelListener, Runnable {
     }
 
     public WebSocketChannel createWSClient(final String ip, final String port, String currentNodeName, final ModelService modelService) throws IOException {
-        Xnio xnio = Xnio.getInstance(io.undertow.websockets.client.WebSocketClient.class.getClassLoader());
-        XnioWorker worker = xnio.createWorker(OptionMap.builder()
-                .set(Options.WORKER_IO_THREADS, 2)
-                .set(Options.CONNECTION_HIGH_WATER, 1000000)
-                .set(Options.CONNECTION_LOW_WATER, 1000000)
-                .set(Options.WORKER_TASK_CORE_THREADS, 30)
-                .set(Options.WORKER_TASK_MAX_THREADS, 30)
-                .set(Options.TCP_NODELAY, true)
-                .set(Options.CORK, true)
-                .getMap());
+        XnioWorker worker = Xnio.getInstance(Undertow.class.getClassLoader())
+                .createWorker(OptionMap.builder()
+                        .set(Options.WORKER_IO_THREADS, 2)
+                        .set(Options.CONNECTION_HIGH_WATER, 1000000)
+                        .set(Options.CONNECTION_LOW_WATER, 1000000)
+                        .set(Options.WORKER_TASK_CORE_THREADS, 30)
+                        .set(Options.WORKER_TASK_MAX_THREADS, 30)
+                        .set(Options.TCP_NODELAY, true)
+                        .set(Options.CORK, true)
+                        .getMap());
         ByteBufferSlicePool buffer = new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 1024, 1024);
         final WebSocketChannel[] client = new WebSocketChannel[1];
         URI uri;

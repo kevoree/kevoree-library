@@ -112,7 +112,7 @@ public class ProvidedPortImpl implements Port {
                 pending.add(new StoredCall(payload, callback));
             }
         } catch (Throwable e) {
-            Log.error("This is really bad, exception during port call...", e);
+            Log.error("Input port \"{}\" method threw an exception", e, portPath);
         }
     }
 

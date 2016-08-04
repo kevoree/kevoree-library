@@ -13,6 +13,21 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.kevoree</groupId>
+            <artifactId>org.kevoree.api</artifactId>
+            <version>${kevoree.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree</groupId>
+            <artifactId>org.kevoree.annotation.api</artifactId>
+            <version>${kevoree.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree.log</groupId>
+            <artifactId>org.kevoree.log</artifactId>
+            <version>1</version>
+        </dependency>
+        <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>avatar-js</artifactId>
             <version>0.10.32-SNAPSHOT</version>
@@ -46,8 +61,12 @@
     <repositories>
         <repository>
             <id>maven.java.net</id>
-            <snapshots><enabled>true</enabled></snapshots>
             <url>https://maven.java.net/content/groups/public/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </snapshots>
         </repository>
     </repositories>
 </project>

@@ -8,7 +8,6 @@ import org.kevoree.api.ChannelContext;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.PrimitiveCommand;
 import org.kevoree.kcl.api.FlexyClassLoader;
-import org.kevoree.kcl.api.FlexyClassLoaderFactory;
 import org.kevoree.library.java.KevoreeThreadGroup;
 import org.kevoree.library.java.ModelRegistry;
 import org.kevoree.library.java.wrapper.ChannelWrapper;
@@ -73,15 +72,7 @@ public class AddInstance implements PrimitiveCommand, Runnable {
 
     public void run() {
         try {
-            FlexyClassLoader fcl = FlexyClassLoaderFactory.INSTANCE.create();
-            fcl.setKey(c.path());
-
-            FlexyClassLoader tdefClassLoader = bs.get(c.getTypeDefinition().path());
-            if (tdefClassLoader == null) {
-                tdefClassLoader = bs.installTypeDefinition(c);
-            }
-
-            fcl.attachChild(tdefClassLoader);
+            FlexyClassLoader fcl = bs.installTypeDefinition(c);
 
             Thread.currentThread().setContextClassLoader(fcl);
             Thread.currentThread().setName("KevoreeInstance_" + c.path());

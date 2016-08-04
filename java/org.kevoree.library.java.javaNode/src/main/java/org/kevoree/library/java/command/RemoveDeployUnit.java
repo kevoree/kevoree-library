@@ -32,7 +32,7 @@ public class RemoveDeployUnit implements PrimitiveCommand {
 
     public boolean execute() {
         try {
-            bootstrap.removeDeployUnit(instance, du);
+            bootstrap.removeDeployUnit(du);
             //TODO cleanup links
             return true;
 

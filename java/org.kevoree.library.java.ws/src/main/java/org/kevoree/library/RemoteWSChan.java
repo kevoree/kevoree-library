@@ -1,6 +1,7 @@
 package org.kevoree.library;
 
 import fr.braindead.websocket.client.WebSocketClient;
+import io.undertow.Undertow;
 import org.kevoree.Channel;
 import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.*;
@@ -8,6 +9,10 @@ import org.kevoree.api.*;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.pmodeling.api.json.JSONModelLoader;
 import org.kevoree.pmodeling.api.json.JSONModelSerializer;
+import org.xnio.OptionMap;
+import org.xnio.Options;
+import org.xnio.Xnio;
+import org.xnio.XnioWorker;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -125,7 +130,17 @@ public class RemoteWSChan implements ChannelDispatch {
 					client.send(s);
 				} else {
 					try {
-						client = new WebSocketClient(URI.create(url + URLEncoder.encode(path, "utf8"))) {
+						XnioWorker worker = Xnio.getInstance(Undertow.class.getClassLoader())
+								.createWorker(OptionMap.builder()
+								.set(Options.WORKER_IO_THREADS, 2)
+								.set(Options.CONNECTION_HIGH_WATER, 1000000)
+								.set(Options.CONNECTION_LOW_WATER, 1000000)
+								.set(Options.WORKER_TASK_CORE_THREADS, 30)
+								.set(Options.WORKER_TASK_MAX_THREADS, 30)
+								.set(Options.TCP_NODELAY, true)
+								.set(Options.CORK, true)
+								.getMap());
+						client = new WebSocketClient(worker, URI.create(url + URLEncoder.encode(path, "utf8"))) {
 							@Override
 							public void onOpen() {
 								clients.put(path, this);

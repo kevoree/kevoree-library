@@ -29,7 +29,8 @@
     <scm>
         <connection>scm:git:git@github.com:kevoree/kevoree-library.git</connection>
         <developerConnection>scm:git:git@github.com:kevoree/kevoree-library.git</developerConnection>
-        <url>http://github.com/kevoree/kevoree-library.git</url>
+        <tag>HEAD</tag>
+        <url>http://github.com/kevoree/kevoree-library</url>
     </scm>
 
     <licenses>
@@ -117,10 +118,12 @@
         <repository>
             <id>kevoree.oss.release</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            <layout>default</layout>
         </repository>
         <snapshotRepository>
             <id>kevoree.oss.snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <layout>default</layout>
         </snapshotRepository>
     </distributionManagement>
 
@@ -135,6 +138,7 @@
         <pluginRepository>
             <id>plugin.kevoree-oss</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
+            <layout>default</layout>
         </pluginRepository>
     </pluginRepositories>
 

@@ -1,6 +1,7 @@
 package org.kevoree.library;
 
-import com.spotify.docker.client.*;
+import com.spotify.docker.client.DefaultDockerClient;
+import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.exceptions.DockerCertificateException;
 import com.spotify.docker.client.exceptions.DockerException;
 import com.spotify.docker.client.exceptions.ImageNotFoundException;
@@ -18,13 +19,12 @@ import org.kevoree.library.util.PortsService;
 import org.kevoree.log.Log;
 
 import java.io.IOException;
-import java.net.URI;
-import java.util.*;
-import java.util.concurrent.Callable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import static com.spotify.docker.client.DockerClient.AttachParameter;
 
 /**
  *
@@ -132,11 +132,11 @@ public class DockerContainer {
             }
             containerId = creation.id();
 
-            computeAttach();
-
             try {
                 docker.startContainer(containerId);
                 Log.info("'{}' has started a new container '{}'", context.getInstanceName(), containerId);
+
+                computeAttach();
             } catch (DockerException err) {
                 Log.error("'{}' had a problem starting the container (are you sure your attributes are ok?)", context.getInstanceName());
             }
@@ -162,19 +162,28 @@ public class DockerContainer {
         try {
             docker.stopContainer(containerId, stopTimeout);
             Log.info("'{}' has stopped container '{}'", context.getInstanceName(), containerId);
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            Log.error("Something went wrong while stopping Docker container {} in {}", e, containerId, context.getInstanceName());
+        }
 
         try {
             docker.killContainer(containerId);
             Log.info("'{}' has killed container '{}'", context.getInstanceName(), containerId);
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            Log.error("Something went wrong while killing Docker container {} in {}", e, containerId, context.getInstanceName());
+        }
 
         if (removeOnStop) {
             try {
-                docker.removeContainer(containerId, removeVolumes);
+                DockerClient.RemoveContainerParam removeParams = DockerClient.RemoveContainerParam.removeVolumes(removeVolumes);
+                docker.removeContainer(containerId, removeParams);
                 Log.info("'{}' has removed container '{}'", context.getInstanceName(), containerId);
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                Log.error("Something went wrong while removing Docker container {} in {}", e, containerId, context.getInstanceName());
+            }
         }
+
+        docker.close();
     }
 
     @Update
@@ -183,17 +192,18 @@ public class DockerContainer {
         this.start();
     }
 
-    private void computeAttach() throws IOException {
-        executor.submit(new Callable<Void>() {
+    private void computeAttach() {
+        executor.submit(new Runnable() {
             @Override
-            public Void call() throws Exception {
-                docker.attachContainer(containerId,
-                        AttachParameter.LOGS,
-                        AttachParameter.STDOUT,
-                        AttachParameter.STDERR,
-                        AttachParameter.STREAM)
-                        .attach(new PortStreamer(stdout), new PortStreamer(stderr));
-                return null;
+            public void run() {
+                try {
+                    docker.attachContainer(containerId,
+                            DockerClient.AttachParameter.LOGS,
+                            DockerClient.AttachParameter.STDOUT,
+                            DockerClient.AttachParameter.STDERR,
+                            DockerClient.AttachParameter.STREAM)
+                            .attach(new PortStreamer(stdout), new PortStreamer(stderr));
+                } catch (Exception ignore) {}
             }
         });
     }
@@ -201,8 +211,7 @@ public class DockerContainer {
     public static void main(String[] args) throws DockerCertificateException, DockerException, InterruptedException, IOException {
         final DockerContainer c = new DockerContainer();
         c.image = "busybox:latest";
-        c.cmd = "ls -lArth";
-        c.ports = "80 22 9001:9000";
+        c.cmd = "ping google.fr";
         c.removeOnStop = true;
         c.stdout = new Port() {
             @Override
@@ -225,8 +234,41 @@ public class DockerContainer {
                 return 0;
             }
         };
+        c.context = new Context() {
+            @Override
+            public String getPath() {
+                return "/nodes["+this.getNodeName()+"]/components["+this.getInstanceName()+"]";
+            }
+
+            @Override
+            public String getNodeName() {
+                return "node0";
+            }
+
+            @Override
+            public String getInstanceName() {
+                return "container";
+            }
+        };
 
         c.start();
-        c.stop();
+
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Log.info("Gonna sleep 5s");
+                    Thread.currentThread().sleep(5000);
+                    Log.info("Woke up");
+
+                    c.stop();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        t.start();
     }
 }
