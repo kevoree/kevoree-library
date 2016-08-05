@@ -159,10 +159,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <registry>${kevoree.registry.url}</registry>
+                    <!--<registry>${kevoree.registry.url}</registry>-->
                     <namespace>${kevoree.registry.namespace}</namespace>
-                    <login>${kevoree.registry.login}</login>
-                    <password>${kevoree.registry.password}</password>
+                    <!--<login>${kevoree.registry.login}</login>-->
+                    <!--<password>${kevoree.registry.password}</password>-->
                 </configuration>
             </plugin>
           </plugins>

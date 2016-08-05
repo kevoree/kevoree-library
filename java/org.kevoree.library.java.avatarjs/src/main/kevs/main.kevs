@@ -1,12 +1,13 @@
-add node0 : JavaNode
-add sync : WSGroup
+add node0 : JavaNode/LATEST/LATEST
+add sync : WSGroup/LATEST/LATEST
+
 attach node0 sync
 
-add chan0, chan1 : AsyncBroadcast
+add chan0, chan1 : LocalChannel/LATEST/LATEST
 
-add node0.avatar : AvatarJS
-add node0.console : ConsolePrinter
-add node0.ticker : Ticker
+add node0.avatar : AvatarJS/LATEST/LATEST
+add node0.console : ConsolePrinter/LATEST/LATEST
+add node0.ticker : Ticker/LATEST/LATEST
 
 bind node0.ticker.tick chan0
 bind node0.avatar.eval chan0
