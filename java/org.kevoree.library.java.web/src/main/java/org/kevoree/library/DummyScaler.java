@@ -5,12 +5,11 @@ import org.kevoree.ContainerNode;
 import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
+import org.kevoree.api.KevScriptService;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.factory.DefaultKevoreeFactory;
-import org.kevoree.kevscript.KevScriptEngine;
 import org.kevoree.log.Log;
-import org.kevoree.pmodeling.api.KMFContainer;
 import org.kevoree.pmodeling.api.ModelCloner;
 
 import java.util.ArrayList;
@@ -33,6 +32,9 @@ public class DummyScaler implements Runnable {
 
     @KevoreeInject
     Context context;
+
+    @KevoreeInject
+    KevScriptService engine;
 
     @Start
     public void start() {
@@ -77,7 +79,6 @@ public class DummyScaler implements Runnable {
                 }
                 if (ports.size() != target) {
 
-                    KevScriptEngine engine = new KevScriptEngine();
                     //reactions
                     if (ports.size() > target) {
                         Log.info("To much instances, drop some");
