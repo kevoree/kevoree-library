@@ -32,16 +32,16 @@ public class RequiredPortImpl implements Port {
 
         Field field = ReflectUtils.findFieldWithAnnotation(port.getName(), targetObj.getClass(), Output.class);
         if (field != null) {
-            if (!field.isAccessible()) {
-                field.setAccessible(true);
-            }
             try {
+                boolean isAccessible = field.isAccessible();
+                field.setAccessible(true);
                 field.set(targetObj, this);
+                field.setAccessible(isAccessible);
             } catch (IllegalAccessException e) {
-                throw new RuntimeException("Unable to set @Output field " + port.getName() + " implementation", e);
+                throw new RuntimeException("Unable to set @Output field \"" + port.getName() + "\" implementation", e);
             }
         } else {
-            throw new RuntimeException("Unable to find @Output field of type "+ org.kevoree.api.Port.class.getName()+" in \""+port.getName()+"\" in " + componentWrapper.getModelElement().getName());
+            throw new RuntimeException("Unable to find @Output port field \""+port.getName()+"\" in type " + targetObj.getClass());
         }
     }
 

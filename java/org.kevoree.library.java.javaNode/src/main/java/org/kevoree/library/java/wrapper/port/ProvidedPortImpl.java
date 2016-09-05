@@ -41,7 +41,7 @@ public class ProvidedPortImpl implements Port {
             }
             paramSize = method.getParameterTypes().length;
         } else {
-            throw new RuntimeException("Unable to find @Input method for port \""+port.getName()+"\" in " +
+            throw new RuntimeException("Unable to find @Input port method for \""+port.getName()+"\" in " +
                     componentWrapper.getModelElement().getName());
         }
     }

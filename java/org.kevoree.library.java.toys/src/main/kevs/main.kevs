@@ -1,8 +1,8 @@
-add node0 : JavaNode
-add node0.ticker : Ticker
-add node0.printer: ConsolePrinter
-add sync : WSGroup
-add chan: SyncBroadcast
+add node0 : JavaNode/LATEST/LATEST
+add node0.ticker : Ticker/LATEST/LATEST
+add node0.printer: ConsolePrinter/LATEST/LATEST
+add sync : WSGroup/LATEST/LATEST
+add chan: LocalChannel/LATEST/LATEST
 
 attach node0 sync
 

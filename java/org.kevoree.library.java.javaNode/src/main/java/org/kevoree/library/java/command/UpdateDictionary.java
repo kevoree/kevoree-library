@@ -125,7 +125,7 @@ public class UpdateDictionary implements PrimitiveCommand {
         DictionaryAttribute attr = instance.getTypeDefinition().getDictionaryType().findAttributesByID(value.getName());
         if (attr.getFragmentDependant()) {
             Log.debug("Update param for {}.{}/{} = '{}'", instance.getName(), value.getName(),
-                    ((NamedElement) value.eContainer()).getName(), value.getValue());
+                    ((FragmentDictionary) value.eContainer()).getName(), value.getValue());
         } else {
             Log.debug("Update param for {}.{} = '{}'", instance.getName(), value.getName(), value.getValue());
         }

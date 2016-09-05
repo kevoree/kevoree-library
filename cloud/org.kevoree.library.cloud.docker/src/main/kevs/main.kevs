@@ -1,11 +1,11 @@
-add node0: JavaNode
-add sync : WSGroup
+add node0: JavaNode/LATEST/LATEST
+add sync : WSGroup/LATEST/LATEST
 
 attach node0 sync
 
-add chan: SyncBroadcast
-add node0.nodeCont : DockerContainer
-add node0.printer: ConsolePrinter
+add chan: SyncBroadcast/LATEST/LATEST
+add node0.nodeCont : DockerContainer/LATEST/LATEST
+add node0.printer: ConsolePrinter/LATEST/LATEST
 set node0.nodeCont.image = 'busybox:latest'
 set node0.nodeCont.cmd = 'ls -lArth'
 set node0.nodeCont.removeOnStop = 'true'
