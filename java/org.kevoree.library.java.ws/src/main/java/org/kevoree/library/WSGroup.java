@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import static io.undertow.Handlers.websocket;
-import static org.kevoree.api.protocol.Protocol.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -117,7 +116,7 @@ public class WSGroup implements ModelListener, Runnable {
                         } else {
                             switch (parsedMsg.getType()) {
                                 case Protocol.REGISTER_TYPE:
-                                    RegisterMessage rm = (RegisterMessage) parsedMsg;
+                                    Protocol.RegisterMessage rm = (Protocol.RegisterMessage) parsedMsg;
                                     cache.put(rm.getNodeName(), webSocket);
                                     rcache.put(webSocket, rm.getNodeName());
                                     if (isMaster()) {
@@ -127,11 +126,11 @@ public class WSGroup implements ModelListener, Runnable {
                                             // new registered model has a model to share: merging it locally
                                             ContainerRoot recModel = (ContainerRoot) jsonModelLoader.loadModelFromString(rm.getModel()).get(0);
                                             TraceSequence tseq = compare.merge(recModel, modelToApply);
-                                            Log.info("Merging his model with mine...", ((RegisterMessage) parsedMsg).getNodeName());
+                                            Log.info("Merging his model with mine...", rm.getNodeName());
                                             tseq.applyOn(recModel);
                                             modelToApply = recModel;
                                         }
-                                        if (checkFilter(((RegisterMessage) parsedMsg).getNodeName())) {
+                                        if (checkFilter(rm.getNodeName())) {
                                             // add onConnect logic
                                             try {
                                                 Log.debug("onConnect KevScript to process:");
@@ -162,7 +161,7 @@ public class WSGroup implements ModelListener, Runnable {
                                     WebSockets.sendText(modelReturn, webSocket, null);
                                     break;
                                 case Protocol.PUSH_TYPE:
-                                    PushMessage pm = (PushMessage) parsedMsg;
+                                    Protocol.PushMessage pm = (Protocol.PushMessage) parsedMsg;
                                     try {
                                         Log.info("{} \"{}\": push received, applying locally...", WSGroup.this.getClass().getSimpleName(), context.getInstanceName());
                                         ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
@@ -432,9 +431,9 @@ public class WSGroup implements ModelListener, Runnable {
                     Log.warn(WSGroup.this.getClass().getSimpleName() + " \"{}\" unknown message '{}'", context.getInstanceName(), msg);
                 } else {
                     switch (parsedMsg.getType()) {
-                        case PUSH_TYPE:
+                        case Protocol.PUSH_TYPE:
                             try {
-                                PushMessage pm = (PushMessage) parsedMsg;
+                                Protocol.PushMessage pm = (Protocol.PushMessage) parsedMsg;
                                 ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
                                 lock.set(true);
                                 modelService.update(model, new UpdateCallback() {
@@ -463,7 +462,7 @@ public class WSGroup implements ModelListener, Runnable {
 
         // register on master
         String currentModel = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
-        WebSockets.sendText(new RegisterMessage(currentNodeName, currentModel).toRaw(), client[0], null);
+        WebSockets.sendText(new Protocol.RegisterMessage(currentNodeName, currentModel).toRaw(), client[0], null);
         return client[0];
     }
 
@@ -481,7 +480,7 @@ public class WSGroup implements ModelListener, Runnable {
     public boolean afterLocalUpdate(UpdateContext context) {
         if (!lock.get()) {
             String modelStr = serializer.serialize(this.modelService.getCurrentModel().getModel());
-            PushMessage pushMessage = new PushMessage(modelStr);
+            Protocol.PushMessage pushMessage = new Protocol.PushMessage(modelStr, null);
             if (isMaster()) {
                 // broadcast changes
                 /*

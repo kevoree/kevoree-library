@@ -1,4 +1,4 @@
-add node0: JavaNode
-add sync: WSGroup
+add node0: JavaNode/LATEST/LATEST
+add sync: WSGroup/LATEST/LATEST
 
 attach node0 sync
