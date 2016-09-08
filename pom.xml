@@ -11,8 +11,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>0.8.11</kotlin.version>
         <kevoree.version>5.4.0-SNAPSHOT</kevoree.version>
-        <kevoree.registry.url>http://localhost:8080</kevoree.registry.url>
+        <kevoree.registry.url>${env.KEVOREE_REGISTRY_URL}</kevoree.registry.url>
         <kevoree.registry.namespace>kevoree</kevoree.registry.namespace>
+        <kevoree.registry.login>${env.KEVOREE_REGISTRY_LOGIN}</kevoree.registry.login>
+        <kevoree.registry.password>${env.KEVOREE_REGISTRY_PASSWORD}</kevoree.registry.password>
     </properties>
 
     <organization>
@@ -159,10 +161,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <!--<registry>${kevoree.registry.url}</registry>-->
+                    <registry>${kevoree.registry.url}</registry>
                     <namespace>${kevoree.registry.namespace}</namespace>
-                    <!--<login>${kevoree.registry.login}</login>-->
-                    <!--<password>${kevoree.registry.password}</password>-->
+                    <login>${kevoree.registry.login}</login>
+                    <password>${kevoree.registry.password}</password>
                 </configuration>
             </plugin>
           </plugins>
