@@ -69,7 +69,7 @@ public class StartStopInstance implements PrimitiveCommand, Runnable {
             Thread t = new Thread(instanceWrapper.getTg(), this);
             t.start();
             try {
-                t.join();
+                t.join(30000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

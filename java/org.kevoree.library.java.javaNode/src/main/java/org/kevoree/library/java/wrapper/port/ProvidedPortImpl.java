@@ -83,16 +83,23 @@ public class ProvidedPortImpl implements Port {
         this.send(payload, null);
     }
 
+
     public void send(String payload, Callback callback) {
         try {
             if (componentWrapper.isStarted()) {
                 Log.debug("Input port {} receiving \"{}\"", portPath, payload);
                 Object result = null;
                 if (paramSize == 0) {
+                    ClassLoader chanCL = Thread.currentThread().getContextClassLoader();
+                    Thread.currentThread().setContextClassLoader(componentInstance.getClass().getClassLoader());
                     result = method.invoke(componentInstance);
+                    Thread.currentThread().setContextClassLoader(chanCL);
                 } else {
                     if (paramSize == 1) {
+                        ClassLoader chanCL = Thread.currentThread().getContextClassLoader();
+                        Thread.currentThread().setContextClassLoader(componentInstance.getClass().getClassLoader());
                         result = method.invoke(componentInstance, payload);
+                        Thread.currentThread().setContextClassLoader(chanCL);
                     } else {
                         callback.onError(new Exception("Only one parameter is allowed"));
                     }

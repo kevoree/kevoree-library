@@ -1,39 +1,13 @@
 package org.kevoree.library;
 
-import static io.undertow.Handlers.websocket;
-import static org.kevoree.library.protocol.Protocol.PULL_TYPE;
-import static org.kevoree.library.protocol.Protocol.PUSH_TYPE;
-import static org.kevoree.library.protocol.Protocol.REGISTER_TYPE;
-import static org.kevoree.library.protocol.Protocol.RESULT_TYPE;
-import static org.kevoree.library.protocol.Protocol.STATUS_TYPE;
-
-import java.io.IOException;
-import java.net.URI;
-import java.rmi.server.UID;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
-
-import org.kevoree.ContainerNode;
-import org.kevoree.ContainerRoot;
-import org.kevoree.FragmentDictionary;
-import org.kevoree.Group;
-import org.kevoree.NetworkInfo;
-import org.kevoree.Value;
+import io.undertow.Undertow;
+import io.undertow.websockets.WebSocketConnectionCallback;
+import io.undertow.websockets.client.WebSocketClient;
+import io.undertow.websockets.core.*;
+import io.undertow.websockets.spi.WebSocketHttpExchange;
+import org.kevoree.*;
 import org.kevoree.annotation.GroupType;
-import org.kevoree.annotation.KevoreeInject;
-import org.kevoree.annotation.Param;
-import org.kevoree.annotation.Start;
-import org.kevoree.annotation.Stop;
+import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.api.KevScriptService;
 import org.kevoree.api.ModelService;
@@ -44,35 +18,28 @@ import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.factory.KevoreeFactory;
 import org.kevoree.library.feedback.ResultTaskService;
 import org.kevoree.library.protocol.Protocol;
-import org.kevoree.library.protocol.Protocol.Message;
-import org.kevoree.library.protocol.Protocol.PushMessage;
-import org.kevoree.library.protocol.Protocol.RegisterMessage;
-import org.kevoree.library.protocol.Protocol.ResultMessage;
-import org.kevoree.library.protocol.Protocol.StatusMessage;
+import org.kevoree.library.protocol.Protocol.*;
 import org.kevoree.log.Log;
 import org.kevoree.pmodeling.api.ModelCloner;
 import org.kevoree.pmodeling.api.compare.ModelCompare;
 import org.kevoree.pmodeling.api.json.JSONModelLoader;
 import org.kevoree.pmodeling.api.json.JSONModelSerializer;
 import org.kevoree.pmodeling.api.trace.TraceSequence;
-import org.xnio.BufferAllocator;
-import org.xnio.ByteBufferSlicePool;
-import org.xnio.OptionMap;
-import org.xnio.Options;
-import org.xnio.Xnio;
-import org.xnio.XnioWorker;
+import org.xnio.*;
 
-import io.undertow.Undertow;
-import io.undertow.websockets.WebSocketConnectionCallback;
-import io.undertow.websockets.client.WebSocketClient;
-import io.undertow.websockets.core.AbstractReceiveListener;
-import io.undertow.websockets.core.BufferedBinaryMessage;
-import io.undertow.websockets.core.BufferedTextMessage;
-import io.undertow.websockets.core.StreamSourceFrameChannel;
-import io.undertow.websockets.core.WebSocketChannel;
-import io.undertow.websockets.core.WebSocketVersion;
-import io.undertow.websockets.core.WebSockets;
-import io.undertow.websockets.spi.WebSocketHttpExchange;
+import java.io.IOException;
+import java.net.URI;
+import java.rmi.server.UID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
+
+import static io.undertow.Handlers.websocket;
+import static org.kevoree.library.protocol.Protocol.*;
 
 /**
  * Created with IntelliJ IDEA. User: duke Date: 29/11/2013 Time: 12:07
