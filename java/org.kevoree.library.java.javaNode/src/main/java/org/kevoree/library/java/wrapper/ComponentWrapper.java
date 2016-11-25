@@ -52,11 +52,10 @@ public class ComponentWrapper extends KInstanceWrapper {
     public void startInstance() throws InvocationTargetException {
         try {
             super.startInstance();
-            for (ProvidedPortImpl input : providedPorts.values()) {
-                if (input != null) {
-                    input.processPending();
-                }
-            }
+            providedPorts.values()
+                    .stream()
+                    .filter(input -> input != null)
+                    .forEachOrdered(ProvidedPortImpl::processPending);
         } catch (InvocationTargetException e) {
             setStarted(true); //WE PUT COMPONENT IN START STATE TO ALLOW ROLLBACK TO UNSET VARIABLE
             throw e;

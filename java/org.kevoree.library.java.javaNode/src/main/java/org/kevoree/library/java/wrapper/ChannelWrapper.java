@@ -35,6 +35,7 @@ public class ChannelWrapper extends KInstanceWrapper {
             ChannelDispatch channel = (ChannelDispatch) getTargetObj();
             Log.debug(" -> {} (dispatch)", getModelElement().path());
             try {
+//                System.out.println("===> channel wrapper context : " + ((FlexyClassLoader) getClass().getClassLoader()).getKey());
                 channel.dispatch(payload, callback);
             } catch (Throwable e) {
                 Log.error("Channel \"{}\" dispatch threw an exception", e, getModelElement().getName());
@@ -47,13 +48,11 @@ public class ChannelWrapper extends KInstanceWrapper {
 
     private void processPending() {
         if (!pending.isEmpty()) {
-            Thread t = new Thread(new Runnable() {
-                public void run() {
-                    for (StoredCall c : pending) {
-                        call(c.getCallback(), c.getPayload());
-                    }
-                    pending.clear();
+            Thread t = new Thread(() -> {
+                for (StoredCall c : pending) {
+                    call(c.getCallback(), c.getPayload());
                 }
+                pending.clear();
             });
             t.start();
         }

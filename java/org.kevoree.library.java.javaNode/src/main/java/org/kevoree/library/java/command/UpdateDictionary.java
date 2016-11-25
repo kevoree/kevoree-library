@@ -26,7 +26,7 @@ public class UpdateDictionary implements PrimitiveCommand {
     public UpdateDictionary(Instance c, Value dicValue, boolean forceInject, String nodeName, ModelRegistry registry, BootstrapService bs, ModelService modelService) {
         this.c = c;
         this.dicValue = dicValue;
-        this.forceInject = false;
+        this.forceInject = forceInject;
         this.nodeName = nodeName;
         this.registry = registry;
         this.bs = bs;
@@ -75,7 +75,7 @@ public class UpdateDictionary implements PrimitiveCommand {
 
     public void undo() {
         try {
-            //try to found old value
+            // try to find old value
             String valueToInject = null;
             KMFContainer previousValue = modelService.getCurrentModel().getModel().findByPath(dicValue.path());
             if (previousValue != null && previousValue instanceof Value) {

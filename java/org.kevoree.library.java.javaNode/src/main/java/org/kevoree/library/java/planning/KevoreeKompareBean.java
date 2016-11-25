@@ -120,6 +120,7 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                 traces.populate(n.toTraces(true, true));
             }
         }
+
         for (Group g : targetNode.getGroups()) {
             Group previousGroup = (Group) currentModel.findByPath(g.path());
             if (previousGroup != null) {
@@ -402,7 +403,7 @@ public class KevoreeKompareBean extends KevoreeScheduler {
                                     // noop
                                 } else {
                                     TupleObjPrim updateDic = new TupleObjPrim(modelElement, AdaptationType.UpdateDictionaryInstance);
-                                    if (!elementAlreadyProcessed.containsKey(updateDic)) {
+                                    if (!elementAlreadyProcessed.containsKey(updateDic.getKey())) {
                                         Object[] values = new Object[]{modelElement.eContainer().eContainer(), modelElement};
                                         adaptationModel.getAdaptations().add(adapt(AdaptationType.UpdateDictionaryInstance, values));
                                         elementAlreadyProcessed.put(updateDic.getKey(), updateDic);
