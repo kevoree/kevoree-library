@@ -9,9 +9,6 @@ import org.kevoree.log.Log;
 
 import java.util.Random;
 
-/**
- * Created with IntelliJ IDEA. User: duke Date: 02/12/2013 Time: 15:10
- */
 @ComponentType(version = 1, description = "A Kevoree component that sends a 'tick' message at user-defined intervals")
 public class Ticker implements Runnable {
 

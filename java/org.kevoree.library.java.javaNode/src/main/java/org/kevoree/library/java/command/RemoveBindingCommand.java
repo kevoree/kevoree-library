@@ -1,12 +1,12 @@
 package org.kevoree.library.java.command;
 
-import org.kevoree.library.java.wrapper.ComponentWrapper;
-import org.kevoree.library.java.wrapper.ChannelWrapper;
-import org.kevoree.library.java.ModelRegistry;
-import org.kevoree.MBinding;
-import org.kevoree.api.PrimitiveCommand;
 import org.kevoree.ComponentInstance;
-import org.kevoree.library.java.wrapper.port.ProvidedPortImpl;
+import org.kevoree.MBinding;
+import org.kevoree.Port;
+import org.kevoree.api.PrimitiveCommand;
+import org.kevoree.library.java.ModelRegistry;
+import org.kevoree.library.java.wrapper.ChannelWrapper;
+import org.kevoree.library.java.wrapper.ComponentWrapper;
 import org.kevoree.library.java.wrapper.port.RequiredPortImpl;
 import org.kevoree.log.Log;
 
@@ -29,22 +29,51 @@ public class RemoveBindingCommand implements PrimitiveCommand {
 
     public boolean execute() {
         try {
-            Object kevoreeChannelFound = registry.lookup(c.getHub());
-            Object kevoreeComponentFound = registry.lookup(c.getPort().eContainer());
-            if(kevoreeChannelFound != null && kevoreeComponentFound != null && kevoreeComponentFound instanceof ComponentWrapper && kevoreeChannelFound instanceof ChannelWrapper){
-                String portName = c.getPort().getPortTypeRef().getName();
-                RequiredPortImpl foundNeedPort = ((ComponentWrapper) kevoreeComponentFound).getRequiredPorts().get(portName);
-                ProvidedPortImpl foundHostedPort = ((ComponentWrapper) kevoreeComponentFound).getProvidedPorts().get(portName);
-                if(foundNeedPort == null && foundHostedPort == null){
-                    Log.info("Port instance not found in component");
-                    return false;
-                }
-                if (foundNeedPort != null) {
-                    foundNeedPort.removeChannelWrapper(c);
-                    return true;
+            ChannelWrapper chan = (ChannelWrapper) registry.lookup(c.getHub());
+            ComponentWrapper comp = (ComponentWrapper) registry.lookup(c.getPort().eContainer());
+
+            if (chan != null && comp != null && comp instanceof ComponentWrapper && chan instanceof ChannelWrapper) {
+                ComponentInstance compInstance = (ComponentInstance) c.getPort().eContainer();
+                Port input = compInstance.findProvidedByID(c.getPort().getName());
+                if (input != null) {
+                    // port is an input (provided)
+                    chan.getContext().getBoundPorts().remove(input.getName());
+                    Log.debug("input {} <-> {}", input.path(), chan.getModelElement().path());
+                } else {
+                    // port is an output (required)
+                    RequiredPortImpl outputWrapper = comp.getRequiredPorts().get(c.getPort().getName());
+                    outputWrapper.removeChannelWrapper(c);
+                    Log.debug("output {} <-> {}", c.getPort().path(), chan.getModelElement().path());
                 }
 
-                ((ChannelWrapper) kevoreeChannelFound).getContext().getBoundPorts().remove(foundHostedPort.getPath());
+                // retrieve every bindings related to this binding chan
+                for (MBinding b: c.getHub().getBindings()) {
+                    if (b != c) {
+                        compInstance = (ComponentInstance) b.getPort().eContainer();
+                        input = compInstance.findProvidedByID(b.getPort().getName());
+                        if (input != null) {
+                            // port is an input
+                            chan.getContext().getBoundPorts().remove(input.getName());
+                            Log.debug("input {} <-> {}", input.path(), chan.getModelElement().path());
+                        }
+                    }
+                }
+
+
+                // OLD ALGO:
+//                String portName = c.getPort().getPortTypeRef().getName();
+//                RequiredPortImpl foundNeedPort = ((ComponentWrapper) comp).getRequiredPorts().get(portName);
+//                ProvidedPortImpl foundHostedPort = ((ComponentWrapper) comp).getProvidedPorts().get(portName);
+//                if (foundNeedPort == null && foundHostedPort == null) {
+//                    Log.info("Port instance not found in component");
+//                    return false;
+//                }
+//                if (foundNeedPort != null) {
+//                    foundNeedPort.removeChannelWrapper(c);
+//                    return true;
+//                }
+//
+//                ((ChannelWrapper) chan).getContext().getBoundPorts().remove(foundHostedPort.getPath());
                 return true;
             } else {
                 return false;

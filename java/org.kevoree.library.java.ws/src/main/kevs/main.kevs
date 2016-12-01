@@ -1,4 +1,20 @@
-add node0: JavaNode/LATEST/LATEST
-add sync: WSGroup/LATEST/LATEST
+//add node0: JavaNode/LATEST/LATEST
+//add sync: WSGroup/LATEST/LATEST
+
+//attach node0 sync
+
+add node0 : JavaNode/LATEST/LATEST
+add sync : WSGroup/LATEST/LATEST
+add node0.ticker : Ticker/LATEST/LATEST
+add node0.printer : ConsolePrinter/LATEST/LATEST
+add chan : RemoteWSChan/LATEST/LATEST
 
 attach node0 sync
+
+set sync.master = 'node0'
+
+bind node0.ticker.tick chan
+bind node0.printer.input chan
+
+set chan.host = 'ws.kevoree.org'
+set chan.uuid = '123'

@@ -42,6 +42,7 @@ public class ChannelWrapperContext implements ChannelContext {
         return boundPorts;
     }
 
+    @Deprecated
     public void setPortsBinded(HashMap<String, Port> portsBinded) {
         this.boundPorts = portsBinded;
     }
@@ -56,12 +57,13 @@ public class ChannelWrapperContext implements ChannelContext {
         Channel channel = (Channel) modelService.getCurrentModel().getModel().findByPath(channelPath);
         if (channel != null) {
             for (MBinding binding : channel.getBindings()) {
-
                 ContainerNode parentNode = (ContainerNode) binding.getPort().eContainer().eContainer();
                 if (parentNode != null) {
                     if (!parentNode.getName().equals(localNodePath)) {
                         org.kevoree.Port finalPort = binding.getPort();
                         if (finalPort != null) {
+                            // TODO should we just add input ports here??
+                            //System.out.println("->> " + finalPort.path() + " REFINPARENT: " + finalPort.getRefInParent());
                             result.add(finalPort.path());
                         }
                     }

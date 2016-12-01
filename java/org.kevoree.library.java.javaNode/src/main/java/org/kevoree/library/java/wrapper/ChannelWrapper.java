@@ -31,9 +31,11 @@ public class ChannelWrapper extends KInstanceWrapper {
     }
 
     public void call(org.kevoree.api.Callback callback, String payload) {
+        String connectedInputs = context.getBoundPorts().keySet().stream().reduce((p, n) -> p + ", " + n).get();
+        connectedInputs += context.getRemotePortPaths().stream().reduce((p, n) -> p + ", " + n).get();
         if (isStarted()) {
             ChannelDispatch channel = (ChannelDispatch) getTargetObj();
-            Log.debug(" -> {} (dispatch)", getModelElement().path());
+            Log.debug(" {} -> {} -> [{}] (dispatch)", getModelElement().getName(), payload, connectedInputs);
             try {
 //                System.out.println("===> channel wrapper context : " + ((FlexyClassLoader) getClass().getClassLoader()).getKey());
                 channel.dispatch(payload, callback);
@@ -41,7 +43,7 @@ public class ChannelWrapper extends KInstanceWrapper {
                 Log.error("Channel \"{}\" dispatch threw an exception", e, getModelElement().getName());
             }
         } else {
-            Log.debug(" -> {} (store)", getModelElement().path());
+            Log.debug(" {} -> {} -> [{}] (queued)", getModelElement().getName(), payload, connectedInputs);
             pending.add(new StoredCall(payload, callback));
         }
     }

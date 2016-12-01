@@ -87,7 +87,7 @@ public class ProvidedPortImpl implements Port {
     public void send(String payload, Callback callback) {
         try {
             if (componentWrapper.isStarted()) {
-                Log.debug("Input port {} receiving \"{}\"", portPath, payload);
+                Log.debug("{} -> {}.{}", payload, componentWrapper.getModelElement().getName(), method.getName());
                 Object result = null;
                 if (paramSize == 0) {
                     ClassLoader chanCL = Thread.currentThread().getContextClassLoader();
@@ -114,7 +114,7 @@ public class ProvidedPortImpl implements Port {
                     CallBackCaller.call(stringResult, callback, portPath);
                 }
             } else {
-                Log.debug("Input port {} storing \"{}\" (component stopped)", portPath, payload);
+                Log.debug("{} -> {}.{} (queued)", payload, componentWrapper.getModelElement().getName(), method.getName());
                 // store call somewhere
                 pending.add(new StoredCall(payload, callback));
             }
@@ -125,13 +125,11 @@ public class ProvidedPortImpl implements Port {
 
     public void processPending() {
         if (!pending.isEmpty()) {
-            Thread t = new Thread(new Runnable() {
-                public void run() {
-                    for (StoredCall c : pending) {
-                        send(c.payload, c.callback);
-                    }
-                    pending.clear();
+            Thread t = new Thread(() -> {
+                for (StoredCall c : pending) {
+                    send(c.payload, c.callback);
                 }
+                pending.clear();
             });
             t.start();
         }

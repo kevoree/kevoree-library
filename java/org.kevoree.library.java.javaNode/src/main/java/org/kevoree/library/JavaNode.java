@@ -12,10 +12,12 @@ import org.kevoree.api.adaptation.AdaptationPrimitive;
 import org.kevoree.api.adaptation.AdaptationType;
 import org.kevoree.api.handler.ModelListener;
 import org.kevoree.api.handler.UpdateContext;
+import org.kevoree.library.java.KevoreeThreadGroup;
 import org.kevoree.library.java.ModelRegistry;
 import org.kevoree.library.java.command.*;
 import org.kevoree.library.java.network.UDPWrapper;
 import org.kevoree.library.java.planning.KevoreeKompareBean;
+import org.kevoree.library.java.wrapper.KInstanceWrapper;
 import org.kevoree.library.java.wrapper.WrapperFactory;
 import org.kevoree.log.Log;
 
@@ -42,7 +44,6 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
 
     public void setLog(String log) {
         boolean changed = false;
-        this.log = log;
         if ("DEBUG".equalsIgnoreCase(log) && !Log.DEBUG) {
             Log.set(Log.LEVEL_DEBUG);
             changed = true;
@@ -63,12 +64,12 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
             changed = true;
         }
         if (changed) {
-            Log.info("Node platform \"{}\" changing LOG level to {}", this.context.getInstanceName(), this.log);
+            Log.info("Node platform \"{}\" changing LOG level to {}", this.context.getInstanceName(), log);
         }
     }
 
-    @Param(optional = true, defaultValue = "INFO")
-    public String log;
+    @Param(defaultValue = "INFO")
+    public String log = "INFO";
 
     /**
      * java VM properties used when this node is hosted by a parent node (parent can be also the watchdog)
@@ -83,13 +84,17 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
     private Long preTime = 0L;
 
     @Start
-    public void startNode() {
-        Log.info("Starting {}", context.getPath());
+    public void startNode() throws Exception {
         preTime = System.currentTimeMillis();
         modelService.registerModelListener(this);
         kompareBean = new KevoreeKompareBean(modelRegistry);
         wrapperFactory = createWrapperFactory(modelService.getNodeName());
-        modelRegistry.registerFromPath(context.getPath(), this);
+        ContainerNode thisNode = modelService.getPendingModel().findNodesByID(context.getNodeName());
+        KevoreeThreadGroup tg = new KevoreeThreadGroup("kev/" + context.getPath());
+        KInstanceWrapper nodeWrapper = wrapperFactory.wrap(thisNode, this, tg, bootstrapService, modelService);
+        nodeWrapper.setStarted(true);
+        modelRegistry.register(thisNode, nodeWrapper);
+
         if (System.getProperty("node.admin") != null) {
             try {
                 adminSrv = new UDPWrapper(Integer.parseInt(System.getProperty("node.admin").toString()));
@@ -118,6 +123,11 @@ public class JavaNode implements ModelListener, org.kevoree.api.NodeType {
         modelService.unregisterModelListener(this);
         kompareBean = null;
         modelRegistry.clear();
+    }
+
+    @Update
+    public void update() {
+        this.setLog(this.log);
     }
 
     @Override

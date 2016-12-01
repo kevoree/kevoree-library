@@ -1,6 +1,6 @@
 add node0 : JavaNode/LATEST/LATEST
 add node0.ticker : Ticker/LATEST/LATEST
-add node0.printer: ConsolePrinter/LATEST/LATEST
+add node0.printer: ToyConsole/2/LATEST
 add sync : WSGroup/LATEST/LATEST
 add chan: LocalChannel/LATEST/LATEST
 

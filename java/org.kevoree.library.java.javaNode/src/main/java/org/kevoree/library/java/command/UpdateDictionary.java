@@ -54,21 +54,11 @@ public class UpdateDictionary implements PrimitiveCommand {
         }
 
         Object ref = registry.lookup(c);
-        if (ref != null) {
-            if (ref instanceof KInstanceWrapper) {
-                doInject(((KInstanceWrapper) ref).getTargetObj());
-            } else {
-                try {
-                    doInject(ref);
-                    return true;
-                } catch (Exception e) {
-                    Log.error("Kevoree NodeType Instance Update Error!", e);
-                    return false;
-                }
-            }
+        if (ref != null && ref instanceof KInstanceWrapper) {
+            doInject(((KInstanceWrapper) ref).getTargetObj());
             return true;
         } else {
-            Log.error("Unable to find instance: " + c.getName());
+            Log.error("Unable to update dictionary of unknown instance: " + c.getName());
             return false;
         }
     }

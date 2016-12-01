@@ -2,7 +2,7 @@ add node0: JavaNode
 add node0.twitter: Twitter
 add node0.printer: ConsolePrinter
 add sync: WSGroup
-add chan: SyncBroadcast
+add chan: LocalChannel
 
 attach node0 sync
 

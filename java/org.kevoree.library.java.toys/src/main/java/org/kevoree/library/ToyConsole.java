@@ -17,7 +17,7 @@ import javax.swing.*;
  * Date: 02/12/2013
  * Time: 10:47
  */
-@ComponentType(version=1)
+@ComponentType(version=2)
 public class ToyConsole {
 
 
@@ -28,7 +28,7 @@ public class ToyConsole {
     protected Boolean showInTab = true;
 
     @Output
-    protected Port textEntered;
+    protected Port output;
 
     @KevoreeInject
     protected Context cmpContext;
@@ -106,11 +106,11 @@ public class ToyConsole {
     }
 
     public void textTypedLocally(String text) {
-        textEntered.send(text,null);
+        output.send(text,null);
     }
 
     @Input
-    public void showText(Object text) {
+    public void input(Object text) {
         if (text != null) {
             thisConsole.appendIncomming("->" + text.toString());
         }

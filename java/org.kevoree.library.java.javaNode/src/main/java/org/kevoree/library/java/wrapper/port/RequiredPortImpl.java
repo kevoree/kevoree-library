@@ -24,10 +24,14 @@ import java.util.Map;
 
 public class RequiredPortImpl implements Port {
 
+    private org.kevoree.Port port;
+    private ComponentWrapper comp;
     private String portPath;
     private final Map<String, ChannelWrapper> channels = Collections.synchronizedMap(new HashMap<String, ChannelWrapper>());
 
     public RequiredPortImpl(Object targetObj, org.kevoree.Port port, ComponentWrapper componentWrapper) {
+        this.port = port;
+        this.comp = componentWrapper;
         this.portPath = port.path();
 
         Field field = ReflectUtils.findFieldWithAnnotation(port.getName(), targetObj.getClass(), Output.class);
@@ -57,9 +61,9 @@ public class RequiredPortImpl implements Port {
     public void send(String payload, final Callback callback) {
         synchronized (channels) {
             if (!channels.isEmpty()) {
-                Log.debug("Output port {} sending \"{}\" to:", portPath, payload);
+                Log.debug("{}.{} -> {}", comp.getModelElement().getName(), port.getName(), payload);
             } else {
-                Log.debug("Output port {} sending \"{}\" to no channel. Port is not connected.", portPath, payload);
+                Log.debug("{}.{} -> {} (dropped)", comp.getModelElement().getName(), port.getName(), payload);
             }
             for (final ChannelWrapper channel : channels.values()) {
                 channel.call(new Callback() {

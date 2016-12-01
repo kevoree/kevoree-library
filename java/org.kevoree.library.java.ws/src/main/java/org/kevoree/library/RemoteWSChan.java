@@ -6,9 +6,7 @@ import org.kevoree.Channel;
 import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.*;
 import org.kevoree.api.*;
-import org.kevoree.factory.DefaultKevoreeFactory;
-import org.kevoree.pmodeling.api.json.JSONModelLoader;
-import org.kevoree.pmodeling.api.json.JSONModelSerializer;
+import org.kevoree.kcl.api.FlexyClassLoader;
 import org.xnio.OptionMap;
 import org.xnio.Options;
 import org.xnio.Xnio;
@@ -31,8 +29,6 @@ import java.util.concurrent.TimeUnit;
 public class RemoteWSChan implements ChannelDispatch {
 
 	private static final int LOOP_BREAK = 3000;
-	private static final JSONModelLoader loader = new JSONModelLoader(new DefaultKevoreeFactory());
-	private static final JSONModelSerializer serializer = new JSONModelSerializer();
 
 	@KevoreeInject
 	private Context context;
@@ -124,12 +120,16 @@ public class RemoteWSChan implements ChannelDispatch {
 				}
 			});
 
+			FlexyClassLoader fcl = (FlexyClassLoader) this.getClass().getClassLoader();
+			System.out.println("channel context dispatch >>>>>>>> " + fcl.getKey());
 			destPaths.forEach(path -> {
 				WebSocketClient client = clients.get(path);
 				if (client != null && client.isOpen()) {
 					client.send(s);
 				} else {
 					try {
+						FlexyClassLoader fcl2 = (FlexyClassLoader) this.getClass().getClassLoader();
+						System.out.println("channel context dispatch 2 >>>>>>>> " + fcl2.getKey());
 						XnioWorker worker = Xnio.getInstance(Undertow.class.getClassLoader())
 								.createWorker(OptionMap.builder()
 								.set(Options.WORKER_IO_THREADS, 2)
