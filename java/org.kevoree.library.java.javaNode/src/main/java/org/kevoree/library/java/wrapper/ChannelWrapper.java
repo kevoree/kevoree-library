@@ -31,8 +31,8 @@ public class ChannelWrapper extends KInstanceWrapper {
     }
 
     public void call(org.kevoree.api.Callback callback, String payload) {
-        String connectedInputs = context.getBoundPorts().keySet().stream().reduce((p, n) -> p + ", " + n).get();
-        connectedInputs += context.getRemotePortPaths().stream().reduce((p, n) -> p + ", " + n).get();
+        String connectedInputs = context.getBoundPorts().keySet().stream().reduce((p, n) -> p + ", " + n).orElse("");
+        connectedInputs += context.getRemotePortPaths().stream().reduce((p, n) -> p + ", " + n).orElse("");
         if (isStarted()) {
             ChannelDispatch channel = (ChannelDispatch) getTargetObj();
             Log.debug(" {} -> {} -> [{}] (dispatch)", getModelElement().getName(), payload, connectedInputs);
