@@ -12,7 +12,6 @@ import org.kevoree.api.Context;
 import org.kevoree.api.KevScriptService;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.ModelListener;
-import org.kevoree.api.handler.UpdateCallback;
 import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.factory.KevoreeFactory;
@@ -126,9 +125,9 @@ public class WSGroup implements ModelListener, Runnable {
                                             // new registered model has a model to share: merging it locally
                                             ContainerRoot recModel = (ContainerRoot) jsonModelLoader.loadModelFromString(rm.getModel()).get(0);
                                             TraceSequence tseq = compare.merge(recModel, modelToApply);
-                                            Log.info("Merging his model with mine...", rm.getNodeName());
                                             tseq.applyOn(recModel);
                                             modelToApply = recModel;
+                                            Log.debug("Node's \"{}\" model has been merged with the current one", rm.getNodeName());
                                         }
                                         if (checkFilter(rm.getNodeName())) {
                                             // add onConnect logic
@@ -151,6 +150,7 @@ public class WSGroup implements ModelListener, Runnable {
                                             }
                                         } else {
                                             // update locally
+                                            Log.debug("Applying merged model locally (no filter)");
                                             modelService.update(modelToApply, null);
                                         }
                                     }
@@ -383,12 +383,16 @@ public class WSGroup implements ModelListener, Runnable {
                                 masterClient = createWSClient(ip, port, context.getNodeName(), modelService);
                                 if (masterClient != null && masterClient.isOpen()) {
                                     Log.info("Master connection opened on {}:{}", ip, port);
+                                    String currentModel = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
+                                    WebSockets.sendText(new Protocol.RegisterMessage(modelService.getNodeName(), currentModel).toRaw(), masterClient, null);
                                     return;
                                 }
                             }
                             masterClient = createWSClient(defaultIP, port, context.getNodeName(), modelService);
                             if (masterClient != null && masterClient.isOpen()) {
                                 Log.info("Master connection opened on {}:{}", defaultIP, port);
+                                String currentModel = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
+                                WebSockets.sendText(new Protocol.RegisterMessage(modelService.getNodeName(), currentModel).toRaw(), masterClient, null);
                             }
                         } else {
                             Log.info("Master node '{}' is not defined in the model. You must add it.", master);
@@ -435,13 +439,7 @@ public class WSGroup implements ModelListener, Runnable {
                             try {
                                 Protocol.PushMessage pm = (Protocol.PushMessage) parsedMsg;
                                 ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
-                                lock.set(true);
-                                modelService.update(model, new UpdateCallback() {
-                                    @Override
-                                    public void run(Boolean applied) {
-                                        lock.set(false);
-                                    }
-                                });
+                                modelService.update(model, null);
                             } catch (Exception err) {
                                 lock.set(false);
                             }
@@ -459,10 +457,15 @@ public class WSGroup implements ModelListener, Runnable {
             }
         });
         client[0].resumeReceives();
-
-        // register on master
-        String currentModel = jsonModelSaver.serialize(modelService.getCurrentModel().getModel());
-        WebSockets.sendText(new Protocol.RegisterMessage(currentNodeName, currentModel).toRaw(), client[0], null);
+//        // register on master
+//        ContainerRoot model = modelService.getCurrentModel().
+//        if (model == null) {
+//            Log.debug("No pending model...taking current one");
+//            model = modelService.getCurrentModel().getModel();
+//            Log.debug("Found current node in model {}", model.findNodesByID(modelService.getNodeName()).getName());
+//        }
+//        String currentModel = jsonModelSaver.serialize(model);
+//        WebSockets.sendText(new Protocol.RegisterMessage(currentNodeName, currentModel).toRaw(), client[0], null);
         return client[0];
     }
 
@@ -493,16 +496,17 @@ public class WSGroup implements ModelListener, Runnable {
                 if (allConnectedClients.size() > 0) {
                     Log.info("Broadcasting new model to all clients ("+this.allConnectedClients.size()+")");
                 }
-                for (WebSocketChannel client : new HashSet<WebSocketChannel>(allConnectedClients)) {
+                for (WebSocketChannel client : new HashSet<>(allConnectedClients)) {
                     if (client != null && client.isOpen()) {
                         WebSockets.sendText(pushMessage.toRaw(), client, null);
                     }
                 }
             } else {
                 if (this.masterClient != null && this.masterClient.isOpen()) {
+                    Log.debug("[{}] Notifying master with local model", modelService.getNodeName());
                     WebSockets.sendText(pushMessage.toRaw(), this.masterClient, null);
                 } else {
-                    Log.debug("Unable to notify master server. No connection.");
+                    Log.debug("Unable to notify master server. Not connected to master yet.");
                 }
             }
         }

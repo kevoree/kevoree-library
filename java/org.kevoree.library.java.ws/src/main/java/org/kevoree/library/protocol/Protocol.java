@@ -32,9 +32,8 @@ public class Protocol {
     private final static Pattern patterStatus = Pattern.compile("^status/(.*)$");
 
     public interface Message {
-        public int getType();
-
-        public String toRaw();
+        int getType();
+        String toRaw();
     }
 
     public static class StatusMessage implements Message {

@@ -59,6 +59,10 @@
             <plugin>
                 <groupId>org.kevoree.tools</groupId>
                 <artifactId>org.kevoree.tools.mavenplugin</artifactId>
+                <configuration>
+                    <namespace>${kevoree.registry.namespace}</namespace>
+                    <kevscript>${env.KEVS}</kevscript>
+                </configuration>
             </plugin>
         </plugins>
     </build>
