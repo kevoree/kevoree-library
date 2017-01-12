@@ -1,10 +1,14 @@
 add node0 : JavaNode/LATEST/LATEST
-add node0.ticker : Ticker/LATEST/LATEST
-add node0.printer: ToyConsole/2/LATEST
 add sync : WSGroup/LATEST/LATEST
-add chan: LocalChannel/LATEST/LATEST
+
+set node0.log = 'DEBUG'
 
 attach node0 sync
 
-bind node0.ticker.tick chan
-bind node0.printer.input chan
+add node0.sender : ToyConsole/LATEST/LATEST
+add node0.receiver: ToyConsole/2/LATEST
+
+add chan: LocalChannel/LATEST/LATEST
+
+bind node0.sender.output chan
+bind node0.receiver.input chan
