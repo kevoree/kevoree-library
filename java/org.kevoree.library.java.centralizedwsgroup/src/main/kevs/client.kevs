@@ -1,0 +1,18 @@
+add node0, client: JavaNode/LATEST/LATEST
+add client.printer: ConsolePrinter/LATEST/LATEST
+add sync: CentralizedWSGroup/LATEST/LATEST
+add chan: RemoteWSChan/LATEST/LATEST
+
+attach node0, client sync
+
+set sync.isMaster/node0 = "true"
+set sync.masterNet/client = 'ip.lo'
+
+set client.log = "DEBUG"
+
+set chan.uuid = 'foobar'
+set chan.host = 'ws.kevoree.org'
+
+bind client.printer.input chan
+
+network node0.ip.lo 127.0.0.1
