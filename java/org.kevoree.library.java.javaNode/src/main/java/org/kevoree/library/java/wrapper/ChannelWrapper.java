@@ -42,7 +42,10 @@ public class ChannelWrapper extends KInstanceWrapper {
             ChannelDispatch channel = (ChannelDispatch) getTargetObj();
             Log.debug(" {} -> {} -> [{}] (dispatch)", getModelElement().getName(), payload, connectedInputs);
             try {
+                ClassLoader nodeCL = Thread.currentThread().getContextClassLoader();
+                Thread.currentThread().setContextClassLoader(channel.getClass().getClassLoader());
                 channel.dispatch(payload, callback);
+                Thread.currentThread().setContextClassLoader(nodeCL);
             } catch (Throwable e) {
                 Log.error("Channel \"{}\" dispatch threw an exception", e, getModelElement().getName());
             }
