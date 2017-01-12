@@ -2,10 +2,10 @@ package org.kevoree.library;
 
 import fr.braindead.websocket.client.WebSocketClient;
 import io.undertow.Undertow;
-import org.kevoree.Channel;
 import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.*;
 import org.kevoree.api.*;
+import org.kevoree.log.Log;
 import org.xnio.OptionMap;
 import org.xnio.Options;
 import org.xnio.Xnio;
@@ -14,11 +14,13 @@ import org.xnio.XnioWorker;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA. User: duke Date: 29/11/2013 Time: 12:07
@@ -59,17 +61,16 @@ public class RemoteWSChan implements ChannelDispatch {
 		clients = new HashMap<>();
 		url = getURI();
 
-		ContainerRoot model = modelService.getPendingModel();
-		if (model == null) {
-			model = modelService.getCurrentModel().getModel();
-		}
-		Channel thisChan = (Channel) model.findByPath(context.getPath());
-		Set<String> inputPaths = Helper.getProvidedPortsPath(thisChan, context.getNodeName());
+		Set<String> localInputs = channelContext.getLocalPorts().stream().map(port -> port.getPath())
+				.collect(Collectors.toSet());
 
-		scheduledThreadPool = Executors.newScheduledThreadPool(inputPaths.size());
-		inputPaths.forEach(p -> {
+//		Channel thisChan = (Channel) model.findByPath(context.getPath());
+//		Set<String> inputPaths = Helper.getProvidedPortsPath(thisChan, context.getNodeName());
+
+		scheduledThreadPool = Executors.newScheduledThreadPool(localInputs.size());
+		localInputs.forEach(inputPath -> {
 			try {
-				WSConnectionCmd runnable = new WSConnectionCmd(url + URLEncoder.encode(p, "utf8"));
+				WSConnectionCmd runnable = new WSConnectionCmd(url + URLEncoder.encode(inputPath, "utf8"));
 				scheduledThreadPool.scheduleAtFixedRate(runnable, 0, LOOP_BREAK, TimeUnit.MILLISECONDS);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
@@ -89,8 +90,10 @@ public class RemoteWSChan implements ChannelDispatch {
 				try {
 					client.close();
 				} catch (IOException e) {
-					/* ignore */ }
+					/* ignore */
+				}
 			});
+			this.clients.clear();
 			this.clients = null;
 		}
 	}
@@ -106,18 +109,23 @@ public class RemoteWSChan implements ChannelDispatch {
 		ContainerRoot model = modelService.getCurrentModel().getModel();
 		if (model != null) {
 			Set<String> destPaths = new HashSet<>();
-			channelContext.getLocalPorts().forEach(p -> {
-				org.kevoree.Port port = (org.kevoree.Port) model.findByPath(p.getPath());
-				if (port != null && port.getRefInParent().equals("provided")) {
-					destPaths.add(port.path());
-				}
-			});
-			channelContext.getRemotePortPaths().forEach(p -> {
-				org.kevoree.Port port = (org.kevoree.Port) model.findByPath(p);
-				if (port != null && port.getRefInParent().equals("provided")) {
-					destPaths.add(port.path());
-				}
-			});
+			destPaths.addAll(channelContext.getLocalPorts().stream().map(port -> port.getPath())
+					.collect(Collectors.toSet()));
+			destPaths.addAll(channelContext.getRemotePortPaths());
+
+
+//			channelContext.getLocalPorts().forEach(p -> {
+//				org.kevoree.Port port = (org.kevoree.Port) model.findByPath(p.getPath());
+//				if (port != null && port.getRefInParent().equals("provided")) {
+//					destPaths.add(port.path());
+//				}
+//			});
+//			channelContext.getRemotePortPaths().forEach(p -> {
+//				org.kevoree.Port port = (org.kevoree.Port) model.findByPath(p);
+//				if (port != null && port.getRefInParent().equals("provided")) {
+//					destPaths.add(port.path());
+//				}
+//			});
 
 			destPaths.forEach(path -> {
 				WebSocketClient client = clients.get(path);
@@ -127,14 +135,14 @@ public class RemoteWSChan implements ChannelDispatch {
 					try {
 						XnioWorker worker = Xnio.getInstance(Undertow.class.getClassLoader())
 								.createWorker(OptionMap.builder()
-								.set(Options.WORKER_IO_THREADS, 2)
-								.set(Options.CONNECTION_HIGH_WATER, 1000000)
-								.set(Options.CONNECTION_LOW_WATER, 1000000)
-								.set(Options.WORKER_TASK_CORE_THREADS, 30)
-								.set(Options.WORKER_TASK_MAX_THREADS, 30)
-								.set(Options.TCP_NODELAY, true)
-								.set(Options.CORK, true)
-								.getMap());
+										.set(Options.WORKER_IO_THREADS, 2)
+										.set(Options.CONNECTION_HIGH_WATER, 1000000)
+										.set(Options.CONNECTION_LOW_WATER, 1000000)
+										.set(Options.WORKER_TASK_CORE_THREADS, 30)
+										.set(Options.WORKER_TASK_MAX_THREADS, 30)
+										.set(Options.TCP_NODELAY, true)
+										.set(Options.CORK, true)
+										.getMap());
 						client = new WebSocketClient(worker, URI.create(url + URLEncoder.encode(path, "utf8"))) {
 							@Override
 							public void onOpen() {
@@ -197,11 +205,15 @@ public class RemoteWSChan implements ChannelDispatch {
 			try {
 				if (context != null) {
 					if (client == null || !client.isOpen()) {
+						final String decodedUri = URLDecoder.decode(uri, "utf8");
+						Log.debug("RemoteWSChan \"{}\" opening WebSocket client to {}", context.getInstanceName(), decodedUri);
 						client = new WebSocketClient(URI.create(uri)) {
 							@Override
 							public void onMessage(String msg) {
+								Log.debug("RemoteWSChan \"{}\" received message on {}", context.getInstanceName(), decodedUri);
 								List<Port> ports = channelContext.getLocalPorts();
 								for (Port p : ports) {
+									Log.trace(" => sending message to port {}", p.getPath());
 									p.send(msg, null);
 								}
 							}
