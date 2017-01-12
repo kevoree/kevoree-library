@@ -38,12 +38,12 @@ public class RemoveBindingCommand implements PrimitiveCommand {
                 if (input != null) {
                     // port is an input (provided)
                     chan.getContext().getBoundPorts().remove(input.getName());
-                    Log.debug("input {} <-> {}", input.path(), chan.getModelElement().path());
+                    Log.info("Unbind input {} <-> {}", input.path(), chan.getModelElement().path());
                 } else {
                     // port is an output (required)
                     RequiredPortImpl outputWrapper = comp.getRequiredPorts().get(c.getPort().getName());
                     outputWrapper.removeChannelWrapper(c);
-                    Log.debug("output {} <-> {}", c.getPort().path(), chan.getModelElement().path());
+                    Log.info("Unbind output {} <-> {}", c.getPort().path(), chan.getModelElement().path());
                 }
 
                 // retrieve every bindings related to this binding chan
@@ -54,7 +54,7 @@ public class RemoveBindingCommand implements PrimitiveCommand {
                         if (input != null) {
                             // port is an input
                             chan.getContext().getBoundPorts().remove(input.getName());
-                            Log.debug("input {} <-> {}", input.path(), chan.getModelElement().path());
+                            Log.info("Unbind input {} <-> {}", input.path(), chan.getModelElement().path());
                         }
                     }
                 }

@@ -34,7 +34,7 @@ public class ProvidedPortImpl implements Port {
         this.portPath = port.path();
         this.componentWrapper = componentWrapper;
 
-        method = ReflectUtils.findMethodWithAnnotation(targetObj.getClass(), Input.class);
+        method = ReflectUtils.findMethodWithAnnotation(targetObj.getClass(), port.getName(), Input.class);
         if (method != null) {
             if (!method.isAccessible()) {
                 method.setAccessible(true);

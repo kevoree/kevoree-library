@@ -1,7 +1,6 @@
 package org.kevoree.library.java.wrapper;
 
 import org.kevoree.Channel;
-import org.kevoree.ContainerNode;
 import org.kevoree.MBinding;
 import org.kevoree.api.ChannelContext;
 import org.kevoree.api.ModelService;
@@ -17,7 +16,7 @@ import java.util.List;
  */
 public class ChannelWrapperContext implements ChannelContext {
 
-    private HashMap<String, Port> boundPorts = new HashMap<String, Port>();
+    private HashMap<String, Port> boundPorts = new HashMap<>();
     private ModelService modelService;
     private String channelPath;
     private String localNodePath;
@@ -30,7 +29,7 @@ public class ChannelWrapperContext implements ChannelContext {
 
     @Override
     public List<Port> getLocalPorts() {
-        return new ArrayList<Port>(boundPorts.values());
+        return new ArrayList<>(boundPorts.values());
     }
 
     @Deprecated
@@ -53,21 +52,24 @@ public class ChannelWrapperContext implements ChannelContext {
 
     @Override
     public List<String> getRemotePortPaths() {
-        ArrayList<String> result = new ArrayList<String>();
+        ArrayList<String> result = new ArrayList<>();
         Channel channel = (Channel) modelService.getCurrentModel().getModel().findByPath(channelPath);
         if (channel != null) {
             for (MBinding binding : channel.getBindings()) {
-                ContainerNode parentNode = (ContainerNode) binding.getPort().eContainer().eContainer();
-                if (parentNode != null) {
-                    if (!parentNode.getName().equals(localNodePath)) {
-                        org.kevoree.Port finalPort = binding.getPort();
-                        if (finalPort != null) {
-                            // TODO should we just add input ports here??
-                            //System.out.println("->> " + finalPort.path() + " REFINPARENT: " + finalPort.getRefInParent());
-                            result.add(finalPort.path());
-                        }
-                    }
+                org.kevoree.Port port = binding.getPort();
+                if (port != null && port.getRefInParent().equals("provided")) {
+                    result.add(port.path());
                 }
+//                ContainerNode parentNode = (ContainerNode) binding.getPort().eContainer().eContainer();
+//                if (parentNode != null) {
+//                    if (!parentNode.getName().equals(localNodePath)) {
+//                        org.kevoree.Port finalPort = binding.getPort();
+//                        if (finalPort != null) {
+//                            // TODO should we just add input ports here??
+//                            result.add(finalPort.path());
+//                        }
+//                    }
+//                }
             }
         }
         return result;

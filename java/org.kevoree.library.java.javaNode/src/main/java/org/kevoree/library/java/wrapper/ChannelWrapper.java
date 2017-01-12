@@ -6,6 +6,8 @@ import org.kevoree.log.Log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -31,13 +33,15 @@ public class ChannelWrapper extends KInstanceWrapper {
     }
 
     public void call(org.kevoree.api.Callback callback, String payload) {
-        String connectedInputs = context.getBoundPorts().keySet().stream().reduce((p, n) -> p + ", " + n).orElse("");
-        connectedInputs += context.getRemotePortPaths().stream().reduce((p, n) -> p + ", " + n).orElse("");
+        Set<String> portPaths = new HashSet<>();
+        portPaths.addAll(context.getBoundPorts().keySet());
+        portPaths.addAll(context.getRemotePortPaths());
+        String connectedInputs = portPaths.stream().reduce((p, n) -> p + ", " + n).orElse("");
+
         if (isStarted()) {
             ChannelDispatch channel = (ChannelDispatch) getTargetObj();
             Log.debug(" {} -> {} -> [{}] (dispatch)", getModelElement().getName(), payload, connectedInputs);
             try {
-//                System.out.println("===> channel wrapper context : " + ((FlexyClassLoader) getClass().getClassLoader()).getKey());
                 channel.dispatch(payload, callback);
             } catch (Throwable e) {
                 Log.error("Channel \"{}\" dispatch threw an exception", e, getModelElement().getName());

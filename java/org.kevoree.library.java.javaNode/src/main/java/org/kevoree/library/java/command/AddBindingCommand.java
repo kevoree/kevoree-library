@@ -42,13 +42,13 @@ public class AddBindingCommand implements PrimitiveCommand {
 
             if (output != null) {
                 output.addChannelWrapper(c, (ChannelWrapper) chan);
-                Log.info("Bind {} {}", c.getPort().path(), c.getHub().path());
+                Log.info("Bind output {} {}", c.getPort().path(), c.getHub().path());
                 return true;
             }
 
             // Seems useless
             ((ChannelWrapper) chan).getContext().getBoundPorts().put(input.getPath(), input);
-            Log.info("Bind {} {}", c.getPort().path(), c.getHub().path());
+            Log.info("Bind input {} {}", c.getPort().path(), c.getHub().path());
             return true;
         } else {
             Log.error("Error while apply binding , channelFound=" + chan + ", componentFound=" + comp);
