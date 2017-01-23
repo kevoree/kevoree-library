@@ -118,12 +118,12 @@
 
     <distributionManagement>
         <repository>
-            <id>kevoree.oss.release</id>
+            <id>sonatype-nexus-staging</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
             <layout>default</layout>
         </repository>
         <snapshotRepository>
-            <id>kevoree.oss.snapshots</id>
+            <id>sonatype-nexus-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <layout>default</layout>
         </snapshotRepository>
