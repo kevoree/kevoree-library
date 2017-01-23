@@ -5,11 +5,13 @@ language: java
 sudo: false
 
 before_install:
-  - export MAVEN_OPTS="-Xms2048m -Xmx2048m -XX:PermSize=512m -XX:MaxPermSize=1024m"
+  - export MAVEN_OPTS="-Xms2048m -Xmx2048m -XX:PermSize=512m"
 
 cache:
   directories:
     - $HOME/.m2
+
+script: mvn -B install
 
 jdk:
   - oraclejdk8
