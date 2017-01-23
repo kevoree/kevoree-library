@@ -1,19 +1,25 @@
----
 language: java
 
-# get us on the new container based builds, we're not using any fancyness
 sudo: false
 
 before_install:
-  - export MAVEN_OPTS="-Xms2048m -Xmx2048m -XX:PermSize=512m"
+- export MAVEN_OPTS="-Xms2048m -Xmx2048m -XX:PermSize=512m"
 
 cache:
   directories:
-    - $HOME/.m2
+  - "$HOME/.m2"
 
 jdk:
-  - oraclejdk8
+- oraclejdk8
 
 branches:
   only:
-    - master
+  - master
+
+after_success:
+- mvn -B deploy --settings settings.xml
+
+env:
+  global:
+  - secure: Nzj9waAeIOxiN98zS9+vsS3uBCGyqY+SarnmQUr8bL9oPgmBCidXzPd0TxnOKTiB7uchJ9CP2C9wR2fB8xn6Z/PTJ5YIxBVhZS2ODo1m5Ph3zjeTWiMhXuckxTt+mJYSK7VWvNDLKCGn+Y59MYNXK6DYR56/TTeGCcmYxN+lNlc=
+  - secure: LQKp7j7vggRTAZQTxEsOyIzNXrDRi5yhWyVSMJgNb9D4BhSCVWExXWcatLa+iav5QcQeFbTJtC0wK9MyHigE97bIjEff/WdWHNqwcKYpHKHM/5UWF81Tt9HMSoXDsRl4OqQlCwlfTym4/2T1eQFsFAmk+k57u9Yc/a9C7yrT7yo=
