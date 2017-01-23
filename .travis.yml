@@ -11,8 +11,6 @@ cache:
   directories:
     - $HOME/.m2
 
-script: mvn -B install
-
 jdk:
   - oraclejdk8
 
