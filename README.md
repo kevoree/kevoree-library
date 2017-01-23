@@ -1,4 +1,5 @@
-kevoree-library
-===============
+## Kevoree Standard Libraries
+[![Build Status](https://travis-ci.org/kevoree/kevoree-library.svg?branch=master)](https://travis-ci.org/kevoree/kevoree-library)
 
-Kevoree base library
+
+This repository contains all the Kevoree libraries officially maintained by the Kevoree team.
