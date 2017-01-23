@@ -32,7 +32,7 @@ public class UpdateCallMethod implements PrimitiveCommand {
                 Thread.currentThread().setContextClassLoader(classLoader);
                 return true;
             } catch (InvocationTargetException e) {
-                Log.error("Unable to invoke update method on " + c.path(), e);
+                Log.error("Unable to invoke update method on " + c.path(), e.getCause());
                 return false;
             }
         } else {

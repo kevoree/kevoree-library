@@ -1,16 +1,18 @@
 add node0: JavaNode/LATEST/LATEST
-add node0.ticker: Ticker/LATEST/LATEST
-add sync: CentralizedWSGroup/LATEST/LATEST
-add chan: RemoteWSChan/LATEST/LATEST
+//add node0.ticker: Ticker/LATEST/LATEST
+add sync: CentralizedWSGroup/2/LATEST
+//add chan: RemoteWSChan/LATEST/LATEST
 
 attach node0 sync
 
 set sync.isMaster/node0 = "true"
+set sync.onDisconnect = "remove {{nodeName}}"
+
 set node0.log = "DEBUG"
 
-set chan.uuid = 'foobar'
-set chan.host = 'ws.kevoree.org'
+//set chan.uuid = 'foobar'
+//set chan.host = 'ws.kevoree.org'
 
-bind node0.ticker.tick chan
+//bind node0.ticker.tick chan
 
 network node0.ip.lo 127.0.0.1

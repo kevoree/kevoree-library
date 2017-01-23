@@ -9,7 +9,7 @@ public class StringUtils {
     public static String shrink(String str, int length) {
         if (str != null) {
             if (str.length() > length) {
-                return str.substring(0, length);
+                return str.substring(0, length) + "...";
             } else {
                 return str;
             }

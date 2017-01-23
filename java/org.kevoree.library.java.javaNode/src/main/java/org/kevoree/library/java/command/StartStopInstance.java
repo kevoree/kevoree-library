@@ -36,7 +36,7 @@ public class StartStopInstance implements PrimitiveCommand, Runnable {
                 instanceWrapper.startInstance();
                 result = true;
             } catch (InvocationTargetException e) {
-                Log.error("Error while starting instance " + c.path(), e);
+                Log.error("Error while starting instance " + c.path(), e.getCause());
                 result = false;
             }
         } else {
@@ -45,7 +45,7 @@ public class StartStopInstance implements PrimitiveCommand, Runnable {
                 instanceWrapper.stopInstance();
                 result = true;
             } catch (InvocationTargetException e) {
-                Log.error("Error while stopping instance " + c.path(), e);
+                Log.error("Error while stopping instance " + c.path(), e.getCause());
                 result = false;
             }
             Thread.currentThread().setContextClassLoader(null);

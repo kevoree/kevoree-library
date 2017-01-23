@@ -19,11 +19,9 @@ public class ChannelWrapperContext implements ChannelContext {
     private HashMap<String, Port> boundPorts = new HashMap<>();
     private ModelService modelService;
     private String channelPath;
-    private String localNodePath;
 
-    public ChannelWrapperContext(String channelPath, String localNodePath, ModelService modelService) {
+    public ChannelWrapperContext(String channelPath, ModelService modelService) {
         this.channelPath = channelPath;
-        this.localNodePath = localNodePath;
         this.modelService = modelService;
     }
 

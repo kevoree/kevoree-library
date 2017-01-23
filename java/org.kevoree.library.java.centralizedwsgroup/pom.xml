@@ -1,8 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
+    <groupId>org.kevoree.library.java</groupId>
     <artifactId>org.kevoree.library.java.centralizedwsgroup</artifactId>
     <name>Kevoree :: Library :: Java :: CentralizedWSGroup</name>
+    <version>5.4.0-SNAPSHOT</version>
 
     <parent>
         <artifactId>org.kevoree.library.java.root</artifactId>
@@ -12,6 +14,7 @@
     </parent>
 
     <dependencies>
+        <!-- DEPS -->
         <dependency>
             <groupId>org.kevoree</groupId>
             <artifactId>org.kevoree.api</artifactId>
@@ -23,15 +26,35 @@
             <version>${kevoree.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.pusher</groupId>
+            <artifactId>java-websocket</artifactId>
+            <version>1.4.1</version>
+        </dependency>
+
+        <!-- TEST DEPS -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.kevoree.tools</groupId>
             <artifactId>org.kevoree.tools.test</artifactId>
             <version>${kevoree.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.pusher</groupId>
-            <artifactId>java-websocket</artifactId>
-            <version>1.4.1</version>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.6.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -49,6 +72,7 @@
             <plugin>
                 <groupId>org.kevoree.tools</groupId>
                 <artifactId>org.kevoree.tools.mavenplugin</artifactId>
+                <version>${kevoree.version}</version>
                 <configuration>
                     <namespace>${kevoree.registry.namespace}</namespace>
                     <kevscript>${env.KEVS}</kevscript>

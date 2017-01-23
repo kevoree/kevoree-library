@@ -16,6 +16,9 @@ public class Protocol {
     private static final String KEVS = "kevs";
     public static final int KEVS_TYPE = 3;
 
+    private static final String REGISTERED = "registered";
+    public static final int REGISTERED_TYPE = 4;
+
     private static final String SEP = "/";
 
     private final static Pattern patternPush = Pattern.compile("^push/(.*)$", Pattern.DOTALL | Pattern.MULTILINE);
@@ -33,6 +36,8 @@ public class Protocol {
                 return KEVS;
             case REGISTER_TYPE:
                 return REGISTER;
+            case REGISTERED_TYPE:
+                return REGISTERED;
             default:
                 return null;
         }
@@ -70,6 +75,19 @@ public class Protocol {
         @Override
         public String toRaw() {
             return REGISTER + SEP + nodeName + SEP + model;
+        }
+    }
+
+    public static class RegisteredMessage implements Message {
+
+        @Override
+        public int getType() {
+            return REGISTERED_TYPE;
+        }
+
+        @Override
+        public String toRaw() {
+            return REGISTERED;
         }
     }
 
@@ -137,6 +155,10 @@ public class Protocol {
 
         if (msg.startsWith(PULL)) {
             return new PullMessage();
+        }
+
+        if (msg.startsWith(REGISTERED)) {
+            return new RegisteredMessage();
         }
 
         matcher = patternRegister.matcher(msg);

@@ -83,7 +83,7 @@ public class AddInstance implements PrimitiveCommand, Runnable {
                 instanceWrapper.setKcl(fcl);
             } else if (c instanceof Channel) {
                 ContainerNode platformNode = modelService.getPendingModel().findNodesByID(nodeName);
-                ChannelWrapperContext ctx = new ChannelWrapperContext(c.path(), platformNode.path(), modelService);
+                ChannelWrapperContext ctx = new ChannelWrapperContext(c.path(), modelService);
                 bs.registerService(ChannelContext.class, ctx);
                 Object newBeanInstance = bs.createInstance(c, fcl);
                 bs.unregisterService(ChannelContext.class);

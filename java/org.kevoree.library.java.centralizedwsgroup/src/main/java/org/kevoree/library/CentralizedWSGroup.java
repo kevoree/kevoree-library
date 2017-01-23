@@ -1,26 +1,38 @@
 package org.kevoree.library;
 
+import org.kevoree.ContainerNode;
 import org.kevoree.ContainerRoot;
-import org.kevoree.Instance;
+import org.kevoree.Group;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
+import org.kevoree.api.KevScriptService;
 import org.kevoree.api.ModelService;
-import org.kevoree.library.client.Client;
-import org.kevoree.library.server.Server;
-import org.kevoree.log.Log;
+import org.kevoree.library.client.ClientAdapter;
+import org.kevoree.library.server.ServerAdapter;
+import org.kevoree.library.util.GroupHelper;
+
+import java.net.URI;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
  * Created by leiko on 16/11/15.
  */
-@GroupType(version = 1, description = "WebSocket group based on a centralized architecture that only sends partial model to connected clients")
+@GroupType(version = 2, description = "WebSocket group based on a centralized architecture that only sends partial model to connected clients")
 public class CentralizedWSGroup {
+
+    private static final Pattern MASTER_NET = Pattern.compile("^([a-z0-9A-Z]+)\\.([a-z0-9A-Z]+)$");
 
     @KevoreeInject
     private Context context;
 
     @KevoreeInject
     private ModelService modelService;
+
+    @KevoreeInject
+    private KevScriptService kevsService;
 
     @Param(optional = false, defaultValue = "false", fragmentDependent = true)
     private boolean isMaster;
@@ -31,16 +43,24 @@ public class CentralizedWSGroup {
     @Param(optional = false, defaultValue = "9000")
     private int port;
 
+    @Param
+    private String onDisconnect;
+
+    @Param(optional = false, defaultValue = "true")
+    private boolean reduceModel;
+
     private FragmentFacade facade;
+    private int previousPort;
 
     @Start
     public void start() {
+        previousPort = port;
         if (this.isMaster) {
-            this.facade = new Server(this);
+            this.facade = new ServerAdapter(this);
         } else {
-            this.facade = new Client(this);
+            this.facade = new ClientAdapter(this);
         }
-        this.facade.create();
+        this.facade.start();
     }
 
     @Stop
@@ -52,8 +72,18 @@ public class CentralizedWSGroup {
 
     @Update
     public void update() {
-        // TODO
-        Log.info("TODO update() in \"{}\"", getName());
+        if (previousPort != port) {
+//            if (this.facade instanceof ServerAdapter) {
+                ServerAdapter serverAdapter = (ServerAdapter) this.facade;
+                System.out.println("--- STOP BROADCAST ---");
+                serverAdapter.broadcast(this.getModelService().getPendingModel());
+                System.out.println("--- STOP BROADCAST DONE ---");
+//            }
+            stop();
+            System.out.println("--- STOP DONE --- ");
+            start();
+            System.out.println("--- START DONE --- ");
+        }
     }
 
     public boolean isMaster() {
@@ -68,8 +98,20 @@ public class CentralizedWSGroup {
         return port;
     }
 
+    public String getOnDisconnect() {
+        return onDisconnect;
+    }
+
+    public boolean isReduceModel() {
+        return reduceModel;
+    }
+
     public ModelService getModelService() {
         return modelService;
+    }
+
+    public KevScriptService getKevsService() {
+        return kevsService;
     }
 
     public Context getContext() {
@@ -77,14 +119,50 @@ public class CentralizedWSGroup {
     }
 
     public ContainerRoot getModel() {
-        ContainerRoot model = modelService.getPendingModel();
+        ContainerRoot model = getModelService().getPendingModel();
         if (model == null) {
-            model = modelService.getCurrentModel().getModel();
+            model = getModelService().getCurrentModel().getModel();
         }
         return model;
     }
 
     public String getName() {
-        return ((Instance) getModel().findByPath(context.getPath())).getName();
+        return getContext().getInstanceName();
+    }
+
+    public URI getURI() {
+        String uri;
+        if (this.getPort() == 443) {
+            uri = "wss://";
+        } else {
+            uri = "ws://";
+        }
+        Matcher masterNetMatcher = MASTER_NET.matcher(this.getMasterNet());
+        if (masterNetMatcher.matches()) {
+            String masterNetName = masterNetMatcher.group(1);
+            String masterNetValueName = masterNetMatcher.group(2);
+            ContainerRoot currentModel = this.getModel();
+            Group group = (Group) currentModel.findByPath(this.getContext().getPath());
+            ContainerNode masterNode = GroupHelper.findMasterNode(group);
+            if (masterNode != null) {
+                HashMap<String, HashMap<String, String>> nets = GroupHelper.findMasterNets(group, masterNode);
+                HashMap<String, String> masterNetValues = nets.get(masterNetName);
+                if (masterNetValues != null) {
+                    String networkValue = masterNetValues.get(masterNetValueName);
+                    if (networkValue != null) {
+                        return URI.create(uri + networkValue + ":" + this.getPort());
+                    } else {
+                        throw new KevoreeParamException("Unable to find network value name \""+masterNetValueName+"\" for master node \""+masterNode.getName()+"\"");
+                    }
+                } else {
+                    throw new Error("Unable to find network \""+masterNetName+"\" for master node \""+masterNode.getName()+"\"");
+                }
+            } else {
+                throw new KevoreeParamException("No master node found. Did you at least set one \"isMaster\" to \"true\"?");
+            }
+        } else {
+            throw new KevoreeParamException(this.getModelService().getNodeName(), "masterNet",
+                    "must comply with /^([a-z0-9A-Z]+)\\\\.([a-z0-9A-Z]+)$/");
+        }
     }
 }
