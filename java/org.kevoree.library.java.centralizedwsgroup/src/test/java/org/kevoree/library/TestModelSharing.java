@@ -14,6 +14,7 @@ import org.kevoree.api.handler.ModelListenerAdapter;
 import org.kevoree.api.handler.UUIDModel;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.factory.KevoreeFactory;
+import org.kevoree.library.client.ClientAdapter;
 import org.kevoree.library.client.ClientFragment;
 import org.kevoree.library.protocol.Protocol;
 import org.kevoree.library.server.ServerFragment;
@@ -227,5 +228,20 @@ public class TestModelSharing {
         ContainerNode clientNode = model.findNodesByID("client");
         assertNotNull(masterNode);
         assertNotNull(clientNode);
+    }
+
+    @Test
+    public void testReconnect() {
+        ClientAdapter clientAdapter = Mockito.spy(new ClientAdapter(clientInstance));
+        clientAdapter.setReconnectDelay(100);
+        clientAdapter.start();
+
+        // expect at least 3 attempts of connection in a time window of 250ms
+        // when the reconnect delay is set at 100ms
+        // - t0 = 0ms        => connect
+        // - t1 = t0 + 100ms => connect
+        // - t2 = t1 + 100ms => connect
+        // => ~200ms implies 3 connection attempts
+        Mockito.verify(clientAdapter, Mockito.after(250).times(3)).start();
     }
 }

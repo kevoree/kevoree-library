@@ -1,0 +1,12 @@
+add node0: JavascriptNode/LATEST/LATEST
+add client: JavaNode/LATEST/LATEST
+add sync: CentralizedWSGroup/2/LATEST
+
+attach node0, client sync
+
+set sync.isMaster/node0 = "true"
+set sync.masterNet/client = 'ip.lo'
+
+set client.log = "DEBUG"
+
+network node0.ip.lo 127.0.0.1

@@ -19,95 +19,109 @@ import java.util.concurrent.TimeUnit;
  *
  * Created by leiko on 1/10/17.
  */
-public class ClientAdapter extends WebSocketClient implements FragmentFacade {
+public class ClientAdapter implements FragmentFacade {
 
+    private long reconnectDelay = 3000;
+    private WebSocketClient client;
     private ClientFragment fragment;
     private CentralizedWSGroup instance;
     private ScheduledExecutorService executorService;
 
     public ClientAdapter(CentralizedWSGroup instance) {
-        super(instance.getURI());
-
         this.instance = instance;
         this.fragment = new ClientFragment(instance);
     }
 
     @Override
     public void start() {
-        Log.debug("[{}][client] trying to connect to {}", instance.getName(), uri);
-        this.connect();
+        this.client = new WebSocketClient(instance.getURI()) {
+            @Override
+            public void onOpen(ServerHandshake handshakedata) {
+                Log.info("[{}][client] connected to {}", instance.getName(), uri);
+                Protocol.RegisterMessage msg = fragment.register();
+                client.send(msg.toRaw());
+            }
+
+            @Override
+            public void onMessage(String message) {
+                Protocol.Message pMsg = Protocol.parse(message);
+                if (pMsg != null) {
+                    if (fragment.isRegistered()) {
+                        // registered client
+                        switch (pMsg.getType()) {
+                            case Protocol.PUSH_TYPE:
+                                fragment.push((Protocol.PushMessage) pMsg);
+                                break;
+
+                            default:
+                                Log.warn("[{}][client] ignoring message type \"{}\" send by master (state: registered)",
+                                        instance.getName(), Protocol.getTypeName(pMsg.getType()));
+                                break;
+                        }
+                    } else {
+                        // unregistered client
+                        switch (pMsg.getType()) {
+                            case Protocol.REGISTERED_TYPE:
+                                fragment.registered();
+                                break;
+
+                            default:
+                                Log.warn("[{}][client] ignoring message type \"{}\" send by master (state: not yet registered)",
+                                        instance.getName(), Protocol.getTypeName(pMsg.getType()));
+                                break;
+                        }
+                    }
+                } else {
+                    Log.warn("[{}][client] unable to parse message: {}", instance.getName(),
+                            StringUtils.shrink(message, 20));
+                }
+            }
+
+            @Override
+            public void onClose(int code, String reason, boolean remote) {
+                fragment.unregister();
+                if (code != 1000) {
+                    reconnect();
+                } else {
+                    Log.info("[{}][client] connection closed with {} (code={},reason={})", instance.getName(), uri, code,
+                            !reason.isEmpty() ? reason : "normal");
+                }
+            }
+
+            @Override
+            public void onError(Exception ex) {
+                if (!(ex instanceof ConnectException)) {
+                    ex.printStackTrace();
+                } else {
+                    Log.warn("[{}][client] unable to connect to {}", instance.getName(), uri);
+                }
+            }
+        };
+
+        Log.debug("[{}][client] trying to connect to {}", instance.getName(), instance.getURI());
+        client.connect();
     }
 
     @Override
     public void close() {
-        super.close();
+        client.close();
         if (executorService != null) {
             executorService.shutdownNow();
             executorService = null;
         }
-        Log.debug("[{}][client] connection closed", instance.getName(), uri);
+        Log.debug("[{}][client] connection closed", instance.getName(), instance.getURI());
     }
 
-    @Override
-    public void onOpen(ServerHandshake handshakedata) {
-        Log.info("[{}][client] connected to {}", instance.getName(), uri);
-        Protocol.RegisterMessage msg = fragment.register();
-        this.send(msg.toRaw());
+    public void setReconnectDelay(long ms) {
+        this.reconnectDelay = ms;
     }
 
-    @Override
-    public void onMessage(String message) {
-        Protocol.Message pMsg = Protocol.parse(message);
-        if (pMsg != null) {
-            if (fragment.isRegistered()) {
-                // registered client
-                switch (pMsg.getType()) {
-                    case Protocol.PUSH_TYPE:
-                        fragment.push((Protocol.PushMessage) pMsg);
-                        break;
-
-                    default:
-                        Log.warn("[{}][client] ignoring message type \"{}\" send by master (state: registered)",
-                                instance.getName(), Protocol.getTypeName(pMsg.getType()));
-                        break;
-                }
-            } else {
-                // unregistered client
-                switch (pMsg.getType()) {
-                    case Protocol.REGISTERED_TYPE:
-                        fragment.registered();
-                        break;
-
-                    default:
-                        Log.warn("[{}][client] ignoring message type \"{}\" send by master (state: not yet registered)",
-                                instance.getName(), Protocol.getTypeName(pMsg.getType()));
-                        break;
-                }
-            }
-        } else {
-            Log.warn("[{}][client] unable to parse message: {}", instance.getName(),
-                    StringUtils.shrink(message, 20));
+    private void reconnect() {
+        if (executorService != null) {
+            executorService.shutdownNow();
         }
-    }
-
-    @Override
-    public void onClose(int code, String reason, boolean remote) {
-        fragment.unregister();
-        Log.warn("[{}][client] connection lost with {} (code={},reason={})", instance.getName(), uri, code,
-                reason != null ? reason : "unknown");
-        if (code != 1000) {
-            if (executorService != null) {
-                executorService.shutdownNow();
-            }
-            executorService = Executors.newSingleThreadScheduledExecutor();
-            executorService.schedule(this::start, 3, TimeUnit.SECONDS);
-        }
-    }
-
-    @Override
-    public void onError(Exception ex) {
-        if (!(ex instanceof ConnectException)) {
-            ex.printStackTrace();
-        }
+        executorService = Executors.newSingleThreadScheduledExecutor();
+        executorService.schedule(this::start, reconnectDelay, TimeUnit.MILLISECONDS);
+        Log.trace("[{}][client] will retry connection in {}ms", instance.getName(), reconnectDelay);
     }
 }

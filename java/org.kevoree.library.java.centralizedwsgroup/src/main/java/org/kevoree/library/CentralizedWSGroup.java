@@ -73,16 +73,10 @@ public class CentralizedWSGroup {
     @Update
     public void update() {
         if (previousPort != port) {
-//            if (this.facade instanceof ServerAdapter) {
-                ServerAdapter serverAdapter = (ServerAdapter) this.facade;
-                System.out.println("--- STOP BROADCAST ---");
-                serverAdapter.broadcast(this.getModelService().getPendingModel());
-                System.out.println("--- STOP BROADCAST DONE ---");
-//            }
+            ServerAdapter serverAdapter = (ServerAdapter) this.facade;
+            serverAdapter.broadcast(this.getModelService().getPendingModel());
             stop();
-            System.out.println("--- STOP DONE --- ");
             start();
-            System.out.println("--- START DONE --- ");
         }
     }
 

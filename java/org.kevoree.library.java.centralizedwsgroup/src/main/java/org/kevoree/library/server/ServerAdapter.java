@@ -42,8 +42,11 @@ public class ServerAdapter extends WebSocketServer implements FragmentFacade {
         this.modelListener = new ModelListenerAdapter() {
             @Override
             public void modelUpdated() {
-                Log.debug("[{}][master] ======= Model Updated =======", instance.getName());
-                broadcast(instance.getModelService().getCurrentModel().getModel());
+                if (!connections().isEmpty()) {
+                    Log.debug("[{}][master] === Broadcast new model to clients ===", instance.getName());
+                    broadcast(instance.getModelService().getCurrentModel().getModel());
+                    Log.debug("[{}][master] === Broadcast done ===", instance.getName());
+                }
             }
         };
     }
@@ -62,22 +65,19 @@ public class ServerAdapter extends WebSocketServer implements FragmentFacade {
             if (!conns.isEmpty()) {
                 KevoreeFactory factory = new DefaultKevoreeFactory();
                 JSONModelSerializer serializer = factory.createJSONSerializer();
-                Log.info("[{}][master] broadcasting model to every clients (size={})", instance.getName(), conns.size());
                 final boolean reduceModel = instance.isReduceModel();
                 final String masterNodeName = instance.getContext().getNodeName();
                 conns.forEach(conn -> {
-                    String nameToLog = "";
                     ContainerRoot processedModel = model;
                     String id = clients.get(conn);
+                    String name = null;
 
                     if (id != null) {
                         // this "conn" is a registered node
                         if (reduceModel) {
-                            String name = fragment.getName(id);
-                            nameToLog = " to node \"" + name + "\"";
-                            Log.info("[{}][master] reducing model for master \"{}\" and client \"{}\"",
-                                    instance.getName(), masterNodeName, name);
+                            name = fragment.getName(id);
                             processedModel = ModelReducer.reduce(model, masterNodeName, name);
+                            Log.info("[{}][master] ✔ reduced model for \"{}\"", instance.getName(), name);
                         }
                     }
 
@@ -86,9 +86,9 @@ public class ServerAdapter extends WebSocketServer implements FragmentFacade {
 
                     if (conn.isOpen()) {
                         conn.send(pushMsg);
-                        Log.debug("[{}][master] pushed new model{}", instance.getName(), nameToLog);
+                        Log.debug("[{}][master] ✔ model pushed to \"{}\"", instance.getName(), (name != null ? name : conn.getRemoteSocketAddress()));
                     } else {
-                        Log.debug("[{}][master] unable to push new model{} (connection is closed)", instance.getName(), nameToLog);
+                        Log.debug("[{}][master] ✘ unable to push to \"{}\" (connection is closed)", instance.getName(), (name != null ? name : conn.getRemoteSocketAddress()));
                     }
                 });
             }
@@ -152,7 +152,7 @@ public class ServerAdapter extends WebSocketServer implements FragmentFacade {
                         break;
 
                     default:
-                        Log.warn("[{}][master] protocol message type \"{}\" sent by unregistered client (ignored)", instance.getName(),
+                        Log.warn("[{}][master] protocol message type \"{}\" sent by unknown client (ignored)", instance.getName(),
                                 Protocol.getTypeName(pMsg.getType()));
                         break;
                 }
