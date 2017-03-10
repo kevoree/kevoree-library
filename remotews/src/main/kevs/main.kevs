@@ -1,0 +1,23 @@
+add node0: JavaNode/LATEST/LATEST
+add node1: JavascriptNode/LATEST/LATEST
+add node0.ticker: Ticker/LATEST/LATEST
+add node1.printer: ConsolePrinter/LATEST/LATEST
+add sync: CentralizedWSGroup/LATEST/LATEST
+
+add chan0: RemoteWSChan/LATEST/LATEST
+
+attach node0, node1 sync
+
+bind node0.ticker.tick chan0
+bind node1.printer.input chan0
+
+set node0.log = 'DEBUG'
+set node1.logLevel = 'DEBUG'
+
+set sync.isMaster/node0 = 'true'
+
+set chan0.host = 'localhost'
+set chan0.port = '3000'
+set chan0.uuid = 'chan0'
+
+network node0.lo.ipv4 127.0.0.1

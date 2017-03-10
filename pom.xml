@@ -5,16 +5,18 @@
     <artifactId>org.kevoree.library</artifactId>
     <packaging>pom</packaging>
     <name>Kevoree :: Library</name>
-    <version>5.4.0-SNAPSHOT</version>
+    <version>5.5.0-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.version>0.8.11</kotlin.version>
-        <kevoree.version>5.4.0</kevoree.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <kevoree.version>5.5.0-SNAPSHOT</kevoree.version>
         <kevoree.registry.url>${env.KEVOREE_REGISTRY_URL}</kevoree.registry.url>
         <kevoree.registry.namespace>kevoree</kevoree.registry.namespace>
         <kevoree.registry.login>${env.KEVOREE_REGISTRY_LOGIN}</kevoree.registry.login>
         <kevoree.registry.password>${env.KEVOREE_REGISTRY_PASSWORD}</kevoree.registry.password>
+        <junit.version>4.12</junit.version>
     </properties>
 
     <organization>
@@ -112,9 +114,58 @@
     </developers>
 
     <modules>
-        <module>java</module>
-        <module>cloud</module>
+        <module>docker</module>
+        <module>docker-killer</module>
+        <module>control-flow</module>
+        <module>javaNode</module>
+        <module>local-channel</module>
+        <module>toys</module>
+        <module>consoleprinter</module>
+        <module>ws</module>
+        <module>centralizedwsgroup</module>
+        <module>haproxy</module>
+        <module>web</module>
+        <module>mqtt</module>
+        <module>mqttServer</module>
+        <module>rss</module>
+        <module>remotews</module>
+        <module>esper</module>
+        <module>facebook</module>
+        <module>twitter</module>
+        <module>groovy</module>
+        <module>jython</module>
+        <module>avatarjs</module>
+        <module>mongochan</module>
+        <module>redischan</module>
+        <module>imagga</module>
+        <module>gstreamer</module>
+        <module>gameoflife</module>
+        <module>kevscript</module>
+        <module>mongodb</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.kevoree</groupId>
+                <artifactId>org.kevoree.api</artifactId>
+                <version>${kevoree.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.kevoree</groupId>
+                <artifactId>org.kevoree.tools.test</artifactId>
+                <version>${kevoree.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <distributionManagement>
         <repository>
@@ -146,28 +197,28 @@
 
     <build>
         <pluginManagement>
-          <plugins>
-            <plugin>
-                <groupId>org.kevoree.tools</groupId>
-                <artifactId>org.kevoree.tools.mavenplugin</artifactId>
-                <version>${kevoree.version}</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                            <goal>deploy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <registry>${kevoree.registry.url}</registry>
-                    <namespace>${kevoree.registry.namespace}</namespace>
-                    <login>${kevoree.registry.login}</login>
-                    <password>${kevoree.registry.password}</password>
-                </configuration>
-            </plugin>
-          </plugins>
+            <plugins>
+                <plugin>
+                    <groupId>org.kevoree</groupId>
+                    <artifactId>org.kevoree.tools.mavenplugin</artifactId>
+                    <version>${kevoree.version}</version>
+                    <extensions>true</extensions>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>generate</goal>
+                                <goal>deploy</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <registry>${kevoree.registry.url}</registry>
+                        <namespace>${kevoree.registry.namespace}</namespace>
+                        <login>${kevoree.registry.login}</login>
+                        <password>${kevoree.registry.password}</password>
+                    </configuration>
+                </plugin>
+            </plugins>
         </pluginManagement>
         <plugins>
             <plugin>
@@ -182,16 +233,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.2</version>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

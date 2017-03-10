@@ -1,0 +1,19 @@
+//add node0: JavaNode/LATEST/LATEST
+//add node1: JavascriptNode/LATEST/LATEST
+//add node0.ticker: Ticker/LATEST/LATEST
+//add node1.printer: ConsolePrinter/LATEST/LATEST
+//add chan: RemoteWSChan/LATEST/LATEST
+//add sync: WSGroup/LATEST/LATEST
+//
+//attach node0, node1 sync
+//
+//bind node0.ticker.tick chan
+//bind node1.printer.input chan
+//
+//set chan.host = "ws.kevoree.org"
+//set chan.uuid = "42aABb42"
+//
+//network node0.ip.lo 127.0.0.1
+
+add node0: JavaNode/1
+set node0.log = 'TRACE'

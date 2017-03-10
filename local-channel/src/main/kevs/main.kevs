@@ -1,0 +1,11 @@
+add node0 : JavaNode/LATEST/LATEST
+add node0.ticker : Ticker/LATEST/LATEST
+set node0.ticker.period = "500"
+add chan : LocalChannel/LATEST/LATEST
+
+add node0.printer1 : ConsolePrinter/LATEST/LATEST
+add node0.printer2 : ConsolePrinter/LATEST/LATEST
+
+bind node0.printer1.input chan
+bind node0.printer2.input chan
+bind node0.ticker.tick chan
