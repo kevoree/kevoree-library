@@ -26,6 +26,7 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.UUID;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -114,7 +115,7 @@ public class TestModelSharing {
         Protocol.RegisterMessage registerMsg = client.register();
         master.register(registerMsg);
 
-        Mockito.verify(masterModelService, Mockito.times(1)).update(Mockito.any(), Mockito.isNull());
+        Mockito.verify(masterModelService, Mockito.times(1)).update(Mockito.any(), Mockito.any(UUID.class));
     }
 
     @Test
@@ -133,7 +134,7 @@ public class TestModelSharing {
         Protocol.PushMessage pushMsg = new Protocol.PushMessage("wrong model");
         master.push("1.2.3.4", pushMsg);
 
-        Mockito.verify(masterModelService, Mockito.times(1)).update(Mockito.any(), Mockito.isNull());
+        Mockito.verify(masterModelService, Mockito.times(1)).update(Mockito.any(), Mockito.any(UUID.class));
     }
 
     @Test
@@ -164,7 +165,7 @@ public class TestModelSharing {
         // fake "editor" pushing a good model
         master.push("1.2.3.4", pushMsg);
 
-        Mockito.verify(masterModelService, Mockito.times(2)).update(Mockito.any(), Mockito.isNull());
+        Mockito.verify(masterModelService, Mockito.times(1)).update(Mockito.any(), Mockito.any(UUID.class));
 
         ContainerRoot newModel = masterModelService.getCurrentModel();
         ContainerNode masterNode = newModel.findNodesByID("master");
@@ -178,7 +179,7 @@ public class TestModelSharing {
         Channel chan = newModel.findHubsByID("chan");
         assertNotNull(chan);
 
-        Mockito.verify(clientModelService, Mockito.times(1)).update(Mockito.any(), Mockito.isNull());
+        Mockito.verify(clientModelService, Mockito.times(1)).update(Mockito.any());
     }
 
     @Test
@@ -194,7 +195,7 @@ public class TestModelSharing {
         // fake "editor" pushing a good model
         master.push("1.2.3.4", pushMsg);
 
-        Mockito.verify(masterModelService, Mockito.times(1)).update(Mockito.any(), Mockito.isNull());
+        Mockito.verify(masterModelService, Mockito.times(1)).update(Mockito.any());
 
         // fake master broadcasting to everyone
         client.push(pushMsg);
@@ -211,7 +212,7 @@ public class TestModelSharing {
         Channel chan = newModel.findHubsByID("chan");
         assertNotNull(chan);
 
-        Mockito.verify(clientModelService, Mockito.times(0)).update(Mockito.any(), Mockito.isNull());
+        Mockito.verify(clientModelService, Mockito.times(0)).update(Mockito.any());
     }
 
     @Test
@@ -239,6 +240,6 @@ public class TestModelSharing {
         // - t1 = t0 + 100ms => connect
         // - t2 = t1 + 100ms => connect
         // => ~200ms implies 3 connection attempts
-        Mockito.verify(clientAdapter, Mockito.after(250).times(3)).start();
+        Mockito.verify(clientAdapter, Mockito.after(300).times(3)).start();
     }
 }

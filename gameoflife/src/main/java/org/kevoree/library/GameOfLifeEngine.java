@@ -1,8 +1,5 @@
 package org.kevoree.library;
 
-import java.util.HashMap;
-import java.util.List;
-
 import org.kevoree.ComponentInstance;
 import org.kevoree.ContainerNode;
 import org.kevoree.ContainerRoot;
@@ -22,6 +19,9 @@ import org.kevoree.library.engine.LifeOperation;
 import org.kevoree.library.engine.LifeOperation.LifeOperationType;
 import org.kevoree.log.Log;
 import org.kevoree.modeling.api.ModelCloner;
+
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by mleduc on 23/05/16.
@@ -62,7 +62,7 @@ public class GameOfLifeEngine {
 	private void execute(final String kevscript, final ContainerRoot model) {
 		try {
 			kevscriptService.execute(kevscript, model);
-			modelService.update(model, null);
+			modelService.update(model);
 		} catch (Exception e) {
 			Log.error(e.getMessage());
 		}

@@ -16,7 +16,10 @@ import org.kevoree.modeling.api.compare.ModelCompare;
 import org.kevoree.modeling.api.json.JSONModelLoader;
 import org.kevoree.modeling.api.json.JSONModelSerializer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 /**
  *
@@ -24,6 +27,7 @@ import java.util.HashMap;
  */
 public class ServerFragment {
 
+    private List<UUID> registerLockUUIDs;
     private CentralizedWSGroup instance;
     private HashMap<String, String> names;
     private HashMap<String, String> ids;
@@ -32,6 +36,7 @@ public class ServerFragment {
         this.instance = instance;
         this.names = new HashMap<>();
         this.ids = new HashMap<>();
+        this.registerLockUUIDs = new ArrayList<>();
     }
 
     public String register(Protocol.RegisterMessage msg) {
@@ -69,7 +74,10 @@ public class ServerFragment {
                 compare.merge(registerModel, currentModel).applyOn(registerModel);
 
                 // updating current core model with the model from registered node
-                instance.getModelService().update(registerModel, null);
+                UUID registerUUID = UUID.randomUUID();
+                registerLockUUIDs.add(registerUUID);
+                instance.getModelService().update(registerModel, registerUUID);
+
             }
         }
 
@@ -83,7 +91,7 @@ public class ServerFragment {
 
         try {
             ContainerRoot model = (ContainerRoot) loader.loadModelFromString(msg.getModel()).get(0);
-            instance.getModelService().update(model, null);
+            instance.getModelService().update(model);
         } catch (Exception e) {
             Log.warn("[{}][master] erroneous model received (push ignored)", instance.getName());
         }
@@ -122,7 +130,7 @@ public class ServerFragment {
                     ContainerRoot model = cloner.clone(instance.getModel());
                     try {
                         instance.getKevsService().execute(onDisconnectKevs, model);
-                        instance.getModelService().update(model, null);
+                        instance.getModelService().update(model);
                     } catch (Exception e) {
                         Log.warn("[{}][master] onDisconnect KevScript interpretation error:", instance.getName());
                         e.printStackTrace();
@@ -146,5 +154,13 @@ public class ServerFragment {
         return kevs
                 .replaceAll("\\{\\{nodeName\\}\\}", nodeName)
                 .replaceAll("\\{\\{groupName\\}\\}", instance.getName());
+    }
+
+    public boolean isRegisterLock(UUID uuid) {
+        return this.registerLockUUIDs.contains(uuid);
+    }
+
+    public void removeRegisterLock(UUID uuid) {
+        this.registerLockUUIDs.remove(uuid);
     }
 }

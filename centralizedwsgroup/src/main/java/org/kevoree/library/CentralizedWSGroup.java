@@ -74,7 +74,7 @@ public class CentralizedWSGroup {
     public void update() {
         if (previousPort != port) {
             ServerAdapter serverAdapter = (ServerAdapter) this.facade;
-            serverAdapter.broadcast(this.getModelService().getPendingModel());
+            serverAdapter.broadcast(this.getModelService().getProposedModel());
             stop();
             start();
         }
@@ -113,7 +113,7 @@ public class CentralizedWSGroup {
     }
 
     public ContainerRoot getModel() {
-        ContainerRoot model = getModelService().getPendingModel();
+        ContainerRoot model = getModelService().getProposedModel();
         if (model == null) {
             model = getModelService().getCurrentModel();
         }

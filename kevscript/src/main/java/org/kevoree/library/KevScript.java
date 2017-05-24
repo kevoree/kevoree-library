@@ -34,7 +34,7 @@ public class KevScript {
 			final String scrpt = this.kevScript.replaceAll("\\{([^}]+)\\}", "%%$1%%");
 			Log.debug("KEV_SCRIPT : " + scrpt);
 			kevsService.execute(scrpt, model);
-			modelService.update(model, null);
+			modelService.update(model);
 		} catch (Exception e) {
 			Log.error(e.getMessage());
 		}

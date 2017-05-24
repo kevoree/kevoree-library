@@ -1,5 +1,6 @@
 package org.kevoree.library.compare;
 
+import com.github.zafarkhaja.semver.Version;
 import org.kevoree.*;
 import org.kevoree.Dictionary;
 import org.kevoree.adaptation.AdaptationCommand;
@@ -22,6 +23,7 @@ import org.kevoree.modeling.api.trace.*;
 import org.kevoree.modeling.api.util.ModelVisitor;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -347,22 +349,6 @@ public class AdaptationEngine {
             }
         }
 
-        final HashSet<String> foundDeployUnitsToRemove = new HashSet<>();
-        if (currentNode != null) {
-            currentNode.visit(new ModelVisitor() {
-                public void visit(KMFContainer elem, String refNameInParent, KMFContainer parent) {
-                    if (elem instanceof DeployUnit) {
-                        foundDeployUnitsToRemove.add(elem.path());
-                    }
-                    //optimization purpose
-                    if ((elem instanceof ContainerNode && elem != currentNode)) {
-                        noChildrenVisit();
-                        noReferencesVisit();
-                    }
-                }
-
-            }, true, true, true);
-        }
         return new ArrayList<>(cmds);
     }
 
@@ -372,11 +358,40 @@ public class AdaptationEngine {
             if (metas.size() == 1) {
                 return (DeployUnit) metas.get(0).eContainer();
             } else {
-                throw new KevoreeAdaptationException("More than 1 DeployUnit found for " + instance.path() + " and platform=java (must only be one)");
+                return findBestDeployUnit(metas.stream().map(meta -> (DeployUnit) meta.eContainer()).collect(Collectors.toSet()));
+                //throw new KevoreeAdaptationException("More than 1 DeployUnit found for " + instance.path() + " and platform=java (must only be one)");
             }
         } else {
             throw new KevoreeAdaptationException("No DeployUnit found for " + instance.path() + " and platform=java");
         }
+    }
+
+    private DeployUnit findBestDeployUnit(Set<DeployUnit> dus) {
+        Iterator<DeployUnit> it = dus.iterator();
+        DeployUnit latest = it.next();
+        while (it.hasNext()) {
+            DeployUnit du = it.next();
+            if (Version.valueOf(latest.getVersion()).lessThan(Version.valueOf(du.getVersion()))) {
+                latest = du;
+            } else if (Version.valueOf(latest.getVersion()).equals(Version.valueOf(du.getVersion()))) {
+                // versions are equals => choose based on timestamp if any
+                Value timestamp0 = latest.findFiltersByID("timestamp");
+                Value timestamp1 = du.findFiltersByID("timestamp");
+                if (timestamp0 != null && timestamp1 != null) {
+                    long t0 = Long.valueOf(timestamp0.getValue());
+                    long t1 = Long.valueOf(timestamp1.getValue());
+                    // if t0 is less than t1 then use the du from t1
+                    // if timestamps are equals...highly unlikely but you never know..
+                    // well, the first one just won the battle :)
+                    if (t0 < t1) {
+                        latest = du;
+                    }
+                } else if (timestamp0 == null && timestamp1 != null) {
+                    latest = du;
+                }
+            }
+        }
+        return latest;
     }
 
     private boolean isVirtual(KMFContainer element) {

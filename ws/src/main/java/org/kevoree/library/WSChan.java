@@ -40,7 +40,7 @@
 //			path = "";
 //		}
 //
-//		ContainerRoot model = modelService.getPendingModel();
+//		ContainerRoot model = modelService.getProposedModel();
 //		if (model == null) {
 //			model = modelService.getCurrentModel();
 //		}

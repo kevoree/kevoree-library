@@ -44,7 +44,7 @@ public class ClientFragment {
             try {
                 ContainerRoot model = (ContainerRoot) loader.loadModelFromString(msg.getModel()).get(0);
                 Log.info("[{}][client] new model pushed by master \"{}\"", instance.getName(), getMasterNodeName());
-                instance.getModelService().update(model, null);
+                instance.getModelService().update(model);
             } catch (Exception e) {
                 Log.warn("[{}][client] erroneous model received by master \"{}\" (push ignored)",
                         instance.getName(), getMasterNodeName());

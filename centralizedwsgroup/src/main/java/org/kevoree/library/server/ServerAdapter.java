@@ -43,10 +43,17 @@ public class ServerAdapter extends WebSocketServer implements FragmentFacade {
         this.modelListener = new AbstractModelListener() {
             @Override
             public void updateSuccess(UpdateContext context) {
-                if (!connections().isEmpty()) {
-                    Log.debug("[{}][master] === Broadcast new model to clients ===", instance.getName());
-                    broadcast(instance.getModelService().getCurrentModel());
-                    Log.debug("[{}][master] === Broadcast done ===", instance.getName());
+                if (!fragment.isRegisterLock(context.getUUID())) {
+                    // if it is not issued from a register: then broadcast
+                    if (!connections().isEmpty()) {
+                        Log.debug("[{}][master] === Broadcast new model to clients ===", instance.getName());
+                        broadcast(instance.getModelService().getCurrentModel());
+                        Log.debug("[{}][master] === Broadcast done ===", instance.getName());
+                    }
+                } else {
+                    // this update is issued from a register: bypass broadcast and remove uuid from lock
+                    fragment.removeRegisterLock(context.getUUID());
+                    Log.debug("Deployment is issued by a register (ignore broadcast)");
                 }
             }
         };
@@ -166,11 +173,15 @@ public class ServerAdapter extends WebSocketServer implements FragmentFacade {
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        String id = clients.get(conn);
-        if (id == null) {
-            Log.warn("[{}][master] error for unknown client", instance.getName());
+        if (clients != null && conn != null) {
+            String id = clients.get(conn);
+            if (id == null) {
+                Log.warn("[{}][master] error for unknown client", ex, instance.getName());
+            } else {
+                Log.warn("[{}][master] error for node \"{}\" (id={})", instance.getName(), fragment.getName(id), id);
+            }
         } else {
-            Log.warn("[{}][master] error for node \"{}\" (id={})", instance.getName(), fragment.getName(id), id);
+            Log.warn("[{}][master] error for unknown client", ex, instance.getName());
         }
     }
 

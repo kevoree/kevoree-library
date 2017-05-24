@@ -8,7 +8,6 @@ import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.RuntimeService;
-import org.kevoree.library.command.AbstractAdaptationCommand;
 import org.kevoree.library.compare.AdaptationEngine;
 import org.kevoree.library.wrapper.KInstanceWrapper;
 import org.kevoree.library.wrapper.WrapperFactory;
@@ -20,7 +19,7 @@ import java.util.List;
 /**
  * @author ffouquet
  */
-@NodeType(version=1)
+@NodeType(version=2)
 public class JavaNode implements org.kevoree.api.NodeType {
 
     @KevoreeInject
@@ -44,7 +43,7 @@ public class JavaNode implements org.kevoree.api.NodeType {
         startTime = System.currentTimeMillis();
         WrapperFactory wrapperFactory = new WrapperFactory(context.getNodeName());
         kompareBean = new AdaptationEngine(context.getNodeName(), modelService, runtimeService, instanceRegistry, wrapperFactory);
-        ContainerNode thisNode = modelService.getPendingModel().findNodesByID(context.getNodeName());
+        ContainerNode thisNode = modelService.getProposedModel().findNodesByID(context.getNodeName());
         KInstanceWrapper nodeWrapper = wrapperFactory.wrap(thisNode, this, runtimeService, modelService);
         nodeWrapper.setStarted(true);
         instanceRegistry.put(thisNode, nodeWrapper);

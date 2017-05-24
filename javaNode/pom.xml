@@ -17,11 +17,16 @@
             <groupId>org.kevoree</groupId>
             <artifactId>org.kevoree.api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.zafarkhaja</groupId>
+            <artifactId>java-semver</artifactId>
+            <version>0.9.0</version>
+        </dependency>
 
         <!-- test dependency -->
         <dependency>
             <groupId>org.kevoree</groupId>
-            <artifactId>org.kevoree.kevscript</artifactId>
+            <artifactId>org.kevoree.tools.kevscript</artifactId>
             <version>${kevoree.version}</version>
             <scope>test</scope>
         </dependency>

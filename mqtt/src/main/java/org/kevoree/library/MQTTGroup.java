@@ -194,10 +194,10 @@ public class MQTTGroup extends AbstractModelListener implements Listener {
 
                     if (payload.startsWith("push/")) {
                         final ContainerRoot model = (ContainerRoot) loader.loadModelFromString(payload.substring("push/".length())).get(0);
-                        modelService.update(model, null);
+                        modelService.update(model);
                     } else if (payload.startsWith("{")) {
                         final ContainerRoot model = (ContainerRoot) loader.loadModelFromString(payload).get(0);
-                        modelService.update(model, null);
+                        modelService.update(model);
                     } else {
                         int indexSep = payload.indexOf(sep);
                         String originName = null;

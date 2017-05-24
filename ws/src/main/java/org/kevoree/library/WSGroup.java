@@ -146,12 +146,12 @@ public class WSGroup extends AbstractModelListener implements Runnable {
                                                 Log.error("Unable to parse onConnect KevScript. Broadcasting model without onConnect process.", e);
                                             } finally {
                                                 // update locally
-                                                modelService.update(modelToApply, null);
+                                                modelService.update(modelToApply);
                                             }
                                         } else {
                                             // update locally
                                             Log.debug("Applying merged model locally (no filter)");
-                                            modelService.update(modelToApply, null);
+                                            modelService.update(modelToApply);
                                         }
                                     }
                                     break;
@@ -165,7 +165,7 @@ public class WSGroup extends AbstractModelListener implements Runnable {
                                     try {
                                         Log.info("{} \"{}\": push received, applying locally...", WSGroup.this.getClass().getSimpleName(), context.getInstanceName());
                                         ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
-                                        modelService.update(model, null);
+                                        modelService.update(model);
                                     } catch (Exception e) {
                                         Log.warn("{} \"{}\" received a malformed push message '{}'", WSGroup.this.getClass().getSimpleName(), context.getInstanceName(), msg);
                                     }
@@ -177,7 +177,7 @@ public class WSGroup extends AbstractModelListener implements Runnable {
                                     ContainerRoot clonedModel = cloner.clone(modelService.getCurrentModel());
                                     try {
                                         kevsService.execute(((Protocol.PushKevSMessage) parsedMsg).getKevScript(), clonedModel);
-                                        modelService.update(clonedModel, null);
+                                        modelService.update(clonedModel);
                                     } catch (Exception e) {
                                         Log.error("KevScript error", e);
                                     }
@@ -439,7 +439,7 @@ public class WSGroup extends AbstractModelListener implements Runnable {
                             try {
                                 Protocol.PushMessage pm = (Protocol.PushMessage) parsedMsg;
                                 ContainerRoot model = (ContainerRoot) jsonModelLoader.loadModelFromString(pm.getModel()).get(0);
-                                modelService.update(model, null);
+                                modelService.update(model);
                             } catch (Exception err) {
                                 lock.set(false);
                             }
