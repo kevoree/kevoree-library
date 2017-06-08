@@ -14,7 +14,7 @@ import org.kevoree.log.Log;
 import org.kevoree.modeling.api.KMFContainer;
 
 
-public class UpdateParam extends AbstractAdaptationCommand {
+public class UpdateParam implements AdaptationCommand {
 
     private Instance instance;
     private Value param;

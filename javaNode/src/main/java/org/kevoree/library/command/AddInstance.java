@@ -5,8 +5,8 @@ import org.kevoree.KevoreeCoreException;
 import org.kevoree.adaptation.AdaptationCommand;
 import org.kevoree.adaptation.AdaptationType;
 import org.kevoree.adaptation.KevoreeAdaptationException;
-import org.kevoree.api.ModelService;
-import org.kevoree.api.RuntimeService;
+import org.kevoree.service.ModelService;
+import org.kevoree.service.RuntimeService;
 import org.kevoree.kcl.api.FlexyClassLoader;
 import org.kevoree.library.InstanceRegistry;
 import org.kevoree.library.wrapper.KInstanceWrapper;
@@ -21,7 +21,7 @@ import org.kevoree.modeling.api.KMFContainer;
  * Date: 26/01/12
  * Time: 17:53
  */
-public class AddInstance extends AbstractAdaptationCommand {
+public class AddInstance implements AdaptationCommand {
 
     private WrapperFactory wrapperFactory;
     private Instance instance;

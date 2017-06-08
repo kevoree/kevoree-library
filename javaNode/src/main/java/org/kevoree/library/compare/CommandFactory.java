@@ -4,11 +4,11 @@ import org.kevoree.DeployUnit;
 import org.kevoree.Instance;
 import org.kevoree.MBinding;
 import org.kevoree.Value;
-import org.kevoree.api.ModelService;
-import org.kevoree.api.RuntimeService;
 import org.kevoree.library.InstanceRegistry;
 import org.kevoree.library.command.*;
 import org.kevoree.library.wrapper.WrapperFactory;
+import org.kevoree.service.ModelService;
+import org.kevoree.service.RuntimeService;
 
 /**
  *

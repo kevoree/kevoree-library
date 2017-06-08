@@ -4,7 +4,7 @@ import org.kevoree.DeployUnit;
 import org.kevoree.adaptation.AdaptationCommand;
 import org.kevoree.adaptation.AdaptationType;
 import org.kevoree.adaptation.KevoreeAdaptationException;
-import org.kevoree.api.RuntimeService;
+import org.kevoree.service.RuntimeService;
 import org.kevoree.log.Log;
 import org.kevoree.modeling.api.KMFContainer;
 
@@ -15,7 +15,7 @@ import org.kevoree.modeling.api.KMFContainer;
  * Time: 16:35
  */
 
-public class RemoveDeployUnit extends AbstractAdaptationCommand {
+public class RemoveDeployUnit implements AdaptationCommand {
 
     private DeployUnit du;
     private RuntimeService runtimeService;

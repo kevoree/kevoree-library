@@ -6,12 +6,12 @@ import org.kevoree.adaptation.AdaptationCommand;
 import org.kevoree.adaptation.KevoreeAdaptationException;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
-import org.kevoree.api.ModelService;
-import org.kevoree.api.RuntimeService;
 import org.kevoree.library.compare.AdaptationEngine;
 import org.kevoree.library.wrapper.KInstanceWrapper;
 import org.kevoree.library.wrapper.WrapperFactory;
 import org.kevoree.log.Log;
+import org.kevoree.service.ModelService;
+import org.kevoree.service.RuntimeService;
 
 import java.util.List;
 

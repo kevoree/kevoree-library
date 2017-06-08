@@ -4,9 +4,9 @@ import org.kevoree.Instance;
 import org.kevoree.annotation.Start;
 import org.kevoree.annotation.Stop;
 import org.kevoree.annotation.Update;
-import org.kevoree.api.ModelService;
-import org.kevoree.api.RuntimeService;
-import org.kevoree.api.helper.ReflectUtils;
+import org.kevoree.service.ModelService;
+import org.kevoree.service.RuntimeService;
+import org.kevoree.reflect.ReflectUtils;
 import org.kevoree.log.Log;
 
 import java.lang.reflect.InvocationTargetException;

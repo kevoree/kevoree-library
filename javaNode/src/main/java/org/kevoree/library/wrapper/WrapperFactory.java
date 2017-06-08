@@ -3,8 +3,8 @@ package org.kevoree.library.wrapper;
 import org.kevoree.*;
 import org.kevoree.api.ChannelContext;
 import org.kevoree.api.ChannelContextImpl;
-import org.kevoree.api.ModelService;
-import org.kevoree.api.RuntimeService;
+import org.kevoree.service.ModelService;
+import org.kevoree.service.RuntimeService;
 import org.kevoree.library.compare.KevoreeThreadGroup;
 import org.kevoree.modeling.api.KMFContainer;
 

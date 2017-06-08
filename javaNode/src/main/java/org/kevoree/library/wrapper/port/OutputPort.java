@@ -5,7 +5,7 @@ import org.kevoree.annotation.Output;
 import org.kevoree.api.Callback;
 import org.kevoree.api.CallbackResult;
 import org.kevoree.api.Port;
-import org.kevoree.api.helper.ReflectUtils;
+import org.kevoree.reflect.ReflectUtils;
 import org.kevoree.library.wrapper.ChannelWrapper;
 import org.kevoree.library.wrapper.ComponentWrapper;
 import org.kevoree.log.Log;

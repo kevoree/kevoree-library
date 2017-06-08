@@ -5,7 +5,7 @@ import org.kevoree.KevoreeCoreException;
 import org.kevoree.adaptation.AdaptationCommand;
 import org.kevoree.adaptation.AdaptationType;
 import org.kevoree.adaptation.KevoreeAdaptationException;
-import org.kevoree.api.RuntimeService;
+import org.kevoree.service.RuntimeService;
 import org.kevoree.kcl.api.FlexyClassLoader;
 import org.kevoree.modeling.api.KMFContainer;
 
@@ -16,7 +16,7 @@ import org.kevoree.modeling.api.KMFContainer;
  * Time: 16:35
  */
 
-public class AddDeployUnit extends AbstractAdaptationCommand {
+public class AddDeployUnit implements AdaptationCommand {
 
     private DeployUnit du;
     private RuntimeService runtimeService;

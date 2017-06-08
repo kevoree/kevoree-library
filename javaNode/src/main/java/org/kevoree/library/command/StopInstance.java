@@ -15,7 +15,7 @@ import java.lang.reflect.InvocationTargetException;
  *
  * Created by leiko on 3/7/17.
  */
-public class StopInstance extends AbstractAdaptationCommand {
+public class StopInstance implements AdaptationCommand {
 
     private Instance instance;
     private InstanceRegistry registry;
@@ -33,7 +33,7 @@ public class StopInstance extends AbstractAdaptationCommand {
         if (instanceWrapper != null) {
             ThreadGroup threadGroup = instanceWrapper.getThreadGroup();
             if (threadGroup == null) {
-                System.out.println("WOW ThreadGroup is null dude.... (stop)");
+                throw new KevoreeAdaptationException("Unable to find a ThreadGroup for instance " + instance.path());
             }
             Thread instanceThread = new Thread(threadGroup, () -> {
                 Log.debug("Stopping {}", instance.path());

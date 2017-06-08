@@ -4,7 +4,7 @@ import fr.braindead.websocket.client.WebSocketClient;
 import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.*;
 import org.kevoree.api.Context;
-import org.kevoree.api.ModelService;
+import org.kevoree.service.ModelService;
 import org.kevoree.api.handler.AbstractModelListener;
 import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.api.protocol.Protocol;

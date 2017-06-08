@@ -4,14 +4,14 @@ import org.kevoree.Instance;
 import org.kevoree.adaptation.AdaptationCommand;
 import org.kevoree.adaptation.AdaptationType;
 import org.kevoree.adaptation.KevoreeAdaptationException;
-import org.kevoree.api.ModelService;
-import org.kevoree.api.RuntimeService;
+import org.kevoree.service.ModelService;
+import org.kevoree.service.RuntimeService;
 import org.kevoree.library.InstanceRegistry;
 import org.kevoree.library.wrapper.WrapperFactory;
 import org.kevoree.log.Log;
 import org.kevoree.modeling.api.KMFContainer;
 
-public class RemoveInstance extends AbstractAdaptationCommand {
+public class RemoveInstance implements AdaptationCommand {
 
     private WrapperFactory wrapperFactory;
     private Instance instance;

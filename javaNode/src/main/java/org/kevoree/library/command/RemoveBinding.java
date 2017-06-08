@@ -12,7 +12,7 @@ import org.kevoree.library.wrapper.port.OutputPort;
 import org.kevoree.log.Log;
 import org.kevoree.modeling.api.KMFContainer;
 
-public class RemoveBinding extends AbstractAdaptationCommand {
+public class RemoveBinding implements AdaptationCommand {
 
     private MBinding binding;
     private String nodeName;

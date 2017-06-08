@@ -15,7 +15,7 @@ import org.kevoree.library.wrapper.port.RemoteOutputPort;
 import org.kevoree.log.Log;
 import org.kevoree.modeling.api.KMFContainer;
 
-public class AddBinding extends AbstractAdaptationCommand {
+public class AddBinding implements AdaptationCommand {
 
     private MBinding binding;
     private String nodeName;

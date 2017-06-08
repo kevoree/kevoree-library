@@ -15,7 +15,7 @@ import java.lang.reflect.InvocationTargetException;
  *
  * Created by leiko on 3/7/17.
  */
-public class StartInstance extends AbstractAdaptationCommand {
+public class StartInstance implements AdaptationCommand {
 
     private Instance instance;
     private InstanceRegistry registry;

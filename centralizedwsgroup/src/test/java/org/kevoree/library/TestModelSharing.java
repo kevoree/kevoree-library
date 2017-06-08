@@ -2,14 +2,15 @@ package org.kevoree.library;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kevoree.Channel;
 import org.kevoree.ComponentInstance;
 import org.kevoree.ContainerNode;
 import org.kevoree.ContainerRoot;
 import org.kevoree.api.Context;
-import org.kevoree.api.KevScriptService;
-import org.kevoree.api.ModelService;
+import org.kevoree.service.KevScriptService;
+import org.kevoree.service.ModelService;
 import org.kevoree.api.handler.AbstractModelListener;
 import org.kevoree.api.handler.UpdateContext;
 import org.kevoree.factory.DefaultKevoreeFactory;
@@ -165,7 +166,7 @@ public class TestModelSharing {
         // fake "editor" pushing a good model
         master.push("1.2.3.4", pushMsg);
 
-        Mockito.verify(masterModelService, Mockito.times(1)).update(Mockito.any(), Mockito.any(UUID.class));
+        Mockito.verify(masterModelService, Mockito.times(1)).update(Mockito.any(ContainerRoot.class));
 
         ContainerRoot newModel = masterModelService.getCurrentModel();
         ContainerNode masterNode = newModel.findNodesByID("master");

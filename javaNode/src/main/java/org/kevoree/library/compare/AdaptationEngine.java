@@ -5,12 +5,9 @@ import org.kevoree.*;
 import org.kevoree.Dictionary;
 import org.kevoree.adaptation.AdaptationCommand;
 import org.kevoree.adaptation.KevoreeAdaptationException;
-import org.kevoree.api.ModelService;
-import org.kevoree.api.RuntimeService;
 import org.kevoree.factory.DefaultKevoreeFactory;
 import org.kevoree.factory.KevoreeFactory;
 import org.kevoree.library.InstanceRegistry;
-import org.kevoree.library.command.AbstractAdaptationCommand;
 import org.kevoree.library.command.StartInstance;
 import org.kevoree.library.command.StopInstance;
 import org.kevoree.library.command.UpdateInstance;
@@ -21,6 +18,8 @@ import org.kevoree.modeling.api.KMFContainer;
 import org.kevoree.modeling.api.compare.ModelCompare;
 import org.kevoree.modeling.api.trace.*;
 import org.kevoree.modeling.api.util.ModelVisitor;
+import org.kevoree.service.ModelService;
+import org.kevoree.service.RuntimeService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,18 +54,16 @@ public class AdaptationEngine {
                 return 0;
             }
         });
-
         Map<String, AdaptationCommand> instances2startOrStop = new HashMap<>();
         Map<String, AdaptationCommand> instances2update = new HashMap<>();
         for (AdaptationCommand cmd : cmds) {
             if (cmd instanceof StopInstance || cmd instanceof StartInstance) {
-                instances2startOrStop.put(((AbstractAdaptationCommand) cmd).getElement().path(), cmd);
+                instances2startOrStop.put(cmd.getElement().path(), cmd);
             }
             if (cmd instanceof UpdateInstance) {
-                instances2update.put(((AbstractAdaptationCommand) cmd).getElement().path(), cmd);
+                instances2update.put(cmd.getElement().path(), cmd);
             }
         }
-
         // if start/stop then no update
         for (Map.Entry<String, AdaptationCommand> entry : instances2startOrStop.entrySet()) {
             AdaptationCommand updateCmd = instances2update.get(entry.getKey());
@@ -245,13 +242,13 @@ public class AdaptationEngine {
                     if (trace.getRefName().equals("started")) {
                         if (modelElement instanceof Instance && trace instanceof ModelSetTrace) {
                             Instance instance = (Instance) modelElement;
-                            if (instance.eContainer() instanceof ContainerNode && !instance.eContainer().path().equals(targetNode.path())) {
-                                //ignore it, for another node
-                            } else {
+                            if (isRelatedToPlatform(nodeName, instance)) {
                                 if (trace.getSrcPath().equals(targetNode.path())) {
                                     if (((ModelSetTrace) trace).getContent().toLowerCase().equals("false")) {
-                                        // HaraKiri case
-                                        // TODO
+                                        KInstanceWrapper objInstance = (KInstanceWrapper) instanceRegistry.get(modelElement);
+                                        if (objInstance != null && objInstance.isStarted()) {
+                                            cmds.add(cmdFactory.createStopInstance(instance));
+                                        }
                                     }
                                 } else {
                                     if (((ModelSetTrace) trace).getContent().toLowerCase().equals("true")) {
@@ -476,9 +473,19 @@ public class AdaptationEngine {
                     return true;
                 }
             }
+        } else if (elem instanceof ContainerNode) {
+            ContainerNode node = (ContainerNode) elem;
+            return node.getName().equals(nodeName) ||
+                    (node.getHost() != null && node.getHost().getName().equals(nodeName));
+        } else if (elem instanceof Group) {
+            Group group = (Group) elem;
+            for (ContainerNode node : group.getSubNodes()) {
+                if (isRelatedToPlatform(nodeName, node)) {
+                    return true;
+                }
+            }
         }
         // TODO add every check
-
         return false;
     }
 }

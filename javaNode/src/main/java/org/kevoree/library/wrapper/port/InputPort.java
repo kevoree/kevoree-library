@@ -4,9 +4,9 @@ import org.kevoree.Channel;
 import org.kevoree.annotation.Input;
 import org.kevoree.api.Callback;
 import org.kevoree.api.Port;
-import org.kevoree.api.helper.ReflectUtils;
 import org.kevoree.library.wrapper.ComponentWrapper;
 import org.kevoree.log.Log;
+import org.kevoree.reflect.ReflectUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

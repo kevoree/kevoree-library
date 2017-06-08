@@ -13,7 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  *
  */
-public class UpdateInstance extends AbstractAdaptationCommand {
+public class UpdateInstance implements AdaptationCommand {
 
     private Instance instance;
     private InstanceRegistry registry;

@@ -12,7 +12,7 @@ import org.kevoree.annotation.*;
 import org.kevoree.api.Callback;
 import org.kevoree.api.ChannelContext;
 import org.kevoree.api.ChannelDispatch;
-import org.kevoree.api.ModelService;
+import org.kevoree.service.ModelService;
 import org.kevoree.log.Log;
 
 import java.util.List;
