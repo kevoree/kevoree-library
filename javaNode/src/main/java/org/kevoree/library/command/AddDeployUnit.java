@@ -6,7 +6,6 @@ import org.kevoree.adaptation.AdaptationCommand;
 import org.kevoree.adaptation.AdaptationType;
 import org.kevoree.adaptation.KevoreeAdaptationException;
 import org.kevoree.service.RuntimeService;
-import org.kevoree.kcl.api.FlexyClassLoader;
 import org.kevoree.modeling.api.KMFContainer;
 
 /**
@@ -28,10 +27,10 @@ public class AddDeployUnit implements AdaptationCommand {
 
     @Override
     public void execute() throws KevoreeAdaptationException {
-        FlexyClassLoader fcl;
+        ClassLoader classLoader;
         try {
-            fcl = runtimeService.installDeployUnit(du);
-            if (fcl == null) {
+            classLoader = runtimeService.installDeployUnit(du);
+            if (classLoader == null) {
                 throw new KevoreeAdaptationException("Unable to add DeployUnit " + du.path());
             }
         } catch (KevoreeCoreException e) {

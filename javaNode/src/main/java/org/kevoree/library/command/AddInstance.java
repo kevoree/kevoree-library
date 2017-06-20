@@ -7,7 +7,6 @@ import org.kevoree.adaptation.AdaptationType;
 import org.kevoree.adaptation.KevoreeAdaptationException;
 import org.kevoree.service.ModelService;
 import org.kevoree.service.RuntimeService;
-import org.kevoree.kcl.api.FlexyClassLoader;
 import org.kevoree.library.InstanceRegistry;
 import org.kevoree.library.wrapper.KInstanceWrapper;
 import org.kevoree.library.wrapper.WrapperFactory;
@@ -41,10 +40,10 @@ public class AddInstance implements AdaptationCommand {
     @Override
     public void execute() throws KevoreeAdaptationException {
         try {
-            FlexyClassLoader fcl = runtimeService.installTypeDefinition(instance);
-            Object instanceObject = runtimeService.createInstance(instance, fcl);
+            ClassLoader classLoader = runtimeService.installTypeDefinition(instance);
+            Object instanceObject = runtimeService.createInstance(instance, classLoader);
             KInstanceWrapper instanceWrapper = wrapperFactory.wrap(instance, instanceObject, runtimeService, modelService);
-            instanceWrapper.setClassLoader(fcl);
+            instanceWrapper.setClassLoader(classLoader);
 //            runtimeService.injectDictionary(instance, instanceObject, true);
 
             registry.put(instance, instanceWrapper);

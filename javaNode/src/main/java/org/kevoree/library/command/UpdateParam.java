@@ -66,22 +66,6 @@ public class UpdateParam implements AdaptationCommand {
             throw new KevoreeAdaptationException("Unable to find instance " + instance.path());
         }
     }
-//
-//    private void injectValue(Value kVal, Object obj, ClassLoader previousCL) throws KevoreeAdaptationException {
-//        try {
-//            ParamInjector.inject(kVal.getName(), kVal.getValue(), obj);
-//            debug(param);
-//            Thread.currentThread().setContextClassLoader(previousCL);
-//        } catch (Exception e) {
-//            Thread.currentThread().setContextClassLoader(previousCL);
-//            throw new KevoreeAdaptationException("Unable to inject value \""+kVal.getValue()+"\" for parameter \""+kVal.getName()+"\" in " + instance.path(), e.getCause());
-//        }
-//    }
-//
-//    private void injectValue(Value kVal, KInstanceWrapper instanceWrapper, ClassLoader previousCL)
-//            throws KevoreeAdaptationException {
-//        injectValue(kVal, instanceWrapper.getTargetObj(), previousCL);
-//    }
 
     private void debug(Value param) {
         Instance instance = (Instance) param.eContainer().eContainer();

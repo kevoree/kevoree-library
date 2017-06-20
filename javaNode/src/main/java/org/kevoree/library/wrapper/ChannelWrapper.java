@@ -1,7 +1,6 @@
 package org.kevoree.library.wrapper;
 
 import org.kevoree.api.*;
-import org.kevoree.kcl.api.FlexyClassLoader;
 import org.kevoree.log.Log;
 
 import java.lang.reflect.InvocationTargetException;
@@ -40,12 +39,13 @@ public class ChannelWrapper extends KInstanceWrapper {
             ChannelDispatch channel = (ChannelDispatch) getTargetObj();
             Log.debug(" {} -> {} -> [{}] (dispatch)", getModelElement().getName(), payload, connectedInputs);
             try {
-                FlexyClassLoader previousCL = (FlexyClassLoader) Thread.currentThread().getContextClassLoader();
+                ClassLoader previousCL = Thread.currentThread().getContextClassLoader();
                 Thread.currentThread().setContextClassLoader(channel.getClass().getClassLoader());
                 channel.dispatch(payload, callback);
                 Thread.currentThread().setContextClassLoader(previousCL);
             } catch (Throwable e) {
                 Log.error("Channel \"{}\" dispatch threw an exception", e.getCause(), getModelElement().getName());
+                e.printStackTrace();
             }
         } else {
             Log.debug(" {} -> {} -> [{}] (queued)", getModelElement().getName(), payload, connectedInputs);

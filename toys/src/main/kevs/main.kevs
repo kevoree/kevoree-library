@@ -1,14 +1,20 @@
 add node0 : JavaNode/LATEST/LATEST
-add sync : WSGroup/LATEST/LATEST
+add sync : CentralizedWSGroup/LATEST/LATEST
 
-set node0.log = 'DEBUG'
+set node0.log = 'TRACE'
 
 attach node0 sync
+
+set sync.isMaster/node0 = 'true'
 
 add node0.sender : ToyConsole/LATEST/LATEST
 add node0.receiver: ToyConsole/2/LATEST
 
-add chan: LocalChannel/LATEST/LATEST
+add chan0: RemoteWSChan/LATEST/LATEST
 
-bind node0.sender.output chan
-bind node0.receiver.input chan
+set chan0.uuid = 'yolo'
+set chan0.host = '172.17.0.2'
+set chan0.port = '3000'
+
+bind node0.sender.output chan0
+bind node0.receiver.input chan0
