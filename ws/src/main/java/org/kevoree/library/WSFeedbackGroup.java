@@ -74,8 +74,8 @@ public class WSFeedbackGroup extends AbstractModelListener implements Runnable {
     @KevoreeInject
     private KevScriptService kevsService;
 
-    @Param(optional = true, fragmentDependent = true, defaultValue = "9000")
-    Integer port;
+    @Param(optional = true, fragmentDependent = true)
+    Integer port = 9000;
 
     public void setMaster(String master) {
         this.master = master;
@@ -87,17 +87,17 @@ public class WSFeedbackGroup extends AbstractModelListener implements Runnable {
     @Param(optional = true)
     String filter;
 
-    @Param(defaultValue = "")
+    @Param
     private String onConnect = "";
 
-    @Param(defaultValue = "")
+    @Param
     private String onDisconnect = "";
 
-    @Param(optional = false, defaultValue = "30000")
-    private Long delay;
+    @Param(optional = false)
+    private Long delay = 30000L;
 
-    @Param(optional = false, defaultValue = "true")
-    private Boolean strict;
+    @Param(optional = false)
+    private Boolean strict = true;
 
     private ScheduledExecutorService scheduledThreadPool;
     private Undertow serverHandler;

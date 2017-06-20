@@ -16,7 +16,7 @@ public class MongoDB {
     @Param
     private String host;
 
-    @Param(defaultValue = "27017")
+    @Param
     private int port = 27017;
 
     @Param

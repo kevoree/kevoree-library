@@ -20,11 +20,11 @@ import java.util.stream.Collectors;
 @ChannelType(version = 1)
 public class RedisChan implements ChannelDispatch {
 
-    @Param(defaultValue = "localhost", optional = false)
-    private String host;
+    @Param(optional = false)
+    private String host = "localhost";
 
-    @Param(defaultValue = "6379", optional = false)
-    private int port;
+    @Param(optional = false)
+    private int port = 6379;
 
     @Param(optional = false)
     private String prefix;

@@ -24,8 +24,8 @@ public class DummyScaler implements Runnable {
 
     private Thread current = null;
 
-    @Param(defaultValue = "1", optional = true)
-    Integer target = null;
+    @Param(optional = true)
+    Integer target = 1;
 
     @KevoreeInject
     ModelService modelService;

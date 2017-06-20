@@ -14,8 +14,8 @@ import java.util.Map;
 @ComponentType(version = 1)
 public class BufferPage extends NanoHTTPD {
 
-    @Param(defaultValue = "8080")
-    Integer http_port;
+    @Param
+    Integer http_port = 8080;
 
     @Start
     public void startBlog() throws IOException {

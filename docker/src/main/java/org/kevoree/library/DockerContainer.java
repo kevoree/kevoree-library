@@ -76,13 +76,13 @@ public class DockerContainer {
     @Param
     private String binds;
 
-    @Param(defaultValue = "true")
+    @Param
     private boolean removeOnStop = true;
 
-    @Param(defaultValue = "5", optional = false)
+    @Param(optional = false)
     private Integer stopTimeout = 5;
 
-    @Param(defaultValue = "false")
+    @Param
     private boolean removeVolumes = false;
 
     @Output

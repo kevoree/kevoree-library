@@ -34,7 +34,7 @@ public class MQTTPubClient {
 	@Param(optional = false)
 	private Integer port;
 
-	@Param(defaultValue = "/")
+	@Param
 	private String topic = "/";
 
 	private MQTT client;

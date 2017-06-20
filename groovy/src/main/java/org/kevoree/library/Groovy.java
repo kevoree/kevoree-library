@@ -17,8 +17,8 @@ public class Groovy {
     @Output
     private Port result;
 
-    @Param(optional = false, defaultValue = "1")
-    public String expression;
+    @Param(optional = false)
+    public String expression = "1";
 
     @Input
     public void eval(final String param) {

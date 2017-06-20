@@ -18,8 +18,8 @@ public class MQTTServer {
     @KevoreeInject
     Context context;
 
-    @Param(defaultValue = "1883")
-    Integer port;
+    @Param
+    Integer port = 1883;
 
     @Start
     public void start() throws IOException {

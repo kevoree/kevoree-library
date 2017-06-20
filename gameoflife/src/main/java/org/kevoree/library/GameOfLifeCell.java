@@ -10,11 +10,11 @@ import org.kevoree.log.Log;
  */
 @ComponentType(version = 1, description = "A game of life cell")
 public class GameOfLifeCell {
-    @Param(optional = true, defaultValue = "0")
-    public Long x;
+    @Param(optional = true)
+    public Long x = 0L;
 
-    @Param(optional = true, defaultValue = "0")
-    public Long y;
+    @Param(optional = true)
+    public Long y = 0L;
 
     @Start
     public void start() {

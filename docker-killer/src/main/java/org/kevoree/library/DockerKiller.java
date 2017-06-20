@@ -26,8 +26,8 @@ public class DockerKiller {
     @Param(optional = false)
     private String value;
 
-    @Param(defaultValue = "5", optional = false)
-    private Integer secondsToWaitBeforeKilling;
+    @Param(optional = false)
+    private Integer secondsToWaitBeforeKilling = 5;
 
     @Output
     public Port killedContainer;

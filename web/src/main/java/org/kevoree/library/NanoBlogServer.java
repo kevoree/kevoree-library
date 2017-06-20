@@ -19,8 +19,8 @@ import java.util.Random;
 @ComponentType(version = 1)
 public class NanoBlogServer extends NanoHTTPD {
 
-    @Param(defaultValue = "8080")
-    Integer http_port;
+    @Param
+    Integer http_port = 8080;
 
     @KevoreeInject
     Context context;

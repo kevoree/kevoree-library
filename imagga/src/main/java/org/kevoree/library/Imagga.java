@@ -22,8 +22,8 @@ public class Imagga {
     @Param(optional = false)
     private String password;
 
-    @Param(optional = false, defaultValue = "false")
-    private Boolean content;
+    @Param(optional = false)
+    private boolean content;
 
     private final ImaggaService imaggaService = new ImaggaService();
     private final SerializerService serializerService = new SerializerService();

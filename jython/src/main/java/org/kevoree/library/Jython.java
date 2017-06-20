@@ -18,14 +18,14 @@ public class Jython {
     @Output
     private Port result;
 
-    @Param(optional = false, defaultValue = "i")
-    public String inVariable;
+    @Param(optional = false)
+    public String inVariable = "i";
 
-    @Param(optional = false, defaultValue = "x")
-    public String resVariable;
+    @Param(optional = false)
+    public String resVariable = "x";
 
-    @Param(optional = false, defaultValue = "x = int(i) + 1")
-    public String expression;
+    @Param(optional = false)
+    public String expression = "x = int(i) + 1";
 
     private final JythonEngine engine = new JythonEngine();
 

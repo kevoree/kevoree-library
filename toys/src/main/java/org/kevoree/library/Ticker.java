@@ -15,13 +15,13 @@ public class Ticker implements Runnable {
 	private Thread thread;
 	private Random rand = new Random();
 
-	@Param(defaultValue = "3000")
+	@Param
 	private long period = 3000l;
 
 	@Output
 	private Port tick;
 
-	@Param(defaultValue = "false")
+	@Param
 	private boolean random = false;
 
 	@Start

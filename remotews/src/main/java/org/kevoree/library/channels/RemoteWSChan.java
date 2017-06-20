@@ -35,11 +35,11 @@ public class RemoteWSChan implements ChannelDispatch {
     @Param(optional = false)
     private String host;
 
-    @Param(defaultValue = "80")
-    private int port;
+    @Param
+    private int port = 80;
 
-    @Param(defaultValue = "/")
-    private String path;
+    @Param
+    private String path = "/";
 
     @Param(optional = false)
     private String uuid;

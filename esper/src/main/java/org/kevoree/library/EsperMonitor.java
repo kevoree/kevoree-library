@@ -21,11 +21,11 @@ import org.kevoree.log.Log;
 @ComponentType(version = 1)
 public class EsperMonitor implements UpdateListener {
 
-    @Param(defaultValue = "select * from StreamDoubleValue(portId='input1').win:length(2) having avg(value) > 6.0")
-    public String cepStatement;
+    @Param
+    public String cepStatement = "select * from StreamDoubleValue(portId='input1').win:length(2) having avg(value) > 6.0";
 
-    @Param(defaultValue = "Event Occured")
-    public String message;
+    @Param
+    public String message = "Event Occured";
 
     @KevoreeInject
     org.kevoree.api.Context context;

@@ -31,7 +31,7 @@ public class JavaNode implements org.kevoree.api.NodeType {
     @KevoreeInject
     private Context context = null;
 
-    @Param(defaultValue = "INFO")
+    @Param
     private String log = "INFO";
 
     private AdaptationEngine kompareBean;

@@ -34,20 +34,20 @@ public class CentralizedWSGroup {
     @KevoreeInject
     private KevScriptService kevsService;
 
-    @Param(optional = false, defaultValue = "false", fragmentDependent = true)
-    private boolean isMaster;
+    @Param(optional = false, fragmentDependent = true)
+    private boolean isMaster = false;
 
-    @Param(optional = false, defaultValue = "lo.ipv4", fragmentDependent = true)
-    private String masterNet;
+    @Param(optional = false, fragmentDependent = true)
+    private String masterNet = "lo.ipv4";
 
-    @Param(optional = false, defaultValue = "9000")
-    private int port;
+    @Param(optional = false)
+    private int port = 9000;
 
     @Param
     private String onDisconnect;
 
-    @Param(optional = false, defaultValue = "true")
-    private boolean reduceModel;
+    @Param(optional = false)
+    private boolean reduceModel = true;
 
     private FragmentFacade facade;
     private int previousPort;

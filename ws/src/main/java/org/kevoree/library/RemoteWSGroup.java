@@ -42,13 +42,13 @@ public class RemoteWSGroup extends AbstractModelListener implements Runnable {
 	@Param(optional = false)
 	private String host;
 
-	@Param(defaultValue = "80")
+	@Param
 	private int port = 80;
 
-	@Param(defaultValue = "/")
+	@Param
 	private String path = "/";
 
-	@Param(optional = false, fragmentDependent = true, defaultValue = "true")
+	@Param(optional = false, fragmentDependent = true)
 	private boolean answerPull = true;
 
 	private ScheduledExecutorService scheduledThreadPool;

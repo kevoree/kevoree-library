@@ -22,11 +22,11 @@ public class MQTTChannel implements ChannelDispatch, Listener {
     @KevoreeInject
     private ChannelContext context;
 
-    @Param(defaultValue = "mqtt.kevoree.org", optional = false)
-    private String host;
+    @Param(optional = false)
+    private String host = "mqtt.kevoree.org";
 
-    @Param(defaultValue = "81", optional = false)
-    private int port;
+    @Param(optional = false)
+    private int port = 81;
 
     @Param(optional = false)
     private String uuid;

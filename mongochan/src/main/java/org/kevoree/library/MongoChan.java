@@ -32,11 +32,11 @@ import static java.util.Arrays.asList;
 @org.kevoree.annotation.ChannelType(version = 1)
 public class MongoChan implements ChannelDispatch {
 
-    @Param(defaultValue = "localhost", optional = false)
-    private String host;
+    @Param(optional = false)
+    private String host = "localhost";
 
-    @Param(defaultValue = "27017", optional = false)
-    private int port;
+    @Param(optional = false)
+    private int port = 27017;
 
     @Param(optional = false)
     private String database;

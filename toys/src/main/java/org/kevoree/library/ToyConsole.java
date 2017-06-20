@@ -23,7 +23,7 @@ public class ToyConsole {
     private ConsolePanel console;
     private ConsoleFrame standaloneFrame;
 
-    @Param(defaultValue = "true")
+    @Param
     private Boolean showInTab = true;
 
     @Output

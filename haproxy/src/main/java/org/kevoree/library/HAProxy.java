@@ -25,7 +25,7 @@ import java.util.HashMap;
  * Date: 04/12/2013
  * Time: 18:43
  */
-@ComponentType(version = 1)
+@ComponentType(version = 2)
 public class HAProxy  extends AbstractModelListener {
 
     @Param
@@ -35,7 +35,7 @@ public class HAProxy  extends AbstractModelListener {
     Context context;
 
     @Param
-    String config = "";
+    String config;
 
     private Process process;
     private Thread readerOUTthread;

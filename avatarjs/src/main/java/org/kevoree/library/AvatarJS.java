@@ -18,11 +18,11 @@ public class AvatarJS {
     @Output
     private Port result;
 
-    @Param(optional = false, defaultValue = "function retOne(a) { return 1; }")
-    public String expression;
+    @Param(optional = false)
+    public String expression = "function retOne(a) { return 1; }";
 
-    @Param(optional = false, defaultValue = "retOne")
-    public String functionName;
+    @Param(optional = false)
+    public String functionName = "retOne";
 
     public final JsEngine jsEngine = new JsEngine();
 

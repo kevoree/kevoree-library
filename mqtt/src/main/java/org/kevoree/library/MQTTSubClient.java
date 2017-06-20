@@ -40,7 +40,7 @@ public class MQTTSubClient implements Listener {
     @Param(optional = false)
     private Integer port;
 
-    @Param(defaultValue = "/")
+    @Param
     private String topic = "/";
 
     @Output

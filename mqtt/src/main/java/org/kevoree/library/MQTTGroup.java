@@ -31,8 +31,8 @@ public class MQTTGroup extends AbstractModelListener implements Listener {
     @KevoreeInject
     ModelService modelService;
 
-    @Param(defaultValue = "tcp://mqtt.kevoree.org:81")
-    String broker;
+    @Param
+    String broker = "tcp://mqtt.kevoree.org:81";
 
     private static final String KEVOREE_PREFIX = "kev/";
 

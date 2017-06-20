@@ -23,7 +23,7 @@
 //	@KevoreeInject
 //	ModelService modelService;
 //
-//	@Param(defaultValue = "/", optional = false)
+//	@Param(optional = false)
 //	private String path;
 //	@Param(optional = false)
 //	private int port;

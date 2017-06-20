@@ -74,8 +74,8 @@ public class WSGroup extends AbstractModelListener implements Runnable {
     @KevoreeInject
     private KevScriptService kevsService;
 
-    @Param(optional = true, fragmentDependent = true, defaultValue = "9000")
-    private int port;
+    @Param(optional = true, fragmentDependent = true)
+    private int port = 9000;
 
     @Param(optional = true)
     private String master;
@@ -83,10 +83,10 @@ public class WSGroup extends AbstractModelListener implements Runnable {
     @Param(optional = true)
     private String filter;
 
-    @Param(defaultValue = "")
+    @Param
     private String onConnect = "";
 
-    @Param(defaultValue = "")
+    @Param
     private String onDisconnect = "";
 
     private String currentMaster;
