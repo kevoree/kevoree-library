@@ -11,7 +11,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <kevoree.version>5.5.0-SNAPSHOT</kevoree.version>
+    <kevoree.version>5.5.0</kevoree.version>
     <kevoree.registry.url>${env.KEVOREE_REGISTRY_URL}</kevoree.registry.url>
     <kevoree.registry.namespace>kevoree</kevoree.registry.namespace>
     <kevoree.registry.login>${env.KEVOREE_REGISTRY_LOGIN}</kevoree.registry.login>

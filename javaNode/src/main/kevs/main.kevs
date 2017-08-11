@@ -17,3 +17,5 @@
 
 add node0: JavaNode/2/{ java: '5.5.0-SNAPSHOT' }
 set node0.log = 'TRACE'
+add node0.ticker: Ticker/LATEST/LATEST
+add node0.printer: ConsolePrinter/LATEST/LATEST
