@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.centralizedwsgroup</artifactId>
     <name>Kevoree :: Library :: CentralizedWSGroup</name>
-    <version>5.5.0-SNAPSHOT</version>
+    <version>5.5.0</version>
 
     <parent>
 			<groupId>org.kevoree.library</groupId>
 			<artifactId>org.kevoree.library</artifactId>
-        <version>5.5.0-SNAPSHOT</version>
+        <version>5.5.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
