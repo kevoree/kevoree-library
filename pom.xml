@@ -131,7 +131,6 @@
     <module>twitter</module>
     <module>groovy</module>
     <module>jython</module>
-    <module>avatarjs</module>
     <module>mongochan</module>
     <module>redischan</module>
     <module>imagga</module>
