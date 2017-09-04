@@ -53,6 +53,9 @@ public abstract class NanoHTTPD {
 
     /**
      * Constructs an HTTP server on given hostname and port.
+     *
+     * @param hostname hostname
+     * @param port port
      */
     public NanoHTTPD(String hostname, int port) {
         this.hostname = hostname;
@@ -205,14 +208,13 @@ public abstract class NanoHTTPD {
 
     /**
      * Override this to customize the server.
-     * <p/>
-     * <p/>
-     * (By default, this delegates to serveFile() and allows directory listing.)
+     * By default, this delegates to serveFile() and allows directory listing.
      *
-     * @param uri     Percent-decoded URI without parameters, for example "/index.cgi"
+     * @param uri  Percent-decoded URI without parameters, for example "/index.cgi"
      * @param method  "GET", "POST" etc.
-     * @param parms   Parsed, percent decoded parameters from URI and, in case of POST, data.
      * @param headers Header entries, percent decoded
+     * @param parms Parsed, percent decoded parameters from URI and, in case of POST, data.
+     * @param files files
      * @return HTTP response, see class Response for details
      */
     @Deprecated
@@ -223,9 +225,7 @@ public abstract class NanoHTTPD {
 
     /**
      * Override this to customize the server.
-     * <p/>
-     * <p/>
-     * (By default, this delegates to serveFile() and allows directory listing.)
+     * By default, this delegates to serveFile() and allows directory listing.
      *
      * @param session The HTTP session
      * @return HTTP response, see class Response for details
@@ -365,9 +365,8 @@ public abstract class NanoHTTPD {
 
     /**
      * Temp file manager.
-     * <p/>
-     * <p>Temp file managers are created 1-to-1 with incoming requests, to create and cleanup
-     * temporary files created as a result of handling the request.</p>
+     * Temp file managers are created 1-to-1 with incoming requests, to create and cleanup
+     * temporary files created as a result of handling the request.
      */
     public interface TempFileManager {
         TempFile createTempFile() throws Exception;
@@ -377,9 +376,8 @@ public abstract class NanoHTTPD {
 
     /**
      * A temp file.
-     * <p/>
-     * <p>Temp files are responsible for managing the actual temporary storage and cleaning
-     * themselves up when no longer needed.</p>
+     * Temp files are responsible for managing the actual temporary storage and cleaning
+     * themselves up when no longer needed.
      */
     public interface TempFile {
         OutputStream open() throws Exception;
@@ -391,10 +389,9 @@ public abstract class NanoHTTPD {
 
     /**
      * Default threading strategy for NanoHttpd.
-     * <p/>
-     * <p>By default, the server spawns a new Thread for every incoming request.  These are set
+     * By default, the server spawns a new Thread for every incoming request.  These are set
      * to <i>daemon</i> status, and named according to the request number.  The name is
-     * useful when profiling the application.</p>
+     * useful when profiling the application.
      */
     public static class DefaultAsyncRunner implements AsyncRunner {
         private long requestCount;
@@ -411,12 +408,11 @@ public abstract class NanoHTTPD {
 
     /**
      * Default strategy for creating and cleaning up temporary files.
-     * <p/>
-     * <p></p>This class stores its files in the standard location (that is,
+     * This class stores its files in the standard location (that is,
      * wherever <code>java.io.tmpdir</code> points to).  Files are added
      * to an internal list, and deleted when no longer needed (that is,
      * when <code>clear()</code> is invoked at the end of processing a
-     * request).</p>
+     * request).
      */
     public static class DefaultTempFileManager implements TempFileManager {
         private final String tmpdir;
@@ -448,9 +444,8 @@ public abstract class NanoHTTPD {
 
     /**
      * Default strategy for creating and cleaning up temporary files.
-     * <p/>
-     * <p></p></[>By default, files are created by <code>File.createTempFile()</code> in
-     * the directory specified.</p>
+     * By default, files are created by <code>File.createTempFile()</code> in
+     * the directory specified.
      */
     public static class DefaultTempFile implements TempFile {
         private File file;
@@ -515,7 +510,10 @@ public abstract class NanoHTTPD {
         }
 
         /**
-         * Basic constructor.
+         *
+         * @param status status
+         * @param mimeType status type
+         * @param data data
          */
         public Response(Status status, String mimeType, InputStream data) {
             this.status = status;
@@ -525,6 +523,9 @@ public abstract class NanoHTTPD {
 
         /**
          * Convenience method that makes an InputStream out of given text.
+         * @param status status
+         * @param mimeType mime type
+         * @param txt txt
          */
         public Response(Status status, String mimeType, String txt) {
             this.status = status;
@@ -538,6 +539,8 @@ public abstract class NanoHTTPD {
 
         /**
          * Adds given line to the header.
+         * @param name name
+         * @param value value
          */
         public void addHeader(String name, String value) {
             header.put(name, value);
@@ -740,7 +743,9 @@ public abstract class NanoHTTPD {
         /**
          * Adds the files in the request body to the files map.
          *
-         * @arg files - map to modify
+         * @param files - map to modify
+         * @throws IOException error
+         * @throws ResponseException error
          */
         void parseBody(Map<String, String> files) throws IOException, ResponseException;
     }
