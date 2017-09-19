@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.groovy</artifactId>
     <name>Kevoree :: Library :: Groovy</name>
-    <version>5.5.2-SNAPSHOT</version>
+    <version>5.5.2</version>
 
     <parent>
 			<groupId>org.kevoree.library</groupId>
 			<artifactId>org.kevoree.library</artifactId>
-        <version>5.5.2-SNAPSHOT</version>
+        <version>5.5.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
