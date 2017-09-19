@@ -116,33 +116,27 @@ public class AdaptationEngine {
             }
         }
         // This process can really slow down
-        HashSet<String> channelsAlreadySeen = new HashSet<String>();
+        HashSet<String> channelsAlreadySeen = new HashSet<>();
         for (ComponentInstance comp : targetNode.getComponents()) {
             for (Port port : comp.getProvided()) {
-                for (MBinding b : port.getBindings()) {
-                    if (b.getHub() != null && !channelsAlreadySeen.contains(b.getHub().path())) {
-                        Channel previousChannel = (Channel) currentModel.findByPath(b.getHub().path());
-                        if (previousChannel != null) {
-                            traces.append(modelCompare.diff(previousChannel, b.getHub()));
-                        } else {
-                            traces.populate(deepToTrace(b.getHub(), nodeName));
-                        }
-                        channelsAlreadySeen.add(b.getHub().path());
-                    }
-                }
+                ensureBindings(traces, currentModel, nodeName, channelsAlreadySeen, port);
             }
             for (Port port : comp.getRequired()) {
-                for (MBinding b : port.getBindings()) {
-                    if (b.getHub() != null && !channelsAlreadySeen.contains(b.getHub().path())) {
-                        Channel previousChannel = (Channel) currentModel.findByPath(b.getHub().path());
-                        if (previousChannel != null) {
-                            traces.append(modelCompare.diff(previousChannel, b.getHub()));
-                        } else {
-                            traces.populate(deepToTrace(b.getHub(), nodeName));
-                        }
-                        channelsAlreadySeen.add(b.getHub().path());
-                    }
+                ensureBindings(traces, currentModel, nodeName, channelsAlreadySeen, port);
+            }
+        }
+    }
+
+    private void ensureBindings(TraceSequence traces, ContainerRoot currentModel, String nodeName, HashSet<String> channelsAlreadySeen, Port port) {
+        for (MBinding b : port.getBindings()) {
+            if (b.getHub() != null && !channelsAlreadySeen.contains(b.getHub().path())) {
+                Channel previousChannel = (Channel) currentModel.findByPath(b.getHub().path());
+                if (previousChannel != null) {
+                    traces.append(modelCompare.diff(previousChannel, b.getHub()));
+                } else {
+                    traces.populate(deepToTrace(b.getHub(), nodeName));
                 }
+                channelsAlreadySeen.add(b.getHub().path());
             }
         }
     }
@@ -164,6 +158,7 @@ public class AdaptationEngine {
                 fillAdditional(traces, targetNode, currentModel, nodeName);
             }
         }
+
         if (traces != null) {
             for (ModelTrace trace : traces.getTraces()) {
                 final KMFContainer modelElement = targetModel.findByPath(trace.getSrcPath());
@@ -175,14 +170,18 @@ public class AdaptationEngine {
                         if (trace.getSrcPath().equals(targetNode.path())) {
                             if (trace instanceof ModelAddTrace) {
                                 Instance instance = (Instance) targetModel.findByPath(((ModelAddTrace) trace).getPreviousPath());
-                                cmds.add(cmdFactory.createAddDeployUnit(validateDeployUnit(instance)));
-                                cmds.add(cmdFactory.createAddInstance(instance));
-                                createDictionaryRelatedCommands(currentModel, instance, cmds);
+                                if (!isVirtual(instance)) {
+                                    cmds.add(cmdFactory.createAddDeployUnit(validateDeployUnit(instance)));
+                                    cmds.add(cmdFactory.createAddInstance(instance));
+                                    createDictionaryRelatedCommands(currentModel, instance, cmds);
+                                }
                             }
                             if (trace instanceof ModelRemoveTrace) {
                                 Instance instance = (Instance) currentModel.findByPath(((ModelRemoveTrace) trace).getObjPath());
-                                cmds.add(cmdFactory.createRemoveInstance(instance));
-                                cmds.add(cmdFactory.createStopInstance(instance));
+                                if (!isVirtual(instance)) {
+                                    cmds.add(cmdFactory.createRemoveInstance(instance));
+                                    cmds.add(cmdFactory.createStopInstance(instance));
+                                }
                             }
                         }
                     }
@@ -245,9 +244,12 @@ public class AdaptationEngine {
                             if (isRelatedToPlatform(nodeName, instance)) {
                                 if (trace.getSrcPath().equals(targetNode.path())) {
                                     if (((ModelSetTrace) trace).getContent().toLowerCase().equals("false")) {
-                                        KInstanceWrapper objInstance = (KInstanceWrapper) instanceRegistry.get(modelElement);
-                                        if (objInstance != null && objInstance.isStarted()) {
-                                            cmds.add(cmdFactory.createStopInstance(instance));
+                                        // do not create a stop command for current node
+                                        if (!modelElement.path().equals(currentNode.path())) {
+                                            KInstanceWrapper objInstance = (KInstanceWrapper) instanceRegistry.get(modelElement);
+                                            if (objInstance != null && objInstance.isStarted()) {
+                                                cmds.add(cmdFactory.createStopInstance(instance));
+                                            }
                                         }
                                     }
                                 } else {
@@ -268,7 +270,7 @@ public class AdaptationEngine {
                             if (modelElement instanceof Instance) {
                                 Instance currentInstance = (Instance) currentModel.findByPath(modelElement.path());
                                 Instance targetInstance = (Instance) targetModel.findByPath(modelElement.path());
-                                if (currentInstance != null && targetInstance != null) {
+                                if (currentInstance != null && targetInstance != null && !isVirtual(currentInstance)) {
                                     // HaraKiri upgrade
                                     if (modelElement.path().equals(targetNode.path())) {
                                         // Serious HaraKiri, should stop the platform and everything .... internalDispatch the core to rebootstrap
@@ -334,10 +336,12 @@ public class AdaptationEngine {
                             if (dictionary != null && dictionary instanceof FragmentDictionary && !((FragmentDictionary) dictionary).getName().equals(nodeName)) {
                                 // noop
                             } else {
-                                cmds.add(cmdFactory.createUpdateParam(instance, value));
-                                Instance previousInstance = (Instance) currentModel.findByPath(instance.path());
-                                if (previousInstance != null && previousInstance.getStarted()) {
-                                    cmds.add(cmdFactory.createUpdateInstance(instance));
+                                if (!isVirtual(instance)) {
+                                    cmds.add(cmdFactory.createUpdateParam(instance, value));
+                                    Instance previousInstance = (Instance) currentModel.findByPath(instance.path());
+                                    if (previousInstance != null && previousInstance.getStarted()) {
+                                        cmds.add(cmdFactory.createUpdateInstance(instance));
+                                    }
                                 }
                             }
                         }

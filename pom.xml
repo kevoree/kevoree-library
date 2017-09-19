@@ -14,7 +14,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <kevoree.version>5.5.0</kevoree.version>
+    <kevoree.version>5.5.1</kevoree.version>
     <kevoree.registry.url>${env.KEVOREE_REGISTRY_URL}</kevoree.registry.url>
     <kevoree.registry.namespace>kevoree</kevoree.registry.namespace>
     <kevoree.registry.login>${env.KEVOREE_REGISTRY_LOGIN}</kevoree.registry.login>
@@ -111,10 +111,11 @@
   </developers>
 
   <modules>
+    <module>javaNode</module>
     <module>docker</module>
+    <module>docker-node</module>
     <module>docker-killer</module>
     <module>control-flow</module>
-    <module>javaNode</module>
     <module>local-channel</module>
     <module>toys</module>
     <module>consoleprinter</module>
@@ -175,14 +176,6 @@
       <layout>default</layout>
     </snapshotRepository>
   </distributionManagement>
-
-  <repositories>
-    <repository>
-      <id>sonatype-nexus-staging</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-      <layout>default</layout>
-    </repository>
-  </repositories>
 
   <pluginRepositories>
     <pluginRepository>

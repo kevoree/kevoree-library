@@ -1,0 +1,7 @@
+add node0: DockerNode/1/{ java: '0.0.1-SNAPSHOT' }
+add sync: CentralizedWSGroup/2/{ java: '5.5.1-SNAPSHOT' }
+
+attach node0 sync
+
+set sync.isMaster/node0 = 'true'
+set node0.log = 'DEBUG'

@@ -33,7 +33,7 @@ public class StartInstance implements AdaptationCommand {
         if (instanceWrapper != null) {
             ThreadGroup threadGroup = instanceWrapper.getThreadGroup();
             if (threadGroup == null) {
-                System.out.println("WOW ThreadGroup is null dude.... (start)");
+                throw new KevoreeAdaptationException("Unable to find a ThreadGroup for instance " + instance.path());
             }
             Thread instanceThread = new Thread(threadGroup, () -> {
                 Log.debug("Starting {}", instance.path());
