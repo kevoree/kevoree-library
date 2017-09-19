@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.localchannel</artifactId>
     <name>Kevoree :: Library :: LocalChannel</name>
-    <version>5.5.1</version>
+    <version>5.5.2-SNAPSHOT</version>
 
     <parent>
 			<groupId>org.kevoree.library</groupId>
 			<artifactId>org.kevoree.library</artifactId>
-        <version>5.5.1</version>
+        <version>5.5.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
