@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.library.imagga</artifactId>
     <name>Kevoree :: Library :: Imagga</name>
-    <version>5.5.2</version>
+    <version>5.5.3-SNAPSHOT</version>
 
     <parent>
 			<groupId>org.kevoree.library</groupId>
 			<artifactId>org.kevoree.library</artifactId>
-        <version>5.5.2</version>
+        <version>5.5.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
