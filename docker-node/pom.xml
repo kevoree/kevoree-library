@@ -59,15 +59,6 @@
             <plugin>
                 <groupId>org.kevoree</groupId>
                 <artifactId>org.kevoree.tools.mavenplugin</artifactId>
-                <configuration>
-                    <registry>${kevoree.registry.url}</registry>
-                    <namespace>${kevoree.registry.namespace}</namespace>
-                    <login>${kevoree.registry.login}</login>
-                    <password>${kevoree.registry.password}</password>
-                    <mergeLocalLibraries>
-                        <param>../centralizedwsgroup/target/classes/KEV-INF/kevlib.json</param>
-                    </mergeLocalLibraries>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

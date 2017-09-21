@@ -1,5 +1,5 @@
-add node0: DockerNode/1/{ java: '0.0.1-SNAPSHOT' }
-add sync: CentralizedWSGroup/2/{ java: '5.5.1-SNAPSHOT' }
+add node0: DockerNode/2/{ java: '5.5.3-SNAPSHOT' }
+add sync: CentralizedWSGroup
 
 attach node0 sync
 

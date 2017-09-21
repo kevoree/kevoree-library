@@ -48,4 +48,19 @@ public class StopContainer implements AdaptationCommand {
     public KMFContainer getElement() {
         return this.instance;
     }
+
+    @Override
+    public int hashCode() {
+        return getType().hashCode() + instance.path().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof AdaptationCommand && obj.hashCode() == hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "StopContainer    " + instance.path();
+    }
 }

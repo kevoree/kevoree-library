@@ -26,7 +26,8 @@ import java.util.concurrent.TimeUnit;
  *
  * Created by leiko on 9/5/17.
  */
-@NodeType(version = 1, description = "A Kevoree node to drive a Docker engine")
+@NodeType(version = 2, description = "A Kevoree node to drive a Docker engine. Will automatically trigger " +
+        "docker-2-model updates every \"<strong>update</strong>\" seconds. Defaults to 30s.")
 public class DockerNode extends JavaNode {
 
     private DockerClient docker;
@@ -41,7 +42,7 @@ public class DockerNode extends JavaNode {
     private Context context;
 
     @Param
-    private long refreshPeriod = 30;
+    private long update = 30;
 
     public DockerNode() {
         super();
@@ -51,7 +52,7 @@ public class DockerNode extends JavaNode {
     @Start
     public void dockerStart() throws Exception {
         super.start();
-        Log.info("DockerNode \"{}\" will update model based on local Docker engine every {}s", context.getNodeName(), refreshPeriod);
+        Log.info("DockerNode \"{}\" will update model based on local Docker engine every {}s", context.getNodeName(), update);
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
         this.docker = DockerClientBuilder.getInstance(config).build();
 
@@ -60,7 +61,7 @@ public class DockerNode extends JavaNode {
             public void updateSuccess(UpdateContext context) {
                 if (executorService == null) {
                     executorService = Executors.newSingleThreadScheduledExecutor();
-                    executorService.scheduleAtFixedRate(DockerNode.this::updateModelAccordingToDocker, 0, refreshPeriod, TimeUnit.SECONDS);
+                    executorService.scheduleAtFixedRate(DockerNode.this::updateModelAccordingToDocker, 0, update, TimeUnit.SECONDS);
                 }
             }
         };
@@ -86,13 +87,13 @@ public class DockerNode extends JavaNode {
             this.executorService.shutdownNow();
             this.executorService = Executors.newSingleThreadScheduledExecutor();
             this.executorService.scheduleAtFixedRate(
-                    DockerNode.this::updateModelAccordingToDocker, 0, refreshPeriod, TimeUnit.SECONDS);
+                    DockerNode.this::updateModelAccordingToDocker, 0, update, TimeUnit.SECONDS);
         }
     }
 
     /**
-     * Converts the current state of the Docker engine to a Kevoree model.
-     * This model is then merged with the current in-use model and deployed.
+     * Converts the currentModel state of the Docker engine to a Kevoree model.
+     * This model is then merged with the currentModel in-use model and deployed.
      *
      * Calling this method subsequently triggers a call to plan(currentModel, targetModel)
      */

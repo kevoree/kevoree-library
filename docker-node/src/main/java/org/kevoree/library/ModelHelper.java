@@ -4,25 +4,25 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.command.InspectImageResponse;
 import com.github.dockerjava.api.exception.NotFoundException;
-import com.github.dockerjava.api.model.Container;
-import com.github.dockerjava.api.model.Image;
-import com.github.dockerjava.api.model.Link;
+import com.github.dockerjava.api.model.*;
 import org.kevoree.*;
 import org.kevoree.Dictionary;
 import org.kevoree.Package;
 import org.kevoree.adaptation.AdaptationCommand;
 import org.kevoree.adaptation.KevoreeAdaptationException;
 import org.kevoree.factory.KevoreeFactory;
+import org.kevoree.library.adaptation.AddTraceProcessor;
+import org.kevoree.library.adaptation.ControlTraceProcessor;
+import org.kevoree.library.adaptation.RemoveTraceProcessor;
+import org.kevoree.library.adaptation.SetTraceProcessor;
 import org.kevoree.library.command.*;
 import org.kevoree.modeling.api.KMFContainer;
 import org.kevoree.modeling.api.ModelCloner;
 import org.kevoree.modeling.api.compare.ModelCompare;
-import org.kevoree.modeling.api.trace.ModelAddTrace;
-import org.kevoree.modeling.api.trace.ModelRemoveTrace;
-import org.kevoree.modeling.api.trace.ModelSetTrace;
-import org.kevoree.modeling.api.trace.ModelTrace;
+import org.kevoree.modeling.api.trace.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -72,7 +72,7 @@ public class ModelHelper {
             this.visitImages(dockerModel);
             this.visitContainers(dockerModel);
         } else {
-            throw new KevoreeAdaptationException("Unable to find node \""+nodeName+"\" in current model");
+            throw new KevoreeAdaptationException("Unable to find node \""+nodeName+"\" in currentModel model");
         }
 
         return dockerModel;
@@ -83,140 +83,63 @@ public class ModelHelper {
      * NB. The commands created by this method are Docker-related ONLY, it is not intended to re-create the behavior
      * of the JavaNode AdaptationEngine for instances that are not Docker-related.
      *
-     * @param currentModel current in-use model
+     * @param currentModel currentModel in-use model
      * @param targetModel expected model goal after delta
      * @return a list of adaptation commands to execute in order to converge to targetModel (docker-wise only)
      */
     public List<AdaptationCommand> model2docker(final ContainerRoot currentModel, final ContainerRoot targetModel)
             throws KevoreeAdaptationException {
-        final List<AdaptationCommand> cmds = new ArrayList<>();
+        final Set<AdaptationCommand> cmds = new HashSet<>();
+        final AddTraceProcessor addTraceProcessor = new AddTraceProcessor(docker, nodeName, currentModel, targetModel);
+        final SetTraceProcessor setTraceProcessor = new SetTraceProcessor(docker, nodeName, currentModel, targetModel);
+        final ControlTraceProcessor ctrlTraceProcessor = new ControlTraceProcessor(docker, nodeName, currentModel, targetModel);
+        final RemoveTraceProcessor delTraceProcessor = new RemoveTraceProcessor(docker, nodeName, currentModel, targetModel);
+        final ModelCompare compare = factory.createModelCompare();
 
-        ModelCompare compare = factory.createModelCompare();
+
         List<ModelTrace> traces = compare.diff(currentModel, targetModel).getTraces();
 
+        // convert traces to AdaptationCommands
         for (ModelTrace trace : traces) {
-            if (trace.getRefName().equals("components")) {
-                final KMFContainer elem = targetModel.findByPath(trace.getSrcPath());
-                if (((NamedElement) elem).getName().equals(nodeName)) {
-                    if (trace instanceof ModelAddTrace) {
-                        ModelAddTrace addTrace = (ModelAddTrace) trace;
-                        Instance instance = (Instance) targetModel.findByPath(addTrace.getPreviousPath());
-                        if (isDockerRelated(instance)) {
-                            Value id = instance.findMetaDataByID(DOCKER_ID);
-                            if (id != null) {
-                                try {
-                                    docker.inspectContainerCmd(id.getValue()).exec();
-                                } catch (NotFoundException ignore) {
-                                    cmds.add(new CreateContainer(docker, instance));
-                                    cmds.add(new StartContainer(docker, instance));
-                                }
-                            } else {
-                                docker.listContainersCmd()
-                                        .exec()
-                                        .stream()
-                                        .filter(container -> container.getNames()[0].equals(instance.getName()))
-                                        .findFirst()
-                                        .orElseGet(() -> {
-                                            cmds.add(new CreateContainer(docker, instance));
-                                            cmds.add(new StartContainer(docker, instance));
-                                            return null;
-                                        });
-                            }
-                        }
-                    } else if (trace instanceof ModelRemoveTrace) {
-                        ModelRemoveTrace removeTrace = (ModelRemoveTrace) trace;
-                        Instance instance = (Instance) currentModel.findByPath(removeTrace.getObjPath());
-                        if (isDockerRelated(instance)) {
-                            Value id = instance.findMetaDataByID(DOCKER_ID);
-                            if (id != null) {
-                                try {
-                                    docker.inspectContainerCmd(id.getValue()).exec();
-                                    cmds.add(new StopContainer(docker, instance));
-                                    cmds.add(new RemoveContainer(docker, instance));
-                                } catch (NotFoundException ignore) {}
-                            } else {
-                                docker.listContainersCmd()
-                                        .exec()
-                                        .stream()
-                                        .filter(container -> container.getNames()[0].equals(instance.getName()))
-                                        .findFirst()
-                                        .ifPresent(container -> {
-                                            cmds.add(new StopContainer(docker, instance));
-                                            cmds.add(new RemoveContainer(docker, instance));
-                                        });
-                            }
-                        }
-                    }
-                }
-            } else if (trace.getRefName().equals("started")) {
-                if (trace instanceof ModelSetTrace) {
-                    ModelSetTrace setTrace = (ModelSetTrace) trace;
-                    final KMFContainer elem = targetModel.findByPath(trace.getSrcPath());
-                    if (elem instanceof ComponentInstance) {
-                        ComponentInstance instance = (ComponentInstance) elem;
-                        if (((ContainerNode) instance.eContainer()).getName().equals(nodeName)) {
-                            if (setTrace.getContent().toLowerCase().equals("false")) {
-                                // stop behavior
-                                ContainerNode node = targetModel.findNodesByID(nodeName);
-                                if (node.getStarted()) {
-                                    // only stop containers if the node platform is not stopping
-                                    Value id = instance.findMetaDataByID(DOCKER_ID);
-                                    if (id != null) {
-                                        try {
-                                            InspectContainerResponse containerRes = docker.inspectContainerCmd(id.getValue()).exec();
-                                            if (containerRes.getState().getRunning()) {
-                                                cmds.add(new StopContainer(docker, instance));
-                                            }
-                                        } catch (NotFoundException ignore) {}
-                                    } else {
-                                        docker.listContainersCmd().exec().stream().filter(
-                                                container -> container.getNames()[0].equals(instance.getName())
-                                        ).findFirst().ifPresent(container -> {
-                                            if (container.getStatus().toLowerCase().startsWith("up")) {
-                                                cmds.add(new StopContainer(docker, instance));
-                                            }
-                                        });
-                                    }
-                                }
-                            } else if (setTrace.getContent().equals("true")) {
-                                Value id = instance.findMetaDataByID(DOCKER_ID);
-                                if (id != null) {
-                                    try {
-                                        InspectContainerResponse containerRes = docker.inspectContainerCmd(id.getValue()).exec();
-                                        if (!containerRes.getState().getRunning()) {
-                                            cmds.add(new StartContainer(docker, instance));
-                                        }
-                                    } catch (NotFoundException ignore) {}
-                                } else {
-                                    docker.listContainersCmd().exec().stream().filter(
-                                            container -> container.getNames()[0].equals(instance.getName())
-                                    ).findFirst().ifPresent(container -> {
-                                        if (container.getStatus().toLowerCase().startsWith("exited")) {
-                                            cmds.add(new StartContainer(docker, instance));
-                                        }
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
+            if (trace instanceof ModelAddTrace) {
+                cmds.addAll(addTraceProcessor.process((ModelAddTrace) trace));
+            } else if (trace instanceof ModelAddAllTrace) {
+                cmds.addAll(addTraceProcessor.process((ModelAddAllTrace) trace));
+            } else if (trace instanceof ModelSetTrace) {
+                cmds.addAll(setTraceProcessor.process((ModelSetTrace) trace));
+            } else if (trace instanceof ModelControlTrace) {
+                cmds.addAll(ctrlTraceProcessor.process((ModelControlTrace) trace));
+            } else if (trace instanceof ModelRemoveTrace) {
+                cmds.addAll(delTraceProcessor.process((ModelRemoveTrace) trace));
+            } else if (trace instanceof ModelRemoveAllTrace) {
+                cmds.addAll(delTraceProcessor.process((ModelRemoveAllTrace) trace));
             }
         }
 
         // post-process commands
         Map<String, AdaptationCommand> container2remove = new HashMap<>();
+        Map<String, AdaptationCommand> container2create = new HashMap<>();
+        Map<String, AdaptationCommand> container2start = new HashMap<>();
+        Map<String, AdaptationCommand> container2update = new HashMap<>();
         Map<String, AdaptationCommand> container2stop = new HashMap<>();
         for (AdaptationCommand cmd : cmds) {
             Value id = ((Instance) cmd.getElement()).findMetaDataByID(DOCKER_ID);
             if (id != null) {
                 if (cmd instanceof RemoveContainer) {
                     container2remove.put(id.getValue(), cmd);
+                } else if (cmd instanceof StartContainer) {
+                    container2start.put(id.getValue(), cmd);
+                } else if (cmd instanceof UpdateContainer) {
+                    container2update.put(id.getValue(), cmd);
                 } else if (cmd instanceof StopContainer) {
                     container2stop.put(id.getValue(), cmd);
+                } else if (cmd instanceof CreateContainer) {
+                    container2create.put(id.getValue(), cmd);
                 }
             }
         }
-        // if containers with same id has to be removed AND stop AND still in target model => only rename
+
+        // if container with same id has to be stopped, removed AND created => only rename
         for (Map.Entry<String, AdaptationCommand> entry : container2remove.entrySet()) {
             AdaptationCommand stopCmd = container2stop.get(entry.getKey());
             if (stopCmd != null) {
@@ -224,27 +147,27 @@ public class ModelHelper {
                 for (ComponentInstance comp : node.getComponents()) {
                     Value id = comp.findMetaDataByID(DOCKER_ID);
                     if (id != null && id.getValue().equals(entry.getKey())) {
-                        // rename case
-                        cmds.remove(entry.getValue());
-                        cmds.remove(stopCmd);
-                        cmds.add(new RenameContainer(docker, comp));
+                        // valid rename case
+                        cmds.remove(entry.getValue()); // remove RemoveContainer cmd
+                        cmds.remove(container2stop.get(entry.getKey())); // remove StopContainer cmd
+                        cmds.remove(container2create.get(entry.getKey())); // remove CreateContainer cmd
+                        cmds.remove(container2start.get(entry.getKey())); // remove StartContainer cmd
+                        cmds.add(new RenameContainer(docker, comp)); // add RenameContainer cmd
                     }
                 }
             }
         }
 
-        // sort cmds
-        cmds.sort((cmd0, cmd1) -> {
-            if (cmd0.getType().getRank() < cmd1.getType().getRank()) {
-                return -1;
-            } else if (cmd0.getType().getRank() > cmd1.getType().getRank()) {
-                return 1;
-            } else {
-                return 0;
+        // if container with same id has to start AND update => only start
+        for (Map.Entry<String, AdaptationCommand> entry : container2start.entrySet()) {
+            AdaptationCommand updateCmd = container2update.get(entry.getKey());
+            if (updateCmd != null) {
+                cmds.remove(updateCmd);
             }
-        });
+        }
 
-        return cmds;
+        // return a sorted list of unique commands
+        return sort(cmds);
     }
 
     private void visitImages(final ContainerRoot model) {
@@ -292,11 +215,11 @@ public class ModelHelper {
                         throw new KevoreeAdaptationException("Unable to find the Package for the Docker image \"" + repoTag + "\"");
                     }
                 }
+                // set dictionary
+                Dictionary dictionary = factory.createDictionary().withGenerated_KMF_ID("0.0");
+                instance.setDictionary(dictionary);
+                visit(dictionary, container);
             }
-            // set dictionary
-            Dictionary dictionary = factory.createDictionary().withGenerated_KMF_ID("0.0");
-            instance.setDictionary(dictionary);
-            visit(dictionary, container);
             // set running state
             instance.setStarted(container.getState().getRunning());
             // set id
@@ -322,7 +245,15 @@ public class ModelHelper {
 
         Value portVal = factory.createValue();
         portVal.setName("port");
-        portVal.setValue(""); // TODO
+        StringBuilder ports = new StringBuilder();
+        for (Map.Entry<ExposedPort, Ports.Binding[]> entry: container.getNetworkSettings().getPorts().getBindings().entrySet()) {
+            if (entry.getValue() != null) {
+                for (Ports.Binding binding: entry.getValue()) {
+                    ports.append(binding.toString()).append(":").append(entry.getKey().toString()).append(" ");
+                }
+            }
+        }
+        portVal.setValue(ports.toString().trim());
         dictionary.addValues(portVal);
 
         Value linkVal = factory.createValue();
@@ -415,7 +346,28 @@ public class ModelHelper {
         }
     }
 
-    private boolean isDockerRelated(KMFContainer elem) {
+    private String getImageTag(String repoTag) {
+        return repoTag.split(":")[1];
+    }
+
+    private List<AdaptationCommand> sort(Set<AdaptationCommand> cmds) {
+        List<AdaptationCommand> cmdList = new ArrayList<>(cmds);
+
+        // sort cmds
+        cmdList.sort((cmd0, cmd1) -> {
+            if (cmd0.getType().getRank() < cmd1.getType().getRank()) {
+                return -1;
+            } else if (cmd0.getType().getRank() > cmd1.getType().getRank()) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+
+        return cmdList;
+    }
+
+    public static boolean isDockerRelated(KMFContainer elem) {
         if (elem instanceof Instance) {
             return isDockerRelated(((Instance) elem).getTypeDefinition());
         } else if (elem instanceof TypeDefinition) {
@@ -431,7 +383,38 @@ public class ModelHelper {
         return false;
     }
 
-    private String getImageTag(String repoTag) {
-        return repoTag.split(":")[1];
+    public static boolean isRunning(DockerClient docker, Instance instance) {
+        Value id = instance.findMetaDataByID(ModelHelper.DOCKER_ID);
+        if (id != null) {
+            try {
+                InspectContainerResponse containerRes = docker.inspectContainerCmd(id.getValue()).exec();
+                return containerRes.getState().getRunning();
+            } catch (NotFoundException ignore) {
+                return false;
+            }
+        } else {
+            return docker.listContainersCmd().exec()
+                    .stream()
+                    .filter(container -> container.getNames()[0].equals("/"+instance.getName()))
+                    .findFirst()
+                    .map(container -> container.getStatus().toLowerCase().startsWith("up"))
+                    .orElse(false);
+        }
+    }
+
+    public static boolean isCreated(DockerClient docker, Instance instance) {
+        Value id = instance.findMetaDataByID(ModelHelper.DOCKER_ID);
+        if (id != null) {
+            try {
+                docker.inspectContainerCmd(id.getValue()).exec();
+                return true;
+            } catch (NotFoundException ignore) {
+                return false;
+            }
+        } else {
+            return docker.listContainersCmd().exec()
+                    .stream()
+                    .anyMatch(container -> container.getNames()[0].equals("/"+instance.getName()));
+        }
     }
 }

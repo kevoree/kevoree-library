@@ -39,11 +39,26 @@ public class RenameContainer implements AdaptationCommand {
 
     @Override
     public AdaptationType getType() {
-        return AdaptationType.UPDATE_INSTANCE;
+        return AdaptationType.UPDATE_PARAM;
     }
 
     @Override
     public KMFContainer getElement() {
         return this.instance;
+    }
+
+    @Override
+    public int hashCode() {
+        return getType().hashCode() + instance.path().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof AdaptationCommand && obj.hashCode() == hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "RenameContainer    " + instance.path();
     }
 }

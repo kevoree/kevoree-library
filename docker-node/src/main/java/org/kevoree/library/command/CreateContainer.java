@@ -69,6 +69,9 @@ public class CreateContainer implements AdaptationCommand {
                         .stream(ports.trim().split("\\s"))
                         .map(PortBinding::parse)
                         .toArray(PortBinding[]::new);
+                for (PortBinding binding : portBindings) {
+                    System.out.println("binding>>> " + binding.getBinding().toString() + ":" + binding.getExposedPort().toString());
+                }
                 return createContainerCmd.withPortBindings(portBindings);
             }
         }
@@ -114,5 +117,20 @@ public class CreateContainer implements AdaptationCommand {
     @Override
     public KMFContainer getElement() {
         return this.instance;
+    }
+
+    @Override
+    public int hashCode() {
+        return getType().hashCode() + instance.path().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof AdaptationCommand && obj.hashCode() == hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "CreateContainer    " + instance.path();
     }
 }
